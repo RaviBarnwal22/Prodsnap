@@ -47,28 +47,35 @@ const difficultyColors: Record<string, string> = {
     'Hard': 'bg-red-500'
 }
 
+// Type for submission submissionResult data
+type SubmissionResult = {
+    isCorrect: boolean
+    correctAnswer: string
+    explanation: string
+    newStreak: number
+}
+
 export function PuzzleGame({ puzzle, streak, hasAttempted, previousAttempt, isLoggedIn }: PuzzleGameProps) {
+    // UI State (Pure Booleans)
+    const [isComplete, setIsComplete] = useState<boolean>(hasAttempted)
+    const [isSubmitting, setIsSubmitting] = useState<boolean>(false)
+    const [showExplanation, setShowExplanation] = useState<boolean>(hasAttempted)
+
+    // Business Data (Complex Objects)
     const [selectedAnswer, setSelectedAnswer] = useState<string | null>(previousAttempt?.answer || null)
-    const [isSubmitting, setIsSubmitting] = useState(false)
-    const [result, setResult] = useState<{
-        isCorrect: boolean
-        correctAnswer: string
-        explanation: string
-        newStreak: number
-    } | null>(null)
-    const [timeElapsed, setTimeElapsed] = useState(0)
-    const [showExplanation, setShowExplanation] = useState(hasAttempted)
+    const [submissionResult, setSubmissionResult] = useState<SubmissionResult | null>(null)
+    const [timeElapsed, setTimeElapsed] = useState<number>(0)
 
     // Timer effect
     useEffect(() => {
-        if (hasAttempted || result) return
+        if (isComplete) return
 
         const timer = setInterval(() => {
             setTimeElapsed(t => t + 1)
         }, 1000)
 
         return () => clearInterval(timer)
-    }, [hasAttempted, result])
+    }, [isComplete])
 
     const formatTime = (seconds: number) => {
         const mins = Math.floor(seconds / 60)
@@ -83,12 +90,15 @@ export function PuzzleGame({ puzzle, streak, hasAttempted, previousAttempt, isLo
         const response = await submitPuzzleAnswer(puzzle.id, selectedAnswer, timeElapsed)
 
         if (response.success) {
-            setResult({
+            // Update business data
+            setSubmissionResult({
                 isCorrect: response.isCorrect!,
                 correctAnswer: response.correctAnswer!,
                 explanation: response.explanation!,
                 newStreak: response.newStreak!
             })
+            // Update UI flags
+            setIsComplete(true)
             setShowExplanation(true)
         }
         setIsSubmitting(false)
@@ -101,7 +111,7 @@ export function PuzzleGame({ puzzle, streak, hasAttempted, previousAttempt, isLo
         ...(puzzle.optionD ? [{ key: 'D', text: puzzle.optionD }] : [])
     ]
 
-    const isComplete = hasAttempted || result !== null
+    // isComplete is now managed as explicit state above
 
     return (
         <div className="space-y-8">
@@ -171,9 +181,9 @@ export function PuzzleGame({ puzzle, streak, hasAttempted, previousAttempt, isLo
                 <div className="p-8 space-y-4">
                     {options.map((option) => {
                         const isSelected = selectedAnswer === option.key
-                        const isCorrect = result?.correctAnswer === option.key || (hasAttempted && previousAttempt?.isCorrect && previousAttempt.answer === option.key)
-                        const isWrong = (result && !result.isCorrect && isSelected) || (hasAttempted && previousAttempt && !previousAttempt.isCorrect && previousAttempt.answer === option.key)
-                        const showAsCorrect = isComplete && (result?.correctAnswer === option.key || (hasAttempted && isSelected && previousAttempt?.isCorrect))
+                        const isCorrect = submissionResult?.correctAnswer === option.key || (hasAttempted && previousAttempt?.isCorrect && previousAttempt.answer === option.key)
+                        const isWrong = (submissionResult && !submissionResult.isCorrect && isSelected) || (hasAttempted && previousAttempt && !previousAttempt.isCorrect && previousAttempt.answer === option.key)
+                        const showAsCorrect = isComplete && (submissionResult?.correctAnswer === option.key || (hasAttempted && isSelected && previousAttempt?.isCorrect))
 
                         return (
                             <button
@@ -236,13 +246,13 @@ export function PuzzleGame({ puzzle, streak, hasAttempted, previousAttempt, isLo
                         </button>
                     )}
 
-                    {isComplete && (result || previousAttempt) && (
-                        <div className={`p-6 rounded-2xl ${(result?.isCorrect ?? previousAttempt?.isCorrect)
+                    {isComplete && (submissionResult || previousAttempt) && (
+                        <div className={`p-6 rounded-2xl ${(submissionResult?.isCorrect ?? previousAttempt?.isCorrect)
                             ? 'bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800'
                             : 'bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800'
                             }`}>
                             <div className="flex items-center gap-3 mb-4">
-                                {(result?.isCorrect ?? previousAttempt?.isCorrect) ? (
+                                {(submissionResult?.isCorrect ?? previousAttempt?.isCorrect) ? (
                                     <>
                                         <div className="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center">
                                             <CheckCircle className="text-white" size={24} />
@@ -251,10 +261,10 @@ export function PuzzleGame({ puzzle, streak, hasAttempted, previousAttempt, isLo
                                             <h3 className="text-xl font-black text-green-700 dark:text-green-400">Perfect!</h3>
                                             <p className="text-green-600/80 text-sm">Your product sense is on fire 🔥</p>
                                         </div>
-                                        {result && (
+                                        {submissionResult && (
                                             <div className="ml-auto flex items-center gap-2 bg-green-500 text-white px-4 py-2 rounded-full">
                                                 <Flame size={18} />
-                                                <span className="font-black">{result.newStreak} Day Streak!</span>
+                                                <span className="font-black">{submissionResult.newStreak} Day Streak!</span>
                                             </div>
                                         )}
                                     </>
@@ -275,7 +285,7 @@ export function PuzzleGame({ puzzle, streak, hasAttempted, previousAttempt, isLo
                 </div>
 
                 {/* Explanation */}
-                {showExplanation && result && (
+                {showExplanation && submissionResult && (
                     <div className="px-8 pb-8">
                         <div className="bg-gray-50 dark:bg-gray-800/50 rounded-2xl p-6 border border-gray-100 dark:border-gray-700">
                             <h4 className="font-black text-sm uppercase tracking-widest text-gray-500 mb-3 flex items-center gap-2">
@@ -283,7 +293,7 @@ export function PuzzleGame({ puzzle, streak, hasAttempted, previousAttempt, isLo
                                 The Insight
                             </h4>
                             <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
-                                {result.explanation}
+                                {submissionResult.explanation}
                             </p>
                         </div>
                     </div>
