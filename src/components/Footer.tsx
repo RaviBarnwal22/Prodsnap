@@ -1,0 +1,45 @@
+import Link from 'next/link'
+import Image from 'next/image'
+
+export function Footer() {
+    return (
+        <footer className="bg-white dark:bg-gray-950 border-t border-gray-100 dark:border-gray-800 py-12">
+            <div className="container mx-auto px-4">
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+                    <div className="col-span-1 md:col-span-2">
+                        <Link href="/" className="flex items-center gap-3 font-bold text-2xl tracking-tight mb-4">
+                            <Image src="/logo.png" alt="Prodsnap" width={44} height={44} className="rounded-xl shadow-lg" />
+                            <span>Prod<span className="text-blue-600">snap</span></span>
+                        </Link>
+                        <p className="text-gray-500 dark:text-gray-400 max-w-sm">
+                            The global platform for Product Managers to practice, learn, and grow through AI-powered feedback and community support.
+                        </p>
+                    </div>
+                    <div>
+                        <h4 className="font-bold text-sm uppercase tracking-widest mb-4">Platform</h4>
+                        <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
+                            <li><Link href="/practice" className="hover:text-blue-600 transition">Practice Engine</Link></li>
+                            <li><Link href="/prodsense" className="hover:text-blue-600 transition">Prodsense</Link></li>
+                            <li><Link href="/solutions" className="hover:text-blue-600 transition">Solutions</Link></li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4 className="font-bold text-sm uppercase tracking-widest mb-4">Company</h4>
+                        <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
+                            <li><Link href="/blog" className="hover:text-blue-600 transition">Blog</Link></li>
+                            <li><Link href="/contact" className="hover:text-blue-600 transition">Contact Us</Link></li>
+                            <li><Link href="/community" className="hover:text-blue-600 transition">Community</Link></li>
+                        </ul>
+                    </div>
+                </div>
+                <div className="pt-8 border-t border-gray-100 dark:border-gray-800 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-gray-400">
+                    <p>&copy; {new Date().getFullYear()} Prodsnap. All rights reserved.</p>
+                    <div className="flex gap-6">
+                        <Link href="/privacy" className="hover:text-gray-600">Privacy Policy</Link>
+                        <Link href="/terms" className="hover:text-gray-600">Terms of Service</Link>
+                    </div>
+                </div>
+            </div>
+        </footer>
+    )
+}

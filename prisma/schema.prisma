@@ -1,0 +1,250 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id             String               @id @default(cuid())
+  email          String               @unique
+  authId         String?              @unique // Supabase Auth ID
+  name           String?
+  image          String?
+  role           String               @default("STUDENT")
+  createdAt      DateTime             @default(now())
+  updatedAt      DateTime             @updatedAt
+  firstName      String?
+  lastName       String?
+  mentorSessions Booking[]            @relation("MentorBookings")
+  bookings       Booking[]
+  expertProfile  ExpertProfile?
+  submissions    PracticeSubmission[]
+  reviews        Review[]
+  activities     UserActivity[]
+  puzzleAttempts PuzzleAttempt[]
+  streak         UserStreak?
+  subscription   Subscription?
+  categoryAttempts CategoryAttempt[]
+}
+
+
+model ExpertProfile {
+  id              String    @id @default(cuid())
+  userId          String    @unique
+  company         String
+  role            String
+  experienceYears Int
+  linkedInUrl     String?
+  isVerified      Boolean   @default(false)
+  hourlyRateINR   Int
+  skills          String
+  user            User      @relation(fields: [userId], references: [id])
+  services        Service[]
+}
+
+model PracticeQuestion {
+  id           String               @id @default(cuid())
+  title        String
+  description  String
+  category     String
+  difficulty   String
+  solutionText String?              // Expert guided solution
+  sampleAnswer String?              // A 5/5 example answer
+  createdAt    DateTime             @default(now())
+  submissions  PracticeSubmission[]
+}
+
+model PracticeSubmission {
+  id         String           @id @default(cuid())
+  userId     String
+  questionId String
+  answerText String
+  aiScore    String?
+  createdAt  DateTime         @default(now())
+  question   PracticeQuestion @relation(fields: [questionId], references: [id])
+  user       User             @relation(fields: [userId], references: [id])
+  reviews    Review[]
+}
+
+model Review {
+  id           String             @id @default(cuid())
+  submissionId String
+  reviewerId   String?
+  type         String
+  content      String
+  score        Int
+  details      String?
+  createdAt    DateTime           @default(now())
+  reviewer     User?              @relation(fields: [reviewerId], references: [id])
+  submission   PracticeSubmission @relation(fields: [submissionId], references: [id])
+}
+
+model Service {
+  id          String        @id @default(cuid())
+  expertId    String
+  type        String
+  title       String
+  durationMin Int
+  priceINR    Int
+  expert      ExpertProfile @relation(fields: [expertId], references: [id])
+}
+
+model Booking {
+  id          String   @id @default(cuid())
+  menteeId    String
+  mentorId    String
+  serviceId   String
+  status      String   @default("PENDING")
+  scheduledAt DateTime
+  meetingUrl  String?
+  createdAt   DateTime @default(now())
+  mentor      User     @relation("MentorBookings", fields: [mentorId], references: [id])
+  mentee      User     @relation(fields: [menteeId], references: [id])
+}
+
+// Track user activity for admin analytics
+model UserActivity {
+  id        String   @id @default(cuid())
+  userId    String?
+  page      String   // Page path visited
+  action    String   // Type of action: 'page_view', 'submission', 'login', etc.
+  metadata  String?  // JSON string for additional data
+  ipAddress String?
+  userAgent String?
+  createdAt DateTime @default(now())
+  user      User?    @relation(fields: [userId], references: [id])
+}
+
+// Store contact form submissions
+model ContactSubmission {
+  id        String   @id @default(cuid())
+  name      String
+  email     String
+  message   String
+  createdAt DateTime @default(now())
+}
+
+// Daily Product Puzzles for Prodsense
+model DailyPuzzle {
+  id          String          @id @default(cuid())
+  question    String          // The puzzle question
+  context     String?         // Background context for the puzzle
+  optionA     String
+  optionB     String
+  optionC     String
+  optionD     String?
+  correctAnswer String        // A, B, C, or D
+  explanation String          // Why this is the correct answer
+  category    String          // e.g., "GROWTH", "METRICS", "STRATEGY", "USER_BEHAVIOR"
+  difficulty  String          @default("Medium") // Easy, Medium, Hard
+  publishDate DateTime        // Date this puzzle is active
+  createdAt   DateTime        @default(now())
+  attempts    PuzzleAttempt[]
+}
+
+// Track user puzzle attempts
+model PuzzleAttempt {
+  id        String      @id @default(cuid())
+  userId    String
+  puzzleId  String
+  answer    String      // User's selected answer (A, B, C, D)
+  isCorrect Boolean
+  timeTaken Int?        // Seconds taken to answer
+  createdAt DateTime    @default(now())
+  user      User        @relation(fields: [userId], references: [id])
+  puzzle    DailyPuzzle @relation(fields: [puzzleId], references: [id])
+}
+
+// Track user streaks
+model UserStreak {
+  id            String   @id @default(cuid())
+  userId        String   @unique
+  currentStreak Int      @default(0)
+  longestStreak Int      @default(0)
+  lastPlayedAt  DateTime?
+  totalCorrect  Int      @default(0)
+  totalPlayed   Int      @default(0)
+  user          User     @relation(fields: [userId], references: [id])
+}
+
+// User subscription for premium access
+model Subscription {
+  id              String   @id @default(cuid())
+  userId          String   @unique
+  status          String   @default("inactive") // active, inactive, cancelled
+  planType        String   @default("monthly")  // monthly, yearly
+  priceINR        Int      @default(199)
+  razorpayOrderId String?
+  razorpayPaymentId String?
+  razorpaySubscriptionId String?
+  startDate       DateTime?
+  endDate         DateTime?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  user            User     @relation(fields: [userId], references: [id])
+}
+
+// Track category-wise attempt count for free users
+model CategoryAttempt {
+  id        String   @id @default(cuid())
+  userId    String
+  category  String
+  count     Int      @default(0)
+  updatedAt DateTime @updatedAt
+  user      User     @relation(fields: [userId], references: [id])
+
+  @@unique([userId, category])
+}
+
+// Subscription payment requests for manual verification
+model SubscriptionRequest {
+  id           String   @id @default(cuid())
+  userId       String
+  name         String
+  email        String
+  phone        String
+  paymentProof String   // Base64 encoded image or URL
+  amount       Int      @default(199)
+  status       String   @default("pending") // pending, approved, rejected
+  adminNotes   String?
+  reviewedBy   String?  // Admin user ID who reviewed
+  reviewedAt   DateTime?
+  createdAt    DateTime @default(now())
+}
+
+// Mentorship booking requests
+model MentorshipBooking {
+  id           String              @id @default(cuid())
+  userId       String?
+  name         String
+  email        String
+  phone        String
+  serviceType  String              // e.g., "1:1 Session", "Resume Review", "Mock Interview"
+  paymentProof String              // Base64 encoded image or URL
+  amount       Int
+  status       String              @default("pending") // pending, approved, completed, cancelled
+  adminNotes   String?
+  scheduledAt  DateTime?           // When the session is scheduled
+  meetingLink  String?             // Google Meet or other link
+  completedAt  DateTime?           // When the session was completed
+  reviewedBy   String?             // Admin user ID who reviewed
+  reviewedAt   DateTime?
+  createdAt    DateTime            @default(now())
+  feedback     MentorshipFeedback?
+}
+
+// Mentorship session feedback from users
+model MentorshipFeedback {
+  id          String            @id @default(cuid())
+  bookingId   String            @unique
+  name        String
+  email       String
+  rating      Int               // 1-5 star rating
+  feedback    String            // Text feedback
+  wouldRecommend Boolean        @default(true)
+  createdAt   DateTime          @default(now())
+  booking     MentorshipBooking @relation(fields: [bookingId], references: [id])
+}
