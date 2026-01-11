@@ -101,7 +101,7 @@ export function PuzzleGame({ puzzle, streak, hasAttempted, previousAttempt, isLo
         ...(puzzle.optionD ? [{ key: 'D', text: puzzle.optionD }] : [])
     ]
 
-    const isComplete: boolean = Boolean(hasAttempted || result)
+    const isComplete = hasAttempted || result !== null
 
     return (
         <div className="space-y-8">
