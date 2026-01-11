@@ -10,6 +10,11 @@ async function main() {
     await prisma.booking.deleteMany({})
     await prisma.service.deleteMany({})
     await prisma.expertProfile.deleteMany({})
+    await prisma.userActivity.deleteMany({})
+    await prisma.puzzleAttempt.deleteMany({})
+    await prisma.userStreak.deleteMany({})
+    await prisma.subscription.deleteMany({})
+    await prisma.categoryAttempt.deleteMany({})
     await prisma.user.deleteMany({})
     await prisma.practiceQuestion.deleteMany({})
 
@@ -186,6 +191,42 @@ async function main() {
                 category: "GROWTH_RETENTION",
                 difficulty: "Hard"
             },
+            {
+                title: "How would you grow Netflix's user base in Southeast Asia?",
+                description: "Consider pricing sensitivity, local content needs, mobile-first behavior, and competition from regional players.",
+                category: "GROWTH_RETENTION",
+                difficulty: "Hard"
+            },
+            {
+                title: "Increase daily active creators on TikTok.",
+                description: "Most users consume but don't create. Design features and incentives to convert lurkers into active creators.",
+                category: "GROWTH_RETENTION",
+                difficulty: "Medium"
+            },
+            {
+                title: "Reduce early churn for LinkedIn Premium subscribers.",
+                description: "Users cancel after the first month. How do you demonstrate value early and drive habit formation?",
+                category: "GROWTH_RETENTION",
+                difficulty: "Medium"
+            },
+            {
+                title: "Design a viral loop for Dropbox's file-sharing feature.",
+                description: "How can the core product experience naturally encourage users to invite others? Think about network effects.",
+                category: "GROWTH_RETENTION",
+                difficulty: "Medium"
+            },
+            {
+                title: "Increase merchant retention on Amazon Marketplace.",
+                description: "Small sellers often quit after poor initial sales. How do you support them and improve their success rate?",
+                category: "GROWTH_RETENTION",
+                difficulty: "Hard"
+            },
+            {
+                title: "Re-activate dormant users for Spotify.",
+                description: "Users who haven't opened the app in 90 days. Design a win-back strategy across email, push, and in-app.",
+                category: "GROWTH_RETENTION",
+                difficulty: "Medium"
+            },
 
             // ============================================
             // CATEGORY 4: TECH ACUMEN
@@ -266,6 +307,42 @@ async function main() {
                 category: "GTM",
                 difficulty: "Hard"
             },
+            {
+                title: "Launch Tesla's electric vehicles in India.",
+                description: "Address charging infrastructure, import duties, price positioning vs luxury cars, and building trust in EV technology.",
+                category: "GTM",
+                difficulty: "Hard"
+            },
+            {
+                title: "How would you launch Amazon's same-day delivery in a new city?",
+                description: "Plan logistics network, warehouse placement, demand forecasting, and initial marketing to drive adoption.",
+                category: "GTM",
+                difficulty: "Medium"
+            },
+            {
+                title: "Design the GTM for Meta's WhatsApp Business API in Europe.",
+                description: "Target SMBs with limited tech resources. Consider GDPR compliance, pricing, and partner channels.",
+                category: "GTM",
+                difficulty: "Hard"
+            },
+            {
+                title: "Launch Shopify's point-of-sale system to offline retailers in India.",
+                description: "Bridge digital-physical gap, handle cash transactions, train shop owners, and compete with local alternatives.",
+                category: "GTM",
+                difficulty: "Medium"
+            },
+            {
+                title: "How would Microsoft Teams enter the education market against Google Classroom?",
+                description: "Late mover advantage, freemium vs paid, institutional sales, and teacher/student onboarding.",
+                category: "GTM",
+                difficulty: "Medium"
+            },
+            {
+                title: "Launch Adobe Creative Cloud's student plan in Tier-2 Indian cities.",
+                description: "Price sensitivity, piracy competition, language support, and partnership with design institutes.",
+                category: "GTM",
+                difficulty: "Hard"
+            },
 
             // ============================================
             // CATEGORY 6: BEHAVIORAL
@@ -303,6 +380,42 @@ async function main() {
             {
                 title: "Tell me about a time you received critical feedback. How did you respond?",
                 description: "Focus on growth mindset, specific actions taken, and measurable improvements made.",
+                category: "BEHAVIORAL",
+                difficulty: "Easy"
+            },
+            {
+                title: "Describe a time when you had to work with a difficult stakeholder at Amazon/Google/Meta.",
+                description: "How did you build alignment despite conflicting priorities? Use STAR format with specific examples.",
+                category: "BEHAVIORAL",
+                difficulty: "Medium"
+            },
+            {
+                title: "Tell me about a time you launched a feature that required cross-functional buy-in from 5+ teams.",
+                description: "How did you manage dependencies, timelines, and communication? What would you do differently?",
+                category: "BEHAVIORAL",
+                difficulty: "Hard"
+            },
+            {
+                title: "Share an example of when you had to make a trade-off between user experience and business metrics.",
+                description: "How did you evaluate the decision? What framework did you use? What was the result?",
+                category: "BEHAVIORAL",
+                difficulty: "Hard"
+            },
+            {
+                title: "Describe a time when you missed a deadline or failed to meet expectations.",
+                description: "Focus on ownership, communication with stakeholders, and how you recovered and rebuilt trust.",
+                category: "BEHAVIORAL",
+                difficulty: "Medium"
+            },
+            {
+                title: "Tell me about the most innovative product idea you've championed.",
+                description: "How did you validate it? What resistance did you face? How did you measure success?",
+                category: "BEHAVIORAL",
+                difficulty: "Medium"
+            },
+            {
+                title: "Describe a situation where data contradicted your intuition. What did you do?",
+                description: "How do you balance gut feel with data? Give a specific example where you pivoted based on insights.",
                 category: "BEHAVIORAL",
                 difficulty: "Easy"
             },
@@ -385,6 +498,304 @@ async function main() {
                 description: "Consider store count, average orders per store, peak hours, and delivery vs dine-in split.",
                 category: "GUESTIMATES",
                 difficulty: "Easy"
+            },
+
+            // ============================================
+            // NEW ADDITIONS (GLOBAL & DIVERSE CASES)
+            // ============================================
+
+            // --- STRATEGY & MARKET ENTRY ---
+            {
+                title: "Should Netflix enter the live sports market?",
+                description: "Analyze the strategic fit, cost of rights, user acquisition potential, and technical requirements. Is it worth the investment?",
+                category: "STRATEGY",
+                difficulty: "Hard"
+            },
+            {
+                title: "Should Google launch a ride-sharing service to compete with Uber?",
+                description: "Evaluate Google's assets (Maps, Waymo), market saturation, and potential synergies vs regulatory risks.",
+                category: "STRATEGY",
+                difficulty: "Hard"
+            },
+            {
+                title: "Evaluate whether Airbnb should offer long-term rentals (1 year+).",
+                description: "Consider the shift in remote work, impact on housing markets, and differences in host/guest needs for long stays.",
+                category: "STRATEGY",
+                difficulty: "Medium"
+            },
+            {
+                title: "Should Apple launch a search engine?",
+                description: "Analyze the 'Buy vs Build' decision, privacy positioning, revenue impact from Google default deal, and ecosystem lock-in.",
+                category: "STRATEGY",
+                difficulty: "Hard"
+            },
+            {
+                title: "Strategy for a US fintech app entering the European market.",
+                description: "Discuss regulatory fragmentation (GDPR, banking licenses), cultural differences in finance, and local competitors.",
+                category: "GTM",
+                difficulty: "Hard"
+            },
+            {
+                title: "Should Uber Eats acquire a grocery delivery startup?",
+                description: "Analyze the 'Superapp' strategy, operational synergies, profit margins in grocery vs food, and competitive landscape.",
+                category: "STRATEGY",
+                difficulty: "Medium"
+            },
+            {
+                title: "Evaluate the threat of TikTok to YouTube's dominance.",
+                description: "Compare user demographics, content consumption patterns, creator economy, and ad revenue models.",
+                category: "STRATEGY",
+                difficulty: "Medium"
+            },
+            {
+                title: "Should Amazon launch a high-end luxury fashion vertical?",
+                description: "Discuss brand perception gaps, logistics for high-value items, and the need for a distinct user experience.",
+                category: "STRATEGY",
+                difficulty: "Medium"
+            },
+
+            // --- GLOBAL PRODUCT DESIGN ---
+            {
+                title: "Design a feature for Spotify to improve social sharing.",
+                description: "Users want to share music but often leave the app. How can you make sharing seamless and engaging within Spotify?",
+                category: "CONSUMER_PRODUCT_DESIGN",
+                difficulty: "Medium"
+            },
+            {
+                title: "Design a smart home app for elderly users living alone.",
+                description: "Focus on safety, voice accessibility, simplified UI, and emergency protocols. Consider physical limitations.",
+                category: "CONSUMER_PRODUCT_DESIGN",
+                difficulty: "Medium"
+            },
+            {
+                title: "Improve the 'Save for Later' experience on Amazon.",
+                description: "Turn a static list into an active purchase driver. Consider price alerts, bundling, and reminders.",
+                category: "CONSUMER_PRODUCT_DESIGN",
+                difficulty: "Easy"
+            },
+            {
+                title: "Design a travel itinerary planner for Airbnb.",
+                description: "Move beyond booking homes to planning experiences. Integrate map views, time slots, and group collaboration.",
+                category: "CONSUMER_PRODUCT_DESIGN",
+                difficulty: "Medium"
+            },
+            {
+                title: "Create a gamified feature for Duolingo to boost weekend usage.",
+                description: "Weekend drop-off is common. Design a mechanic (leagues, streak freeze quests, team challenges) to retain users.",
+                category: "CONSUMER_PRODUCT_DESIGN",
+                difficulty: "Easy"
+            },
+            {
+                title: "Design a mental health feature for Instagram.",
+                description: "Address the negative impact of social media. Consider usage limits, 'take a break' nudges, or positive content filters.",
+                category: "CONSUMER_PRODUCT_DESIGN",
+                difficulty: "Hard"
+            },
+            {
+                title: "Improve the notification system for Slack to reduce noise.",
+                description: "Information overload is a pain point. Design smart summaries, priority inbox, or better default settings.",
+                category: "CONSUMER_PRODUCT_DESIGN",
+                difficulty: "Medium"
+            },
+            {
+                title: "Design a product to help remote teams build culture.",
+                description: "Remote work can feel isolating. Create a digital watercooler or team-bonding experience for distributed companies.",
+                category: "CONSUMER_PRODUCT_DESIGN",
+                difficulty: "Medium"
+            },
+            {
+                title: "Create a sustainable shopping feature for a fashion e-commerce app.",
+                description: "Help users make eco-friendly choices. Consider carbon footprint tracking, second-hand resale, or material transparency.",
+                category: "CONSUMER_PRODUCT_DESIGN",
+                difficulty: "Medium"
+            },
+            {
+                title: "Design an AR feature for Google Maps to help tourists.",
+                description: "Enhance the walking navigation experience with history overlays, menu translations, or landmark tagging.",
+                category: "CONSUMER_PRODUCT_DESIGN",
+                difficulty: "Hash"
+            },
+
+            // --- ANALYTICS & RCA (GLOBAL CONTEXT) ---
+            {
+                title: "YouTube usage is up, but ad revenue is down. Why?",
+                description: "Investigate shifts in viewer geography, rise of AdBlockers, content safety issues, or lower CPM on Shorts.",
+                category: "RCA",
+                difficulty: "Hard"
+            },
+            {
+                title: "Daily active users on Twitter/X increased, but posting decreased. Investigate.",
+                description: "Analyze the 'lurker' phenomenon. Is it a content consumption shift or fear of toxicity? Check feature usage.",
+                category: "RCA",
+                difficulty: "Medium"
+            },
+            {
+                title: "Success metrics for a new collaborative feature in Google Docs.",
+                description: "Define adoption, retention, and latency metrics. How do you measure 'collaborative friction'?",
+                category: "METRICS",
+                difficulty: "Medium"
+            },
+            {
+                title: "Key metrics for a B2B SaaS churn prediction model.",
+                description: "Identify leading indicators of churn: login frequency, feature usage drops, support ticket volume, and contract renewals.",
+                category: "METRICS",
+                difficulty: "Hard"
+            },
+            {
+                title: "Measuring the success of Instagram Reels vs. TikTok.",
+                description: "Compare watch time, creation rate, shareability, and retention impact. How do you define 'viral'?",
+                category: "METRICS",
+                difficulty: "Medium"
+            },
+            {
+                title: "LinkedIn job applications are up, but hires are down. Diagnose.",
+                description: "Investigate application quality, resume parsing issues, employer responsiveness, or fake job postings.",
+                category: "RCA",
+                difficulty: "Medium"
+            },
+            {
+                title: "Define success for Facebook Marketplace.",
+                description: "Track liquidity (listing to sold ratio), scams reported, user trust, and local engagement.",
+                category: "METRICS",
+                difficulty: "Medium"
+            },
+            {
+                title: "Metrics to track the health of the Airbnb host ecosystem.",
+                description: "Measure occupancy rates, host churn, Superhost retention, and earnings per listing.",
+                category: "METRICS",
+                difficulty: "Medium"
+            },
+            {
+                title: "Cart abandonment rate increased on an e-commerce site. RCA.",
+                description: "Check for technical errors, new shipping costs, complex checkout flow, or payment gateway failures.",
+                category: "RCA",
+                difficulty: "Easy"
+            },
+            {
+                title: "Zoom's average meeting length decreased by 10%. Good or bad?",
+                description: "Context matters. Could be efficiency (good) or product fatigue/competitor usage (bad). Segment by user type.",
+                category: "METRICS",
+                difficulty: "Medium"
+            },
+
+            // --- TECHNICAL ACUMEN (SYSTEM DESIGN) ---
+            {
+                title: "How does end-to-end encryption work in WhatsApp?",
+                description: "Explain public/private keys in simple terms. Why can't WhatsApp read your messages?",
+                category: "TECH_ACUMEN",
+                difficulty: "Medium"
+            },
+            {
+                title: "Explain the difference between HTTP and HTTPS to a non-tech person.",
+                description: "Use an analogy (like a sealed envelope vs a postcard). Explain SSL/TLS certificates.",
+                category: "TECH_ACUMEN",
+                difficulty: "Easy"
+            },
+            {
+                title: "How would you design the 'Trending Now' algorithm for Twitter?",
+                description: "Discuss volume vs velocity of tweets, location filtering, and spam detection mechanisms.",
+                category: "TECH_ACUMEN",
+                difficulty: "Hard"
+            },
+            {
+                title: "Explain machine learning bias to a client.",
+                description: "How does training data affect output? Give examples like facial recognition or hiring algorithms.",
+                category: "TECH_ACUMEN",
+                difficulty: "Medium"
+            },
+            {
+                title: "How does Google Search indexing work?",
+                description: "Explain crawling (spiders), indexing, and ranking (PageRank signals) simply.",
+                category: "TECH_ACUMEN",
+                difficulty: "Medium"
+            },
+            {
+                title: "Trade-offs between native apps vs. Progressive Web Apps (PWA).",
+                description: "Compare performance, access to device features, development cost, and install friction.",
+                category: "TECH_ACUMEN",
+                difficulty: "Medium"
+            },
+            {
+                title: "Explain the concept of availability vs consistency (CAP Theorem).",
+                description: "In a distributed system, you can't have it all. When would you choose one over the other (e.g., Banking vs Social Feed)?",
+                category: "TECH_ACUMEN",
+                difficulty: "Hard"
+            },
+            {
+                title: "How does a load balancer work?",
+                description: "Analogy of a traffic cop distributing cars to different lanes. Why is it needed for scaling?",
+                category: "TECH_ACUMEN",
+                difficulty: "Easy"
+            },
+            {
+                title: "Basics of Blockchain technology for a supply chain PM.",
+                description: "Explain the decentralized ledger, immutability, and smart contracts for tracking goods.",
+                category: "TECH_ACUMEN",
+                difficulty: "Medium"
+            },
+            {
+                title: "What is an API and how does it enable partnerships?",
+                description: "Analogy of a waiter in a restaurant. How does it allow two different software systems to talk?",
+                category: "TECH_ACUMEN",
+                difficulty: "Easy"
+            },
+
+            // --- GLOBAL GUESTIMATES ---
+            {
+                title: "Estimate the number of commercial flights in the air right now globally.",
+                description: "Consider time zones, major hubs, average flight duration, and peak travel times.",
+                category: "GUESTIMATES",
+                difficulty: "Hard"
+            },
+            {
+                title: "How many tennis balls can fit in a Boeing 747?",
+                description: "Volume estimation challenge. Estimate volume of plane fuselage vs volume of a ball (packing efficiency).",
+                category: "GUESTIMATES",
+                difficulty: "Hard"
+            },
+            {
+                title: "Estimate the daily revenue of a Starbucks in New York City.",
+                description: "Footfall, conversion rate, average order value, peak vs non-peak hours.",
+                category: "GUESTIMATES",
+                difficulty: "Medium"
+            },
+            {
+                title: "How many smartphones are sold in the US annually?",
+                description: "Population, replacement cycle (2-3 years), market penetration.",
+                category: "GUESTIMATES",
+                difficulty: "Medium"
+            },
+            {
+                title: "Number of daily subway riders in Tokyo.",
+                description: "Population, commuter percentage, public transport reliance vs cars.",
+                category: "GUESTIMATES",
+                difficulty: "Medium"
+            },
+            {
+                title: "Estimate the market size of pet food in the UK.",
+                description: "Household penetration of pets, average spend per pet per month.",
+                category: "GUESTIMATES",
+                difficulty: "Medium"
+            },
+            {
+                title: "Amount of storage required to host all of Spotify's music.",
+                description: "Number of songs, average size per song (bitrate), compression factors.",
+                category: "GUESTIMATES",
+                difficulty: "Hard"
+            },
+
+            // --- ETHICS & POLICY ---
+            {
+                title: "How should a social media platform handle political misinformation?",
+                description: "Discuss freedom of speech vs safety, fact-checking labels, and algorithmic demotion.",
+                category: "BEHAVIORAL",
+                difficulty: "Hard"
+            },
+            {
+                title: "Should AI art generators pay royalties to artists?",
+                description: "Debate copyright, fair use, and the economics of generative AI.",
+                category: "STRATEGY",
+                difficulty: "Hard"
             }
         ]
     })

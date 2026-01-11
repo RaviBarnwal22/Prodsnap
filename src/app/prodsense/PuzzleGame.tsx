@@ -101,7 +101,7 @@ export function PuzzleGame({ puzzle, streak, hasAttempted, previousAttempt, isLo
         ...(puzzle.optionD ? [{ key: 'D', text: puzzle.optionD }] : [])
     ]
 
-    const isComplete = hasAttempted || result
+    const isComplete = hasAttempted || !!result
 
     return (
         <div className="space-y-8">
@@ -181,21 +181,21 @@ export function PuzzleGame({ puzzle, streak, hasAttempted, previousAttempt, isLo
                                 onClick={() => !isComplete && setSelectedAnswer(option.key)}
                                 disabled={isComplete || isSubmitting || !isLoggedIn}
                                 className={`w-full text-left p-6 rounded-2xl border-2 transition-all duration-300 flex items-start gap-4 group ${showAsCorrect
-                                        ? 'border-green-500 bg-green-50 dark:bg-green-900/20'
-                                        : isWrong
-                                            ? 'border-red-500 bg-red-50 dark:bg-red-900/20'
-                                            : isSelected
-                                                ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
-                                                : 'border-gray-200 dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-700 hover:bg-gray-50 dark:hover:bg-gray-800'
+                                    ? 'border-green-500 bg-green-50 dark:bg-green-900/20'
+                                    : isWrong
+                                        ? 'border-red-500 bg-red-50 dark:bg-red-900/20'
+                                        : isSelected
+                                            ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
+                                            : 'border-gray-200 dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-700 hover:bg-gray-50 dark:hover:bg-gray-800'
                                     } ${!isLoggedIn ? 'opacity-50 cursor-not-allowed' : ''}`}
                             >
                                 <span className={`w-10 h-10 rounded-xl flex items-center justify-center font-black text-lg shrink-0 transition-all ${showAsCorrect
-                                        ? 'bg-green-500 text-white'
-                                        : isWrong
-                                            ? 'bg-red-500 text-white'
-                                            : isSelected
-                                                ? 'bg-blue-500 text-white'
-                                                : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 group-hover:bg-blue-100 group-hover:text-blue-600'
+                                    ? 'bg-green-500 text-white'
+                                    : isWrong
+                                        ? 'bg-red-500 text-white'
+                                        : isSelected
+                                            ? 'bg-blue-500 text-white'
+                                            : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 group-hover:bg-blue-100 group-hover:text-blue-600'
                                     }`}>
                                     {showAsCorrect ? <CheckCircle size={20} /> : isWrong ? <XCircle size={20} /> : option.key}
                                 </span>
@@ -238,8 +238,8 @@ export function PuzzleGame({ puzzle, streak, hasAttempted, previousAttempt, isLo
 
                     {isComplete && (result || previousAttempt) && (
                         <div className={`p-6 rounded-2xl ${(result?.isCorrect ?? previousAttempt?.isCorrect)
-                                ? 'bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800'
-                                : 'bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800'
+                            ? 'bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800'
+                            : 'bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800'
                             }`}>
                             <div className="flex items-center gap-3 mb-4">
                                 {(result?.isCorrect ?? previousAttempt?.isCorrect) ? (
