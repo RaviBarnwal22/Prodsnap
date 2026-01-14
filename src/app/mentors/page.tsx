@@ -1,3 +1,4 @@
+export const dynamic = "force-dynamic"
 import { prisma } from "@/lib/prisma"
 import { Header } from "@/components/Header"
 import { Briefcase, Star } from "lucide-react"
