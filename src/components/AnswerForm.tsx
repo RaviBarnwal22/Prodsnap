@@ -1,23 +1,49 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
-import { submitAnswer } from '@/app/actions'
+import { submitAnswer, submitPracticeFeedback } from '@/app/actions'
 import { useForm } from 'react-hook-form'
 import { Mic, MicOff, CheckCircle2, AlertTriangle, Lightbulb, Info, ExternalLink, ShieldCheck, Trophy } from 'lucide-react'
 import { AIEvaluationResponse } from '@/lib/ai/engine'
+import { PracticeFeedbackModal } from './PracticeFeedbackModal'
+import { MentorSuggestionModal } from './MentorSuggestionModal'
+import { ErrorModal } from './ErrorModal'
 
 interface AnswerFormProps {
     questionId: string
     userId?: string
     solutionText?: string
     sampleAnswer?: string
+    elapsedTime?: number
+    previousSubmission?: {
+        answerText: string
+        aiScore?: string
+        createdAt: string
+    }
 }
 
-export function AnswerForm({ questionId, userId, solutionText, sampleAnswer }: AnswerFormProps) {
+export function AnswerForm({ questionId, userId, solutionText, sampleAnswer, elapsedTime = 0, previousSubmission }: AnswerFormProps) {
+    // Initialize result with previous submission if it exists
+    const [result, setResult] = useState<AIEvaluationResponse | null>(() => {
+        if (previousSubmission?.aiScore) {
+            try {
+                return JSON.parse(previousSubmission.aiScore)
+            } catch {
+                return null
+            }
+        }
+        return null
+    })
+
     const [isSubmitting, setIsSubmitting] = useState(false)
-    const [result, setResult] = useState<AIEvaluationResponse | null>(null)
     const [error, setError] = useState<string | null>(null)
     const [isRecording, setIsRecording] = useState(false)
+    const [showFeedbackModal, setShowFeedbackModal] = useState(false)
+    const [showMentorSuggestion, setShowMentorSuggestion] = useState(false)
+    const [submissionCount, setSubmissionCount] = useState(0)
+    const [submissionId, setSubmissionId] = useState<string | null>(null)
+    const [showErrorModal, setShowErrorModal] = useState(false)
+    const [previousAnswer, setPreviousAnswer] = useState(previousSubmission?.answerText || '')
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const recognitionRef = useRef<any>(null)
     const answerRef = useRef("")
@@ -101,19 +127,60 @@ export function AnswerForm({ questionId, userId, solutionText, sampleAnswer }: A
         }
         setIsSubmitting(true)
         try {
-            const response = await submitAnswer(questionId, data.answer)
+            const response = await submitAnswer(questionId, data.answer, elapsedTime)
             console.log("Submission response:", response)
             if (response.success && response.aiResponse) {
+                setPreviousAnswer(data.answer) // Save the answer for display
                 setResult(response.aiResponse)
+                setSubmissionId(response.submissionId || null)
+
+                // Show feedback modal after 2 seconds
+                setTimeout(() => {
+                    setShowFeedbackModal(true)
+                }, 2000)
+
+                // Fetch submission count to check if we should show mentor suggestion
+                try {
+                    const countResponse = await fetch('/api/submission-count')
+                    if (countResponse.ok) {
+                        const countData = await countResponse.json()
+                        setSubmissionCount(countData.count)
+
+                        // Check if user should see mentor suggestion
+                        // Show only if: 1) count is 5 or more, 2) hasn't dismissed recently
+                        if (countData.shouldShowMentorSuggestion) {
+                            const lastDismissed = localStorage.getItem('mentorReminderDismissed')
+                            const shouldShow = !lastDismissed ||
+                                (Date.now() - parseInt(lastDismissed)) > 7 * 24 * 60 * 60 * 1000 // 7 days
+
+                            if (shouldShow) {
+                                // Show mentor suggestion modal after feedback modal
+                                setTimeout(() => {
+                                    setShowMentorSuggestion(true)
+                                }, 5000) // Show 5 seconds after feedback modal
+                            }
+                        }
+                    }
+                } catch (err) {
+                    console.error('Failed to fetch submission count:', err)
+                }
             } else {
                 setError(response.error || "Submission failed")
+                setShowErrorModal(true)
             }
         } catch (e) {
             console.error("Submission catch error:", e)
             setError("An unexpected error occurred. Please try again.")
+            setShowErrorModal(true)
         } finally {
             setIsSubmitting(false)
         }
+    }
+
+    const formatTime = (seconds: number) => {
+        const mins = Math.floor(seconds / 60)
+        const secs = seconds % 60
+        return `${mins}:${secs.toString().padStart(2, '0')}`
     }
 
     if (result) {
@@ -126,19 +193,47 @@ export function AnswerForm({ questionId, userId, solutionText, sampleAnswer }: A
                         </h3>
                         <p className="text-sm text-gray-500 font-medium">Powered by Gemini AI Engine</p>
                     </div>
-                    {result.isMock && (
-                        <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-100 dark:border-amber-800 p-3 rounded-xl flex items-start gap-3 max-w-sm">
-                            <Info size={18} className="text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
-                            <div className="text-[11px] text-amber-800 dark:text-amber-300">
-                                <span className="font-bold block mb-1">PRO-TIP: Reality Check Needed</span>
-                                This is a <strong>mock response</strong>. To enable real-time AI evaluation, add your <code>GEMINI_API_KEY</code> to the <code>.env</code> file.
-                                <a href="https://aistudio.google.com/app/apikey" target="_blank" className="font-bold underline ml-1 inline-flex items-center gap-0.5">
-                                    Get key <ExternalLink size={10} />
-                                </a>
+                    <div className="flex items-center gap-3 flex-wrap">
+                        {elapsedTime > 0 && (
+                            <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 px-4 py-2 rounded-xl flex items-center gap-2">
+                                <Info size={16} className="text-blue-600 dark:text-blue-400" />
+                                <span className="text-sm font-bold text-blue-800 dark:text-blue-200">
+                                    Time: {formatTime(elapsedTime)}
+                                </span>
                             </div>
-                        </div>
-                    )}
+                        )}
+                        {result.isMock && (
+                            <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-100 dark:border-amber-800 p-3 rounded-xl flex items-start gap-3 max-w-sm">
+                                <Info size={18} className="text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
+                                <div className="text-[11px] text-amber-800 dark:text-amber-300">
+                                    <span className="font-bold block mb-1">PRO-TIP: Reality Check Needed</span>
+                                    This is a <strong>mock response</strong>. To enable real-time AI evaluation, add your <code>GEMINI_API_KEY</code> to the <code>.env</code> file.
+                                    <a href="https://aistudio.google.com/app/apikey" target="_blank" className="font-bold underline ml-1 inline-flex items-center gap-0.5">
+                                        Get key <ExternalLink size={10} />
+                                    </a>
+                                </div>
+                            </div>
+                        )}
+                    </div>
                 </div>
+
+                {/* User's Answer */}
+                {(previousAnswer || previousSubmission) && (
+                    <div className="bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-800/50 dark:to-gray-700/50 p-6 rounded-2xl border border-gray-200 dark:border-gray-700">
+                        <h4 className="font-bold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
+                            <Info size={20} className="text-gray-600 dark:text-gray-400" />
+                            Your Answer
+                        </h4>
+                        <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-wrap">
+                            {previousAnswer || previousSubmission?.answerText}
+                        </p>
+                        {previousSubmission?.createdAt && (
+                            <p className="text-xs text-gray-500 mt-3">
+                                Submitted: {new Date(previousSubmission.createdAt).toLocaleString()}
+                            </p>
+                        )}
+                    </div>
+                )}
 
                 {/* Section Scores */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -257,10 +352,14 @@ export function AnswerForm({ questionId, userId, solutionText, sampleAnswer }: A
                 )}
 
                 <button
-                    onClick={() => setResult(null)}
-                    className="w-full bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 py-4 rounded-xl font-bold hover:scale-[1.01] transition-all shadow-xl"
+                    onClick={() => {
+                        setResult(null)
+                        setPreviousAnswer('')
+                        setValue('answer', '')
+                    }}
+                    className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white py-4 rounded-xl font-bold transition-all shadow-xl flex items-center justify-center gap-2"
                 >
-                    Try Another Approach
+                    Clear & Retry
                 </button>
             </div>
         )
@@ -291,11 +390,7 @@ export function AnswerForm({ questionId, userId, solutionText, sampleAnswer }: A
                 <p className="text-red-500 text-sm">Please provide an answer before submitting.</p>
             )}
 
-            {error && (
-                <div className="p-3 bg-red-50 border border-red-200 text-red-600 rounded-lg text-sm">
-                    {error}
-                </div>
-            )}
+
 
             <div className="flex justify-end">
                 <button
@@ -306,6 +401,23 @@ export function AnswerForm({ questionId, userId, solutionText, sampleAnswer }: A
                     {isSubmitting ? 'Analyzing...' : 'Submit Choice'}
                 </button>
             </div>
+
+            {/* Mentor Suggestion Modal */}
+            <MentorSuggestionModal
+                isOpen={showMentorSuggestion}
+                onClose={() => setShowMentorSuggestion(false)}
+                completedSessions={submissionCount}
+            />
+
+            {/* Error Modal */}
+            <ErrorModal
+                isOpen={showErrorModal}
+                onClose={() => {
+                    setShowErrorModal(false)
+                    setError(null)
+                }}
+                errorMessage={error || undefined}
+            />
         </form>
     )
 }

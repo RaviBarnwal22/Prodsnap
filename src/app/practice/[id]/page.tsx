@@ -14,6 +14,20 @@ export default async function QuestionPage({ params }: { params: Promise<{ id: s
         return <div>Question not found</div>
     }
 
+    // Fetch user's most recent submission for this question
+    let previousSubmission = null
+    if (user) {
+        previousSubmission = await prisma.practiceSubmission.findFirst({
+            where: {
+                userId: user.id,
+                questionId: id
+            },
+            orderBy: {
+                createdAt: 'desc'
+            }
+        })
+    }
+
     return (
         <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
             <Header />
@@ -53,6 +67,11 @@ export default async function QuestionPage({ params }: { params: Promise<{ id: s
                         category={question.category}
                         solutionText={question.solutionText || undefined}
                         sampleAnswer={question.sampleAnswer || undefined}
+                        previousSubmission={previousSubmission ? {
+                            answerText: previousSubmission.answerText,
+                            aiScore: previousSubmission.aiScore || undefined,
+                            createdAt: previousSubmission.createdAt.toISOString()
+                        } : undefined}
                     />
                 </div>
 

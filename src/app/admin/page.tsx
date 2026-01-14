@@ -46,7 +46,25 @@ export default async function AdminPage() {
         include: {
             submissions: {
                 orderBy: { createdAt: 'desc' },
-                include: { question: true }
+                select: {
+                    id: true,
+                    createdAt: true,
+                    answerText: true,
+                    aiScore: true,
+                    timeSpent: true,
+                    isGoldStandard: true,
+                    question: { select: { title: true } },
+                    reviews: {
+                        where: { type: 'EXPERT' },
+                        orderBy: { createdAt: 'desc' },
+                        take: 1,
+                        select: {
+                            score: true,
+                            aiAccuracy: true,
+                            content: true
+                        }
+                    }
+                }
             },
             subscription: true,
             _count: {

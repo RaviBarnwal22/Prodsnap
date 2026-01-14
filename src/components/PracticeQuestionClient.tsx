@@ -1,10 +1,10 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { AnswerForm } from '@/components/AnswerForm'
 import { PremiumUpgradeModal } from '@/components/PremiumUpgradeModal'
 import { canAttemptCategory, incrementCategoryAttempt } from '@/lib/subscription'
-import { Crown, Lock, Sparkles } from 'lucide-react'
+import { Crown, Lock, Sparkles, Clock } from 'lucide-react'
 import Link from 'next/link'
 
 interface PracticeQuestionClientProps {
@@ -15,6 +15,11 @@ interface PracticeQuestionClientProps {
     category: string
     solutionText?: string
     sampleAnswer?: string
+    previousSubmission?: {
+        answerText: string
+        aiScore?: string
+        createdAt: string
+    }
 }
 
 export function PracticeQuestionClient({
@@ -24,7 +29,8 @@ export function PracticeQuestionClient({
     userName,
     category,
     solutionText,
-    sampleAnswer
+    sampleAnswer,
+    previousSubmission
 }: PracticeQuestionClientProps) {
     const [showUpgradeModal, setShowUpgradeModal] = useState(false)
     const [attemptStatus, setAttemptStatus] = useState<{
@@ -35,6 +41,9 @@ export function PracticeQuestionClient({
     } | null>(null)
     const [isLoading, setIsLoading] = useState(true)
     const [hasStartedAttempt, setHasStartedAttempt] = useState(false)
+    const [startTime, setStartTime] = useState<number | null>(null)
+    const [elapsedTime, setElapsedTime] = useState(0)
+    const timerRef = useRef<NodeJS.Timeout | null>(null)
 
     useEffect(() => {
         async function checkAttemptStatus() {
@@ -56,6 +65,21 @@ export function PracticeQuestionClient({
         checkAttemptStatus()
     }, [category, userId])
 
+    // Timer effect
+    useEffect(() => {
+        if (hasStartedAttempt && startTime) {
+            timerRef.current = setInterval(() => {
+                setElapsedTime(Math.floor((Date.now() - startTime) / 1000))
+            }, 1000)
+        }
+
+        return () => {
+            if (timerRef.current) {
+                clearInterval(timerRef.current)
+            }
+        }
+    }, [hasStartedAttempt, startTime])
+
     const handleStartAttempt = async () => {
         if (!attemptStatus?.canAttempt) {
             setShowUpgradeModal(true)
@@ -66,9 +90,17 @@ export function PracticeQuestionClient({
         try {
             await incrementCategoryAttempt(category)
             setHasStartedAttempt(true)
+            setStartTime(Date.now())
+            setElapsedTime(0)
         } catch (error) {
             console.error('Error incrementing attempt:', error)
         }
+    }
+
+    const formatTime = (seconds: number) => {
+        const mins = Math.floor(seconds / 60)
+        const secs = seconds % 60
+        return `${mins}:${secs.toString().padStart(2, '0')}`
     }
 
     if (!userId) {
@@ -181,12 +213,25 @@ export function PracticeQuestionClient({
                     </button>
                 </div>
             ) : hasStartedAttempt || attemptStatus?.isPremium ? (
-                <AnswerForm
-                    questionId={questionId}
-                    userId={userId}
-                    solutionText={solutionText}
-                    sampleAnswer={sampleAnswer}
-                />
+                <>
+                    {/* Timer Display */}
+                    {hasStartedAttempt && (
+                        <div className="mb-4 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border border-blue-200 dark:border-blue-800 rounded-xl flex items-center justify-center gap-3">
+                            <Clock size={20} className="text-blue-600 dark:text-blue-400" />
+                            <span className="text-lg font-mono font-bold text-blue-800 dark:text-blue-200">
+                                Time Elapsed: {formatTime(elapsedTime)}
+                            </span>
+                        </div>
+                    )}
+                    <AnswerForm
+                        questionId={questionId}
+                        userId={userId}
+                        solutionText={solutionText}
+                        sampleAnswer={sampleAnswer}
+                        elapsedTime={elapsedTime}
+                        previousSubmission={previousSubmission}
+                    />
+                </>
             ) : null}
 
             <PremiumUpgradeModal

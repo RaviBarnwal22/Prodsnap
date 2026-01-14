@@ -8,28 +8,28 @@ datasource db {
 }
 
 model User {
-  id             String               @id @default(cuid())
-  email          String               @unique
-  authId         String?              @unique // Supabase Auth ID
-  name           String?
-  image          String?
-  role           String               @default("STUDENT")
-  createdAt      DateTime             @default(now())
-  updatedAt      DateTime             @updatedAt
-  firstName      String?
-  lastName       String?
-  mentorSessions Booking[]            @relation("MentorBookings")
-  bookings       Booking[]
-  expertProfile  ExpertProfile?
-  submissions    PracticeSubmission[]
-  reviews        Review[]
-  activities     UserActivity[]
-  puzzleAttempts PuzzleAttempt[]
-  streak         UserStreak?
-  subscription   Subscription?
+  id               String               @id @default(cuid())
+  email            String               @unique
+  authId           String?              @unique
+  name             String?
+  image            String?
+  role             String               @default("STUDENT")
+  createdAt        DateTime             @default(now())
+  updatedAt        DateTime             @updatedAt
+  firstName        String?
+  lastName         String?
+  bookings         Booking[]
+  mentorSessions   Booking[]            @relation("MentorBookings")
   categoryAttempts CategoryAttempt[]
+  expertProfile    ExpertProfile?
+  practiceFeedback PracticeFeedback[]
+  submissions      PracticeSubmission[]
+  puzzleAttempts   PuzzleAttempt[]
+  reviews          Review[]
+  subscription     Subscription?
+  activities       UserActivity[]
+  streak           UserStreak?
 }
-
 
 model ExpertProfile {
   id              String    @id @default(cuid())
@@ -51,22 +51,24 @@ model PracticeQuestion {
   description  String
   category     String
   difficulty   String
-  solutionText String?              // Expert guided solution
-  sampleAnswer String?              // A 5/5 example answer
+  solutionText String?
+  sampleAnswer String?
   createdAt    DateTime             @default(now())
   submissions  PracticeSubmission[]
 }
 
 model PracticeSubmission {
-  id         String           @id @default(cuid())
-  userId     String
-  questionId String
-  answerText String
-  aiScore    String?
-  createdAt  DateTime         @default(now())
-  question   PracticeQuestion @relation(fields: [questionId], references: [id])
-  user       User             @relation(fields: [userId], references: [id])
-  reviews    Review[]
+  id             String           @id @default(cuid())
+  userId         String
+  questionId     String
+  answerText     String
+  aiScore        String?
+  timeSpent      Int?
+  isGoldStandard Boolean          @default(false)
+  createdAt      DateTime         @default(now())
+  user           User             @relation(fields: [userId], references: [id])
+  question       PracticeQuestion @relation(fields: [questionId], references: [id])
+  reviews        Review[]
 }
 
 model Review {
@@ -78,8 +80,9 @@ model Review {
   score        Int
   details      String?
   createdAt    DateTime           @default(now())
-  reviewer     User?              @relation(fields: [reviewerId], references: [id])
+  aiAccuracy   Int?
   submission   PracticeSubmission @relation(fields: [submissionId], references: [id])
+  reviewer     User?              @relation(fields: [reviewerId], references: [id])
 }
 
 model Service {
@@ -101,24 +104,22 @@ model Booking {
   scheduledAt DateTime
   meetingUrl  String?
   createdAt   DateTime @default(now())
-  mentor      User     @relation("MentorBookings", fields: [mentorId], references: [id])
   mentee      User     @relation(fields: [menteeId], references: [id])
+  mentor      User     @relation("MentorBookings", fields: [mentorId], references: [id])
 }
 
-// Track user activity for admin analytics
 model UserActivity {
   id        String   @id @default(cuid())
   userId    String?
-  page      String   // Page path visited
-  action    String   // Type of action: 'page_view', 'submission', 'login', etc.
-  metadata  String?  // JSON string for additional data
+  page      String
+  action    String
+  metadata  String?
   ipAddress String?
   userAgent String?
   createdAt DateTime @default(now())
   user      User?    @relation(fields: [userId], references: [id])
 }
 
-// Store contact form submissions
 model ContactSubmission {
   id        String   @id @default(cuid())
   name      String
@@ -127,67 +128,62 @@ model ContactSubmission {
   createdAt DateTime @default(now())
 }
 
-// Daily Product Puzzles for Prodsense
 model DailyPuzzle {
-  id          String          @id @default(cuid())
-  question    String          // The puzzle question
-  context     String?         // Background context for the puzzle
-  optionA     String
-  optionB     String
-  optionC     String
-  optionD     String?
-  correctAnswer String        // A, B, C, or D
-  explanation String          // Why this is the correct answer
-  category    String          // e.g., "GROWTH", "METRICS", "STRATEGY", "USER_BEHAVIOR"
-  difficulty  String          @default("Medium") // Easy, Medium, Hard
-  publishDate DateTime        // Date this puzzle is active
-  createdAt   DateTime        @default(now())
-  attempts    PuzzleAttempt[]
+  id            String          @id @default(cuid())
+  question      String
+  context       String?
+  optionA       String
+  optionB       String
+  optionC       String
+  optionD       String?
+  correctAnswer String
+  explanation   String
+  category      String
+  difficulty    String          @default("Medium")
+  publishDate   DateTime
+  createdAt     DateTime        @default(now())
+  attempts      PuzzleAttempt[]
 }
 
-// Track user puzzle attempts
 model PuzzleAttempt {
   id        String      @id @default(cuid())
   userId    String
   puzzleId  String
-  answer    String      // User's selected answer (A, B, C, D)
+  answer    String
   isCorrect Boolean
-  timeTaken Int?        // Seconds taken to answer
+  timeTaken Int?
   createdAt DateTime    @default(now())
-  user      User        @relation(fields: [userId], references: [id])
   puzzle    DailyPuzzle @relation(fields: [puzzleId], references: [id])
+  user      User        @relation(fields: [userId], references: [id])
 }
 
-// Track user streaks
 model UserStreak {
-  id            String   @id @default(cuid())
-  userId        String   @unique
-  currentStreak Int      @default(0)
-  longestStreak Int      @default(0)
+  id            String    @id @default(cuid())
+  userId        String    @unique
+  currentStreak Int       @default(0)
+  longestStreak Int       @default(0)
   lastPlayedAt  DateTime?
-  totalCorrect  Int      @default(0)
-  totalPlayed   Int      @default(0)
-  user          User     @relation(fields: [userId], references: [id])
+  totalCorrect  Int       @default(0)
+  totalPlayed   Int       @default(0)
+  user          User      @relation(fields: [userId], references: [id])
 }
 
-// User subscription for premium access
 model Subscription {
-  id              String   @id @default(cuid())
-  userId          String   @unique
-  status          String   @default("inactive") // active, inactive, cancelled
-  planType        String   @default("monthly")  // monthly, yearly
-  priceINR        Int      @default(199)
-  razorpayOrderId String?
-  razorpayPaymentId String?
+  id                     String    @id @default(cuid())
+  userId                 String    @unique
+  status                 String    @default("inactive")
+  planType               String    @default("monthly")
+  priceINR               Int       @default(199)
+  razorpayOrderId        String?
+  razorpayPaymentId      String?
   razorpaySubscriptionId String?
-  startDate       DateTime?
-  endDate         DateTime?
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-  user            User     @relation(fields: [userId], references: [id])
+  startDate              DateTime?
+  endDate                DateTime?
+  createdAt              DateTime  @default(now())
+  updatedAt              DateTime  @updatedAt
+  user                   User      @relation(fields: [userId], references: [id])
 }
 
-// Track category-wise attempt count for free users
 model CategoryAttempt {
   id        String   @id @default(cuid())
   userId    String
@@ -199,52 +195,60 @@ model CategoryAttempt {
   @@unique([userId, category])
 }
 
-// Subscription payment requests for manual verification
 model SubscriptionRequest {
-  id           String   @id @default(cuid())
+  id           String    @id @default(cuid())
   userId       String
   name         String
   email        String
   phone        String
-  paymentProof String   // Base64 encoded image or URL
-  amount       Int      @default(199)
-  status       String   @default("pending") // pending, approved, rejected
+  paymentProof String
+  amount       Int       @default(199)
+  status       String    @default("pending")
   adminNotes   String?
-  reviewedBy   String?  // Admin user ID who reviewed
+  reviewedBy   String?
   reviewedAt   DateTime?
-  createdAt    DateTime @default(now())
+  createdAt    DateTime  @default(now())
 }
 
-// Mentorship booking requests
 model MentorshipBooking {
   id           String              @id @default(cuid())
   userId       String?
   name         String
   email        String
   phone        String
-  serviceType  String              // e.g., "1:1 Session", "Resume Review", "Mock Interview"
-  paymentProof String              // Base64 encoded image or URL
+  serviceType  String
+  paymentProof String
   amount       Int
-  status       String              @default("pending") // pending, approved, completed, cancelled
+  status       String              @default("pending")
   adminNotes   String?
-  scheduledAt  DateTime?           // When the session is scheduled
-  meetingLink  String?             // Google Meet or other link
-  completedAt  DateTime?           // When the session was completed
-  reviewedBy   String?             // Admin user ID who reviewed
+  scheduledAt  DateTime?
+  meetingLink  String?
+  completedAt  DateTime?
+  reviewedBy   String?
   reviewedAt   DateTime?
   createdAt    DateTime            @default(now())
   feedback     MentorshipFeedback?
 }
 
-// Mentorship session feedback from users
 model MentorshipFeedback {
-  id          String            @id @default(cuid())
-  bookingId   String            @unique
-  name        String
-  email       String
-  rating      Int               // 1-5 star rating
-  feedback    String            // Text feedback
-  wouldRecommend Boolean        @default(true)
-  createdAt   DateTime          @default(now())
-  booking     MentorshipBooking @relation(fields: [bookingId], references: [id])
+  id             String            @id @default(cuid())
+  bookingId      String            @unique
+  name           String
+  email          String
+  rating         Int
+  feedback       String
+  wouldRecommend Boolean           @default(true)
+  createdAt      DateTime          @default(now())
+  booking        MentorshipBooking @relation(fields: [bookingId], references: [id])
+}
+
+model PracticeFeedback {
+  id           String   @id @default(cuid())
+  userId       String
+  submissionId String?
+  experience   String
+  comments     String?
+  npsScore     Int
+  createdAt    DateTime @default(now())
+  user         User     @relation(fields: [userId], references: [id])
 }

@@ -62,9 +62,9 @@ export default function Home() {
                   <Link href="/practice" className="bg-gradient-to-r from-violet-600 to-blue-600 text-white px-10 py-4 rounded-full font-black text-lg hover:shadow-xl hover:shadow-violet-500/30 transition-all flex items-center justify-center gap-2 group">
                     Start Practicing <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
                   </Link>
-                  <Link href="/prodsense" className="bg-white dark:bg-gray-800 text-gray-900 dark:text-white px-10 py-4 rounded-full font-black text-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition border border-gray-200 dark:border-gray-700 shadow-lg">
+                  {/* <Link href="/prodsense" className="bg-white dark:bg-gray-800 text-gray-900 dark:text-white px-10 py-4 rounded-full font-black text-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition border border-gray-200 dark:border-gray-700 shadow-lg">
                     Explore Prodsense
-                  </Link>
+                  </Link> */}
                 </div>
               </div>
 

@@ -518,3 +518,72 @@ export async function sendMentorshipScheduledEmail(data: {
         html
     })
 }
+
+// Send contact form notification to admin
+export async function sendContactFormNotification(data: {
+    name: string
+    email: string
+    message: string
+}) {
+    const adminEmail = 'info.prodsnap@gmail.com'
+
+    const html = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <style>
+                body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: #333; }
+                .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+                .header { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: white; padding: 30px; border-radius: 12px 12px 0 0; text-align: center; }
+                .content { background: #f8f9fa; padding: 30px; border-radius: 0 0 12px 12px; }
+                .info-box { background: white; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #3b82f6; }
+                .label { font-size: 12px; color: #666; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px; }
+                .value { font-size: 16px; font-weight: 500; color: #333; margin-bottom: 15px; }
+                .message-box { background: #e0f2fe; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #3b82f6; }
+                .message-text { font-size: 15px; color: #1e40af; line-height: 1.8; white-space: pre-wrap; }
+                .cta { display: inline-block; background: #3b82f6; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: bold; margin-top: 20px; }
+                .footer { text-align: center; margin-top: 30px; color: #999; font-size: 12px; }
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <div class="header">
+                    <h1 style="margin: 0;">📬 New Contact Form Submission!</h1>
+                    <p style="margin: 10px 0 0 0; opacity: 0.9;">Someone reached out via the contact form</p>
+                </div>
+                <div class="content">
+                    <div class="info-box">
+                        <div class="label">Full Name</div>
+                        <div class="value">${data.name}</div>
+                        
+                        <div class="label">Email Address</div>
+                        <div class="value">${data.email}</div>
+                    </div>
+                    
+                    <div class="message-box">
+                        <div class="label" style="color: #1e40af;">Message</div>
+                        <div class="message-text">${data.message}</div>
+                    </div>
+                    
+                    <p style="margin-top: 30px; color: #666;">
+                        Please respond to this inquiry at your earliest convenience. You can reply directly to <strong>${data.email}</strong>.
+                    </p>
+                    
+                    <a href="${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/admin" class="cta">
+                        View in Admin Panel →
+                    </a>
+                </div>
+                <div class="footer">
+                    <p>This is an automated notification from Prodsnap Contact Form</p>
+                </div>
+            </div>
+        </body>
+        </html>
+    `
+
+    return sendEmail({
+        to: adminEmail,
+        subject: `📬 New Contact Form Submission from ${data.name}`,
+        html
+    })
+}

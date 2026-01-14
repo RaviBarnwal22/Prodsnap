@@ -95,11 +95,23 @@ export default async function PracticePage({
     searchParams: Promise<{ category?: string }>
 }) {
     const { category: selectedCategory } = await searchParams
+
+    // Fetch questions with proper ordering
     const questions = await prisma.practiceQuestion.findMany({
         orderBy: { createdAt: 'desc' }
     })
 
-    // Group questions by category
+    // Difficulty order for sorting
+    const difficultyOrder: Record<string, number> = {
+        'easy': 1,
+        'Easy': 1,
+        'medium': 2,
+        'Medium': 2,
+        'hard': 3,
+        'Hard': 3
+    }
+
+    // Group questions by category and sort by difficulty
     const groupedQuestions = questions.reduce((acc, q) => {
         if (!acc[q.category]) {
             acc[q.category] = []
@@ -107,6 +119,15 @@ export default async function PracticePage({
         acc[q.category].push(q)
         return acc
     }, {} as Record<string, typeof questions>)
+
+    // Sort each category's questions by difficulty
+    Object.keys(groupedQuestions).forEach(category => {
+        groupedQuestions[category].sort((a, b) => {
+            const orderA = difficultyOrder[a.difficulty] || 999
+            const orderB = difficultyOrder[b.difficulty] || 999
+            return orderA - orderB
+        })
+    })
 
     const categoryOrder = ['CONSUMER_PRODUCT_DESIGN', 'METRICS', 'GROWTH_RETENTION', 'TECH_ACUMEN', 'GTM', 'BEHAVIORAL', 'RCA', 'GUESTIMATES']
 
@@ -164,28 +185,28 @@ export default async function PracticePage({
 
                         {/* Questions List */}
                         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                            {(groupedQuestions[selectedCategory] || []).map((q) => (
+                            {(groupedQuestions[selectedCategory] || []).map((q, index) => (
                                 <Link
                                     key={q.id}
                                     href={`/practice/${q.id}`}
                                     className="group block p-8 rounded-[2rem] bg-gray-50 dark:bg-gray-900 border border-transparent hover:border-blue-500/50 hover:bg-white dark:hover:bg-gray-800 transition-all duration-300 shadow-sm hover:shadow-2xl hover:shadow-blue-500/10 hover:-translate-y-1"
                                 >
                                     <div className="mb-6 flex items-center justify-between">
-                                        <div className="w-10 h-10 rounded-xl bg-white dark:bg-gray-800 flex items-center justify-center text-blue-600 shadow-sm">
-                                            <Sparkles size={18} />
+                                        <div className="w-10 h-10 rounded-xl bg-white dark:bg-gray-800 flex items-center justify-center text-blue-600 shadow-sm font-bold text-sm">
+                                            #{index + 1}
                                         </div>
                                         <span className={`text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full border border-current ${getDifficultyColor(q.difficulty)}`}>
                                             {q.difficulty}
                                         </span>
                                     </div>
                                     <h3 className="text-xl font-bold mb-4 leading-tight group-hover:text-blue-600 transition-colors">
-                                        {q.title}
+                                        Question #{index + 1}
                                     </h3>
-                                    <p className="text-sm text-gray-500 dark:text-gray-400 line-clamp-3 mb-8 leading-relaxed">
-                                        {q.description}
+                                    <p className="text-sm text-gray-500 dark:text-gray-400 mb-8 leading-relaxed italic">
+                                        {q.difficulty} level challenge • Click to reveal and practice
                                     </p>
                                     <div className="flex items-center gap-2 text-blue-600 font-bold text-sm">
-                                        Begin Training <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
+                                        Start Challenge <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
                                     </div>
                                 </Link>
                             ))}
