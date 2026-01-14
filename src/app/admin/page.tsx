@@ -7,6 +7,7 @@ import { Users, Activity, FileText, Calendar, MessageSquare, BarChart3, ShieldCh
 import { AdminUserList } from "@/components/admin/AdminUserList"
 import { AdminPaymentRequests } from "@/components/admin/AdminPaymentRequests"
 import { AdminMentorshipBookings } from "@/components/admin/AdminMentorshipBookings"
+import { AdminSupportQueue } from "@/components/admin/AdminSupportQueue"
 
 // Helper to format date
 function formatDate(date: Date) {
@@ -363,27 +364,7 @@ export default async function AdminPage() {
                             </div>
                         </div>
 
-                        {/* Contact Submissions */}
-                        {contactSubmissions.length > 0 && (
-                            <div className="bg-gray-800 rounded-2xl p-6 border border-gray-700">
-                                <h2 className="text-lg font-black mb-6 flex items-center gap-2 text-white">
-                                    <MessageSquare className="text-orange-400" size={20} />
-                                    Support Queue ({contactSubmissions.length})
-                                </h2>
-                                <div className="space-y-3">
-                                    {contactSubmissions.slice(0, 5).map((c) => (
-                                        <div key={c.id} className="p-4 bg-orange-500/10 rounded-xl border border-orange-500/20">
-                                            <div className="flex justify-between mb-2">
-                                                <p className="text-sm font-bold text-orange-400">{c.name}</p>
-                                                <p className="text-xs text-gray-500">{formatDate(c.createdAt)}</p>
-                                            </div>
-                                            <p className="text-sm text-white mb-1">{c.email}</p>
-                                            <p className="text-xs text-gray-400 line-clamp-2">&quot;{c.message}&quot;</p>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-                        )}
+                        <AdminSupportQueue submissions={contactSubmissions as any} />
                     </div>
                 </div>
             </main>

@@ -27,12 +27,21 @@ interface UserWithStats {
         id: string;
         createdAt: Date;
         answerText: string;
-        aiScore: string;
+        aiScore: string | null;
         timeSpent: number | null;
         isGoldStandard?: boolean;
-        reviews?: Array<{ score: number; aiAccuracy: number; content: string }>;
+        reviews?: Array<{ score: number; aiAccuracy: number | null; content: string }>;
         question: { title: string };
     }>;
+}
+
+interface SelectedSubmission {
+    id: string;
+    answerText: string;
+    question: { title: string };
+    aiScore: string | null;
+    isGoldStandard?: boolean;
+    reviews?: Array<{ score: number; aiAccuracy: number | null; content: string }>;
 }
 
 function formatDate(date: Date) {
@@ -58,12 +67,7 @@ export function AdminUserList({ users }: { users: UserWithStats[] }) {
     const [localUsers, setLocalUsers] = useState(users)
     const [searchQuery, setSearchQuery] = useState('')
     const [showPremiumOnly, setShowPremiumOnly] = useState(false)
-    const [selectedSubmission, setSelectedSubmission] = useState<{
-        id: string,
-        answerText: string,
-        question: { title: string },
-        aiScore: string
-    } | null>(null)
+    const [selectedSubmission, setSelectedSubmission] = useState<SelectedSubmission | null>(null)
     const [expertReviewData, setExpertReviewData] = useState({
         score: 5,
         content: '',
@@ -606,6 +610,7 @@ export function AdminUserList({ users }: { users: UserWithStats[] }) {
                                 <p className="text-xs text-gray-400">
                                     {(() => {
                                         try {
+                                            if (!selectedSubmission.aiScore) return 'No AI feedback available'
                                             return JSON.parse(selectedSubmission.aiScore).feedback
                                         } catch { return 'No AI feedback available' }
                                     })()}

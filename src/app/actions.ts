@@ -4,7 +4,7 @@ import { prisma } from "@/lib/prisma"
 import { evaluateAnswer } from "@/lib/ai/engine"
 import { revalidatePath } from "next/cache"
 import { getUser } from "@/lib/auth"
-import { sendContactFormNotification } from "@/lib/email"
+import { sendContactFormNotification, sendSupportReply } from "@/lib/email"
 
 export async function submitAnswer(questionId: string, answer: string, elapsedTimeSeconds?: number) {
     const user = await getUser()
@@ -195,5 +195,53 @@ export async function submitExpertReview(data: {
     } catch (error) {
         console.error("[submitExpertReview] Error:", error);
         return { success: false, error: "Failed to save expert review" }
+    }
+}
+
+// Reply to support inquiry (Admin only)
+export async function replyToSupport(data: {
+    submissionId: string,
+    replyMessage: string
+}) {
+    const user = await getUser()
+
+    // Check if user is admin OR specifically ravibarnwal89@gmail.com
+    const isAdminEmail = user?.email === 'ravibarnwal89@gmail.com'
+    if (!user || (!isAdminEmail && user.role !== 'ADMIN')) {
+        return { success: false, error: "Only admins can reply to support inquiries" }
+    }
+
+    try {
+        // 1. Fetch the original submission
+        const submission = await prisma.contactSubmission.findUnique({
+            where: { id: data.submissionId }
+        })
+
+        if (!submission) {
+            return { success: false, error: "Submission not found" }
+        }
+
+        // 2. Send the email
+        await sendSupportReply({
+            name: submission.name,
+            email: submission.email,
+            originalMessage: submission.message,
+            replyMessage: data.replyMessage
+        })
+
+        // 3. Update the database
+        await prisma.contactSubmission.update({
+            where: { id: data.submissionId },
+            data: {
+                reply: data.replyMessage,
+                repliedAt: new Date()
+            }
+        })
+
+        revalidatePath('/admin')
+        return { success: true }
+    } catch (error) {
+        console.error("[replyToSupport] Error:", error);
+        return { success: false, error: "Failed to send reply" }
     }
 }

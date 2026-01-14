@@ -121,11 +121,13 @@ model UserActivity {
 }
 
 model ContactSubmission {
-  id        String   @id @default(cuid())
+  id        String    @id @default(cuid())
   name      String
   email     String
   message   String
-  createdAt DateTime @default(now())
+  reply     String?
+  repliedAt DateTime?
+  createdAt DateTime  @default(now())
 }
 
 model DailyPuzzle {
