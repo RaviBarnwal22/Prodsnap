@@ -56,7 +56,7 @@ export default function Home() {
                   <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-600 via-blue-600 to-cyan-500">With AI-Guided Precision</span>
                 </h1>
                 <p className="text-lg md:text-xl text-gray-600 dark:text-gray-300 max-w-xl mb-10 leading-relaxed font-medium lg:mx-0 mx-auto">
-                  The only platform that evaluates your product sensing questions using the CIRCLES framework and instant Gemini-powered feedback.
+                  The only platform that evaluates your product sensing questions using adaptive case frameworks and instant Gemini-powered feedback.
                 </p>
                 <div className="flex flex-col sm:flex-row justify-center lg:justify-start gap-4">
                   <Link href="/practice" className="bg-gradient-to-r from-violet-600 to-blue-600 text-white px-10 py-4 rounded-full font-black text-lg hover:shadow-xl hover:shadow-violet-500/30 transition-all flex items-center justify-center gap-2 group">
@@ -142,7 +142,7 @@ export default function Home() {
         <section className="py-8 bg-gradient-to-r from-violet-600 via-purple-600 to-indigo-600 overflow-hidden">
           <div className="flex animate-marquee whitespace-nowrap">
             {[
-              { icon: "🎯", text: "CIRCLES Framework Evaluation" },
+              { icon: "🎯", text: "Custom Framework Evaluation" },
               { icon: "🤖", text: "Gemini-Powered AI Feedback" },
               { icon: "📝", text: "100+ Product Sense Questions" },
               { icon: "🎤", text: "Voice & Text Submissions" },
@@ -150,7 +150,7 @@ export default function Home() {
               { icon: "💡", text: "Expert-Curated Solutions" },
               { icon: "🚀", text: "Unlimited Practice Sessions" },
               { icon: "📱", text: "Mobile-Friendly Interface" },
-              { icon: "🎯", text: "CIRCLES Framework Evaluation" },
+              { icon: "🎯", text: "Custom Framework Evaluation" },
               { icon: "🤖", text: "Gemini-Powered AI Feedback" },
               { icon: "📝", text: "100+ Product Sense Questions" },
               { icon: "🎤", text: "Voice & Text Submissions" },
@@ -180,7 +180,7 @@ export default function Home() {
                 <Sparkles size={32} />
               </div>
               <h3 className="text-2xl font-bold mb-4">Practice Engine</h3>
-              <p className="text-gray-500 dark:text-gray-400 leading-relaxed font-medium mb-4">Real-time feedback on your verbal and written answers using the industry-standard CIRCLES framework.</p>
+              <p className="text-gray-500 dark:text-gray-400 leading-relaxed font-medium mb-4">Real-time feedback on your verbal and written answers using industry-standard frameworks.</p>
               <Link href="/practice" className="inline-flex items-center gap-2 text-violet-600 font-bold hover:underline group-hover:gap-3 transition-all">Launch engine <ArrowRight size={16} /></Link>
             </div>
             <div className="group bg-gradient-to-br from-blue-50 to-white dark:from-gray-900 dark:to-gray-900 p-8 rounded-3xl border border-blue-100 dark:border-gray-800 hover:shadow-xl hover:shadow-blue-500/10 transition-all">

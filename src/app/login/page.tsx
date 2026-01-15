@@ -169,7 +169,7 @@ export default function LoginPage() {
     const features = [
         { icon: <Sparkles size={20} />, text: "AI-Powered Feedback", color: "from-yellow-400 to-orange-500" },
         { icon: <GraduationCap size={20} />, text: "IIM(Gold Medalist) Grad Mentorship", color: "from-red-400 to-pink-500" },
-        { icon: <Target size={20} />, text: "India-Focused Cases", color: "from-green-400 to-emerald-500" },
+        { icon: <Target size={20} />, text: "Diverse Case Studies", color: "from-green-400 to-emerald-500" },
         { icon: <Zap size={20} />, text: "Real-Time Practice", color: "from-blue-400 to-cyan-500" },
         { icon: <TrendingUp size={20} />, text: "Track Your Growth", color: "from-purple-400 to-pink-500" },
     ]
@@ -296,7 +296,7 @@ export default function LoginPage() {
 
                     <p className="text-xl text-white/80 mb-12 leading-relaxed">
                         Join thousands of aspiring PMs practicing with AI-powered feedback
-                        and India-focused case studies.
+                        and expert-curated case studies.
                     </p>
 
                     {/* Feature badges */}

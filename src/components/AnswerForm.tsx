@@ -195,9 +195,9 @@ export function AnswerForm({ questionId, userId, solutionText, sampleAnswer, ela
                     </div>
                     <div className="flex items-center gap-3 flex-wrap">
                         {elapsedTime > 0 && (
-                            <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 px-4 py-2 rounded-xl flex items-center gap-2">
-                                <Info size={16} className="text-blue-600 dark:text-blue-400" />
-                                <span className="text-sm font-bold text-blue-800 dark:text-blue-200">
+                            <div className="bg-violet-50 dark:bg-violet-900/20 border border-violet-200 dark:border-violet-800 px-4 py-2 rounded-xl flex items-center gap-2">
+                                <Info size={16} className="text-violet-600 dark:text-violet-400" />
+                                <span className="text-sm font-bold text-violet-800 dark:text-violet-200">
                                     Time: {formatTime(elapsedTime)}
                                 </span>
                             </div>
@@ -265,7 +265,7 @@ export function AnswerForm({ questionId, userId, solutionText, sampleAnswer, ela
                 </div>
 
                 {/* Overall Summary */}
-                <div className="bg-gradient-to-r from-blue-600 to-indigo-700 p-6 rounded-2xl text-white shadow-lg shadow-blue-500/20">
+                <div className="bg-gradient-to-r from-violet-600 to-indigo-700 p-6 rounded-2xl text-white shadow-lg shadow-violet-500/20">
                     <div className="flex justify-between items-center mb-4">
                         <h4 className="font-black flex items-center gap-2 text-sm uppercase tracking-wider">
                             Summary Feedback
@@ -274,7 +274,7 @@ export function AnswerForm({ questionId, userId, solutionText, sampleAnswer, ela
                             Score: {result.scores.overall}/5
                         </div>
                     </div>
-                    <p className="text-blue-50 leading-relaxed font-medium text-base">
+                    <p className="text-violet-50 leading-relaxed font-medium text-base">
                         {result.feedback}
                     </p>
                 </div>
@@ -357,7 +357,7 @@ export function AnswerForm({ questionId, userId, solutionText, sampleAnswer, ela
                         setPreviousAnswer('')
                         setValue('answer', '')
                     }}
-                    className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white py-4 rounded-xl font-bold transition-all shadow-xl flex items-center justify-center gap-2"
+                    className="w-full bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 text-white py-4 rounded-xl font-bold transition-all shadow-xl flex items-center justify-center gap-2"
                 >
                     Clear & Retry
                 </button>
@@ -370,7 +370,7 @@ export function AnswerForm({ questionId, userId, solutionText, sampleAnswer, ela
             <div className="relative">
                 <textarea
                     {...register("answer", { required: true })}
-                    className="w-full h-64 p-4 pr-12 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none dark:bg-gray-800 dark:border-gray-700"
+                    className="w-full h-64 p-4 pr-12 border rounded-lg focus:ring-2 focus:ring-violet-500 focus:outline-none dark:bg-gray-800 dark:border-gray-700"
                     placeholder="Type or speak your answer here..."
                 />
                 <button
@@ -396,7 +396,7 @@ export function AnswerForm({ questionId, userId, solutionText, sampleAnswer, ela
                 <button
                     type="submit"
                     disabled={isSubmitting}
-                    className="bg-blue-600 text-white px-6 py-2 rounded-lg font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition flex items-center gap-2"
+                    className="bg-violet-600 text-white px-6 py-2 rounded-lg font-medium hover:bg-violet-700 disabled:opacity-50 disabled:cursor-not-allowed transition flex items-center gap-2"
                 >
                     {isSubmitting ? 'Analyzing...' : 'Submit Choice'}
                 </button>

@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from 'react'
 import { AnswerForm } from '@/components/AnswerForm'
 import { PremiumUpgradeModal } from '@/components/PremiumUpgradeModal'
 import { canAttemptCategory, incrementCategoryAttempt } from '@/lib/subscription'
-import { Crown, Lock, Sparkles, Clock } from 'lucide-react'
+import { Crown, Lock, Sparkles, Clock, CheckCircle2 } from 'lucide-react'
 import Link from 'next/link'
 
 interface PracticeQuestionClientProps {
@@ -81,6 +81,14 @@ export function PracticeQuestionClient({
     }, [hasStartedAttempt, startTime])
 
     const handleStartAttempt = async () => {
+        // If previous submission exists, this is a free re-attempt
+        if (previousSubmission) {
+            setHasStartedAttempt(true)
+            setStartTime(Date.now())
+            setElapsedTime(0)
+            return
+        }
+
         if (!attemptStatus?.canAttempt) {
             setShowUpgradeModal(true)
             return
@@ -126,7 +134,8 @@ export function PracticeQuestionClient({
     }
 
     // If user has exceeded limit and hasn't started an attempt
-    if (attemptStatus && !attemptStatus.canAttempt && !hasStartedAttempt) {
+    // AND they have NOT previously solved this (if they have, they can re-attempt)
+    if (attemptStatus && !attemptStatus.canAttempt && !hasStartedAttempt && !previousSubmission) {
         return (
             <>
                 <div className="bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 border border-gray-200 dark:border-gray-700 p-8 rounded-2xl text-center">
@@ -143,7 +152,7 @@ export function PracticeQuestionClient({
                     </p>
                     <button
                         onClick={() => setShowUpgradeModal(true)}
-                        className="inline-flex items-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-8 py-3 rounded-xl font-bold hover:shadow-lg hover:shadow-blue-500/30 transition-all"
+                        className="inline-flex items-center gap-2 bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white px-8 py-3 rounded-xl font-bold hover:shadow-lg hover:shadow-violet-500/30 transition-all"
                     >
                         <Crown size={18} />
                         Upgrade to Premium - ₹199/month
@@ -163,26 +172,36 @@ export function PracticeQuestionClient({
     }
 
     // Show attempt status banner for free users
-    const showAttemptBanner = attemptStatus && !attemptStatus.isPremium && !hasStartedAttempt
+    const showAttemptBanner = attemptStatus && !attemptStatus.isPremium && !hasStartedAttempt && !previousSubmission
 
     return (
         <>
             {/* Attempt Status Banner */}
             {showAttemptBanner && (
-                <div className="mb-4 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl flex items-center justify-between">
+                <div className="mb-4 p-4 bg-violet-50 dark:bg-violet-900/20 border border-violet-200 dark:border-violet-800 rounded-xl flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                        <Sparkles size={20} className="text-blue-600 dark:text-blue-400" />
-                        <span className="text-sm font-medium text-blue-800 dark:text-blue-200">
+                        <Sparkles size={20} className="text-violet-600 dark:text-violet-400" />
+                        <span className="text-sm font-medium text-violet-800 dark:text-violet-200">
                             Free Attempts: {attemptStatus.attemptsRemaining}/2 remaining (across all categories)
                         </span>
                     </div>
                     <button
                         onClick={() => setShowUpgradeModal(true)}
-                        className="text-xs font-bold text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1"
+                        className="text-xs font-bold text-violet-600 dark:text-violet-400 hover:underline flex items-center gap-1"
                     >
                         <Crown size={14} />
                         Go Premium
                     </button>
+                </div>
+            )}
+
+            {/* Previously Solved Banner */}
+            {previousSubmission && !hasStartedAttempt && (
+                <div className="mb-4 p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-xl flex items-center gap-3">
+                    <CheckCircle2 size={20} className="text-green-600 dark:text-green-400" />
+                    <span className="text-sm font-medium text-green-800 dark:text-green-200">
+                        You have already solved this case. Re-attempts are free!
+                    </span>
                 </div>
             )}
 
@@ -197,28 +216,34 @@ export function PracticeQuestionClient({
             )}
 
             {/* Show start button or answer form */}
-            {!hasStartedAttempt && attemptStatus?.canAttempt ? (
+            {!hasStartedAttempt && (attemptStatus?.canAttempt || previousSubmission) ? (
                 <div className="bg-white dark:bg-gray-900 p-8 rounded-2xl border shadow-sm text-center">
                     <h3 className="text-xl font-bold mb-4 text-gray-900 dark:text-white">
-                        Ready to Practice?
+                        {previousSubmission ? "Want to try again?" : "Ready to Practice?"}
                     </h3>
                     <p className="text-gray-600 dark:text-gray-400 mb-6">
-                        Click below to start your attempt. This will count as one of your practice attempts.
+                        {previousSubmission
+                            ? "This will safely replace your display answer without using your daily attempts."
+                            : "Click below to start your attempt. This will count as one of your practice attempts."
+                        }
                     </p>
                     <button
                         onClick={handleStartAttempt}
-                        className="bg-blue-600 text-white px-8 py-3 rounded-xl font-bold hover:bg-blue-700 transition-colors"
+                        className={`text-white px-8 py-3 rounded-xl font-bold transition-colors ${previousSubmission
+                            ? "bg-emerald-600 hover:bg-emerald-700"
+                            : "bg-violet-600 hover:bg-violet-700"
+                            }`}
                     >
-                        Start Practice
+                        {previousSubmission ? "Try Again (Free)" : "Start Practice"}
                     </button>
                 </div>
             ) : hasStartedAttempt || attemptStatus?.isPremium ? (
                 <>
                     {/* Timer Display */}
                     {hasStartedAttempt && (
-                        <div className="mb-4 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border border-blue-200 dark:border-blue-800 rounded-xl flex items-center justify-center gap-3">
-                            <Clock size={20} className="text-blue-600 dark:text-blue-400" />
-                            <span className="text-lg font-mono font-bold text-blue-800 dark:text-blue-200">
+                        <div className="mb-4 p-4 bg-gradient-to-r from-violet-50 to-fuchsia-50 dark:from-violet-900/20 dark:to-fuchsia-900/20 border border-violet-200 dark:border-violet-800 rounded-xl flex items-center justify-center gap-3">
+                            <Clock size={20} className="text-violet-600 dark:text-violet-400" />
+                            <span className="text-lg font-mono font-bold text-violet-800 dark:text-violet-200">
                                 Time Elapsed: {formatTime(elapsedTime)}
                             </span>
                         </div>
