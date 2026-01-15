@@ -1,36 +1,75 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Prodsnap
+
+Prodsnap is an AI-powered platform for practicing product management case studies with adaptive frameworks and instant feedback.
+
+## Tech Stack
+
+- **Framework**: [Next.js](https://nextjs.org/) (App Router)
+- **Styling**: [Tailwind CSS](https://tailwindcss.com/)
+- **Database**: [PostgreSQL](https://postgresql.org/) (via [Supabase](https://supabase.com/))
+- **ORM**: [Prisma](https://www.prisma.io/)
+- **AI**: Google Gemini API
+- **Deployment**: [Vercel](https://vercel.com/)
+
+## Repository & Deployment Strategy
+
+This project follows a professional two-branch deployment strategy to ensure stability and reliable testing.
+
+### Branches
+
+- **`main` (Production)**
+  - Represents the live, stable version of the application.
+  - Automatically deployed to the production domain (e.g., `prodsnap.ai`).
+  - **Rule**: Direct commits are discouraged. Changes should be merged from `develop`.
+
+- **`develop` (Staging)**
+  - The integration branch for testing new features.
+  - Automatically deployed to the staging URL (e.g., `https://prodsnap-git-develop.vercel.app/`).
+  - **Rule**: All feature branches should merge into `develop` first.
+
+- **Feature Branches**
+  - Created for individual tasks or features (e.g., `feature/login-redesign`).
+  - Deployed to unique Preview URLs on Vercel for isolated testing.
+
+### Deployment Workflow
+
+1.  Create a feature branch from `develop`.
+2.  Push changes and open a Pull Request (PR) to `develop`.
+3.  Vercel automatically builds a Preview URL.
+4.  Once verified, merge to `develop` (deploys to Staging).
+5.  Perform final verification on Staging.
+6.  Merge `develop` into `main` (deploys to Production).
+
+## Health Check & Monitoring
+
+A health check endpoint is available to verify application status and database connectivity:
+
+- **Endpoint**: `/api/health`
+- **Response**: JSON object with status, timestamp, and database connection state.
 
 ## Getting Started
 
-First, run the development server:
+1.  **Clone the repository**:
+    ```bash
+    git clone https://github.com/RaviBarnwal22/Prodsnap.git
+    ```
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+2.  **Install dependencies**:
+    ```bash
+    npm install
+    ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+3.  **Environment Setup**:
+    Copy `.env.example` to `.env` (if available) or ensure the following variables are set:
+    - `DATABASE_URL`
+    - `DIRECT_URL`
+    - `GEMINI_API_KEY_1`
+    - `NEXT_PUBLIC_SUPABASE_URL`
+    - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+4.  **Run Development Server**:
+    ```bash
+    npm run dev
+    ```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+5.  Open [http://localhost:3000](http://localhost:3000) with your browser.
