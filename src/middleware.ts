@@ -5,10 +5,7 @@ import { NextResponse, type NextRequest } from 'next/server'
 const publicRoutes = ['/', '/login', '/home', '/admin/login', '/auth/callback', '/auth/reset-password', '/forgot-password']
 
 export async function middleware(request: NextRequest) {
-    // Temporary debugging: Bypass auth for all practice routes
-    if (request.nextUrl.pathname.startsWith('/practice')) {
-        return NextResponse.next()
-    }
+
 
     let supabaseResponse = NextResponse.next({
         request,
@@ -49,13 +46,8 @@ export async function middleware(request: NextRequest) {
     const isPublicRoute = publicRoutes.some(route => pathname.startsWith(route))
 
     // If not logged in and trying to access a protected route
+    // If not logged in and trying to access a protected route
     if (!user && !isPublicRoute) {
-        // PERMISSIVE MODE: Allow access even if server-side auth fails, to prevent loops.
-        // Client-side auth will handle protection.
-        console.log(`[Middleware] Allowing unauthenticated access to ${pathname} (Permissive Mode)`)
-        return supabaseResponse
-
-        /* 
         const loginUrl = new URL('/login', request.url)
         const response = NextResponse.redirect(loginUrl)
 
@@ -64,7 +56,6 @@ export async function middleware(request: NextRequest) {
         cookiesToSet.forEach(cookie => response.cookies.set(cookie))
 
         return response
-        */
     }
 
     // If logged in and trying to access login page, redirect to home
