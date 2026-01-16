@@ -45,17 +45,13 @@ export async function middleware(request: NextRequest) {
     // Check if the route is public
     const isPublicRoute = publicRoutes.some(route => pathname.startsWith(route))
 
-    // If not logged in and trying to access a protected route
-    // If not logged in and trying to access a protected route
-    if (!user && !isPublicRoute) {
-        // Bypass practice routes to rely on client-side auth (fixes redirect loops)
-        if (pathname.startsWith('/practice')) {
-            return supabaseResponse
-        }
-        const loginUrl = new URL('/login', request.url)
+    // Only protect /admin routes strictly on the server
+    // All other routes use client-side auth to avoid server/client cookie mismatch issues
+    if (!user && pathname.startsWith('/admin') && pathname !== '/admin/login') {
+        const loginUrl = new URL('/admin/login', request.url)
         const response = NextResponse.redirect(loginUrl)
 
-        // Copy cookies from supabaseResponse (which might have refreshed tokens) to the redirect response
+        // Copy cookies from supabaseResponse (which might have refreshed tokens)
         const cookiesToSet = supabaseResponse.cookies.getAll()
         cookiesToSet.forEach(cookie => response.cookies.set(cookie))
 
@@ -98,6 +94,6 @@ export const config = {
          * - favicon.ico (favicon file)
          * - api routes
          */
-        '/((?!_next/static|_next/image|favicon.ico|api|practice|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+        '/((?!_next/static|_next/image|favicon.ico|api|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
     ],
 }
