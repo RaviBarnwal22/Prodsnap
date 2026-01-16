@@ -5,6 +5,11 @@ import { NextResponse, type NextRequest } from 'next/server'
 const publicRoutes = ['/', '/login', '/home', '/admin/login', '/auth/callback', '/auth/reset-password', '/forgot-password']
 
 export async function middleware(request: NextRequest) {
+    // Temporary debugging: Bypass auth for all practice routes
+    if (request.nextUrl.pathname.startsWith('/practice')) {
+        return NextResponse.next()
+    }
+
     let supabaseResponse = NextResponse.next({
         request,
     })
