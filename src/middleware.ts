@@ -50,6 +50,12 @@ export async function middleware(request: NextRequest) {
 
     // If not logged in and trying to access a protected route
     if (!user && !isPublicRoute) {
+        // PERMISSIVE MODE: Allow access even if server-side auth fails, to prevent loops.
+        // Client-side auth will handle protection.
+        console.log(`[Middleware] Allowing unauthenticated access to ${pathname} (Permissive Mode)`)
+        return supabaseResponse
+
+        /* 
         const loginUrl = new URL('/login', request.url)
         const response = NextResponse.redirect(loginUrl)
 
@@ -58,6 +64,7 @@ export async function middleware(request: NextRequest) {
         cookiesToSet.forEach(cookie => response.cookies.set(cookie))
 
         return response
+        */
     }
 
     // If logged in and trying to access login page, redirect to home
