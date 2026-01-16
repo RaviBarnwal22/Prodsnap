@@ -31,7 +31,12 @@ export async function middleware(request: NextRequest) {
     )
 
     // Get current user
-    const { data: { user } } = await supabase.auth.getUser()
+    const { data: { user }, error } = await supabase.auth.getUser()
+
+    console.log(`[Middleware] ${request.method} ${request.nextUrl.pathname}`)
+    console.log(`[Middleware] Cookies present: ${request.cookies.getAll().map(c => c.name).join(', ')}`)
+    console.log(`[Middleware] User ID: ${user?.id || 'none'}`)
+    if (error) console.log(`[Middleware] Auth Error: ${error.message}`)
 
     const pathname = request.nextUrl.pathname
 
