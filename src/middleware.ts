@@ -41,19 +41,37 @@ export async function middleware(request: NextRequest) {
     // If not logged in and trying to access a protected route
     if (!user && !isPublicRoute) {
         const loginUrl = new URL('/login', request.url)
-        return NextResponse.redirect(loginUrl)
+        const response = NextResponse.redirect(loginUrl)
+
+        // Copy cookies from supabaseResponse (which might have refreshed tokens) to the redirect response
+        const cookiesToSet = supabaseResponse.cookies.getAll()
+        cookiesToSet.forEach(cookie => response.cookies.set(cookie))
+
+        return response
     }
 
     // If logged in and trying to access login page, redirect to home
     if (user && pathname === '/login') {
         const homeUrl = new URL('/', request.url)
-        return NextResponse.redirect(homeUrl)
+        const response = NextResponse.redirect(homeUrl)
+
+        // Copy cookies
+        const cookiesToSet = supabaseResponse.cookies.getAll()
+        cookiesToSet.forEach(cookie => response.cookies.set(cookie))
+
+        return response
     }
 
     // If logged in and trying to access admin login, redirect to admin
     if (user && pathname === '/admin/login') {
         const adminUrl = new URL('/admin', request.url)
-        return NextResponse.redirect(adminUrl)
+        const response = NextResponse.redirect(adminUrl)
+
+        // Copy cookies
+        const cookiesToSet = supabaseResponse.cookies.getAll()
+        cookiesToSet.forEach(cookie => response.cookies.set(cookie))
+
+        return response
     }
 
     return supabaseResponse
