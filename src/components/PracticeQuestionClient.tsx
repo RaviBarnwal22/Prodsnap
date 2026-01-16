@@ -146,7 +146,8 @@ export function PracticeQuestionClient({
         return `${mins}:${secs.toString().padStart(2, '0')}`
     }
 
-    if (!userId) {
+    // Only show "Please sign in" if we've finished loading and truly have no user
+    if (!finalUserId && !isLoading) {
         return (
             <div className="bg-blue-50 border-blue-200 border p-6 rounded-lg text-center">
                 <p className="mb-4 text-blue-800">Please sign in to practice and get AI feedback.</p>
