@@ -48,6 +48,10 @@ export async function middleware(request: NextRequest) {
     // If not logged in and trying to access a protected route
     // If not logged in and trying to access a protected route
     if (!user && !isPublicRoute) {
+        // Bypass practice routes to rely on client-side auth (fixes redirect loops)
+        if (pathname.startsWith('/practice')) {
+            return supabaseResponse
+        }
         const loginUrl = new URL('/login', request.url)
         const response = NextResponse.redirect(loginUrl)
 

@@ -32,22 +32,39 @@ export function PracticeQuestionClient({
     sampleAnswer,
     previousSubmission
 }: PracticeQuestionClientProps) {
-    const [showUpgradeModal, setShowUpgradeModal] = useState(false)
-    const [attemptStatus, setAttemptStatus] = useState<{
-        canAttempt: boolean
-        attemptsUsed: number
-        attemptsRemaining: number
-        isPremium: boolean
-    } | null>(null)
-    const [isLoading, setIsLoading] = useState(true)
-    const [hasStartedAttempt, setHasStartedAttempt] = useState(false)
-    const [startTime, setStartTime] = useState<number | null>(null)
-    const [elapsedTime, setElapsedTime] = useState(0)
-    const timerRef = useRef<NodeJS.Timeout | null>(null)
+    // State for client-side user fetching (fallback if server props are missing)
+    const [clientUser, setClientUser] = useState<{ id: string; email?: string; name?: string } | null>(null)
+
+    // Resolve final user data efficiently
+    const finalUserId = userId || clientUser?.id
+    const finalUserEmail = userEmail || clientUser?.email
+    const finalUserName = userName || clientUser?.name
+
+    // Effect: Fetch user client-side if missing from props
+    useEffect(() => {
+        if (!userId) {
+            const fetchClientUser = async () => {
+                const { createClient } = await import('@/lib/supabase/client')
+                const supabase = createClient()
+                const { data: { user } } = await supabase.auth.getUser()
+
+                if (user) {
+                    setClientUser({
+                        id: user.id,
+                        email: user.email,
+                        name: user.user_metadata?.full_name
+                    })
+                }
+            }
+            fetchClientUser()
+        }
+    }, [userId])
 
     useEffect(() => {
         async function checkAttemptStatus() {
-            if (!userId) {
+            if (!finalUserId) {
+                // If we are still loading client user, don't stop yet
+                if (!userId && isLoading) return
                 setIsLoading(false)
                 return
             }
@@ -62,8 +79,13 @@ export function PracticeQuestionClient({
             }
         }
 
-        checkAttemptStatus()
-    }, [category, userId])
+        if (finalUserId) {
+            checkAttemptStatus()
+        } else if (!userId) {
+            // Allow a small delay for client fetch to kick in before showing "Please sign in"
+            setTimeout(() => setIsLoading(false), 2000)
+        }
+    }, [category, finalUserId, userId, isLoading])
 
     // Timer effect
     useEffect(() => {
