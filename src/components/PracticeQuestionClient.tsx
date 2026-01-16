@@ -32,6 +32,19 @@ export function PracticeQuestionClient({
     sampleAnswer,
     previousSubmission
 }: PracticeQuestionClientProps) {
+    const [showUpgradeModal, setShowUpgradeModal] = useState(false)
+    const [attemptStatus, setAttemptStatus] = useState<{
+        canAttempt: boolean
+        attemptsUsed: number
+        attemptsRemaining: number
+        isPremium: boolean
+    } | null>(null)
+    const [isLoading, setIsLoading] = useState(true)
+    const [hasStartedAttempt, setHasStartedAttempt] = useState(false)
+    const [startTime, setStartTime] = useState<number | null>(null)
+    const [elapsedTime, setElapsedTime] = useState(0)
+    const timerRef = useRef<NodeJS.Timeout | null>(null)
+
     // State for client-side user fetching (fallback if server props are missing)
     const [clientUser, setClientUser] = useState<{ id: string; email?: string; name?: string } | null>(null)
 
