@@ -2,10 +2,8 @@ import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
 export async function middleware(request: NextRequest) {
-    let response = NextResponse.next({
-        request: {
-            headers: request.headers,
-        },
+    let supabaseResponse = NextResponse.next({
+        request,
     })
 
     const supabase = createServerClient(
@@ -17,25 +15,19 @@ export async function middleware(request: NextRequest) {
                     return request.cookies.getAll()
                 },
                 setAll(cookiesToSet) {
-                    cookiesToSet.forEach(({ name, value }) => {
-                        request.cookies.set(name, value)
-                    })
-                    response = NextResponse.next({
+                    cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value))
+                    supabaseResponse = NextResponse.next({
                         request,
                     })
-                    cookiesToSet.forEach(({ name, value, options }) => {
-                        response.cookies.set(name, value, {
-                            ...options,
-                            path: '/', // Ensure auth cookies are available everywhere
-                        })
-                    })
+                    cookiesToSet.forEach(({ name, value, options }) =>
+                        supabaseResponse.cookies.set(name, value, options)
+                    )
                 },
             },
         }
     )
 
-    // IMPORTANT: DO NOT remove this getUser() call.
-    // It is required for the Supabase SSR to refresh the session correctly.
+    // Refresh session if expired - this is critical
     const { data: { user } } = await supabase.auth.getUser()
 
     const pathname = request.nextUrl.pathname
@@ -46,46 +38,20 @@ export async function middleware(request: NextRequest) {
 
     // Auth routes (where logged-in users shouldn't go)
     const authRoutes = ['/login', '/signup', '/admin/login']
+
     // Case A: Unauthenticated User trying to access Protected Route
     if (!user && isProtected) {
         const loginUrl = new URL('/login', request.url)
-        // Store the original URL to redirect back after login
         loginUrl.searchParams.set('redirectedFrom', pathname)
-
-        const redirectResponse = NextResponse.redirect(loginUrl)
-        // Copy cookies from refreshed session if any
-        response.cookies.getAll().forEach((cookie) => {
-            redirectResponse.cookies.set(cookie.name, cookie.value, {
-                path: cookie.path ?? '/',
-                domain: cookie.domain,
-                maxAge: cookie.maxAge,
-                httpOnly: cookie.httpOnly,
-                secure: cookie.secure,
-                sameSite: cookie.sameSite,
-            })
-        })
-        return redirectResponse
+        return NextResponse.redirect(loginUrl)
     }
 
     // Case B: Authenticated User trying to access Auth Pages
     if (user && authRoutes.includes(pathname)) {
-        const homeUrl = new URL('/', request.url)
-        const redirectResponse = NextResponse.redirect(homeUrl)
-        // Copy cookies
-        response.cookies.getAll().forEach((cookie) => {
-            redirectResponse.cookies.set(cookie.name, cookie.value, {
-                path: cookie.path ?? '/',
-                domain: cookie.domain,
-                maxAge: cookie.maxAge,
-                httpOnly: cookie.httpOnly,
-                secure: cookie.secure,
-                sameSite: cookie.sameSite,
-            })
-        })
-        return redirectResponse
+        return NextResponse.redirect(new URL('/', request.url))
     }
 
-    return response
+    return supabaseResponse
 }
 
 export const config = {

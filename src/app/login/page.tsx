@@ -65,10 +65,9 @@ export default function LoginPage() {
             setError(error.message)
         } else {
             setMessage("Login successful! Taking you to your dashboard...")
-            // Keep loading state true while redirecting
             const params = new URLSearchParams(window.location.search)
             const redirectedFrom = params.get('redirectedFrom')
-            // Use hard redirect to ensure cookies are synced with server
+            // Hard redirect to ensure proper cookie sync
             window.location.href = redirectedFrom || '/'
         }
     }
