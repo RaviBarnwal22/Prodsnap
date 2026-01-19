@@ -5,8 +5,11 @@ export async function middleware(request: NextRequest) {
     const pathname = request.nextUrl.pathname
     console.log(`[Middleware] ${pathname} - Start`)
 
-    let supabaseResponse = NextResponse.next({
-        request,
+    // Create response that we'll mutate with cookies
+    let response = NextResponse.next({
+        request: {
+            headers: request.headers,
+        },
     })
 
     const supabase = createServerClient(
@@ -14,26 +17,52 @@ export async function middleware(request: NextRequest) {
         process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
         {
             cookies: {
-                getAll() {
-                    const cookies = request.cookies.getAll()
-                    console.log(`[Middleware] ${pathname} - Cookies found:`, cookies.length)
-                    return cookies
+                get(name: string) {
+                    const cookie = request.cookies.get(name)?.value
+                    console.log(`[Middleware] ${pathname} - GET cookie ${name}:`, cookie ? 'exists' : 'missing')
+                    return cookie
                 },
-                setAll(cookiesToSet) {
-                    console.log(`[Middleware] ${pathname} - Setting cookies:`, cookiesToSet.length)
-                    cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value))
-                    supabaseResponse = NextResponse.next({
-                        request,
+                set(name: string, value: string, options: any) {
+                    console.log(`[Middleware] ${pathname} - SET cookie ${name}`)
+                    request.cookies.set({
+                        name,
+                        value,
+                        ...options,
                     })
-                    cookiesToSet.forEach(({ name, value, options }) =>
-                        supabaseResponse.cookies.set(name, value, options)
-                    )
+                    response = NextResponse.next({
+                        request: {
+                            headers: request.headers,
+                        },
+                    })
+                    response.cookies.set({
+                        name,
+                        value,
+                        ...options,
+                    })
+                },
+                remove(name: string, options: any) {
+                    console.log(`[Middleware] ${pathname} - REMOVE cookie ${name}`)
+                    request.cookies.set({
+                        name,
+                        value: '',
+                        ...options,
+                    })
+                    response = NextResponse.next({
+                        request: {
+                            headers: request.headers,
+                        },
+                    })
+                    response.cookies.set({
+                        name,
+                        value: '',
+                        ...options,
+                    })
                 },
             },
         }
     )
 
-    // Refresh session if expired - this is critical
+    // CRITICAL: This refreshes the session
     const { data: { user }, error } = await supabase.auth.getUser()
 
     console.log(`[Middleware] ${pathname} - User:`, user ? `${user.id} (${user.email})` : 'null')
@@ -61,7 +90,7 @@ export async function middleware(request: NextRequest) {
     }
 
     console.log(`[Middleware] ${pathname} - ALLOW (user: ${!!user})`)
-    return supabaseResponse
+    return response
 }
 
 export const config = {
