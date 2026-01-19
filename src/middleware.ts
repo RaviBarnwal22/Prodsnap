@@ -5,8 +5,6 @@ import { NextResponse, type NextRequest } from 'next/server'
 const publicRoutes = ['/', '/login', '/home', '/admin/login', '/auth/callback', '/auth/reset-password', '/forgot-password']
 
 export async function middleware(request: NextRequest) {
-
-
     let supabaseResponse = NextResponse.next({
         request,
     })
@@ -20,7 +18,7 @@ export async function middleware(request: NextRequest) {
                     return request.cookies.getAll()
                 },
                 setAll(cookiesToSet) {
-                    cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value))
+                    cookiesToSet.forEach(({ name, value, options }) => request.cookies.set(name, value))
                     supabaseResponse = NextResponse.next({
                         request,
                     })
@@ -32,66 +30,64 @@ export async function middleware(request: NextRequest) {
         }
     )
 
-    // Get current user
-    const { data: { user }, error } = await supabase.auth.getUser()
+    // IMPORTANT: Avoid writing any logic between createServerClient and
+    // supabase.auth.getUser(). A simple mistake could make it very hard to debug
+    // issues with users being randomly logged out.
+
+    const {
+        data: { user },
+    } = await supabase.auth.getUser()
 
     console.log(`[Middleware] ${request.method} ${request.nextUrl.pathname}`)
-    console.log(`[Middleware] Cookies present: ${request.cookies.getAll().map(c => c.name).join(', ')}`)
     console.log(`[Middleware] User ID: ${user?.id || 'none'}`)
-    if (error) console.log(`[Middleware] Auth Error: ${error.message}`)
 
     const pathname = request.nextUrl.pathname
 
-    // Only protect /admin routes strictly on the server
-    // All other routes use client-side auth to avoid server/client cookie mismatch issues
-    // EXCEPTION: Force redirect from /, /home, /practice, /prodsense, /contact, /mentorship, /blog, /community to /login
+    // 1. Strict Route Protection
+    // Redirect unauthenticated users to /login for protected routes
     const protectedRoutes = ['/', '/home', '/practice', '/prodsense', '/contact', '/mentorship', '/blog', '/community']
     const isProtected = protectedRoutes.some(route => pathname === route || pathname.startsWith(route + '/'))
 
     if (!user && isProtected) {
         console.log(`[Middleware] Redirecting unauthenticated user from ${pathname} to /login`)
-        const loginUrl = new URL('/login', request.url)
-        const response = NextResponse.redirect(loginUrl)
-
-        // Copy cookies from supabaseResponse
+        const url = request.nextUrl.clone()
+        url.pathname = '/login'
+        // Redirect completely, but ensure cookies are passed along
+        const response = NextResponse.redirect(url)
+        // ESSENTIAL: Copy any updated cookies (e.g. session refresh) to the redirect response
         const cookiesToSet = supabaseResponse.cookies.getAll()
         cookiesToSet.forEach(cookie => response.cookies.set(cookie))
-
         return response
     }
 
+    // 2. Admin Route Protection
     if (!user && pathname.startsWith('/admin') && pathname !== '/admin/login') {
-        const loginUrl = new URL('/admin/login', request.url)
-        const response = NextResponse.redirect(loginUrl)
-
-        // Copy cookies from supabaseResponse
+        const url = request.nextUrl.clone()
+        url.pathname = '/admin/login'
+        const response = NextResponse.redirect(url)
         const cookiesToSet = supabaseResponse.cookies.getAll()
         cookiesToSet.forEach(cookie => response.cookies.set(cookie))
-
         return response
     }
 
+    // 3. Authenticated User Redirects
     // If logged in and trying to access login page, redirect to home
     if (user && pathname === '/login') {
-        const homeUrl = new URL('/', request.url)
-        const response = NextResponse.redirect(homeUrl)
-
-        // Copy cookies
+        const url = request.nextUrl.clone()
+        url.pathname = '/'
+        const response = NextResponse.redirect(url)
         const cookiesToSet = supabaseResponse.cookies.getAll()
         cookiesToSet.forEach(cookie => response.cookies.set(cookie))
-
         return response
     }
 
     // If logged in and trying to access admin login, redirect to admin
     if (user && pathname === '/admin/login') {
-        const adminUrl = new URL('/admin', request.url)
-        const response = NextResponse.redirect(adminUrl)
-
-        // Copy cookies
+        const url = request.nextUrl.clone()
+        url.pathname = '/admin'
+        const response = NextResponse.redirect(url)
         const cookiesToSet = supabaseResponse.cookies.getAll()
         cookiesToSet.forEach(cookie => response.cookies.set(cookie))
-
         return response
     }
 
