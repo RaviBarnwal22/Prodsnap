@@ -47,11 +47,23 @@ export async function middleware(request: NextRequest) {
 
     // Only protect /admin routes strictly on the server
     // All other routes use client-side auth to avoid server/client cookie mismatch issues
+    // EXCEPTION: Force redirect from / to /login for unauthenticated users as per user request
+    if (!user && pathname === '/') {
+        const loginUrl = new URL('/login', request.url)
+        const response = NextResponse.redirect(loginUrl)
+
+        // Copy cookies from supabaseResponse
+        const cookiesToSet = supabaseResponse.cookies.getAll()
+        cookiesToSet.forEach(cookie => response.cookies.set(cookie))
+
+        return response
+    }
+
     if (!user && pathname.startsWith('/admin') && pathname !== '/admin/login') {
         const loginUrl = new URL('/admin/login', request.url)
         const response = NextResponse.redirect(loginUrl)
 
-        // Copy cookies from supabaseResponse (which might have refreshed tokens)
+        // Copy cookies from supabaseResponse
         const cookiesToSet = supabaseResponse.cookies.getAll()
         cookiesToSet.forEach(cookie => response.cookies.set(cookie))
 
