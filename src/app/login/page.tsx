@@ -20,8 +20,22 @@ export default function LoginPage() {
     const [verificationEmail, setVerificationEmail] = useState("")
     const [resendCountdown, setResendCountdown] = useState(0)
     const [focusedField, setFocusedField] = useState<string | null>(null)
+    const [showLongLoading, setShowLongLoading] = useState(false)
     const supabase = createClient()
     const router = useRouter()
+
+    // Loading timer
+    useEffect(() => {
+        let timer: NodeJS.Timeout
+        if (isLoading) {
+            timer = setTimeout(() => {
+                setShowLongLoading(true)
+            }, 2000)
+        } else {
+            setShowLongLoading(false)
+        }
+        return () => clearTimeout(timer)
+    }, [isLoading])
 
     // Countdown timer for resend
     useEffect(() => {
