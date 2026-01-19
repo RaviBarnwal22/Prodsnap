@@ -42,13 +42,11 @@ export async function middleware(request: NextRequest) {
 
     const pathname = request.nextUrl.pathname
 
-    // Check if the route is public
-    const isPublicRoute = publicRoutes.some(route => pathname.startsWith(route))
-
     // Only protect /admin routes strictly on the server
     // All other routes use client-side auth to avoid server/client cookie mismatch issues
     // EXCEPTION: Force redirect from / to /login for unauthenticated users as per user request
-    if (!user && pathname === '/') {
+    if (!user && (pathname === '/' || pathname === '/home')) {
+        console.log('[Middleware] Redirecting unauthenticated user from root/home to /login')
         const loginUrl = new URL('/login', request.url)
         const response = NextResponse.redirect(loginUrl)
 
