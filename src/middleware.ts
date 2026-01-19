@@ -44,8 +44,8 @@ export async function middleware(request: NextRequest) {
 
     // Only protect /admin routes strictly on the server
     // All other routes use client-side auth to avoid server/client cookie mismatch issues
-    // EXCEPTION: Force redirect from /, /home, /practice, /prodsense to /login for unauthenticated users
-    const protectedRoutes = ['/', '/home', '/practice', '/prodsense']
+    // EXCEPTION: Force redirect from /, /home, /practice, /prodsense, /contact, /mentorship, /blog, /community to /login
+    const protectedRoutes = ['/', '/home', '/practice', '/prodsense', '/contact', '/mentorship', '/blog', '/community']
     const isProtected = protectedRoutes.some(route => pathname === route || pathname.startsWith(route + '/'))
 
     if (!user && isProtected) {
