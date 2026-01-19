@@ -55,15 +55,18 @@ export default function LoginPage() {
         const email = formData.get("email") as string
         const password = formData.get("password") as string
 
-        const { error } = await supabase.auth.signInWithPassword({
+        const { data, error } = await supabase.auth.signInWithPassword({
             email,
             password,
         })
 
         if (error) {
+            console.log('[Login] Error:', error.message)
             setIsLoading(false)
             setError(error.message)
         } else {
+            console.log('[Login] Success! User:', data.user?.id, 'Session:', !!data.session)
+            console.log('[Login] Cookies:', document.cookie)
             setMessage("Login successful! Taking you to your dashboard...")
             const params = new URLSearchParams(window.location.search)
             const redirectedFrom = params.get('redirectedFrom')

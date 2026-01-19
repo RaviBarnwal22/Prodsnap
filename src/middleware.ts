@@ -2,6 +2,9 @@ import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
 export async function middleware(request: NextRequest) {
+    const pathname = request.nextUrl.pathname
+    console.log(`[Middleware] ${pathname} - Start`)
+
     let supabaseResponse = NextResponse.next({
         request,
     })
@@ -12,9 +15,12 @@ export async function middleware(request: NextRequest) {
         {
             cookies: {
                 getAll() {
-                    return request.cookies.getAll()
+                    const cookies = request.cookies.getAll()
+                    console.log(`[Middleware] ${pathname} - Cookies found:`, cookies.length)
+                    return cookies
                 },
                 setAll(cookiesToSet) {
+                    console.log(`[Middleware] ${pathname} - Setting cookies:`, cookiesToSet.length)
                     cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value))
                     supabaseResponse = NextResponse.next({
                         request,
@@ -28,9 +34,10 @@ export async function middleware(request: NextRequest) {
     )
 
     // Refresh session if expired - this is critical
-    const { data: { user } } = await supabase.auth.getUser()
+    const { data: { user }, error } = await supabase.auth.getUser()
 
-    const pathname = request.nextUrl.pathname
+    console.log(`[Middleware] ${pathname} - User:`, user ? `${user.id} (${user.email})` : 'null')
+    if (error) console.log(`[Middleware] ${pathname} - Auth error:`, error.message)
 
     // Define protected routes
     const protectedRoutes = ['/', '/home', '/practice', '/prodsense', '/contact', '/mentorship', '/blog', '/community', '/admin']
@@ -41,6 +48,7 @@ export async function middleware(request: NextRequest) {
 
     // Case A: Unauthenticated User trying to access Protected Route
     if (!user && isProtected) {
+        console.log(`[Middleware] ${pathname} - REDIRECT to login (no user)`)
         const loginUrl = new URL('/login', request.url)
         loginUrl.searchParams.set('redirectedFrom', pathname)
         return NextResponse.redirect(loginUrl)
@@ -48,9 +56,11 @@ export async function middleware(request: NextRequest) {
 
     // Case B: Authenticated User trying to access Auth Pages
     if (user && authRoutes.includes(pathname)) {
+        console.log(`[Middleware] ${pathname} - REDIRECT to home (already logged in)`)
         return NextResponse.redirect(new URL('/', request.url))
     }
 
+    console.log(`[Middleware] ${pathname} - ALLOW (user: ${!!user})`)
     return supabaseResponse
 }
 
