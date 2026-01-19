@@ -6,7 +6,7 @@ import { cookies } from 'next/headers'
 export async function GET(request: Request) {
     const { searchParams, origin } = new URL(request.url)
     const code = searchParams.get('code')
-    const next = searchParams.get('next') ?? '/'
+    const next = searchParams.get('next') ?? searchParams.get('redirectedFrom') ?? '/'
 
     if (code) {
         const cookieStoreVal = await cookies()
@@ -43,11 +43,20 @@ export async function GET(request: Request) {
         const { error } = await supabase.auth.exchangeCodeForSession(code)
 
         if (!error) {
-            const response = NextResponse.redirect(`${origin}${next}`)
+            // Build target URL
+            let targetPath = next
+            if (!targetPath.startsWith('/')) {
+                targetPath = '/' + targetPath
+            }
+
+            const response = NextResponse.redirect(`${origin}${targetPath}`)
 
             // Apply all auth cookies to the redirect response
             cookiesToSetOnResponse.forEach(({ name, value, options }) => {
-                response.cookies.set(name, value, options)
+                response.cookies.set(name, value, {
+                    ...options,
+                    path: '/'
+                })
             })
 
             return response

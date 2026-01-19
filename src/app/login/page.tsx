@@ -66,8 +66,10 @@ export default function LoginPage() {
         } else {
             setMessage("Login successful! Taking you to your dashboard...")
             // Keep loading state true while redirecting
-            // Use window.location.href to force a hard refresh
-            window.location.href = '/'
+            const params = new URLSearchParams(window.location.search)
+            const redirectedFrom = params.get('redirectedFrom')
+            // Use hard redirect to ensure cookies are synced with server
+            window.location.href = redirectedFrom || '/'
         }
     }
 

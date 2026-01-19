@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 
@@ -15,21 +15,22 @@ export default function SessionTimeout() {
     const [showWarning, setShowWarning] = useState(false)
     const [isLoggedIn, setIsLoggedIn] = useState(false)
 
-    const logout = async () => {
+    const logout = useCallback(async () => {
+        // Clear timers immediately
+        if (timeoutRef.current) clearTimeout(timeoutRef.current)
+        if (warningTimeoutRef.current) clearTimeout(warningTimeoutRef.current)
+
         await supabase.auth.signOut()
         setShowWarning(false)
+        setIsLoggedIn(false)
         router.push('/login')
         router.refresh()
-    }
+    }, [supabase, router])
 
-    const resetTimer = () => {
+    const resetTimer = useCallback(() => {
         // Clear existing timers
-        if (timeoutRef.current) {
-            clearTimeout(timeoutRef.current)
-        }
-        if (warningTimeoutRef.current) {
-            clearTimeout(warningTimeoutRef.current)
-        }
+        if (timeoutRef.current) clearTimeout(timeoutRef.current)
+        if (warningTimeoutRef.current) clearTimeout(warningTimeoutRef.current)
 
         // Hide warning if it's showing
         setShowWarning(false)
@@ -43,44 +44,52 @@ export default function SessionTimeout() {
         timeoutRef.current = setTimeout(() => {
             logout()
         }, INACTIVITY_TIMEOUT)
-    }
+    }, [logout])
 
-    const handleActivity = () => {
+    const handleActivity = useCallback(() => {
         if (isLoggedIn) {
             resetTimer()
         }
-    }
-
-    const extendSession = () => {
-        setShowWarning(false)
-        resetTimer()
-    }
+    }, [isLoggedIn, resetTimer])
 
     useEffect(() => {
-        // Check if user is logged in
-        const checkAuth = async () => {
-            const { data: { user } } = await supabase.auth.getUser()
-            setIsLoggedIn(!!user)
+        let lastActivity = Date.now()
+        const activityThrottle = 10000 // 10 seconds
 
-            if (user) {
-                resetTimer()
+        const throttledActivity = () => {
+            const now = Date.now()
+            if (now - lastActivity > activityThrottle) {
+                lastActivity = now
+                handleActivity()
             }
         }
 
+        // Initial auth check
+        const checkAuth = async () => {
+            const { data: { session } } = await supabase.auth.getSession()
+            const hasUser = !!session?.user
+            setIsLoggedIn(hasUser)
+            if (hasUser) resetTimer()
+        }
         checkAuth()
 
         // Listen for auth state changes
-        const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-            const loggedIn = !!session?.user
-            setIsLoggedIn(loggedIn)
+        const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+            const hasUser = !!session?.user
+            setIsLoggedIn(hasUser)
 
-            if (loggedIn) {
+            if (hasUser) {
                 resetTimer()
-            } else {
-                // Clear timers when logged out
+            } else if (event === 'SIGNED_OUT' || event === 'USER_UPDATED') {
+                // Clear timers and redirect if definitively logged out
                 if (timeoutRef.current) clearTimeout(timeoutRef.current)
                 if (warningTimeoutRef.current) clearTimeout(warningTimeoutRef.current)
                 setShowWarning(false)
+
+                if (event === 'SIGNED_OUT') {
+                    router.push('/login')
+                    router.refresh()
+                }
             }
         })
 
@@ -88,7 +97,7 @@ export default function SessionTimeout() {
         const events = ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart', 'click']
 
         events.forEach(event => {
-            document.addEventListener(event, handleActivity, true)
+            document.addEventListener(event, throttledActivity, { passive: true, capture: true })
         })
 
         // Cleanup
@@ -96,11 +105,16 @@ export default function SessionTimeout() {
             if (timeoutRef.current) clearTimeout(timeoutRef.current)
             if (warningTimeoutRef.current) clearTimeout(warningTimeoutRef.current)
             events.forEach(event => {
-                document.removeEventListener(event, handleActivity, true)
+                document.removeEventListener(event, throttledActivity, true)
             })
             subscription.unsubscribe()
         }
-    }, [isLoggedIn])
+    }, [supabase, handleActivity, resetTimer]) // Stable dependencies
+
+
+    const extendSession = () => {
+        resetTimer()
+    }
 
     // Don't render anything if user is not logged in or no warning
     if (!isLoggedIn || !showWarning) {
@@ -108,12 +122,12 @@ export default function SessionTimeout() {
     }
 
     return (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-            <div className="bg-white rounded-lg shadow-xl max-w-md w-full p-6 animate-in fade-in zoom-in duration-200">
-                <div className="flex items-center gap-3 mb-4">
-                    <div className="w-12 h-12 rounded-full bg-amber-100 flex items-center justify-center flex-shrink-0">
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[9999] flex items-center justify-center p-4">
+            <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl max-w-md w-full p-8 animate-in fade-in zoom-in duration-300 border border-gray-200 dark:border-gray-800">
+                <div className="flex items-center gap-4 mb-6">
+                    <div className="w-14 h-14 rounded-2xl bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center flex-shrink-0 animate-pulse">
                         <svg
-                            className="w-6 h-6 text-amber-600"
+                            className="w-8 h-8 text-amber-600 dark:text-amber-400"
                             fill="none"
                             strokeLinecap="round"
                             strokeLinejoin="round"
@@ -125,26 +139,26 @@ export default function SessionTimeout() {
                         </svg>
                     </div>
                     <div>
-                        <h3 className="text-lg font-semibold text-gray-900">Session Timeout Warning</h3>
-                        <p className="text-sm text-gray-500">You've been inactive for a while</p>
+                        <h3 className="text-xl font-bold text-gray-900 dark:text-white">Session Security</h3>
+                        <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">Auto-logout in 60 seconds</p>
                     </div>
                 </div>
 
-                <p className="text-gray-700 mb-6">
-                    You will be automatically logged out in <strong>1 minute</strong> due to inactivity.
-                    Click "Stay Logged In" to continue your session.
+                <p className="text-gray-600 dark:text-gray-300 mb-8 leading-relaxed">
+                    We've detected some inactivity. For your security, you'll be logged out soon.
+                    Would you like to continue your session?
                 </p>
 
-                <div className="flex gap-3">
+                <div className="flex flex-col gap-3">
                     <button
                         onClick={extendSession}
-                        className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 px-4 rounded-lg transition-colors duration-200"
+                        className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold py-3.5 rounded-xl transition-all duration-300 shadow-lg shadow-blue-500/20"
                     >
-                        Stay Logged In
+                        Yes, Stay Logged In
                     </button>
                     <button
                         onClick={logout}
-                        className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium py-2.5 px-4 rounded-lg transition-colors duration-200"
+                        className="w-full bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 font-bold py-3.5 rounded-xl transition-all duration-300"
                     >
                         Log Out Now
                     </button>
@@ -153,3 +167,4 @@ export default function SessionTimeout() {
         </div>
     )
 }
+

@@ -10,6 +10,8 @@ export async function GET(req: NextRequest) {
         data: { user },
     } = await supabase.auth.getUser()
 
+    console.log(`[signout] User found: ${!!user}`)
+
     if (user) {
         await supabase.auth.signOut()
     }
