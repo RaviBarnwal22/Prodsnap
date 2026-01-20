@@ -52,21 +52,36 @@ export default function LoginPage() {
         setMessage("")
 
         const formData = new FormData(e.currentTarget)
+        const email = formData.get("email") as string
+        const password = formData.get("password") as string
         const params = new URLSearchParams(window.location.search)
         const redirectedFrom = params.get('redirectedFrom')
 
-        if (redirectedFrom) {
-            formData.append('redirectedFrom', redirectedFrom)
-        }
-
         try {
-            const { loginAction } = await import('./actions')
-            await loginAction(formData)
-            // If we get here without redirect, there was an error
-        } catch (error: any) {
-            if (error?.message) {
-                setError(error.message)
+            const response = await fetch('/api/auth/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ email, password, redirectedFrom }),
+                credentials: 'include', // Important: include cookies
+            })
+
+            const data = await response.json()
+
+            if (!response.ok) {
+                setError(data.error || 'Login failed')
+                setIsLoading(false)
+                return
             }
+
+            setMessage("Login successful! Redirecting...")
+            // Give cookies time to be set
+            setTimeout(() => {
+                window.location.href = data.redirectTo || '/'
+            }, 500)
+        } catch (error: any) {
+            setError(error.message || 'Login failed')
             setIsLoading(false)
         }
     }
