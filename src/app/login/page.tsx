@@ -52,26 +52,22 @@ export default function LoginPage() {
         setMessage("")
 
         const formData = new FormData(e.currentTarget)
-        const email = formData.get("email") as string
-        const password = formData.get("password") as string
+        const params = new URLSearchParams(window.location.search)
+        const redirectedFrom = params.get('redirectedFrom')
 
-        const { data, error } = await supabase.auth.signInWithPassword({
-            email,
-            password,
-        })
+        if (redirectedFrom) {
+            formData.append('redirectedFrom', redirectedFrom)
+        }
 
-        if (error) {
-            console.log('[Login] Error:', error.message)
+        try {
+            const { loginAction } = await import('./actions')
+            await loginAction(formData)
+            // If we get here without redirect, there was an error
+        } catch (error: any) {
+            if (error?.message) {
+                setError(error.message)
+            }
             setIsLoading(false)
-            setError(error.message)
-        } else {
-            console.log('[Login] Success! User:', data.user?.id, 'Session:', !!data.session)
-            console.log('[Login] Cookies:', document.cookie)
-            setMessage("Login successful! Taking you to your dashboard...")
-            const params = new URLSearchParams(window.location.search)
-            const redirectedFrom = params.get('redirectedFrom')
-            // Hard redirect to ensure proper cookie sync
-            window.location.href = redirectedFrom || '/'
         }
     }
 
