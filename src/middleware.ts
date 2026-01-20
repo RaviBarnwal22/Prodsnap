@@ -50,7 +50,15 @@ export async function middleware(request: NextRequest) {
                     })
                     cookiesToSet.forEach(({ name, value, options }) => {
                         console.log('[MW] Setting cookie on response:', name, '(length:', value.length, ')')
-                        response.cookies.set(name, value, options)
+                        // Force specific cookie attributes for Vercel
+                        const cookieOptions = {
+                            ...options,
+                            path: '/',
+                            sameSite: 'lax' as const,
+                            secure: process.env.NODE_ENV === 'production',
+                            httpOnly: true,
+                        }
+                        response.cookies.set(name, value, cookieOptions)
                     })
                 },
             },
