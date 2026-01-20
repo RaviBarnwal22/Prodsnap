@@ -3,13 +3,10 @@ import { NextResponse, type NextRequest } from 'next/server'
 
 export async function middleware(request: NextRequest) {
     const pathname = request.nextUrl.pathname
-    console.log(`[Middleware] ${pathname} - Start`)
 
-    // Create response that we'll mutate with cookies
+    // Create a response
     let response = NextResponse.next({
-        request: {
-            headers: request.headers,
-        },
+        request,
     })
 
     const supabase = createServerClient(
@@ -17,56 +14,24 @@ export async function middleware(request: NextRequest) {
         process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
         {
             cookies: {
-                get(name: string) {
-                    const cookie = request.cookies.get(name)?.value
-                    console.log(`[Middleware] ${pathname} - GET cookie ${name}:`, cookie ? 'exists' : 'missing')
-                    return cookie
+                getAll() {
+                    return request.cookies.getAll()
                 },
-                set(name: string, value: string, options: any) {
-                    console.log(`[Middleware] ${pathname} - SET cookie ${name}`)
-                    request.cookies.set({
-                        name,
-                        value,
-                        ...options,
-                    })
+                setAll(cookiesToSet) {
+                    cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value))
                     response = NextResponse.next({
-                        request: {
-                            headers: request.headers,
-                        },
+                        request,
                     })
-                    response.cookies.set({
-                        name,
-                        value,
-                        ...options,
-                    })
-                },
-                remove(name: string, options: any) {
-                    console.log(`[Middleware] ${pathname} - REMOVE cookie ${name}`)
-                    request.cookies.set({
-                        name,
-                        value: '',
-                        ...options,
-                    })
-                    response = NextResponse.next({
-                        request: {
-                            headers: request.headers,
-                        },
-                    })
-                    response.cookies.set({
-                        name,
-                        value: '',
-                        ...options,
-                    })
+                    cookiesToSet.forEach(({ name, value, options }) =>
+                        response.cookies.set(name, value, options)
+                    )
                 },
             },
         }
     )
 
-    // CRITICAL: This refreshes the session
-    const { data: { user }, error } = await supabase.auth.getUser()
-
-    console.log(`[Middleware] ${pathname} - User:`, user ? `${user.id} (${user.email})` : 'null')
-    if (error) console.log(`[Middleware] ${pathname} - Auth error:`, error.message)
+    // Refresh the user's session
+    const { data: { user } } = await supabase.auth.getUser()
 
     // Define protected routes
     const protectedRoutes = ['/', '/home', '/practice', '/prodsense', '/contact', '/mentorship', '/blog', '/community', '/admin']
@@ -77,7 +42,6 @@ export async function middleware(request: NextRequest) {
 
     // Case A: Unauthenticated User trying to access Protected Route
     if (!user && isProtected) {
-        console.log(`[Middleware] ${pathname} - REDIRECT to login (no user)`)
         const loginUrl = new URL('/login', request.url)
         loginUrl.searchParams.set('redirectedFrom', pathname)
         return NextResponse.redirect(loginUrl)
@@ -85,11 +49,9 @@ export async function middleware(request: NextRequest) {
 
     // Case B: Authenticated User trying to access Auth Pages
     if (user && authRoutes.includes(pathname)) {
-        console.log(`[Middleware] ${pathname} - REDIRECT to home (already logged in)`)
         return NextResponse.redirect(new URL('/', request.url))
     }
 
-    console.log(`[Middleware] ${pathname} - ALLOW (user: ${!!user})`)
     return response
 }
 
