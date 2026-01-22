@@ -30,18 +30,29 @@ export default function AdminLoginPage() {
             return
         }
 
-        const { error } = await supabase.auth.signInWithPassword({
-            email,
-            password,
-        })
+        try {
+            const response = await fetch('/api/auth/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ email, password, redirectedFrom: '/admin' }),
+                credentials: 'include',
+            })
 
-        setIsLoading(false)
+            const data = await response.json()
 
-        if (error) {
-            setError(error.message)
-        } else {
-            router.push('/admin')
-            router.refresh()
+            if (!response.ok) {
+                setError(data.error || 'Login failed')
+                setIsLoading(false)
+                return
+            }
+
+            // Redirect to admin dashboard
+            window.location.href = '/admin'
+        } catch (error: any) {
+            setError(error.message || 'Login failed')
+            setIsLoading(false)
         }
     }
 

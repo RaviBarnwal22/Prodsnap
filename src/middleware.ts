@@ -79,17 +79,21 @@ export async function middleware(request: NextRequest) {
         console.log('[MW] ❌ NO USER - Session not found')
     }
 
-    // Define protected routes
-    const protectedRoutes = ['/', '/home', '/practice', '/prodsense', '/contact', '/mentorship', '/blog', '/community', '/admin']
-    const isProtected = protectedRoutes.some(route => pathname === route || pathname.startsWith(route + '/'))
-
     // Auth routes (where logged-in users shouldn't go)
     const authRoutes = ['/login', '/signup', '/admin/login']
+    const isAuthRoute = authRoutes.includes(pathname)
+
+    // Define protected routes
+    const protectedRoutes = ['/', '/home', '/practice', '/prodsense', '/contact', '/mentorship', '/blog', '/community', '/admin']
+    // A route is protected if it's in the list and NOT an auth route
+    const isProtected = protectedRoutes.some(route => pathname === route || pathname.startsWith(route + '/')) && !isAuthRoute
 
     // Case A: Unauthenticated User trying to access Protected Route
     if (!user && isProtected) {
         console.log('[MW] 🔒 PROTECTED ROUTE + NO USER → Redirecting to login')
-        const loginUrl = new URL('/login', request.url)
+        // If it's an admin route, redirect to admin login
+        const redirectPath = pathname.startsWith('/admin') ? '/admin/login' : '/login'
+        const loginUrl = new URL(redirectPath, request.url)
         loginUrl.searchParams.set('redirectedFrom', pathname)
         console.log('[MW] Redirect URL:', loginUrl.toString())
         console.log('┌─────────────────────────────────────┐')

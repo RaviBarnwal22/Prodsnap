@@ -18,7 +18,9 @@ import {
     CreditCard,
     Upload,
     Camera,
-    AlertCircle
+    AlertCircle,
+    Mic,
+    Sparkles
 } from "lucide-react"
 
 export default function MentorshipClient() {
@@ -67,6 +69,7 @@ export default function MentorshipClient() {
             { icon: <GraduationCap size={20} />, title: "IIM Gold Medalist", description: "Graduated with distinction from a premier B-school" },
             { icon: <Award size={20} />, title: "Building ProdSnap", description: "Built India's leading PM interview prep platform" },
             { icon: <Trophy size={20} />, title: "Top Mentor on Unstop", description: "Recognized as a top-rated mentor helping aspiring PMs" },
+            { icon: <Mic size={20} />, title: "Guest Speaker", description: "Speaker at multiple product and tech events" },
         ],
         testimonials: [
             {
@@ -533,7 +536,7 @@ export default function MentorshipClient() {
                             <div className="absolute inset-0 bg-gradient-to-tr from-violet-600 to-purple-400 rounded-[2rem] rotate-3 opacity-20 blur-xl"></div>
                             <div className="relative">
                                 <img
-                                    src="/ravi-barnwal.jpg"
+                                    src="/mentor-5.jpg"
                                     alt={mentor.name}
                                     className="w-full rounded-3xl object-cover aspect-[4/5] shadow-2xl"
                                 />
@@ -567,6 +570,61 @@ export default function MentorshipClient() {
                                 <p className="text-xs text-gray-500 dark:text-gray-400">{accolade.description}</p>
                             </div>
                         ))}
+                    </div>
+                </div>
+            </section>
+
+            {/* Mentorship in Action Gallery */}
+            <section className="py-20 px-4 bg-white dark:bg-gray-950">
+                <div className="container mx-auto max-w-6xl">
+                    <div className="text-center mb-12">
+                        <h2 className="text-3xl font-black mb-4 flex items-center justify-center gap-3">
+                            <Sparkles className="text-violet-600" />
+                            Mentorship in Action
+                        </h2>
+                        <p className="text-gray-600 dark:text-gray-400">
+                            Real sessions, real impact. Building the next generation of Product Leaders.
+                        </p>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <div className="lg:col-span-2 group relative overflow-hidden rounded-3xl h-[400px]">
+                            <img
+                                src="/mentor-1.jpg"
+                                alt="Mentorship Session"
+                                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                            />
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-8">
+                                <p className="text-white font-bold text-lg">Interactive Product Management session at IBM for interns</p>
+                            </div>
+                        </div>
+                        <div className="group relative overflow-hidden rounded-3xl h-[400px]">
+                            <img
+                                src="/mentor-2.jpg"
+                                alt="Speaking Event"
+                                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                            />
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-8">
+                                <p className="text-white font-bold">Solving the right problem</p>
+                            </div>
+                        </div>
+                        <div className="group relative overflow-hidden rounded-3xl h-[300px]">
+                            <img
+                                src="/mentor-3.jpg"
+                                alt="Panel Discussion"
+                                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                            />
+                        </div>
+                        <div className="lg:col-span-2 group relative overflow-hidden rounded-3xl h-[300px]">
+                            <img
+                                src="/mentor-4.jpg"
+                                alt="Large Group Session"
+                                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                            />
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-8">
+                                <p className="text-white font-bold text-lg">Interactive career session at IIM Bodh Gaya</p>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </section>
