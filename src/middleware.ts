@@ -55,7 +55,9 @@ export async function middleware(request: NextRequest) {
                             ...options,
                             path: '/',
                             sameSite: 'lax' as const,
-                            
+                            secure: true,
+                            httpOnly: true,
+                            maxAge: 60 * 60 * 24 * 365,
                         }
                         response.cookies.set(name, value, cookieOptions)
                     })
