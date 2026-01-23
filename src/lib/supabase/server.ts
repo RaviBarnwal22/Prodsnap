@@ -20,9 +20,7 @@ export async function createClient() {
                                 ...options,
                                 path: '/',
                                 sameSite: 'lax' as const,
-                                secure: true,
-                                httpOnly: true,
-                                maxAge: 60 * 60 * 24 * 365,
+                                
                             }
                             cookieStore.set(name, value, cookieOptions)
                         })
