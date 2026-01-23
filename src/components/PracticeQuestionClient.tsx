@@ -124,9 +124,9 @@ export function PracticeQuestionClient({
         // If previous submission exists, this is a free re-attempt
         if (previousSubmission) {
             setHasStartedAttempt(true)
-            setStartTime(Date.now())
+            setStartTime(null) // Don't start the clock yet
             setElapsedTime(0)
-            setIsFinished(false)
+            setIsFinished(true) // Mark as "finished" (viewing result mode)
             return
         }
 
