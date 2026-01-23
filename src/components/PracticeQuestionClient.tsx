@@ -43,6 +43,7 @@ export function PracticeQuestionClient({
     const [hasStartedAttempt, setHasStartedAttempt] = useState(false)
     const [startTime, setStartTime] = useState<number | null>(null)
     const [elapsedTime, setElapsedTime] = useState(0)
+    const [isFinished, setIsFinished] = useState(false)
     const timerRef = useRef<NodeJS.Timeout | null>(null)
 
     // State for client-side user fetching (fallback if server props are missing)
@@ -102,10 +103,14 @@ export function PracticeQuestionClient({
 
     // Timer effect
     useEffect(() => {
-        if (hasStartedAttempt && startTime) {
+        if (hasStartedAttempt && startTime && !isFinished) {
             timerRef.current = setInterval(() => {
                 setElapsedTime(Math.floor((Date.now() - startTime) / 1000))
             }, 1000)
+        } else {
+            if (timerRef.current) {
+                clearInterval(timerRef.current)
+            }
         }
 
         return () => {
@@ -113,7 +118,7 @@ export function PracticeQuestionClient({
                 clearInterval(timerRef.current)
             }
         }
-    }, [hasStartedAttempt, startTime])
+    }, [hasStartedAttempt, startTime, isFinished])
 
     const handleStartAttempt = async () => {
         // If previous submission exists, this is a free re-attempt
@@ -121,6 +126,7 @@ export function PracticeQuestionClient({
             setHasStartedAttempt(true)
             setStartTime(Date.now())
             setElapsedTime(0)
+            setIsFinished(false)
             return
         }
 
@@ -135,6 +141,7 @@ export function PracticeQuestionClient({
             setHasStartedAttempt(true)
             setStartTime(Date.now())
             setElapsedTime(0)
+            setIsFinished(false)
         } catch (error) {
             console.error('Error incrementing attempt:', error)
         }
@@ -290,6 +297,7 @@ export function PracticeQuestionClient({
                         solutionText={solutionText}
                         sampleAnswer={sampleAnswer}
                         elapsedTime={elapsedTime}
+                        onSubmitted={() => setIsFinished(true)}
                         previousSubmission={previousSubmission}
                     />
                 </>

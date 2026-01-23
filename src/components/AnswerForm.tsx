@@ -15,6 +15,7 @@ interface AnswerFormProps {
     solutionText?: string
     sampleAnswer?: string
     elapsedTime?: number
+    onSubmitted?: () => void
     previousSubmission?: {
         answerText: string
         aiScore?: string
@@ -22,7 +23,7 @@ interface AnswerFormProps {
     }
 }
 
-export function AnswerForm({ questionId, userId, solutionText, sampleAnswer, elapsedTime = 0, previousSubmission }: AnswerFormProps) {
+export function AnswerForm({ questionId, userId, solutionText, sampleAnswer, elapsedTime = 0, onSubmitted, previousSubmission }: AnswerFormProps) {
     // Initialize result with previous submission if it exists
     const [result, setResult] = useState<AIEvaluationResponse | null>(() => {
         if (previousSubmission?.aiScore) {
@@ -133,6 +134,11 @@ export function AnswerForm({ questionId, userId, solutionText, sampleAnswer, ela
                 setPreviousAnswer(data.answer) // Save the answer for display
                 setResult(response.aiResponse)
                 setSubmissionId(response.submissionId || null)
+
+                // Stop the timer
+                if (onSubmitted) {
+                    onSubmitted()
+                }
 
                 // Show feedback modal after 2 seconds
                 setTimeout(() => {
