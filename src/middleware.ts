@@ -57,8 +57,12 @@ export async function middleware(request: NextRequest) {
                             sameSite: 'none' as const,
                             secure: true,
                             httpOnly: true,
-                            maxAge: 60 * 60 * 24 * 30, // 30 days
                         }
+
+                        if (value && !cookieOptions.maxAge) {
+                            cookieOptions.maxAge = 60 * 60 * 24 * 30
+                        }
+
                         response.cookies.set(name, value, cookieOptions)
                     })
                 },

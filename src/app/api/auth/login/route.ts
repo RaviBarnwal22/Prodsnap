@@ -70,15 +70,20 @@ export async function POST(request: Request) {
 
     // Apply all cookies to the response with explicit attributes
     cookiesToSet.forEach(({ name, value, options }) => {
-        console.log('[API LOGIN] Setting cookie on response:', name, '(length:', value.length, ')')
-        response.cookies.set(name, value, {
+        const cookieOptions = {
             ...options,
             path: '/',
-            sameSite: 'lax',
-            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'none' as const,
+            secure: true,
             httpOnly: true,
-            maxAge: options.maxAge || 60 * 60 * 24 * 7, // 7 days
-        })
+        }
+
+        // Only apply long maxAge if the cookie isn't being deleted (value is not empty)
+        if (value && !cookieOptions.maxAge) {
+            cookieOptions.maxAge = 60 * 60 * 24 * 30 // 30 days
+        }
+
+        response.cookies.set(name, value, cookieOptions)
     })
 
     console.log('[API LOGIN] Returning success response')
