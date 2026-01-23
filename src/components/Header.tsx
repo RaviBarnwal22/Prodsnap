@@ -26,7 +26,7 @@ export async function Header() {
                     {user ? (
                         <div className="flex items-center gap-3">
                             <span className="text-sm font-medium">{user.firstName || user.name?.split(' ')[0] || user.email.split('@')[0]}</span>
-                            <Link href="/auth/signout" className="text-xs text-gray-500 hover:text-red-500 transition">Log Out</Link>
+                            <a href="/auth/signout" className="text-xs text-gray-500 hover:text-red-500 transition">Log Out</a>
                         </div>
                     ) : (
                         <Link href="/login" className="bg-violet-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-violet-700 transition">

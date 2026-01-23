@@ -169,10 +169,10 @@ export default async function AdminPage() {
                             <Home size={16} />
                             View Site
                         </Link>
-                        <Link href="/auth/signout" className="flex items-center gap-2 text-red-400 hover:text-red-300 text-sm transition">
+                        <a href="/auth/signout" className="flex items-center gap-2 text-red-400 hover:text-red-300 text-sm transition">
                             <LogOut size={16} />
                             Sign Out
-                        </Link>
+                        </a>
                     </div>
                 </div>
             </header>
