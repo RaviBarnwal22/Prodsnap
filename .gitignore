@@ -45,3 +45,32 @@ next-env.d.ts
 *.db-journal
 /prisma/dev.db
 .env*.local
+
+# Backup and temporary files
+*.BACKUP.*
+*.OLD.*
+*.backup
+*.tmp
+*.temp
+*~
+
+# Editor directories and files
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+.idea
+*.swp
+*.swo
+*~.nib
+*.iml
+
+# OS-specific files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
