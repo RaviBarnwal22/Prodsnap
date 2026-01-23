@@ -16,6 +16,7 @@ interface AnswerFormProps {
     sampleAnswer?: string
     elapsedTime?: number
     onSubmitted?: () => void
+    onRetry?: () => void
     previousSubmission?: {
         answerText: string
         aiScore?: string
@@ -23,7 +24,7 @@ interface AnswerFormProps {
     }
 }
 
-export function AnswerForm({ questionId, userId, solutionText, sampleAnswer, elapsedTime = 0, onSubmitted, previousSubmission }: AnswerFormProps) {
+export function AnswerForm({ questionId, userId, solutionText, sampleAnswer, elapsedTime = 0, onSubmitted, onRetry, previousSubmission }: AnswerFormProps) {
     // Initialize result with previous submission if it exists
     const [result, setResult] = useState<AIEvaluationResponse | null>(() => {
         if (previousSubmission?.aiScore) {
@@ -362,6 +363,7 @@ export function AnswerForm({ questionId, userId, solutionText, sampleAnswer, ela
                         setResult(null)
                         setPreviousAnswer('')
                         setValue('answer', '')
+                        if (onRetry) onRetry()
                     }}
                     className="w-full bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 text-white py-4 rounded-xl font-bold transition-all shadow-xl flex items-center justify-center gap-2"
                 >

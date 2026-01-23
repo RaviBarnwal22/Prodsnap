@@ -147,6 +147,12 @@ export function PracticeQuestionClient({
         }
     }
 
+    const handleRetry = () => {
+        setStartTime(Date.now())
+        setElapsedTime(0)
+        setIsFinished(false)
+    }
+
     const formatTime = (seconds: number) => {
         const mins = Math.floor(seconds / 60)
         const secs = seconds % 60
@@ -298,6 +304,7 @@ export function PracticeQuestionClient({
                         sampleAnswer={sampleAnswer}
                         elapsedTime={elapsedTime}
                         onSubmitted={() => setIsFinished(true)}
+                        onRetry={handleRetry}
                         previousSubmission={previousSubmission}
                     />
                 </>
