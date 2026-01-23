@@ -19,10 +19,10 @@ export async function createClient() {
                             const cookieOptions = {
                                 ...options,
                                 path: '/',
-                                sameSite: 'lax' as const,
-                                secure: true,
+                                sameSite: 'none' as const, // Essential for Vercel/Chrome session persistence
+                                secure: true,              // Required when sameSite is 'none'
                                 httpOnly: true,
-                                maxAge: 60 * 60 * 24 * 365,
+                                maxAge: 60 * 60 * 24 * 30, // 30 days
                             }
                             cookieStore.set(name, value, cookieOptions)
                         })

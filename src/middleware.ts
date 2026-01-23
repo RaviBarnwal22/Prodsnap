@@ -54,10 +54,10 @@ export async function middleware(request: NextRequest) {
                         const cookieOptions = {
                             ...options,
                             path: '/',
-                            sameSite: 'lax' as const,
+                            sameSite: 'none' as const,
                             secure: true,
                             httpOnly: true,
-                            maxAge: 60 * 60 * 24 * 365,
+                            maxAge: 60 * 60 * 24 * 30, // 30 days
                         }
                         response.cookies.set(name, value, cookieOptions)
                     })
