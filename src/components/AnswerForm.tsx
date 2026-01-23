@@ -1,9 +1,10 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
 import { submitAnswer, submitPracticeFeedback } from '@/app/actions'
 import { useForm } from 'react-hook-form'
-import { Mic, MicOff, CheckCircle2, AlertTriangle, Lightbulb, Info, ExternalLink, ShieldCheck, Trophy } from 'lucide-react'
+import { Mic, MicOff, CheckCircle2, AlertTriangle, Lightbulb, Info, ExternalLink, ShieldCheck, Trophy, Sparkles } from 'lucide-react'
 import { AIEvaluationResponse } from '@/lib/ai/engine'
 import { PracticeFeedbackModal } from './PracticeFeedbackModal'
 import { MentorSuggestionModal } from './MentorSuggestionModal'
@@ -45,7 +46,28 @@ export function AnswerForm({ questionId, userId, solutionText, sampleAnswer, ela
     const [submissionCount, setSubmissionCount] = useState(0)
     const [submissionId, setSubmissionId] = useState<string | null>(null)
     const [showErrorModal, setShowErrorModal] = useState(false)
+    const [loadingMessageIndex, setLoadingMessageIndex] = useState(0)
     const [previousAnswer, setPreviousAnswer] = useState(previousSubmission?.answerText || '')
+
+    const loadingMessages = [
+        "Analyzing your product framework...",
+        "Evaluating strategic depth...",
+        "Identifying key strengths...",
+        "Generating improvement suggestions...",
+        "Aligning with expert standards...",
+        "Almost ready with your feedback..."
+    ]
+
+    // Cycle through loading messages
+    useEffect(() => {
+        let interval: NodeJS.Timeout
+        if (isSubmitting) {
+            interval = setInterval(() => {
+                setLoadingMessageIndex((prev) => (prev + 1) % loadingMessages.length)
+            }, 3000)
+        }
+        return () => clearInterval(interval)
+    }, [isSubmitting])
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const recognitionRef = useRef<any>(null)
     const answerRef = useRef("")
@@ -374,58 +396,104 @@ export function AnswerForm({ questionId, userId, solutionText, sampleAnswer, ela
     }
 
     return (
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-            <div className="relative">
-                <textarea
-                    {...register("answer", { required: true })}
-                    className="w-full h-64 p-4 pr-12 border rounded-lg focus:ring-2 focus:ring-violet-500 focus:outline-none dark:bg-gray-800 dark:border-gray-700"
-                    placeholder="Type or speak your answer here..."
+        <div className="relative">
+            <AnimatePresence>
+                {isSubmitting && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="absolute inset-0 z-50 rounded-2xl bg-white/80 dark:bg-gray-900/80 backdrop-blur-md flex flex-col items-center justify-center p-8 text-center"
+                    >
+                        <div className="relative w-20 h-20 mb-8">
+                            <motion.div
+                                className="absolute inset-0 border-4 border-violet-100 dark:border-violet-900/30 rounded-full"
+                                animate={{ scale: [1, 1.1, 1] }}
+                                transition={{ duration: 2, repeat: Infinity }}
+                            />
+                            <motion.div
+                                className="absolute inset-0 border-4 border-violet-600 rounded-full border-t-transparent"
+                                animate={{ rotate: 360 }}
+                                transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                            />
+                            <div className="absolute inset-0 flex items-center justify-center">
+                                <Sparkles className="text-violet-600 animate-pulse" size={32} />
+                            </div>
+                        </div>
+
+                        <motion.div
+                            key={loadingMessageIndex}
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -10 }}
+                            className="space-y-2"
+                        >
+                            <h3 className="text-xl font-black text-gray-900 dark:text-white">
+                                Evaluating Case Solution
+                            </h3>
+                            <p className="text-violet-600 dark:text-violet-400 font-bold bg-violet-50 dark:bg-violet-900/20 px-4 py-1 rounded-full text-sm inline-block">
+                                {loadingMessages[loadingMessageIndex]}
+                            </p>
+                        </motion.div>
+
+                        <p className="mt-8 text-xs text-gray-400 font-medium uppercase tracking-[0.2em]">
+                            This usually takes 10-15 seconds
+                        </p>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+                <div className="relative">
+                    <textarea
+                        {...register("answer", { required: true })}
+                        className="w-full h-64 p-4 pr-12 border rounded-lg focus:ring-2 focus:ring-violet-500 focus:outline-none dark:bg-gray-800 dark:border-gray-700"
+                        placeholder="Type or speak your answer here..."
+                    />
+                    <button
+                        type="button"
+                        onClick={toggleRecording}
+                        className={`absolute bottom-4 right-4 p-3 rounded-full transition ${isRecording
+                            ? 'bg-red-100 text-red-600 animate-pulse dark:bg-red-900/30'
+                            : 'bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300'
+                            }`}
+                        title={isRecording ? "Stop Recording" : "Start Voice Input"}
+                    >
+                        {isRecording ? <Mic className="text-red-600" size={20} /> : <MicOff size={20} />}
+                    </button>
+                </div>
+
+                {errors.answer && (
+                    <p className="text-red-500 text-sm">Please provide an answer before submitting.</p>
+                )}
+
+                <div className="flex justify-end">
+                    <button
+                        type="submit"
+                        disabled={isSubmitting}
+                        className="bg-violet-600 text-white px-6 py-2 rounded-lg font-medium hover:bg-violet-700 disabled:opacity-50 disabled:cursor-not-allowed transition flex items-center gap-2"
+                    >
+                        {isSubmitting ? 'Analyzing...' : 'Submit Choice'}
+                    </button>
+                </div>
+
+                {/* Mentor Suggestion Modal */}
+                <MentorSuggestionModal
+                    isOpen={showMentorSuggestion}
+                    onClose={() => setShowMentorSuggestion(false)}
+                    completedSessions={submissionCount}
                 />
-                <button
-                    type="button"
-                    onClick={toggleRecording}
-                    className={`absolute bottom-4 right-4 p-3 rounded-full transition ${isRecording
-                        ? 'bg-red-100 text-red-600 animate-pulse dark:bg-red-900/30'
-                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300'
-                        }`}
-                    title={isRecording ? "Stop Recording" : "Start Voice Input"}
-                >
-                    {isRecording ? <Mic className="text-red-600" size={20} /> : <MicOff size={20} />}
-                </button>
-            </div>
 
-            {errors.answer && (
-                <p className="text-red-500 text-sm">Please provide an answer before submitting.</p>
-            )}
-
-
-
-            <div className="flex justify-end">
-                <button
-                    type="submit"
-                    disabled={isSubmitting}
-                    className="bg-violet-600 text-white px-6 py-2 rounded-lg font-medium hover:bg-violet-700 disabled:opacity-50 disabled:cursor-not-allowed transition flex items-center gap-2"
-                >
-                    {isSubmitting ? 'Analyzing...' : 'Submit Choice'}
-                </button>
-            </div>
-
-            {/* Mentor Suggestion Modal */}
-            <MentorSuggestionModal
-                isOpen={showMentorSuggestion}
-                onClose={() => setShowMentorSuggestion(false)}
-                completedSessions={submissionCount}
-            />
-
-            {/* Error Modal */}
-            <ErrorModal
-                isOpen={showErrorModal}
-                onClose={() => {
-                    setShowErrorModal(false)
-                    setError(null)
-                }}
-                errorMessage={error || undefined}
-            />
-        </form>
+                {/* Error Modal */}
+                <ErrorModal
+                    isOpen={showErrorModal}
+                    onClose={() => {
+                        setShowErrorModal(false)
+                        setError(null)
+                    }}
+                    errorMessage={error || undefined}
+                />
+            </form>
+        </div>
     )
 }
