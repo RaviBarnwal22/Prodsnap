@@ -73,9 +73,8 @@ export async function POST(request: Request) {
         const cookieOptions = {
             ...options,
             path: '/',
-            sameSite: 'none' as const,
+            sameSite: 'lax' as const,
             secure: true,
-            httpOnly: true,
         }
 
         // Only apply long maxAge if the cookie isn't being deleted (value is not empty)

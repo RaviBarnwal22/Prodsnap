@@ -54,9 +54,8 @@ export async function middleware(request: NextRequest) {
                         const cookieOptions = {
                             ...options,
                             path: '/',
-                            sameSite: 'none' as const,
+                            sameSite: 'lax' as const,
                             secure: true,
-                            httpOnly: true,
                         }
 
                         if (value && !cookieOptions.maxAge) {
