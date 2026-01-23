@@ -40,29 +40,19 @@ export async function middleware(request: NextRequest) {
                     return cookies
                 },
                 setAll(cookiesToSet) {
-                    console.log('[MW] setAll() called - setting', cookiesToSet.length, 'cookies')
-                    cookiesToSet.forEach(({ name, value }) => {
-                        console.log('[MW] Setting cookie on request:', name, '(length:', value.length, ')')
+                    cookiesToSet.forEach(({ name, value, options }) => {
                         request.cookies.set(name, value)
                     })
                     response = NextResponse.next({
                         request,
                     })
                     cookiesToSet.forEach(({ name, value, options }) => {
-                        console.log('[MW] Setting cookie on response:', name, '(length:', value.length, ')')
-                        // Force specific cookie attributes for Vercel
-                        const cookieOptions = {
+                        response.cookies.set(name, value, {
                             ...options,
                             path: '/',
-                            sameSite: 'lax' as const,
+                            sameSite: 'lax',
                             secure: true,
-                        }
-
-                        if (value && !cookieOptions.maxAge) {
-                            cookieOptions.maxAge = 60 * 60 * 24 * 30
-                        }
-
-                        response.cookies.set(name, value, cookieOptions)
+                        })
                     })
                 },
             },

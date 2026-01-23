@@ -15,19 +15,12 @@ export async function createClient() {
                 setAll(cookiesToSet) {
                     try {
                         cookiesToSet.forEach(({ name, value, options }) => {
-                            // Force specific cookie attributes for Vercel
-                            const cookieOptions = {
+                            cookieStore.set(name, value, {
                                 ...options,
                                 path: '/',
-                                sameSite: 'lax' as const,
+                                sameSite: 'lax',
                                 secure: true,
-                            }
-
-                            if (value && !cookieOptions.maxAge) {
-                                cookieOptions.maxAge = 60 * 60 * 24 * 30
-                            }
-
-                            cookieStore.set(name, value, cookieOptions)
+                            })
                         })
                     } catch {
                         // The `setAll` method was called from a Server Component.

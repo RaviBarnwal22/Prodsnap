@@ -35,7 +35,6 @@ export async function POST(request: Request) {
                                 path: '/',
                                 sameSite: 'lax',
                                 secure: process.env.NODE_ENV === 'production',
-                                httpOnly: true,
                             })
                         } catch (e) {
                             console.log('[API LOGIN] Error setting cookie on store:', name)
