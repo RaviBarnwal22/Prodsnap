@@ -22,7 +22,6 @@ export interface AIEvaluationResponse {
     strengths: string[];
     weaknesses: string[];
     feedback: string;
-    follow_up_question?: string;
     improved_example: string;
     isMock?: boolean;
 }
@@ -153,7 +152,6 @@ function getMockResponse(): AIEvaluationResponse {
         strengths: ["Excellent user identification", "Structured solution exploration"],
         weaknesses: ["Trade-off analysis was a bit shallow", "Prioritization could be more data-driven"],
         feedback: "Great application of the CIRCLES framework. Section-wise scores reflect strong structure.",
-        follow_up_question: "How would you prioritize these features if you only had 2 months to launch an MVP?",
         improved_example: "To improve the trade-offs section, consider using a matrix for impact vs. effort...",
         isMock: true
     };

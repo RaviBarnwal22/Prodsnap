@@ -46,7 +46,6 @@ export const PRODUCT_SENSE_PROMPT = (questionTitle: string, userAnswer: string, 
   "strengths": ["string", "string"],
   "weaknesses": ["string", "string"],
   "feedback": "Framework Used: [Name]. Direct summary of why this would or would not pass a hiring bar.",
-  "follow_up_question": "A single, short, pointed interviewer follow-up question that challenges a specific gap or assumption in the candidate's answer (e.g., 'Why did you prioritize X over Y?' or 'How would this change if our target audience was Z?').",
   "improved_example": "A detailed, high-quality 5/5 path for this case. You MUST use clear double paragraph breaks (\\n\\n) between each part (Goal, Users, Needs, Solutions, etc.) to ensure it is highly readable and professional."
 }
 `;

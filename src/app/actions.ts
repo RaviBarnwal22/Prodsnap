@@ -246,30 +246,6 @@ export async function replyToSupport(data: {
     }
 }
 
-export async function submitFollowUp(data: {
-    questionTitle: string,
-    originalAnswer: string,
-    followUpQuestion: string,
-    followUpAnswer: string
-}) {
-    const user = await getUser()
-    if (!user) return { success: false, error: "Please login" }
-
-    const { evaluateFollowUp } = await import("@/lib/ai/followup")
-    try {
-        const evaluation = await evaluateFollowUp(
-            data.questionTitle,
-            data.originalAnswer,
-            data.followUpQuestion,
-            data.followUpAnswer
-        )
-        return { success: true, evaluation }
-    } catch (error) {
-        console.error("Follow-up action error:", error)
-        return { success: false, error: "AI Evaluation failed" }
-    }
-}
-
 export async function getUserSkillScores() {
     const user = await getUser()
     if (!user) return { success: false, error: "Not logged in" }
