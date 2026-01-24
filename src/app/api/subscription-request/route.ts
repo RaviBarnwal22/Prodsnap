@@ -50,7 +50,7 @@ export async function POST(request: NextRequest) {
         })
 
         // Send email notification to admin (don't block on failure)
-        sendPaymentNotification({
+        await sendPaymentNotification({
             name,
             email: user.email,
             phone,
@@ -58,7 +58,7 @@ export async function POST(request: NextRequest) {
         }).catch(err => console.error('Admin email notification failed:', err))
 
         // Send confirmation email to user
-        sendPaymentConfirmationToUser({
+        await sendPaymentConfirmationToUser({
             name,
             email: user.email,
             amount: 199

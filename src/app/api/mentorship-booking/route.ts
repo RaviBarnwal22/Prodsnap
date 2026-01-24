@@ -42,7 +42,7 @@ export async function POST(request: NextRequest) {
         })
 
         // Send booking confirmation to user
-        sendMentorshipBookingConfirmation({
+        await sendMentorshipBookingConfirmation({
             name,
             email: contactEmail,
             serviceType,
@@ -50,7 +50,7 @@ export async function POST(request: NextRequest) {
         }).catch(err => console.error('User confirmation email failed:', err))
 
         // Send notification to admin
-        sendMentorshipPaymentNotification({
+        await sendMentorshipPaymentNotification({
             name,
             email: contactEmail,
             phone,

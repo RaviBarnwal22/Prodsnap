@@ -103,7 +103,7 @@ export async function PUT(request: NextRequest) {
 
         // If approved and scheduled, send confirmation email
         if (action === "approve" && scheduledAt && meetingLink) {
-            sendMentorshipScheduledEmail({
+            await sendMentorshipScheduledEmail({
                 name: booking.name,
                 email: booking.email,
                 serviceType: booking.serviceType,
@@ -114,7 +114,7 @@ export async function PUT(request: NextRequest) {
 
         // If completed, send feedback request email
         if (action === "complete") {
-            sendFeedbackRequestEmail({
+            await sendFeedbackRequestEmail({
                 name: booking.name,
                 email: booking.email,
                 bookingId: booking.id,

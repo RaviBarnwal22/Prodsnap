@@ -17,16 +17,17 @@ interface EmailOptions {
 
 export async function sendEmail({ to, subject, html }: EmailOptions) {
     try {
+        console.log(`[Email] Attempting to send email to: ${to} | Subject: ${subject}`)
         const info = await transporter.sendMail({
             from: `"Prodsnap" <${process.env.GMAIL_USER || 'ravibarnwal89@gmail.com'}>`,
             to,
             subject,
             html
         })
-        console.log('Email sent:', info.messageId)
+        console.log('[Email] SUCCESS:', info.messageId)
         return { success: true, messageId: info.messageId }
     } catch (error) {
-        console.error('Error sending email:', error)
+        console.error('[Email] FAILED to send email:', error)
         return { success: false, error }
     }
 }

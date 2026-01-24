@@ -102,7 +102,7 @@ export async function PUT(request: NextRequest) {
             })
 
             // Send congratulations email to user
-            sendApprovalNotification({
+            await sendApprovalNotification({
                 name: subscriptionRequest.name,
                 email: subscriptionRequest.email,
                 endDate: subscriptionEndDate
