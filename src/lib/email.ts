@@ -1,11 +1,15 @@
 import nodemailer from 'nodemailer'
 
-// Create transporter using Gmail SMTP
+// Create transporter using Zoho SMTP (or Gmail as fallback)
+// For Zoho: Use ZOHO_EMAIL and ZOHO_PASSWORD
+// For Gmail: Use GMAIL_USER and GMAIL_APP_PASSWORD
 const transporter = nodemailer.createTransport({
-    service: 'gmail',
+    host: process.env.SMTP_HOST || 'smtp.zoho.com',
+    port: parseInt(process.env.SMTP_PORT || '587'),
+    secure: process.env.SMTP_PORT === '465', // true for 465, false for other ports
     auth: {
-        user: process.env.GMAIL_USER || 'ravibarnwal89@gmail.com',
-        pass: process.env.GMAIL_APP_PASSWORD // App password from Google account
+        user: process.env.SMTP_USER || process.env.GMAIL_USER || 'ravibarnwal89@gmail.com',
+        pass: process.env.SMTP_PASSWORD || process.env.GMAIL_APP_PASSWORD
     }
 })
 
@@ -18,8 +22,9 @@ interface EmailOptions {
 export async function sendEmail({ to, subject, html }: EmailOptions) {
     try {
         console.log(`[Email] Attempting to send email to: ${to} | Subject: ${subject}`)
+        const senderEmail = process.env.SMTP_USER || process.env.GMAIL_USER || 'ravibarnwal89@gmail.com'
         const info = await transporter.sendMail({
-            from: `"Prodsnap" <${process.env.GMAIL_USER || 'ravibarnwal89@gmail.com'}>`,
+            from: `"Prodsnap" <${senderEmail}>`,
             to,
             subject,
             html
