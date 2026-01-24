@@ -19,6 +19,7 @@ export default function LoginPage() {
     const [verificationState, setVerificationState] = useState<VerificationState>('none')
     const [verificationEmail, setVerificationEmail] = useState("")
     const [resendCountdown, setResendCountdown] = useState(0)
+    const [resetPasswordCountdown, setResetPasswordCountdown] = useState(0)
     const [focusedField, setFocusedField] = useState<string | null>(null)
     const [showLongLoading, setShowLongLoading] = useState(false)
     const supabase = createClient()
@@ -44,6 +45,35 @@ export default function LoginPage() {
             return () => clearTimeout(timer)
         }
     }, [resendCountdown])
+
+    // Countdown timer for password reset
+    useEffect(() => {
+        if (resetPasswordCountdown > 0) {
+            const timer = setTimeout(() => setResetPasswordCountdown(resetPasswordCountdown - 1), 1000)
+            return () => clearTimeout(timer)
+        }
+    }, [resetPasswordCountdown])
+
+    // Restore cooldown on mount (for page refreshes)
+    useEffect(() => {
+        const params = new URLSearchParams(window.location.search)
+        const email = params.get('email')
+
+        if (email && mode === 'forgot') {
+            const lastResetKey = `last_reset_${email}`
+            const lastResetTime = localStorage.getItem(lastResetKey)
+
+            if (lastResetTime) {
+                const timeSinceLastReset = Date.now() - parseInt(lastResetTime)
+                const cooldownMs = 60000 // 60 seconds
+
+                if (timeSinceLastReset < cooldownMs) {
+                    const remainingSeconds = Math.ceil((cooldownMs - timeSinceLastReset) / 1000)
+                    setResetPasswordCountdown(remainingSeconds)
+                }
+            }
+        }
+    }, [mode])
 
     const handleSignIn = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault()
@@ -167,12 +197,36 @@ export default function LoginPage() {
 
     const handleForgotPassword = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault()
+
+        // Check if cooldown is active
+        if (resetPasswordCountdown > 0) {
+            setError(`Please wait ${resetPasswordCountdown} seconds before requesting another reset link.`)
+            return
+        }
+
         setIsLoading(true)
         setError("")
         setMessage("")
 
         const formData = new FormData(e.currentTarget)
         const email = formData.get("email") as string
+
+        // Check localStorage for last reset attempt
+        const lastResetKey = `last_reset_${email}`
+        const lastResetTime = localStorage.getItem(lastResetKey)
+
+        if (lastResetTime) {
+            const timeSinceLastReset = Date.now() - parseInt(lastResetTime)
+            const cooldownMs = 60000 // 60 seconds
+
+            if (timeSinceLastReset < cooldownMs) {
+                const remainingSeconds = Math.ceil((cooldownMs - timeSinceLastReset) / 1000)
+                setResetPasswordCountdown(remainingSeconds)
+                setError(`Please wait ${remainingSeconds} seconds before requesting another reset link.`)
+                setIsLoading(false)
+                return
+            }
+        }
 
         const { error } = await supabase.auth.resetPasswordForEmail(email, {
             redirectTo: `${window.location.origin}/auth/reset-password`,
@@ -181,9 +235,20 @@ export default function LoginPage() {
         setIsLoading(false)
 
         if (error) {
-            setError(error.message)
+            // Handle rate limit error specifically
+            if (error.message.toLowerCase().includes('rate limit') ||
+                error.message.toLowerCase().includes('too many requests')) {
+                setError("Too many reset attempts. Please wait 60 seconds and try again.")
+                setResetPasswordCountdown(60)
+                localStorage.setItem(lastResetKey, Date.now().toString())
+            } else {
+                setError(error.message)
+            }
         } else {
             setMessage("Check your email for a password reset link!")
+            // Set cooldown after successful request
+            setResetPasswordCountdown(60)
+            localStorage.setItem(lastResetKey, Date.now().toString())
         }
     }
 
@@ -593,15 +658,22 @@ export default function LoginPage() {
                                     </div>
                                 </div>
                                 <button
-                                    disabled={isLoading}
-                                    className="w-full bg-gradient-to-r from-purple-600 via-violet-600 to-indigo-600 text-white rounded-xl py-4 font-bold hover:shadow-lg hover:shadow-purple-500/30 transition-all flex items-center justify-center gap-2 disabled:opacity-50 group"
+                                    disabled={isLoading || resetPasswordCountdown > 0}
+                                    className="w-full bg-gradient-to-r from-purple-600 via-violet-600 to-indigo-600 text-white rounded-xl py-4 font-bold hover:shadow-lg hover:shadow-purple-500/30 transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed group"
                                 >
                                     {isLoading ? (
                                         <Loader2 className="animate-spin" size={20} />
+                                    ) : resetPasswordCountdown > 0 ? (
+                                        <>Wait {resetPasswordCountdown}s</>
                                     ) : (
                                         <>Send Reset Link <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" /></>
                                     )}
                                 </button>
+                                {resetPasswordCountdown > 0 && (
+                                    <p className="text-xs text-center text-amber-600 dark:text-amber-400 font-medium">
+                                        ⏱️ Please wait {resetPasswordCountdown} seconds before requesting another reset link
+                                    </p>
+                                )}
                                 <button
                                     type="button"
                                     onClick={() => { setMode('signin'); setError(''); setMessage('') }}
