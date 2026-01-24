@@ -245,3 +245,84 @@ export async function replyToSupport(data: {
         return { success: false, error: "Failed to send reply" }
     }
 }
+
+export async function submitFollowUp(data: {
+    questionTitle: string,
+    originalAnswer: string,
+    followUpQuestion: string,
+    followUpAnswer: string
+}) {
+    const user = await getUser()
+    if (!user) return { success: false, error: "Please login" }
+
+    const { evaluateFollowUp } = await import("@/lib/ai/followup")
+    try {
+        const evaluation = await evaluateFollowUp(
+            data.questionTitle,
+            data.originalAnswer,
+            data.followUpQuestion,
+            data.followUpAnswer
+        )
+        return { success: true, evaluation }
+    } catch (error) {
+        console.error("Follow-up action error:", error)
+        return { success: false, error: "AI Evaluation failed" }
+    }
+}
+
+export async function getUserSkillScores() {
+    const user = await getUser()
+    if (!user) return { success: false, error: "Not logged in" }
+
+    try {
+        const submissions = await prisma.practiceSubmission.findMany({
+            where: { userId: user.id },
+            orderBy: { createdAt: 'desc' },
+            take: 10,
+            select: { aiScore: true }
+        })
+
+        if (submissions.length === 0) return { success: true, scores: null }
+
+        // Average out the scores
+        const totals = {
+            comprehend_goal: 0,
+            identify_users: 0,
+            report_needs: 0,
+            cut_prioritization: 0,
+            list_solutions: 0,
+            evaluate_tradeoffs: 0
+        }
+
+        let validCount = 0
+        submissions.forEach(sub => {
+            try {
+                const results = JSON.parse(sub.aiScore || '{}')
+                if (results.scores) {
+                    Object.keys(totals).forEach(key => {
+                        // @ts-ignore
+                        totals[key] += results.scores[key] || 0
+                    })
+                    validCount++
+                }
+            } catch (e) {
+                console.error("Parse error in skill scores", e)
+            }
+        })
+
+        if (validCount === 0) return { success: true, scores: null }
+
+        const averages = Object.keys(totals).map(key => ({
+            subject: key.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' '),
+            // @ts-ignore
+            A: Number((totals[key] / validCount).toFixed(1)),
+            fullMark: 5
+        }))
+
+        return { success: true, scores: averages }
+
+    } catch (error) {
+        console.error("Error fetching skill scores", error)
+        return { success: false, error: "Failed to fetch scores" }
+    }
+}

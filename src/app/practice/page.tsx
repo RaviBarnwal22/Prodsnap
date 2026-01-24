@@ -3,6 +3,8 @@ import { prisma } from "@/lib/prisma"
 import Link from "next/link"
 import { Header } from "@/components/Header"
 import { Briefcase, BarChart3, TrendingUp, ArrowRight, Sparkles, ChevronLeft, Cpu, Rocket, Users, Search, Calculator } from "lucide-react"
+import { getUser } from "@/lib/auth"
+import { SkillRadarChart } from "@/components/SkillRadarChart"
 
 // Helper for difficulty color
 const getDifficultyColor = (diff: string) => {
@@ -132,24 +134,40 @@ export default async function PracticePage({
 
     const categoryOrder = ['CONSUMER_PRODUCT_DESIGN', 'METRICS', 'GROWTH_RETENTION', 'TECH_ACUMEN', 'GTM', 'BEHAVIORAL', 'RCA', 'GUESTIMATES']
 
+    const user = await getUser()
+
     return (
         <div className="min-h-screen bg-white dark:bg-gray-950 flex flex-col">
             <Header />
             <main className="flex-grow container mx-auto px-4 py-20">
-                {/* Hero Section - Only show if no category selected */}
+                {/* Hero & Analytics Section - Only show if no category selected */}
                 {!selectedCategory && (
-                    <div className="mb-20 text-center max-w-3xl mx-auto">
-                        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-300 text-xs font-black uppercase tracking-widest mb-6 border border-blue-100 dark:border-blue-800">
-                            <Sparkles size={14} />
-                            Select Your Path
+                    <div className="grid lg:grid-cols-5 gap-12 items-center mb-24 max-w-7xl mx-auto">
+                        <div className="lg:col-span-3 text-center lg:text-left">
+                            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-300 text-xs font-black uppercase tracking-widest mb-6 border border-blue-100 dark:border-blue-800">
+                                <Sparkles size={14} />
+                                Select Your Path
+                            </div>
+                            <h1 className="text-6xl md:text-7xl font-black tracking-tight mb-8">
+                                Practice <span className="text-blue-600">Engine</span>
+                            </h1>
+                            <p className="text-xl text-gray-500 dark:text-gray-400 leading-relaxed mb-8 max-w-xl">
+                                Pick a focus area to start your practice. Each track contains
+                                hand-picked cases designed by senior PMs to test specific skills.
+                            </p>
                         </div>
-                        <h1 className="text-6xl md:text-7xl font-black tracking-tight mb-8">
-                            Practice <span className="text-blue-600">Engine</span>
-                        </h1>
-                        <p className="text-xl text-gray-500 dark:text-gray-400 leading-relaxed">
-                            Pick a focus area to start your practice. Each track contains
-                            hand-picked cases designed by senior PMs.
-                        </p>
+                        <div className="lg:col-span-2">
+                            {user ? (
+                                <SkillRadarChart />
+                            ) : (
+                                <div className="p-10 text-center bg-gray-50 dark:bg-gray-900/50 rounded-[2.5rem] border-2 border-dashed border-gray-200 dark:border-gray-800">
+                                    <Users size={48} className="mx-auto text-gray-300 mb-4" />
+                                    <h3 className="font-bold text-gray-900 dark:text-white mb-2">Unlock Skill Analytics</h3>
+                                    <p className="text-sm text-gray-500 mb-6">Sign in to track your performance and see your skill radar matrix.</p>
+                                    <Link href="/login" className="inline-block bg-white dark:bg-gray-800 px-6 py-2 rounded-full font-bold text-sm shadow-sm border border-gray-100 dark:border-gray-700 hover:shadow-md transition-all">Sign In Now</Link>
+                                </div>
+                            )}
+                        </div>
                     </div>
                 )}
 

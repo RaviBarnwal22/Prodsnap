@@ -9,6 +9,7 @@ import Link from 'next/link'
 
 interface PracticeQuestionClientProps {
     questionId: string
+    questionTitle: string
     userId?: string
     userEmail?: string
     userName?: string
@@ -24,6 +25,7 @@ interface PracticeQuestionClientProps {
 
 export function PracticeQuestionClient({
     questionId,
+    questionTitle,
     userId,
     userEmail,
     userName,
@@ -299,6 +301,7 @@ export function PracticeQuestionClient({
                     )}
                     <AnswerForm
                         questionId={questionId}
+                        questionTitle={questionTitle}
                         userId={userId}
                         solutionText={solutionText}
                         sampleAnswer={sampleAnswer}

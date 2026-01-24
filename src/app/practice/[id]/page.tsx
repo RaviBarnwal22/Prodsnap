@@ -61,6 +61,7 @@ export default async function QuestionPage({ params }: { params: Promise<{ id: s
                 <div className="md:col-span-2">
                     <PracticeQuestionClient
                         questionId={question.id}
+                        questionTitle={question.title}
                         userId={user?.id}
                         userEmail={user?.email}
                         userName={user?.firstName || user?.name || ''}

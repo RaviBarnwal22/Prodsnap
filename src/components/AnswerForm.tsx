@@ -2,9 +2,9 @@
 
 import { useState, useRef, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { submitAnswer, submitPracticeFeedback } from '@/app/actions'
+import { submitAnswer, submitPracticeFeedback, submitFollowUp } from '@/app/actions'
 import { useForm } from 'react-hook-form'
-import { Mic, MicOff, CheckCircle2, AlertTriangle, Lightbulb, Info, ExternalLink, ShieldCheck, Trophy, Sparkles } from 'lucide-react'
+import { Mic, MicOff, CheckCircle2, AlertTriangle, Lightbulb, Info, ExternalLink, ShieldCheck, Trophy, Sparkles, Users } from 'lucide-react'
 import { AIEvaluationResponse } from '@/lib/ai/engine'
 import { PracticeFeedbackModal } from './PracticeFeedbackModal'
 import { MentorSuggestionModal } from './MentorSuggestionModal'
@@ -12,6 +12,7 @@ import { ErrorModal } from './ErrorModal'
 
 interface AnswerFormProps {
     questionId: string
+    questionTitle: string
     userId?: string
     solutionText?: string
     sampleAnswer?: string
@@ -25,7 +26,7 @@ interface AnswerFormProps {
     }
 }
 
-export function AnswerForm({ questionId, userId, solutionText, sampleAnswer, elapsedTime = 0, onSubmitted, onRetry, previousSubmission }: AnswerFormProps) {
+export function AnswerForm({ questionId, questionTitle, userId, solutionText, sampleAnswer, elapsedTime = 0, onSubmitted, onRetry, previousSubmission }: AnswerFormProps) {
     // Initialize result with previous submission if it exists
     const [result, setResult] = useState<AIEvaluationResponse | null>(() => {
         if (previousSubmission?.aiScore) {
@@ -48,6 +49,10 @@ export function AnswerForm({ questionId, userId, solutionText, sampleAnswer, ela
     const [showErrorModal, setShowErrorModal] = useState(false)
     const [loadingMessageIndex, setLoadingMessageIndex] = useState(0)
     const [previousAnswer, setPreviousAnswer] = useState(previousSubmission?.answerText || '')
+    const [followUpAnswer, setFollowUpAnswer] = useState('')
+    const [isSubmittingFollowUp, setIsSubmittingFollowUp] = useState(false)
+    const [followUpResult, setFollowUpResult] = useState<{ feedback: string; score: number } | null>(null)
+    const [showFollowUp, setShowFollowUp] = useState(false)
 
     const loadingMessages = [
         "Analyzing your product framework...",
@@ -206,6 +211,28 @@ export function AnswerForm({ questionId, userId, solutionText, sampleAnswer, ela
         }
     }
 
+    const handleFollowUpSubmit = async () => {
+        if (!followUpAnswer.trim() || !result?.follow_up_question) return
+
+        setIsSubmittingFollowUp(true)
+        try {
+            const resp = await submitFollowUp({
+                questionTitle,
+                originalAnswer: previousAnswer,
+                followUpQuestion: result.follow_up_question,
+                followUpAnswer
+            })
+
+            if (resp.success && resp.evaluation) {
+                setFollowUpResult(resp.evaluation)
+            }
+        } catch (err) {
+            console.error("Follow up error", err)
+        } finally {
+            setIsSubmittingFollowUp(false)
+        }
+    }
+
     const formatTime = (seconds: number) => {
         const mins = Math.floor(seconds / 60)
         const secs = seconds % 60
@@ -307,6 +334,67 @@ export function AnswerForm({ questionId, userId, solutionText, sampleAnswer, ela
                         {result.feedback}
                     </p>
                 </div>
+
+                {/* Interactive Drill-Down (Interviewer Follow-up) */}
+                {result.follow_up_question && (
+                    <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="bg-gray-900 border-2 border-violet-500/30 rounded-2xl p-6 shadow-xl shadow-violet-500/10 overflow-hidden relative"
+                    >
+                        {/* Decorative background pulse */}
+                        <div className="absolute top-0 right-0 w-32 h-32 bg-violet-600/10 blur-3xl rounded-full -mr-16 -mt-16 animate-pulse" />
+
+                        <div className="relative z-10">
+                            <div className="flex items-center gap-2 mb-4 text-violet-400">
+                                <Users size={18} />
+                                <span className="text-xs font-black uppercase tracking-[0.2em]">Interviewer Follow-up</span>
+                            </div>
+
+                            <p className="text-lg font-bold text-white mb-6 leading-relaxed">
+                                &quot;{result.follow_up_question}&quot;
+                            </p>
+
+                            {!followUpResult ? (
+                                <div className="space-y-4">
+                                    <textarea
+                                        value={followUpAnswer}
+                                        onChange={(e) => setFollowUpAnswer(e.target.value)}
+                                        placeholder="Defend your position or adapt your strategy..."
+                                        disabled={isSubmittingFollowUp}
+                                        className="w-full bg-gray-800 border border-gray-700 rounded-xl p-4 text-white text-sm focus:ring-2 focus:ring-violet-500 focus:outline-none transition-all placeholder:text-gray-500"
+                                        rows={3}
+                                    />
+                                    <div className="flex justify-end">
+                                        <button
+                                            onClick={handleFollowUpSubmit}
+                                            disabled={!followUpAnswer.trim() || isSubmittingFollowUp}
+                                            className="bg-violet-600 hover:bg-violet-700 disabled:opacity-50 text-white px-6 py-2 rounded-lg font-bold text-sm transition-all flex items-center gap-2 shadow-lg shadow-violet-600/20"
+                                        >
+                                            {isSubmittingFollowUp ? "Analyzing..." : "Submit Follow-up"}
+                                        </button>
+                                    </div>
+                                </div>
+                            ) : (
+                                <motion.div
+                                    initial={{ opacity: 0, x: -20 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    className="bg-violet-600/20 border border-violet-500/30 p-5 rounded-xl"
+                                >
+                                    <div className="flex justify-between items-start mb-3">
+                                        <h5 className="font-bold text-violet-300 text-sm">Response Evaluation</h5>
+                                        <div className="bg-violet-500 text-white px-2 py-0.5 rounded-full text-[10px] font-black italic">
+                                            Adaptability Score: {followUpResult.score}/5
+                                        </div>
+                                    </div>
+                                    <p className="text-sm text-violet-100 leading-relaxed italic border-l-2 border-violet-500 pl-4">
+                                        &quot;{followUpResult.feedback}&quot;
+                                    </p>
+                                </motion.div>
+                            )}
+                        </div>
+                    </motion.div>
+                )}
 
                 {/* Strengths & Weaknesses */}
                 <div className="grid md:grid-cols-2 gap-6">
