@@ -85,7 +85,7 @@ export async function sendPaymentNotification(data: {
                         Please log in to the admin panel to review the payment screenshot and approve/reject this request.
                     </p>
                     
-                    <a href="${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/admin" class="cta">
+                    <a href="${process.env.NEXT_PUBLIC_APP_URL || 'https://prodsnap-gamma.vercel.app'}/admin" class="cta">
                         Open Admin Panel →
                     </a>
                 </div>
@@ -222,7 +222,7 @@ export async function sendApprovalNotification(data: {
                     </div>
                     
                     <div style="text-align: center;">
-                        <a href="${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/practice" class="cta">
+                        <a href="${process.env.NEXT_PUBLIC_APP_URL || 'https://prodsnap-gamma.vercel.app'}/practice" class="cta">
                             Start Practicing Now →
                         </a>
                     </div>
@@ -364,7 +364,7 @@ export async function sendMentorshipPaymentNotification(data: {
                         Please review the payment and reach out to the customer to schedule the session.
                     </p>
                     
-                    <a href="${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/admin" class="cta">
+                    <a href="${process.env.NEXT_PUBLIC_APP_URL || 'https://prodsnap-gamma.vercel.app'}/admin" class="cta">
                         Open Admin Panel →
                     </a>
                 </div>
@@ -390,7 +390,7 @@ export async function sendFeedbackRequestEmail(data: {
     bookingId: string
     serviceType: string
 }) {
-    const feedbackUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/feedback/${data.bookingId}`
+    const feedbackUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'https://prodsnap-gamma.vercel.app'}/feedback/${data.bookingId}`
 
     const html = `
         <!DOCTYPE html>
@@ -569,7 +569,7 @@ export async function sendContactFormNotification(data: {
                         Please respond to this inquiry at your earliest convenience. You can reply directly to <strong>${data.email}</strong>.
                     </p>
                     
-                    <a href="${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/admin" class="cta">
+                    <a href="${process.env.NEXT_PUBLIC_APP_URL || 'https://prodsnap-gamma.vercel.app'}/admin" class="cta">
                         View in Admin Panel →
                     </a>
                 </div>
