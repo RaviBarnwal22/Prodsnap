@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 import { Menu, X, ArrowRight } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 
@@ -12,6 +13,7 @@ interface MobileMenuProps {
 
 export function MobileMenu({ isLoggedIn, userName }: MobileMenuProps) {
     const [isOpen, setIsOpen] = useState(false)
+    const pathname = usePathname()
 
     const toggleMenu = () => setIsOpen(!isOpen)
 
@@ -63,17 +65,23 @@ export function MobileMenu({ isLoggedIn, userName }: MobileMenuProps) {
                             </div>
 
                             <nav className="flex flex-col gap-1 mb-8">
-                                {navLinks.map((link) => (
-                                    <Link
-                                        key={link.name}
-                                        href={link.href}
-                                        onClick={toggleMenu}
-                                        className="py-4 px-4 rounded-xl text-lg font-bold text-gray-700 dark:text-gray-200 hover:bg-violet-50 dark:hover:bg-violet-900/20 hover:text-violet-600 transition-all flex items-center justify-between group"
-                                    >
-                                        {link.name}
-                                        <ArrowRight size={18} className="opacity-0 group-hover:opacity-100 -translate-x-2 group-hover:translate-x-0 transition-all" />
-                                    </Link>
-                                ))}
+                                {navLinks.map((link) => {
+                                    const isActive = pathname === link.href || pathname.startsWith(link.href + '/')
+                                    return (
+                                        <Link
+                                            key={link.name}
+                                            href={link.href}
+                                            onClick={toggleMenu}
+                                            className={`py-4 px-4 rounded-xl text-lg font-bold transition-all flex items-center justify-between group ${isActive
+                                                ? 'bg-violet-100 dark:bg-violet-900/30 text-violet-600'
+                                                : 'text-gray-700 dark:text-gray-200 hover:bg-violet-50 dark:hover:bg-violet-900/10 hover:text-violet-600'
+                                                }`}
+                                        >
+                                            {link.name}
+                                            <ArrowRight size={18} className={`${isActive ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0'} transition-all`} />
+                                        </Link>
+                                    )
+                                })}
                             </nav>
 
                             <div className="mt-auto border-t pt-8">

@@ -78,6 +78,9 @@ export default async function AdminPage() {
     const totalSubmissions = await prisma.practiceSubmission.count()
     const totalQuestions = await prisma.practiceQuestion.count()
     const totalActivities = await prisma.userActivity.count()
+    const totalBookings = await prisma.mentorshipBooking.count()
+    const pendingRequests = await prisma.subscriptionRequest.count({ where: { status: 'pending' } })
+    const pendingBookings = await prisma.mentorshipBooking.count({ where: { status: 'pending' } })
 
     // Contact submissions
     const contactSubmissions = await prisma.contactSubmission.findMany({
@@ -197,49 +200,74 @@ export default async function AdminPage() {
                     </div>
                 </div>
 
+                {/* Platform Health Overview */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                    <div className="bg-gradient-to-r from-violet-600 to-indigo-700 rounded-3xl p-8 text-white shadow-xl shadow-violet-500/20 flex items-center justify-between">
+                        <div>
+                            <h3 className="text-sm font-black uppercase tracking-widest opacity-80 mb-1">Active Pipeline</h3>
+                            <p className="text-3xl font-black">{pendingRequests + pendingBookings} Requests</p>
+                            <p className="text-xs font-bold opacity-60 mt-2">Action required: {pendingRequests} Subscriptions & {pendingBookings} Sessions</p>
+                        </div>
+                        <div className="bg-white/20 p-4 rounded-2xl backdrop-blur-md">
+                            <ShieldCheck size={32} />
+                        </div>
+                    </div>
+                </div>
+
                 {/* Stats Grid */}
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-8">
+                <div className="grid grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
                     <div className="bg-gray-800 rounded-2xl p-6 border border-gray-700">
-                        <div className="flex items-center gap-4">
-                            <div className="bg-blue-500/20 w-12 h-12 flex items-center justify-center rounded-xl text-blue-400">
-                                <Users size={24} />
+                        <div className="flex flex-col gap-3">
+                            <div className="bg-blue-500/20 w-10 h-10 flex items-center justify-center rounded-xl text-blue-400">
+                                <Users size={20} />
                             </div>
                             <div>
-                                <p className="text-3xl font-black text-white">{users.length}</p>
-                                <p className="text-xs font-bold text-gray-500 uppercase tracking-widest">Total Users</p>
+                                <p className="text-2xl font-black text-white">{users.length}</p>
+                                <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Total Users</p>
                             </div>
                         </div>
                     </div>
                     <div className="bg-gray-800 rounded-2xl p-6 border border-gray-700">
-                        <div className="flex items-center gap-4">
-                            <div className="bg-green-500/20 w-12 h-12 flex items-center justify-center rounded-xl text-green-400">
-                                <FileText size={24} />
+                        <div className="flex flex-col gap-3">
+                            <div className="bg-green-500/20 w-10 h-10 flex items-center justify-center rounded-xl text-green-400">
+                                <FileText size={20} />
                             </div>
                             <div>
-                                <p className="text-3xl font-black text-white">{totalSubmissions}</p>
-                                <p className="text-xs font-bold text-gray-500 uppercase tracking-widest">Submissions</p>
+                                <p className="text-2xl font-black text-white">{totalSubmissions}</p>
+                                <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Case Submissions</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div className="bg-gray-800 rounded-2xl p-6 border border-gray-700 border-violet-500/30">
+                        <div className="flex flex-col gap-3">
+                            <div className="bg-violet-500/20 w-10 h-10 flex items-center justify-center rounded-xl text-violet-400">
+                                <Calendar size={20} />
+                            </div>
+                            <div>
+                                <p className="text-2xl font-black text-white">{totalBookings}</p>
+                                <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Mentorships</p>
                             </div>
                         </div>
                     </div>
                     <div className="bg-gray-800 rounded-2xl p-6 border border-gray-700">
-                        <div className="flex items-center gap-4">
-                            <div className="bg-purple-500/20 w-12 h-12 flex items-center justify-center rounded-xl text-purple-400">
-                                <BarChart3 size={24} />
+                        <div className="flex flex-col gap-3">
+                            <div className="bg-purple-500/20 w-10 h-10 flex items-center justify-center rounded-xl text-purple-400">
+                                <BarChart3 size={20} />
                             </div>
                             <div>
-                                <p className="text-3xl font-black text-white">{totalQuestions}</p>
-                                <p className="text-xs font-bold text-gray-500 uppercase tracking-widest">Questions</p>
+                                <p className="text-2xl font-black text-white">{totalQuestions}</p>
+                                <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Live Tracks</p>
                             </div>
                         </div>
                     </div>
                     <div className="bg-gray-800 rounded-2xl p-6 border border-gray-700">
-                        <div className="flex items-center gap-4">
-                            <div className="bg-orange-500/20 w-12 h-12 flex items-center justify-center rounded-xl text-orange-400">
-                                <Activity size={24} />
+                        <div className="flex flex-col gap-3">
+                            <div className="bg-orange-500/20 w-10 h-10 flex items-center justify-center rounded-xl text-orange-400">
+                                <Activity size={20} />
                             </div>
                             <div>
-                                <p className="text-3xl font-black text-white">{totalActivities}</p>
-                                <p className="text-xs font-bold text-gray-500 uppercase tracking-widest">Page Views</p>
+                                <p className="text-2xl font-black text-white">{totalActivities}</p>
+                                <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Engagement</p>
                             </div>
                         </div>
                     </div>

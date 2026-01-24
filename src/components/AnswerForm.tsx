@@ -532,6 +532,26 @@ export function AnswerForm({ questionId, questionTitle, userId, solutionText, sa
             </AnimatePresence>
 
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+                <div className="flex flex-wrap gap-2 mb-4">
+                    <span className="text-[10px] font-black uppercase tracking-widest text-gray-400 w-full mb-1">Answer Template:</span>
+                    <button
+                        type="button"
+                        onClick={() => setValue('answer', "Goal:\n- \n\nUsers:\n- \n\nPain Points:\n- \n\nSolutions:\n- \n\nPrioritization:\n- \n\nTrade-offs:\n- ")}
+                        className="text-[10px] font-bold px-3 py-1.5 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-violet-600 hover:text-white transition-all flex items-center gap-1.5 border border-gray-200 dark:border-gray-700"
+                    >
+                        <Sparkles size={12} />
+                        CIRCLES Framework
+                    </button>
+                    <button
+                        type="button"
+                        onClick={() => setValue('answer', "Who:\n- \n\nWhat:\n- \n\nWhere:\n- \n\nWhen:\n- \n\nWhy:\n- \n\nHow:\n- ")}
+                        className="text-[10px] font-bold px-3 py-1.5 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-violet-600 hover:text-white transition-all flex items-center gap-1.5 border border-gray-200 dark:border-gray-700"
+                    >
+                        <Info size={12} />
+                        5W1H Framework
+                    </button>
+                </div>
+
                 <div className="relative">
                     <textarea
                         {...register("answer", { required: true })}
