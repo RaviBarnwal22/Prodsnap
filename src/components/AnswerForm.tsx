@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { submitAnswer, submitPracticeFeedback } from '@/app/actions'
 import { useForm } from 'react-hook-form'
-import { Mic, MicOff, CheckCircle2, AlertTriangle, Lightbulb, Info, ExternalLink, ShieldCheck, Trophy, Sparkles, Calculator, BarChart3, Activity, Users } from 'lucide-react'
+import { Mic, MicOff, CheckCircle2, AlertTriangle, Lightbulb, Info, ExternalLink, ShieldCheck, Trophy, Sparkles, Calculator, BarChart3, Activity, Users, MessageSquare, ArrowRight } from 'lucide-react'
 import { AIEvaluationResponse } from '@/lib/ai/engine'
 import { PracticeFeedbackModal } from './PracticeFeedbackModal'
 import { MentorSuggestionModal } from './MentorSuggestionModal'
@@ -15,6 +15,7 @@ interface AnswerFormProps {
     questionTitle: string
     userId?: string
     category: string
+    description: string
     solutionText?: string
     sampleAnswer?: string
     elapsedTime?: number
@@ -27,7 +28,7 @@ interface AnswerFormProps {
     }
 }
 
-export function AnswerForm({ questionId, questionTitle, userId, category, solutionText, sampleAnswer, elapsedTime = 0, onSubmitted, onRetry, previousSubmission }: AnswerFormProps) {
+export function AnswerForm({ questionId, questionTitle, userId, category, description, solutionText, sampleAnswer, elapsedTime = 0, onSubmitted, onRetry, previousSubmission }: AnswerFormProps) {
     // Initialize result with previous submission if it exists
     const [result, setResult] = useState<AIEvaluationResponse | null>(() => {
         if (previousSubmission?.aiScore) {
@@ -50,6 +51,80 @@ export function AnswerForm({ questionId, questionTitle, userId, category, soluti
     const [showErrorModal, setShowErrorModal] = useState(false)
     const [loadingMessageIndex, setLoadingMessageIndex] = useState(0)
     const [previousAnswer, setPreviousAnswer] = useState(previousSubmission?.answerText || '')
+
+    // Clarification Chat State
+    const [chatMessages, setChatMessages] = useState<{ role: 'user' | 'model', text: string }[]>([])
+    const [chatInput, setChatInput] = useState('')
+    const [isAsking, setIsAsking] = useState(false)
+    const [chatOpen, setChatOpen] = useState(false)
+    const [chatError, setChatError] = useState('')
+    const [hintCount, setHintCount] = useState(0)
+
+    const handleGetHint = async () => {
+        if (hintCount >= 3 || isAsking) return
+
+        setIsAsking(true)
+        setChatError('')
+
+        try {
+            const { getInterviewerHint } = await import('@/app/actions')
+            const resp = await getInterviewerHint({
+                questionTitle,
+                questionDescription: description,
+                history: chatMessages
+            })
+
+            if (resp.success && resp.text) {
+                setChatMessages([...chatMessages, { role: 'model', text: `💡 HINT: ${resp.text}` }])
+                setHintCount(prev => prev + 1)
+                setChatOpen(true)
+            } else {
+                setChatError(resp.error || "Failed to get hint")
+            }
+        } catch (err) {
+            setChatError("Something went wrong.")
+        } finally {
+            setIsAsking(false)
+        }
+    }
+
+    const handleAskClarification = async (e: React.FormEvent) => {
+        e.preventDefault()
+        if (!chatInput.trim() || isAsking || chatMessages.filter(m => m.role === 'user').length >= 10) return
+
+        const userMsg = chatInput.trim()
+        setChatInput('')
+        setIsAsking(true)
+        setChatError('')
+
+        const newMessages = [...chatMessages, { role: 'user' as const, text: userMsg }]
+        setChatMessages(newMessages)
+
+        try {
+            const { askClarifyingQuestion } = await import('@/app/actions')
+            const history = newMessages.slice(0, -1).map(m => ({
+                role: m.role,
+                parts: [{ text: m.text }]
+            }))
+
+            const resp = await askClarifyingQuestion({
+                questionTitle,
+                questionDescription: description,
+                userMessage: userMsg,
+                history
+            })
+
+            if (resp.success && resp.text) {
+                setChatMessages([...newMessages, { role: 'model', text: resp.text }])
+            } else {
+                setChatError(resp.error || "Failed to get response")
+            }
+        } catch (err) {
+            setChatError("Something went wrong. Please try again.")
+        } finally {
+            setIsAsking(false)
+        }
+    }
 
     const loadingMessages = [
         "Analyzing your product framework...",
@@ -153,7 +228,9 @@ export function AnswerForm({ questionId, questionTitle, userId, category, soluti
         }
         setIsSubmitting(true)
         try {
-            const response = await submitAnswer(questionId, data.answer, elapsedTime)
+            // Include chat context in submission for AI evaluation
+            const chatContext = chatMessages.map(m => `${m.role.toUpperCase()}: ${m.text}`).join('\n')
+            const response = await submitAnswer(questionId, data.answer, elapsedTime, chatContext)
             console.log("Submission response:", response)
             if (response.success && response.aiResponse) {
                 setPreviousAnswer(data.answer) // Save the answer for display
@@ -217,183 +294,209 @@ export function AnswerForm({ questionId, questionTitle, userId, category, soluti
 
     if (result) {
         return (
-            <div className="bg-white dark:bg-gray-900 border rounded-2xl p-8 space-y-8 shadow-sm">
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b pb-6">
-                    <div>
-                        <h3 className="text-2xl font-black text-gray-900 dark:text-white flex items-center gap-2">
-                            AI Evaluation
-                        </h3>
-                        <p className="text-sm text-gray-500 font-medium">Powered by Gemini AI Engine</p>
-                    </div>
-                    <div className="flex items-center gap-3 flex-wrap">
-                        {elapsedTime > 0 && (
-                            <div className="bg-violet-50 dark:bg-violet-900/20 border border-violet-200 dark:border-violet-800 px-4 py-2 rounded-xl flex items-center gap-2">
-                                <Info size={16} className="text-violet-600 dark:text-violet-400" />
-                                <span className="text-sm font-bold text-violet-800 dark:text-violet-200">
-                                    Time: {formatTime(elapsedTime)}
-                                </span>
+            <div className="space-y-6">
+                {previousSubmission && (
+                    <div className="bg-gradient-to-r from-blue-500 to-indigo-600 rounded-2xl p-4 text-white flex flex-col md:flex-row items-center justify-between gap-4 shadow-lg shadow-blue-500/20">
+                        <div className="flex items-center gap-3">
+                            <div className="bg-white/20 p-2 rounded-lg backdrop-blur-md">
+                                <Trophy size={20} />
                             </div>
-                        )}
-                        {result.isMock && (
-                            <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-100 dark:border-amber-800 p-3 rounded-xl flex items-start gap-3 max-w-sm">
-                                <Info size={18} className="text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
-                                <div className="text-[11px] text-amber-800 dark:text-amber-300">
-                                    <span className="font-bold block mb-1">PRO-TIP: Reality Check Needed</span>
-                                    This is a <strong>mock response</strong>. To enable real-time AI evaluation, add your <code>GEMINI_API_KEY</code> to the <code>.env</code> file.
-                                    <a href="https://aistudio.google.com/app/apikey" target="_blank" className="font-bold underline ml-1 inline-flex items-center gap-0.5">
-                                        Get key <ExternalLink size={10} />
-                                    </a>
-                                </div>
+                            <div>
+                                <p className="text-xs font-black uppercase tracking-widest opacity-80">Previous Performance</p>
+                                <p className="text-sm font-bold">You scored {result.scores.overall}/5 on {new Date(previousSubmission.createdAt).toLocaleDateString()}</p>
                             </div>
-                        )}
-                    </div>
-                </div>
-
-                {/* User's Answer */}
-                {(previousAnswer || previousSubmission) && (
-                    <div className="bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-800/50 dark:to-gray-700/50 p-6 rounded-2xl border border-gray-200 dark:border-gray-700">
-                        <h4 className="font-bold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
-                            <Info size={20} className="text-gray-600 dark:text-gray-400" />
-                            Your Answer
-                        </h4>
-                        <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-wrap">
-                            {previousAnswer || previousSubmission?.answerText}
-                        </p>
-                        {previousSubmission?.createdAt && (
-                            <p className="text-xs text-gray-500 mt-3">
-                                Submitted: {new Date(previousSubmission.createdAt).toLocaleString()}
-                            </p>
-                        )}
+                        </div>
+                        <button
+                            onClick={() => {
+                                setResult(null)
+                                if (onRetry) onRetry()
+                            }}
+                            className="bg-white/10 hover:bg-white/20 px-4 py-2 rounded-xl text-sm font-black transition-all border border-white/20 flex items-center gap-2"
+                        >
+                            Try Again
+                            <ArrowRight size={16} />
+                        </button>
                     </div>
                 )}
 
-                {/* Section Scores */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {Object.entries(result.scores).map(([key, score]) => {
-                        if (key === 'overall') return null;
-                        const analysis = (result.detailed_analysis as Record<string, string>)[key];
-                        return (
-                            <div key={key} className="bg-gray-50 dark:bg-gray-800/50 p-5 rounded-2xl border border-gray-100 dark:border-gray-800 hover:shadow-md transition-all">
-                                <div className="flex justify-between items-center mb-3">
-                                    <span className="text-[10px] uppercase text-gray-500 font-black tracking-widest">{key.replace('_', ' ')}</span>
-                                    <div className="flex items-center gap-1">
-                                        <div className="h-2 w-16 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
-                                            <div
-                                                className={`h-full rounded-full ${Number(score) >= 4 ? 'bg-green-500' : Number(score) >= 3 ? 'bg-blue-500' : 'bg-amber-500'}`}
-                                                style={{ width: `${(Number(score) / 5) * 100}%` }}
-                                            />
-                                        </div>
-                                        <span className="text-sm font-black text-gray-900 dark:text-gray-100 min-w-[32px] text-right">{score as number}/5</span>
+                <div className="bg-white dark:bg-gray-900 border rounded-2xl p-8 space-y-8 shadow-sm">
+                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b pb-6">
+                        <div>
+                            <h3 className="text-2xl font-black text-gray-900 dark:text-white flex items-center gap-2">
+                                AI Evaluation
+                            </h3>
+                            <p className="text-sm text-gray-500 font-medium">Powered by Gemini AI Engine</p>
+                        </div>
+                        <div className="flex items-center gap-3 flex-wrap">
+                            {elapsedTime > 0 && (
+                                <div className="bg-violet-50 dark:bg-violet-900/20 border border-violet-200 dark:border-violet-800 px-4 py-2 rounded-xl flex items-center gap-2">
+                                    <Info size={16} className="text-violet-600 dark:text-violet-400" />
+                                    <span className="text-sm font-bold text-violet-800 dark:text-violet-200">
+                                        Time: {formatTime(elapsedTime)}
+                                    </span>
+                                </div>
+                            )}
+                            {result.isMock && (
+                                <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-100 dark:border-amber-800 p-3 rounded-xl flex items-start gap-3 max-w-sm">
+                                    <Info size={18} className="text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
+                                    <div className="text-[11px] text-amber-800 dark:text-amber-300">
+                                        <span className="font-bold block mb-1">PRO-TIP: Reality Check Needed</span>
+                                        This is a <strong>mock response</strong>. To enable real-time AI evaluation, add your <code>GEMINI_API_KEY</code> to the <code>.env</code> file.
+                                        <a href="https://aistudio.google.com/app/apikey" target="_blank" className="font-bold underline ml-1 inline-flex items-center gap-0.5">
+                                            Get key <ExternalLink size={10} />
+                                        </a>
                                     </div>
                                 </div>
-                                {analysis && (
-                                    <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed italic">
-                                        &quot;{analysis}&quot;
-                                    </p>
-                                )}
-                            </div>
-                        );
-                    })}
-                </div>
-
-                {/* Overall Summary */}
-                <div className="bg-gradient-to-r from-violet-600 to-indigo-700 p-6 rounded-2xl text-white shadow-lg shadow-violet-500/20">
-                    <div className="flex justify-between items-center mb-4">
-                        <h4 className="font-black flex items-center gap-2 text-sm uppercase tracking-wider">
-                            Summary Feedback
-                        </h4>
-                        <div className="bg-white/20 backdrop-blur-md px-4 py-2 rounded-full text-sm font-black">
-                            Score: {result.scores.overall}/5
+                            )}
                         </div>
                     </div>
-                    <p className="text-violet-50 leading-relaxed font-medium text-base whitespace-pre-wrap">
-                        {result.feedback}
-                    </p>
+
+                    {/* User's Answer */}
+                    {(previousAnswer || previousSubmission) && (
+                        <div className="bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-800/50 dark:to-gray-700/50 p-6 rounded-2xl border border-gray-200 dark:border-gray-700">
+                            <h4 className="font-bold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
+                                <Info size={20} className="text-gray-600 dark:text-gray-400" />
+                                Your Answer
+                            </h4>
+                            <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-wrap">
+                                {previousAnswer || previousSubmission?.answerText}
+                            </p>
+                            {previousSubmission?.createdAt && (
+                                <p className="text-xs text-gray-500 mt-3">
+                                    Submitted: {new Date(previousSubmission.createdAt).toLocaleString()}
+                                </p>
+                            )}
+                        </div>
+                    )}
+
+                    {/* Section Scores */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {Object.entries(result.scores).map(([key, score]) => {
+                            if (key === 'overall') return null;
+                            const analysis = (result.detailed_analysis as Record<string, string>)[key];
+                            return (
+                                <div key={key} className="bg-gray-50 dark:bg-gray-800/50 p-5 rounded-2xl border border-gray-100 dark:border-gray-800 hover:shadow-md transition-all">
+                                    <div className="flex justify-between items-center mb-3">
+                                        <span className="text-[10px] uppercase text-gray-500 font-black tracking-widest">{key.replace('_', ' ')}</span>
+                                        <div className="flex items-center gap-1">
+                                            <div className="h-2 w-16 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                                                <div
+                                                    className={`h-full rounded-full ${Number(score) >= 4 ? 'bg-green-500' : Number(score) >= 3 ? 'bg-blue-500' : 'bg-amber-500'}`}
+                                                    style={{ width: `${(Number(score) / 5) * 100}%` }}
+                                                />
+                                            </div>
+                                            <span className="text-sm font-black text-gray-900 dark:text-gray-100 min-w-[32px] text-right">{score as number}/5</span>
+                                        </div>
+                                    </div>
+                                    {analysis && (
+                                        <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed italic">
+                                            &quot;{analysis}&quot;
+                                        </p>
+                                    )}
+                                </div>
+                            );
+                        })}
+                    </div>
+
+                    {/* Overall Summary */}
+                    <div className="bg-gradient-to-r from-violet-600 to-indigo-700 p-6 rounded-2xl text-white shadow-lg shadow-violet-500/20">
+                        <div className="flex justify-between items-center mb-4">
+                            <h4 className="font-black flex items-center gap-2 text-sm uppercase tracking-wider">
+                                Summary Feedback
+                            </h4>
+                            <div className="bg-white/20 backdrop-blur-md px-4 py-2 rounded-full text-sm font-black">
+                                Score: {result.scores.overall}/5
+                            </div>
+                        </div>
+                        <p className="text-violet-50 leading-relaxed font-medium text-base whitespace-pre-wrap">
+                            {result.feedback}
+                        </p>
+                    </div>
+
+                    {/* Strengths & Weaknesses */}
+                    <div className="grid md:grid-cols-2 gap-6">
+                        <div className="bg-green-50 dark:bg-green-900/10 p-6 rounded-2xl border border-green-100 dark:border-green-900/30">
+                            <h4 className="font-bold text-green-800 dark:text-green-300 mb-4 flex items-center gap-2">
+                                <CheckCircle2 size={20} />
+                                Key Strengths
+                            </h4>
+                            <ul className="space-y-3">
+                                {(result.strengths || []).map((s: string, i: number) => (
+                                    <li key={i} className="text-sm text-green-700 dark:text-green-400 flex items-start gap-2">
+                                        <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-green-500 shrink-0" />
+                                        {s}
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
+
+                        <div className="bg-amber-50 dark:bg-amber-900/10 p-6 rounded-2xl border border-amber-100 dark:border-amber-900/30">
+                            <h4 className="font-bold text-amber-800 dark:text-amber-300 mb-4 flex items-center gap-2">
+                                <AlertTriangle size={20} />
+                                Areas for Growth
+                            </h4>
+                            <ul className="space-y-3">
+                                {(result.weaknesses || []).map((s: string, i: number) => (
+                                    <li key={i} className="text-sm text-amber-700 dark:text-amber-400 flex items-start gap-2">
+                                        <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-amber-500 shrink-0" />
+                                        {s}
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
+                    </div>
+
+                    {/* Improved Example */}
+                    {result.improved_example && (
+                        <div className="bg-gray-50 dark:bg-gray-800/50 p-6 rounded-2xl border border-gray-100 dark:border-gray-800">
+                            <h4 className="font-bold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
+                                <Lightbulb size={20} className="text-blue-500" />
+                                AI Suggestion: A 5/5 Path
+                            </h4>
+                            <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed whitespace-pre-wrap">
+                                {result.improved_example}
+                            </p>
+                        </div>
+                    )}
+
+                    {/* Expert Guide (Ground Truth) */}
+                    {solutionText && (
+                        <div className="bg-blue-50 dark:bg-blue-900/10 p-6 rounded-2xl border border-blue-100 dark:border-blue-900/30">
+                            <h4 className="font-bold text-blue-900 dark:text-blue-300 mb-3 flex items-center gap-2">
+                                <ShieldCheck size={20} className="text-blue-600" />
+                                Expert Structured Guide
+                            </h4>
+                            <p className="text-sm text-blue-800 dark:text-blue-200 leading-relaxed">
+                                {solutionText}
+                            </p>
+                        </div>
+                    )}
+
+                    {/* Sample Answer (Ground Truth) */}
+                    {sampleAnswer && (
+                        <div className="bg-purple-50 dark:bg-purple-900/10 p-6 rounded-2xl border border-purple-100 dark:border-purple-900/30">
+                            <h4 className="font-bold text-purple-900 dark:text-purple-300 mb-3 flex items-center gap-2">
+                                <Trophy size={20} className="text-purple-600" />
+                                Curated 5/5 Sample Answer
+                            </h4>
+                            <p className="text-sm text-purple-800 dark:text-purple-200 leading-relaxed font-serif italic">
+                                &quot;{sampleAnswer}&quot;
+                            </p>
+                        </div>
+                    )}
+
+                    <button
+                        onClick={() => {
+                            setResult(null)
+                            setPreviousAnswer('')
+                            setValue('answer', '')
+                            if (onRetry) onRetry()
+                        }}
+                        className="w-full bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 text-white py-4 rounded-xl font-bold transition-all shadow-xl flex items-center justify-center gap-2"
+                    >
+                        Clear & Retry
+                    </button>
                 </div>
-
-                {/* Strengths & Weaknesses */}
-                <div className="grid md:grid-cols-2 gap-6">
-                    <div className="bg-green-50 dark:bg-green-900/10 p-6 rounded-2xl border border-green-100 dark:border-green-900/30">
-                        <h4 className="font-bold text-green-800 dark:text-green-300 mb-4 flex items-center gap-2">
-                            <CheckCircle2 size={20} />
-                            Key Strengths
-                        </h4>
-                        <ul className="space-y-3">
-                            {(result.strengths || []).map((s: string, i: number) => (
-                                <li key={i} className="text-sm text-green-700 dark:text-green-400 flex items-start gap-2">
-                                    <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-green-500 shrink-0" />
-                                    {s}
-                                </li>
-                            ))}
-                        </ul>
-                    </div>
-
-                    <div className="bg-amber-50 dark:bg-amber-900/10 p-6 rounded-2xl border border-amber-100 dark:border-amber-900/30">
-                        <h4 className="font-bold text-amber-800 dark:text-amber-300 mb-4 flex items-center gap-2">
-                            <AlertTriangle size={20} />
-                            Areas for Growth
-                        </h4>
-                        <ul className="space-y-3">
-                            {(result.weaknesses || []).map((s: string, i: number) => (
-                                <li key={i} className="text-sm text-amber-700 dark:text-amber-400 flex items-start gap-2">
-                                    <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-amber-500 shrink-0" />
-                                    {s}
-                                </li>
-                            ))}
-                        </ul>
-                    </div>
-                </div>
-
-                {/* Improved Example */}
-                {result.improved_example && (
-                    <div className="bg-gray-50 dark:bg-gray-800/50 p-6 rounded-2xl border border-gray-100 dark:border-gray-800">
-                        <h4 className="font-bold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
-                            <Lightbulb size={20} className="text-blue-500" />
-                            AI Suggestion: A 5/5 Path
-                        </h4>
-                        <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed whitespace-pre-wrap">
-                            {result.improved_example}
-                        </p>
-                    </div>
-                )}
-
-                {/* Expert Guide (Ground Truth) */}
-                {solutionText && (
-                    <div className="bg-blue-50 dark:bg-blue-900/10 p-6 rounded-2xl border border-blue-100 dark:border-blue-900/30">
-                        <h4 className="font-bold text-blue-900 dark:text-blue-300 mb-3 flex items-center gap-2">
-                            <ShieldCheck size={20} className="text-blue-600" />
-                            Expert Structured Guide
-                        </h4>
-                        <p className="text-sm text-blue-800 dark:text-blue-200 leading-relaxed">
-                            {solutionText}
-                        </p>
-                    </div>
-                )}
-
-                {/* Sample Answer (Ground Truth) */}
-                {sampleAnswer && (
-                    <div className="bg-purple-50 dark:bg-purple-900/10 p-6 rounded-2xl border border-purple-100 dark:border-purple-900/30">
-                        <h4 className="font-bold text-purple-900 dark:text-purple-300 mb-3 flex items-center gap-2">
-                            <Trophy size={20} className="text-purple-600" />
-                            Curated 5/5 Sample Answer
-                        </h4>
-                        <p className="text-sm text-purple-800 dark:text-purple-200 leading-relaxed font-serif italic">
-                            &quot;{sampleAnswer}&quot;
-                        </p>
-                    </div>
-                )}
-
-                <button
-                    onClick={() => {
-                        setResult(null)
-                        setPreviousAnswer('')
-                        setValue('answer', '')
-                        if (onRetry) onRetry()
-                    }}
-                    className="w-full bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 text-white py-4 rounded-xl font-bold transition-all shadow-xl flex items-center justify-center gap-2"
-                >
-                    Clear & Retry
-                </button>
             </div>
         )
     }
@@ -516,6 +619,14 @@ export function AnswerForm({ questionId, questionTitle, userId, category, soluti
                         {isRecording ? <Mic className="text-red-600" size={20} /> : <MicOff size={20} />}
                     </button>
                 </div>
+
+                {/* Clarification Hub - DISABLED due to Gemini API issues
+                {!result && (
+                    <div className="bg-white dark:bg-gray-900 border rounded-2xl overflow-hidden shadow-sm transition-all border-violet-100 dark:border-violet-900/30">
+                        Clarification Hub UI was here
+                    </div>
+                )}
+                */}
 
                 {errors.answer && (
                     <p className="text-red-500 text-sm">Please provide an answer before submitting.</p>

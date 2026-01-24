@@ -2,6 +2,7 @@ import { prisma } from "@/lib/prisma"
 import { Header } from "@/components/Header"
 import { PracticeQuestionClient } from "@/components/PracticeQuestionClient"
 import { getUser } from "@/lib/auth"
+import { PracticeHistory } from "@/components/PracticeHistory"
 
 export default async function QuestionPage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = await params
@@ -14,10 +15,10 @@ export default async function QuestionPage({ params }: { params: Promise<{ id: s
         return <div>Question not found</div>
     }
 
-    // Fetch user's most recent submission for this question
-    let previousSubmission = null
+    // Fetch user's practice history for this question
+    let submissionHistory: any[] = []
     if (user) {
-        previousSubmission = await prisma.practiceSubmission.findFirst({
+        submissionHistory = await prisma.practiceSubmission.findMany({
             where: {
                 userId: user.id,
                 questionId: id
@@ -27,6 +28,9 @@ export default async function QuestionPage({ params }: { params: Promise<{ id: s
             }
         })
     }
+
+    const latestSubmission = submissionHistory[0] || null
+
 
     return (
         <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
@@ -55,6 +59,13 @@ export default async function QuestionPage({ params }: { params: Promise<{ id: s
                             </ul>
                         </div>
                     </div>
+
+                    <PracticeHistory history={submissionHistory.map(s => ({
+                        id: s.id,
+                        answerText: s.answerText,
+                        aiScore: s.aiScore || undefined,
+                        createdAt: s.createdAt.toISOString()
+                    }))} />
                 </div>
 
                 {/* Right Column: Answer Area */}
@@ -62,17 +73,24 @@ export default async function QuestionPage({ params }: { params: Promise<{ id: s
                     <PracticeQuestionClient
                         questionId={question.id}
                         questionTitle={question.title}
+                        description={question.description}
                         userId={user?.id}
                         userEmail={user?.email}
                         userName={user?.firstName || user?.name || ''}
                         category={question.category}
                         solutionText={question.solutionText || undefined}
                         sampleAnswer={question.sampleAnswer || undefined}
-                        previousSubmission={previousSubmission ? {
-                            answerText: previousSubmission.answerText,
-                            aiScore: previousSubmission.aiScore || undefined,
-                            createdAt: previousSubmission.createdAt.toISOString()
+                        previousSubmission={latestSubmission ? {
+                            answerText: latestSubmission.answerText,
+                            aiScore: latestSubmission.aiScore || undefined,
+                            createdAt: latestSubmission.createdAt.toISOString()
                         } : undefined}
+                        history={submissionHistory.map(s => ({
+                            id: s.id,
+                            answerText: s.answerText,
+                            aiScore: s.aiScore || undefined,
+                            createdAt: s.createdAt.toISOString()
+                        }))}
                     />
                 </div>
 

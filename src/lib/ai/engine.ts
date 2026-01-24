@@ -41,7 +41,7 @@ function getApiKeys(): string[] {
     return keys.filter(key => key.trim() !== "");
 }
 
-export async function evaluateAnswer(questionTitle: string, userAnswer: string, elapsedTimeSeconds?: number): Promise<AIEvaluationResponse> {
+export async function evaluateAnswer(questionTitle: string, userAnswer: string, elapsedTimeSeconds?: number, chatContext?: string): Promise<AIEvaluationResponse> {
     const apiKeys = getApiKeys();
     console.log(`[AI Engine] Total keys found: ${apiKeys.length}`);
 
@@ -50,7 +50,7 @@ export async function evaluateAnswer(questionTitle: string, userAnswer: string, 
         return getMockResponse();
     }
 
-    const prompt = PRODUCT_SENSE_PROMPT(questionTitle, userAnswer, elapsedTimeSeconds);
+    const prompt = PRODUCT_SENSE_PROMPT(questionTitle, userAnswer, elapsedTimeSeconds, chatContext);
     let lastErrorMessage = "Unknown error";
 
     for (let i = 0; i < apiKeys.length; i++) {

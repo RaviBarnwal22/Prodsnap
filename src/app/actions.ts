@@ -6,7 +6,7 @@ import { revalidatePath } from "next/cache"
 import { getUser } from "@/lib/auth"
 import { sendContactFormNotification, sendSupportReply } from "@/lib/email"
 
-export async function submitAnswer(questionId: string, answer: string, elapsedTimeSeconds?: number) {
+export async function submitAnswer(questionId: string, answer: string, elapsedTimeSeconds?: number, chatContext?: string) {
     const user = await getUser()
 
     if (!user) {
@@ -31,7 +31,7 @@ export async function submitAnswer(questionId: string, answer: string, elapsedTi
     let aiResponse;
     try {
         console.log(`[submitAnswer] Calling AI Engine...`);
-        aiResponse = await evaluateAnswer(question.title, answer, elapsedTimeSeconds)
+        aiResponse = await evaluateAnswer(question.title, answer, elapsedTimeSeconds, chatContext)
         console.log(`[submitAnswer] AI Engine success`);
     } catch (error) {
         console.error("[submitAnswer] AI Error", error)
@@ -301,4 +301,189 @@ export async function getUserSkillScores() {
         console.error("Error fetching skill scores", error)
         return { success: false, error: "Failed to fetch scores" }
     }
+}
+
+export async function askClarifyingQuestion(data: {
+    questionTitle: string,
+    questionDescription: string,
+    userMessage: string,
+    history: { role: 'user' | 'model', parts: { text: string }[] }[]
+}) {
+    const user = await getUser()
+    if (!user) return { success: false, error: "Please login to ask questions" }
+
+    const { GoogleGenerativeAI } = await import("@google/generative-ai");
+    const { INTERVIEWER_CHAT_PROMPT } = await import("@/lib/ai/prompts");
+
+    function getApiKeys(): string[] {
+        const keys: string[] = [];
+        let i = 1;
+        while (process.env[`GEMINI_API_KEY_${i}`]) {
+            keys.push(process.env[`GEMINI_API_KEY_${i}`] as string);
+            i++;
+        }
+        if (keys.length === 0 && process.env.GEMINI_API_KEY) {
+            keys.push(process.env.GEMINI_API_KEY);
+        }
+        return keys.filter(key => key.trim() !== "");
+    }
+
+    const apiKeys = getApiKeys();
+    if (apiKeys.length === 0) return { success: false, error: "AI Service unconfigured" }
+
+    const systemPrompt = INTERVIEWER_CHAT_PROMPT(data.questionTitle, data.questionDescription);
+
+    // AI Model Cycling Logic
+    let lastError = "All AI models are currently saturated.";
+    let totalAttempts = 0;
+
+    for (const key of apiKeys) {
+        if (key.startsWith("pplx-")) continue;
+
+        // Use only v1beta - v1 doesn't work with newer Google AI Studio keys
+        const apiVersions = ["v1beta"];
+        // Use only models confirmed to work with generateContent on v1beta
+        const models = ["gemini-1.5-flash", "gemini-1.5-pro"];
+
+        for (const version of apiVersions) {
+            for (const modelName of models) {
+                totalAttempts++;
+                try {
+                    const contents = [];
+                    let lastRole = "model";
+
+                    // Handle first turn vs subsequent turns
+                    if (data.history.length === 0) {
+                        contents.push({
+                            role: "user",
+                            parts: [{ text: `INSTRUCTIONS: ${systemPrompt}\n\nUSER QUESTION: ${data.userMessage}` }]
+                        });
+                    } else {
+                        // For subsequent turns, we re-inject instructions to keep context strong
+                        contents.push({
+                            role: "user",
+                            parts: [{ text: `REMINDER OF YOUR ROLE & CONTEXT: ${systemPrompt}` }]
+                        });
+                        contents.push({
+                            role: "model",
+                            parts: [{ text: "Understood. I'm continuing as your interviewer." }]
+                        });
+
+                        for (const m of data.history) {
+                            const currentRole = m.role === 'user' ? 'user' : 'model';
+                            if (currentRole !== lastRole) {
+                                contents.push({
+                                    role: currentRole,
+                                    parts: [{ text: m.parts?.[0]?.text || '' }]
+                                });
+                                lastRole = currentRole;
+                            }
+                        }
+
+                        if (lastRole === "user") {
+                            contents[contents.length - 1].parts[0].text += `\n\n${data.userMessage}`;
+                        } else {
+                            contents.push({
+                                role: "user",
+                                parts: [{ text: data.userMessage }]
+                            });
+                        }
+                    }
+
+                    const response = await fetch(`https://generativelanguage.googleapis.com/${version}/models/${modelName}:generateContent?key=${key}`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            contents,
+                            generationConfig: {
+                                temperature: 0.7,
+                                maxOutputTokens: 800,
+                            }
+                        })
+                    });
+
+                    if (!response.ok) {
+                        const errorData = await response.json();
+                        const msg = errorData.error?.message || response.statusText;
+
+                        // Always capture the error for diagnostics
+                        lastError = `${modelName}: ${msg}`;
+
+                        if (msg.toLowerCase().includes("not found") || msg.toLowerCase().includes("not supported")) continue;
+                        if (msg.includes("API key not valid")) {
+                            lastError = "API key invalid or expired.";
+                            break;
+                        }
+                        if (response.status === 429) {
+                            lastError = "Rate limit exhausted. Wait 1 min or add another API key.";
+                            continue;
+                        }
+                        continue;
+                    }
+
+                    const result = await response.json();
+                    const text = result.candidates?.[0]?.content?.parts?.[0]?.text;
+                    if (text) return { success: true, text };
+
+                    if (result.candidates?.[0]?.finishReason === "SAFETY") {
+                        return { success: false, error: "SAFETY_BLOCK: Please rephrase." };
+                    }
+                } catch (error: any) {
+                    lastError = error.message || String(error);
+                    console.error(`[askClarifyingQuestion] ${modelName} error:`, lastError);
+                }
+            }
+        }
+    }
+
+    return {
+        success: false,
+        error: `Interviewer is having trouble: ${lastError} (Try count: ${totalAttempts})`
+    };
+}
+
+export async function getInterviewerHint(data: {
+    questionTitle: string,
+    questionDescription: string,
+    history: { role: 'user' | 'model', text: string }[]
+}) {
+    const user = await getUser()
+    if (!user) return { success: false, error: "Please login to ask questions" }
+
+    const { GoogleGenerativeAI } = await import("@google/generative-ai");
+    const { HINT_PROMPT } = await import("@/lib/ai/prompts");
+
+    function getApiKeys(): string[] {
+        const keys: string[] = [];
+        let i = 1;
+        while (process.env[`GEMINI_API_KEY_${i}`]) {
+            keys.push(process.env[`GEMINI_API_KEY_${i}`] as string);
+            i++;
+        }
+        if (keys.length === 0 && process.env.GEMINI_API_KEY) {
+            keys.push(process.env.GEMINI_API_KEY);
+        }
+        return keys.filter(key => key.trim() !== "");
+    }
+
+    const apiKeys = getApiKeys();
+    if (apiKeys.length === 0) return { success: false, error: "AI Service unconfigured" }
+
+    const currentChat = data.history.map(m => `${m.role.toUpperCase()}: ${m.text}`).join('\n');
+    const systemPrompt = HINT_PROMPT(data.questionTitle, data.questionDescription, currentChat);
+
+    for (const key of apiKeys) {
+        try {
+            const genAI = new GoogleGenerativeAI(key);
+            const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+
+            const result = await model.generateContent(systemPrompt);
+            const response = await result.response;
+            return { success: true, text: response.text() };
+        } catch (error) {
+            console.error(`Hint error with key:`, error);
+        }
+    }
+
+    return { success: false, error: "Interviewer is currently busy." };
 }

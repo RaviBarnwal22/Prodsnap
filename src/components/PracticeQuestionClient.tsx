@@ -14,6 +14,7 @@ interface PracticeQuestionClientProps {
     userEmail?: string
     userName?: string
     category: string
+    description: string
     solutionText?: string
     sampleAnswer?: string
     previousSubmission?: {
@@ -21,6 +22,12 @@ interface PracticeQuestionClientProps {
         aiScore?: string
         createdAt: string
     }
+    history?: {
+        id: string
+        answerText: string
+        aiScore?: string
+        createdAt: string
+    }[]
 }
 
 export function PracticeQuestionClient({
@@ -30,9 +37,11 @@ export function PracticeQuestionClient({
     userEmail,
     userName,
     category,
+    description,
     solutionText,
     sampleAnswer,
-    previousSubmission
+    previousSubmission,
+    history = []
 }: PracticeQuestionClientProps) {
     const [showUpgradeModal, setShowUpgradeModal] = useState(false)
     const [attemptStatus, setAttemptStatus] = useState<{
@@ -103,6 +112,16 @@ export function PracticeQuestionClient({
             setTimeout(() => setIsLoading(false), 2000)
         }
     }, [category, finalUserId, userId, isLoading])
+
+    // Auto-load if previous submission exists
+    useEffect(() => {
+        if (previousSubmission && !hasStartedAttempt) {
+            setHasStartedAttempt(true)
+            setIsFinished(true)
+            setElapsedTime(0)
+            setStartTime(null)
+        }
+    }, [previousSubmission])
 
     // Timer effect
     useEffect(() => {
@@ -285,9 +304,7 @@ export function PracticeQuestionClient({
                     <button
                         onClick={handleStartAttempt}
                         disabled={isStarting}
-                        className={`text-white px-8 py-3 rounded-xl font-bold transition-all flex items-center justify-center gap-2 mx-auto min-w-[200px] ${previousSubmission
-                            ? "bg-emerald-600 hover:bg-emerald-700"
-                            : "bg-violet-600 hover:bg-violet-700"
+                        className={`text-white px-8 py-3 rounded-xl font-bold transition-all flex items-center justify-center gap-2 mx-auto min-w-[200px] ${previousSubmission ? "bg-emerald-600 hover:bg-emerald-700" : "bg-violet-600 hover:bg-violet-700"
                             } ${isStarting ? 'opacity-80 cursor-wait' : ''}`}
                     >
                         {isStarting ? (
@@ -296,7 +313,7 @@ export function PracticeQuestionClient({
                                 Setting Up...
                             </>
                         ) : (
-                            previousSubmission ? "Try Again (Free)" : "Start Practice"
+                            previousSubmission ? "View Previous Try (Free)" : "Start Practice"
                         )}
                     </button>
                 </div>
@@ -316,6 +333,7 @@ export function PracticeQuestionClient({
                         questionTitle={questionTitle}
                         userId={userId}
                         category={category}
+                        description={description}
                         solutionText={solutionText}
                         sampleAnswer={sampleAnswer}
                         elapsedTime={elapsedTime}
