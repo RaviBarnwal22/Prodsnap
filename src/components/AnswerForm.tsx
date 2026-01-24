@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { submitAnswer, submitPracticeFeedback } from '@/app/actions'
 import { useForm } from 'react-hook-form'
-import { Mic, MicOff, CheckCircle2, AlertTriangle, Lightbulb, Info, ExternalLink, ShieldCheck, Trophy, Sparkles } from 'lucide-react'
+import { Mic, MicOff, CheckCircle2, AlertTriangle, Lightbulb, Info, ExternalLink, ShieldCheck, Trophy, Sparkles, Calculator, BarChart3, Activity, Users } from 'lucide-react'
 import { AIEvaluationResponse } from '@/lib/ai/engine'
 import { PracticeFeedbackModal } from './PracticeFeedbackModal'
 import { MentorSuggestionModal } from './MentorSuggestionModal'
@@ -14,6 +14,7 @@ interface AnswerFormProps {
     questionId: string
     questionTitle: string
     userId?: string
+    category: string
     solutionText?: string
     sampleAnswer?: string
     elapsedTime?: number
@@ -26,7 +27,7 @@ interface AnswerFormProps {
     }
 }
 
-export function AnswerForm({ questionId, questionTitle, userId, solutionText, sampleAnswer, elapsedTime = 0, onSubmitted, onRetry, previousSubmission }: AnswerFormProps) {
+export function AnswerForm({ questionId, questionTitle, userId, category, solutionText, sampleAnswer, elapsedTime = 0, onSubmitted, onRetry, previousSubmission }: AnswerFormProps) {
     // Initialize result with previous submission if it exists
     const [result, setResult] = useState<AIEvaluationResponse | null>(() => {
         if (previousSubmission?.aiScore) {
@@ -448,22 +449,53 @@ export function AnswerForm({ questionId, questionTitle, userId, solutionText, sa
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
                 <div className="flex flex-wrap gap-2 mb-4">
                     <span className="text-[10px] font-black uppercase tracking-widest text-gray-400 w-full mb-1">Answer Template:</span>
-                    <button
-                        type="button"
-                        onClick={() => setValue('answer', "Goal:\n- \n\nUsers:\n- \n\nPain Points:\n- \n\nSolutions:\n- \n\nPrioritization:\n- \n\nTrade-offs:\n- ")}
-                        className="text-[10px] font-bold px-3 py-1.5 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-violet-600 hover:text-white transition-all flex items-center gap-1.5 border border-gray-200 dark:border-gray-700"
-                    >
-                        <Sparkles size={12} />
-                        CIRCLES Framework
-                    </button>
-                    <button
-                        type="button"
-                        onClick={() => setValue('answer', "Who:\n- \n\nWhat:\n- \n\nWhere:\n- \n\nWhen:\n- \n\nWhy:\n- \n\nHow:\n- ")}
-                        className="text-[10px] font-bold px-3 py-1.5 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-violet-600 hover:text-white transition-all flex items-center gap-1.5 border border-gray-200 dark:border-gray-700"
-                    >
-                        <Info size={12} />
-                        5W1H Framework
-                    </button>
+                    {(() => {
+                        const getTemplates = (cat: string) => {
+                            switch (cat) {
+                                case 'CONSUMER_PRODUCT_DESIGN':
+                                    return [
+                                        { name: 'CIRCLES Framework', icon: <Sparkles size={12} />, template: "Clarify Goal:\n- \n\nIdentity Users:\n- \n\nReport Needs:\n- \n\nCut Prioritization:\n- \n\nList Solutions:\n- \n\nEvaluate Trade-offs:\n- \n\nSummarize:\n- " },
+                                        { name: 'HEART Framework', icon: <Info size={12} />, template: "Happiness:\n- \n\nEngagement:\n- \n\nAdoption:\n- \n\nRetention:\n- \n\nTask Success:\n- " }
+                                    ]
+                                case 'GUESTIMATES':
+                                    return [
+                                        { name: 'Top-Down Approach', icon: <Calculator size={12} />, template: "Total Population:\n- \n\nRelevant Segment %:\n- \n\nFrequency of Use:\n- \n\nReplacement Cycle:\n- \n\nFinal Estimate:\n- " },
+                                        { name: 'Bottom-Up Approach', icon: <Calculator size={12} />, template: "Supply Side Units:\n- \n\nOperating Hours:\n- \n\nUtilization Rate %:\n- \n\nTransactions per Hour:\n- \n\nFinal Estimate:\n- " }
+                                    ]
+                                case 'METRICS':
+                                    return [
+                                        { name: 'GAME Framework', icon: <BarChart3 size={12} />, template: "Goals:\n- \n\nActions:\n- \n\nMetrics:\n- \n\nEvaluations:\n- " },
+                                        { name: 'North Star Metric', icon: <Sparkles size={12} />, template: "North Star:\n- \n\nInput Metric 1:\n- \n\nInput Metric 2:\n- \n\nInput Metric 3:\n- " }
+                                    ]
+                                case 'RCA':
+                                    return [
+                                        { name: '5 Whys Method', icon: <Info size={12} />, template: "Problem Statement:\n- \n\nWhy 1:\n- \n\nWhy 2:\n- \n\nWhy 3:\n- \n\nWhy 4:\n- \n\nWhy 5:\n- \n\nRoot Cause:\n- " },
+                                        { name: 'Fishbone Diagram', icon: <Activity size={12} />, template: "People:\n- \n\nProcess:\n- \n\nPlatform:\n- \n\nExternal:\n- " }
+                                    ]
+                                case 'BEHAVIORAL':
+                                    return [
+                                        { name: 'STAR Method', icon: <Users size={12} />, template: "Situation:\n- \n\nTask:\n- \n\nAction:\n- \n\nResult:\n- " }
+                                    ]
+                                default:
+                                    return [
+                                        { name: 'CIRCLES Framework', icon: <Sparkles size={12} />, template: "Goal:\n- \n\nUsers:\n- \n\nPain Points:\n- \n\nSolutions:\n- \n\nPrioritization:\n- \n\nTrade-offs:\n- " },
+                                        { name: '5W1H Framework', icon: <Info size={12} />, template: "Who:\n- \n\nWhat:\n- \n\nWhere:\n- \n\nWhen:\n- \n\nWhy:\n- \n\nHow:\n- " }
+                                    ]
+                            }
+                        }
+
+                        return getTemplates(category).map((t, idx) => (
+                            <button
+                                key={idx}
+                                type="button"
+                                onClick={() => setValue('answer', t.template)}
+                                className="text-[10px] font-bold px-3 py-1.5 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-violet-600 hover:text-white transition-all flex items-center gap-1.5 border border-gray-200 dark:border-gray-700"
+                            >
+                                {t.icon}
+                                {t.name}
+                            </button>
+                        ))
+                    })()}
                 </div>
 
                 <div className="relative">

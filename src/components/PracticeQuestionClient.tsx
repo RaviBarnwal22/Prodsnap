@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from 'react'
 import { AnswerForm } from '@/components/AnswerForm'
 import { PremiumUpgradeModal } from '@/components/PremiumUpgradeModal'
 import { canAttemptCategory, incrementCategoryAttempt } from '@/lib/subscription'
-import { Crown, Lock, Sparkles, Clock, CheckCircle2 } from 'lucide-react'
+import { Crown, Lock, Sparkles, Clock, CheckCircle2, Loader2 } from 'lucide-react'
 import Link from 'next/link'
 
 interface PracticeQuestionClientProps {
@@ -46,6 +46,7 @@ export function PracticeQuestionClient({
     const [startTime, setStartTime] = useState<number | null>(null)
     const [elapsedTime, setElapsedTime] = useState(0)
     const [isFinished, setIsFinished] = useState(false)
+    const [isStarting, setIsStarting] = useState(false)
     const timerRef = useRef<NodeJS.Timeout | null>(null)
 
     // State for client-side user fetching (fallback if server props are missing)
@@ -138,6 +139,7 @@ export function PracticeQuestionClient({
         }
 
         // Increment attempt count when user starts
+        setIsStarting(true)
         try {
             await incrementCategoryAttempt(category)
             setHasStartedAttempt(true)
@@ -146,6 +148,8 @@ export function PracticeQuestionClient({
             setIsFinished(false)
         } catch (error) {
             console.error('Error incrementing attempt:', error)
+        } finally {
+            setIsStarting(false)
         }
     }
 
@@ -280,12 +284,20 @@ export function PracticeQuestionClient({
                     </p>
                     <button
                         onClick={handleStartAttempt}
-                        className={`text-white px-8 py-3 rounded-xl font-bold transition-colors ${previousSubmission
+                        disabled={isStarting}
+                        className={`text-white px-8 py-3 rounded-xl font-bold transition-all flex items-center justify-center gap-2 mx-auto min-w-[200px] ${previousSubmission
                             ? "bg-emerald-600 hover:bg-emerald-700"
                             : "bg-violet-600 hover:bg-violet-700"
-                            }`}
+                            } ${isStarting ? 'opacity-80 cursor-wait' : ''}`}
                     >
-                        {previousSubmission ? "Try Again (Free)" : "Start Practice"}
+                        {isStarting ? (
+                            <>
+                                <Loader2 size={20} className="animate-spin" />
+                                Setting Up...
+                            </>
+                        ) : (
+                            previousSubmission ? "Try Again (Free)" : "Start Practice"
+                        )}
                     </button>
                 </div>
             ) : hasStartedAttempt || attemptStatus?.isPremium ? (
@@ -303,6 +315,7 @@ export function PracticeQuestionClient({
                         questionId={questionId}
                         questionTitle={questionTitle}
                         userId={userId}
+                        category={category}
                         solutionText={solutionText}
                         sampleAnswer={sampleAnswer}
                         elapsedTime={elapsedTime}
