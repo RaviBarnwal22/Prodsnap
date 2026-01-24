@@ -50,7 +50,7 @@ export default function MentorshipClient() {
         tagline: "Helping aspiring PMs crack their dream roles",
         image: "/ravi-speaker.jpg",
         linkedIn: "https://www.linkedin.com/in/barnwalravi/",
-        bio: "I am a Product Leader with extensive experience in building and scaling products at top-tier tech companies. My mentorship style is practical, focusing on first-principles thinking and real-world case studies.",
+        bio: "Ravi is a Product Leader with extensive experience in building and scaling products at top-tier tech companies. His mentorship style is practical, focusing on first-principles thinking and real-world case studies.",
         stats: {
             mentees: "100+",
             successRate: "90%",
