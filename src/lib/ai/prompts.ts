@@ -21,7 +21,8 @@ export const PRODUCT_SENSE_PROMPT = (questionTitle: string, userAnswer: string, 
     - **list_solutions**: Tactics, features, or metrics (depending on question type).
     - **evaluate_tradeoffs**: Risks, counter-metrics, and strategic risks.
 
-**Tone**: Be direct, objective, and evaluative. Avoid generic advice or a soft coaching tone.
+**Tone**: Be direct, objective, and evaluative. Avoid generic advice or a soft coaching tone. 
+**Constraint**: Do NOT use search citations or brackets like [1], [2], [3] anywhere in your response.
 
 **Output Format (Strict VALID JSON ONLY)**:
 {
@@ -45,7 +46,7 @@ export const PRODUCT_SENSE_PROMPT = (questionTitle: string, userAnswer: string, 
   "strengths": ["string", "string"],
   "weaknesses": ["string", "string"],
   "feedback": "Framework Used: [Name]. Direct summary of why this would or would not pass a hiring bar.",
-  "improved_example": "A concise, structured 5/5 response showing the ideal path for this question."
+  "improved_example": "A detailed, high-quality 5/5 path for this case. You MUST use clear double paragraph breaks (\\n\\n) between each part (Goal, Users, Needs, Solutions, etc.) to ensure it is highly readable and professional."
 }
 `;
 }

@@ -303,7 +303,7 @@ export function AnswerForm({ questionId, userId, solutionText, sampleAnswer, ela
                             Score: {result.scores.overall}/5
                         </div>
                     </div>
-                    <p className="text-violet-50 leading-relaxed font-medium text-base">
+                    <p className="text-violet-50 leading-relaxed font-medium text-base whitespace-pre-wrap">
                         {result.feedback}
                     </p>
                 </div>
@@ -348,7 +348,7 @@ export function AnswerForm({ questionId, userId, solutionText, sampleAnswer, ela
                             <Lightbulb size={20} className="text-blue-500" />
                             AI Suggestion: A 5/5 Path
                         </h4>
-                        <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
+                        <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed whitespace-pre-wrap">
                             {result.improved_example}
                         </p>
                     </div>
