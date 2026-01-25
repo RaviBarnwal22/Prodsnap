@@ -93,7 +93,7 @@ export async function evaluateAnswer(questionTitle: string, userAnswer: string, 
         const key = apiKeys[i];
         const isPerplexity = key.startsWith("pplx-");
         const provider = isPerplexity ? 'perplexity' : 'gemini';
-        const modelName = isPerplexity ? 'sonar' : 'gemini-pro';
+        const modelName = isPerplexity ? 'sonar' : 'gemini-1.5-pro';
         const startTime = Date.now();
 
         console.log(`[AI Engine] Attempt ${i + 1}/${apiKeys.length} using ${isPerplexity ? 'Perplexity' : 'Gemini'}`);
@@ -141,8 +141,7 @@ export async function evaluateAnswer(questionTitle: string, userAnswer: string, 
                 // Handle Gemini
                 try {
                     const genAI = new GoogleGenerativeAI(key);
-                    // gemini-1.5-flash was causing 404 for some regions/tiers, switching to stable gemini-pro
-                    const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+                    const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
 
                     const result = await model.generateContent(prompt);
                     text = result.response.text();
