@@ -227,6 +227,9 @@ export function AnswerForm({ questionId, questionTitle, userId, category, descri
             return
         }
         setIsSubmitting(true)
+        if (onSubmitted) {
+            onSubmitted()
+        }
         try {
             // Include chat context in submission for AI evaluation
             const chatContext = chatMessages.map(m => `${m.role.toUpperCase()}: ${m.text}`).join('\n')
@@ -237,10 +240,6 @@ export function AnswerForm({ questionId, questionTitle, userId, category, descri
                 setResult(response.aiResponse)
                 setSubmissionId(response.submissionId || null)
 
-                // Stop the timer
-                if (onSubmitted) {
-                    onSubmitted()
-                }
 
                 // Show feedback modal after 2 seconds
                 setTimeout(() => {
@@ -326,6 +325,10 @@ export function AnswerForm({ questionId, questionTitle, userId, category, descri
                                 AI Evaluation
                             </h3>
                             <p className="text-sm text-gray-500 font-medium">Powered by Gemini AI Engine</p>
+                            <p className="text-[10px] text-gray-400 mt-1 italic italic flex items-center gap-1">
+                                <Info size={10} />
+                                AI-generated feedback can be incorrect. Use as a guide, not absolute truth.
+                            </p>
                         </div>
                         <div className="flex items-center gap-3 flex-wrap">
                             {elapsedTime > 0 && (

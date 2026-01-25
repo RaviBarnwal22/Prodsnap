@@ -1,8 +1,6 @@
 import nodemailer from 'nodemailer'
 
-// Create transporter using Zoho SMTP (or Gmail as fallback)
-// For Zoho: Use ZOHO_EMAIL and ZOHO_PASSWORD
-// For Gmail: Use GMAIL_USER and GMAIL_APP_PASSWORD
+// Create transporter using SMTP
 const transporter = nodemailer.createTransport({
     host: process.env.SMTP_HOST || 'smtp-relay.brevo.com',
     port: parseInt(process.env.SMTP_PORT || '587'),

@@ -442,7 +442,7 @@ export default function LoginPage() {
 
                     <div className="text-center mb-8">
                         <h2 className="text-3xl font-bold mb-2">
-                            {mode === 'signin' && '👋 Welcome back!'}
+                            {mode === 'signin' && '👋 Welcome!'}
                             {mode === 'signup' && '🚀 Get started'}
                             {mode === 'forgot' && '🔑 Reset password'}
                         </h2>

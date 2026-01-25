@@ -25,7 +25,7 @@ export default function ContactPage() {
 
                             <div className="space-y-6">
                                 <a
-                                    href="mailto:info.prodsnap@gmail.com"
+                                    href="mailto:support@prodsnap.in"
                                     className="flex items-center gap-6 p-6 rounded-3xl bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 shadow-sm hover:shadow-md transition-all group"
                                 >
                                     <div className="w-14 h-14 bg-blue-100 dark:bg-blue-900/30 rounded-2xl flex items-center justify-center text-blue-600 dark:text-blue-400 group-hover:bg-blue-600 group-hover:text-white transition-colors">
@@ -33,7 +33,7 @@ export default function ContactPage() {
                                     </div>
                                     <div>
                                         <p className="text-sm font-bold text-gray-400 uppercase tracking-widest mb-1">Email Me</p>
-                                        <p className="text-lg font-bold">info.prodsnap@gmail.com</p>
+                                        <p className="text-lg font-bold">support@prodsnap.in</p>
                                     </div>
                                 </a>
 
