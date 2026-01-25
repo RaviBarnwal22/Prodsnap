@@ -27,6 +27,8 @@ interface MentorshipBooking {
     feedback: MentorshipFeedback | null
     scheduledAt: string | null
     meetingLink: string | null
+    linkedinProfile?: string | null
+    messageToMentor?: string | null
 }
 
 export function AdminMentorshipBookings() {
@@ -43,6 +45,10 @@ export function AdminMentorshipBookings() {
     const [scheduledDate, setScheduledDate] = useState('')
     const [scheduledTime, setScheduledTime] = useState('')
     const [meetingLink, setMeetingLink] = useState('')
+
+    // Cancellation/Rejection State
+    const [rejectingId, setRejectingId] = useState<string | null>(null)
+    const [rejectionReason, setRejectionReason] = useState('')
 
     useEffect(() => {
         fetchBookings()
@@ -76,6 +82,9 @@ export function AdminMentorshipBookings() {
             if (response.ok) {
                 fetchBookings()
                 setExpandedId(null)
+                // Clear rejection state if applicable
+                setRejectingId(null)
+                setRejectionReason('')
             } else {
                 const data = await response.json()
                 alert(data.error)
@@ -144,7 +153,7 @@ export function AdminMentorshipBookings() {
     }
 
     const exportToExcel = () => {
-        const headers = ['Name', 'Email', 'Phone', 'Service Type', 'Amount', 'Status', 'Rating', 'Booked Date', 'Completed Date']
+        const headers = ['Name', 'Email', 'Phone', 'Service Type', 'Amount', 'Status', 'Rating', 'Booked Date', 'Completed Date', 'LinkedIn', 'Message']
         const rows = bookings.map(b => [
             escapeCSV(b.name),
             escapeCSV(b.email),
@@ -154,7 +163,9 @@ export function AdminMentorshipBookings() {
             escapeCSV(b.status.charAt(0).toUpperCase() + b.status.slice(1)),
             b.feedback ? `${b.feedback.rating}/5` : 'N/A',
             escapeCSV(formatDate(b.createdAt)),
-            b.completedAt ? escapeCSV(formatDate(b.completedAt)) : 'N/A'
+            b.completedAt ? escapeCSV(formatDate(b.completedAt)) : 'N/A',
+            escapeCSV(b.linkedinProfile || 'N/A'),
+            escapeCSV(b.messageToMentor || 'N/A')
         ])
 
         const BOM = '\uFEFF'
@@ -307,17 +318,43 @@ export function AdminMentorshipBookings() {
                                                 <p className="text-gray-500 text-xs uppercase tracking-wider">Booked On</p>
                                                 <p className="text-white font-medium">{formatDate(booking.createdAt)}</p>
                                             </div>
-                                            <div>
-                                                <p className="text-gray-500 text-xs uppercase tracking-wider">Payment Proof</p>
-                                                <button
-                                                    onClick={() => setViewingProof(booking.paymentProof)}
-                                                    className="flex items-center gap-1 text-amber-400 hover:text-amber-300 font-medium"
-                                                >
-                                                    <Eye size={14} />
-                                                    View Screenshot
-                                                </button>
-                                            </div>
+                                            <button
+                                                onClick={() => setViewingProof(booking.paymentProof)}
+                                                className="flex-1 bg-gray-700/50 hover:bg-gray-700 text-amber-400 hover:text-amber-300 py-2 px-3 rounded-lg text-xs font-bold transition-colors flex items-center justify-center gap-2 border border-gray-600"
+                                            >
+                                                <Eye size={14} />
+                                                View Payment Screen
+                                            </button>
                                         </div>
+
+                                        {/* User Provided Context */}
+                                        {(booking.linkedinProfile || booking.messageToMentor) && (
+                                            <div className="bg-gray-700/30 rounded-xl p-4 mb-4 border border-gray-700">
+                                                <h4 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">User Context</h4>
+                                                <div className="space-y-3">
+                                                    {booking.linkedinProfile && (
+                                                        <div>
+                                                            <p className="text-gray-500 text-xs mb-1">LinkedIn Profile</p>
+                                                            <a
+                                                                href={booking.linkedinProfile}
+                                                                target="_blank"
+                                                                rel="noopener noreferrer"
+                                                                className="text-blue-400 hover:text-blue-300 text-sm font-medium flex items-center gap-1 underline"
+                                                            >
+                                                                {booking.linkedinProfile}
+                                                                <ExternalLink size={12} />
+                                                            </a>
+                                                        </div>
+                                                    )}
+                                                    {booking.messageToMentor && (
+                                                        <div>
+                                                            <p className="text-gray-500 text-xs mb-1">Message for Mentor</p>
+                                                            <p className="text-white text-sm italic bg-gray-800 p-3 rounded-lg border border-gray-700">"{booking.messageToMentor}"</p>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        )}
 
                                         {/* Feedback Display */}
                                         {booking.feedback && (
@@ -358,7 +395,7 @@ export function AdminMentorshipBookings() {
                                                     Approve & Schedule
                                                 </button>
                                                 <button
-                                                    onClick={() => handleAction(booking.id, 'cancel')}
+                                                    onClick={() => setRejectingId(booking.id)}
                                                     disabled={processingId === booking.id}
                                                     className="flex-1 bg-red-600 hover:bg-red-700 text-white py-2 rounded-lg font-bold text-sm flex items-center justify-center gap-2 disabled:opacity-50"
                                                 >
@@ -398,33 +435,35 @@ export function AdminMentorshipBookings() {
                         ))}
                     </div>
                 )}
-            </div>
+            </div >
 
             {/* Payment Proof Modal */}
-            {viewingProof && (
-                <div
-                    className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/90"
-                    onClick={() => setViewingProof(null)}
-                >
-                    <div className="relative" onClick={(e) => e.stopPropagation()}>
-                        <button
-                            onClick={() => setViewingProof(null)}
-                            className="absolute -top-12 right-0 bg-white text-gray-900 hover:bg-gray-200 p-2 rounded-full shadow-lg flex items-center gap-2 font-bold text-sm"
-                        >
-                            <X size={20} />
-                            Close
-                        </button>
-                        <img
-                            src={viewingProof}
-                            alt="Payment Proof"
-                            className="rounded-xl max-w-full max-h-[80vh] object-contain"
-                        />
+            {
+                viewingProof && (
+                    <div
+                        className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/90"
+                        onClick={() => setViewingProof(null)}
+                    >
+                        <div className="relative" onClick={(e) => e.stopPropagation()}>
+                            <button
+                                onClick={() => setViewingProof(null)}
+                                className="absolute -top-12 right-0 bg-white text-gray-900 hover:bg-gray-200 p-2 rounded-full shadow-lg flex items-center gap-2 font-bold text-sm"
+                            >
+                                <X size={20} />
+                                Close
+                            </button>
+                            <img
+                                src={viewingProof}
+                                alt="Payment Proof"
+                                className="rounded-xl max-w-full max-h-[80vh] object-contain"
+                            />
+                        </div>
+                        <p className="absolute bottom-6 left-1/2 -translate-x-1/2 text-white/60 text-sm">
+                            Click anywhere outside to dismiss
+                        </p>
                     </div>
-                    <p className="absolute bottom-6 left-1/2 -translate-x-1/2 text-white/60 text-sm">
-                        Click anywhere outside to dismiss
-                    </p>
-                </div>
-            )}
+                )
+            }
             {/* Scheduling Modal */}
             {
                 schedulingBooking && (
@@ -495,6 +534,84 @@ export function AdminMentorshipBookings() {
                                     className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl font-bold disabled:opacity-50 transition-colors"
                                 >
                                     Confirm & Send
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )
+            }
+
+            {/* Rejection/Cancellation Reason Modal */}
+            {
+                rejectingId && (
+                    <div
+                        className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80"
+                        onClick={() => {
+                            setRejectingId(null)
+                            setRejectionReason('')
+                        }}
+                    >
+                        <div
+                            className="bg-gray-800 rounded-2xl p-6 max-w-md w-full border border-gray-700 animate-in zoom-in-95 duration-200"
+                            onClick={(e) => e.stopPropagation()}
+                        >
+                            <div className="flex items-center justify-between mb-4">
+                                <h3 className="text-xl font-bold text-white flex items-center gap-2">
+                                    <XCircle className="text-red-500" />
+                                    Cancel & Reject Booking
+                                </h3>
+                                <button
+                                    onClick={() => {
+                                        setRejectingId(null)
+                                        setRejectionReason('')
+                                    }}
+                                    className="text-gray-400 hover:text-white transition-colors"
+                                >
+                                    <X size={20} />
+                                </button>
+                            </div>
+                            <p className="text-sm text-gray-400 mb-4">
+                                Please provide a reason for cancelling this booking. This message will be sent to the user via email.
+                            </p>
+                            <textarea
+                                value={rejectionReason}
+                                onChange={(e) => setRejectionReason(e.target.value)}
+                                placeholder="E.g., Payment could not be verified, Mentor is unavailable, etc."
+                                className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-xl text-white text-sm placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent resize-none transition-all"
+                                rows={4}
+                                autoFocus
+                            />
+                            <div className="flex gap-3 mt-6">
+                                <button
+                                    onClick={() => {
+                                        setRejectingId(null)
+                                        setRejectionReason('')
+                                    }}
+                                    className="flex-1 bg-gray-700 hover:bg-gray-600 text-white py-3 rounded-xl font-bold transition-colors"
+                                >
+                                    Back
+                                </button>
+                                <button
+                                    onClick={() => {
+                                        if (!rejectionReason.trim()) {
+                                            alert('Please provide a reason')
+                                            return
+                                        }
+                                        handleAction(rejectingId, 'cancel', { notes: rejectionReason })
+                                    }}
+                                    disabled={!rejectionReason.trim() || processingId === rejectingId}
+                                    className="flex-1 bg-red-600 hover:bg-red-700 text-white py-3 rounded-xl font-bold flex items-center justify-center gap-2 disabled:opacity-50 transition-colors shadow-lg shadow-red-600/20"
+                                >
+                                    {processingId === rejectingId ? (
+                                        <>
+                                            <Loader2 className="animate-spin" size={16} />
+                                            Cancelling...
+                                        </>
+                                    ) : (
+                                        <>
+                                            Confirm Cancellation
+                                        </>
+                                    )}
                                 </button>
                             </div>
                         </div>

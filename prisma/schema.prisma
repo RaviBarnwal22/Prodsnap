@@ -227,6 +227,8 @@ model MentorshipBooking {
   adminNotes   String?
   scheduledAt  DateTime?
   meetingLink  String?
+  linkedinProfile String?
+  messageToMentor String?
   completedAt  DateTime?
   reviewedBy   String?
   reviewedAt   DateTime?

@@ -122,13 +122,24 @@ export async function PUT(request: NextRequest) {
             }).catch(err => console.error('Feedback request email failed:', err))
         }
 
+        // If cancelled, send rejection email
+        if (action === "cancel") {
+            const { sendRejectionNotification } = await import('@/lib/email')
+            await sendRejectionNotification({
+                name: booking.name,
+                email: booking.email,
+                reason: notes || "Booking cancelled by admin",
+                type: 'mentorship'
+            }).catch(err => console.error('Cancellation email failed:', err))
+        }
+
         return NextResponse.json({
             success: true,
             message: action === "approve"
                 ? "Booking approved successfully"
                 : action === "complete"
                     ? "Session marked as complete. Feedback request sent to user."
-                    : "Booking cancelled"
+                    : "Booking cancelled and user notified via email"
         })
     } catch (error) {
         console.error("Error processing mentorship booking:", error)

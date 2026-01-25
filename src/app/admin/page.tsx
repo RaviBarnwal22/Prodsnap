@@ -9,6 +9,7 @@ import { AdminPaymentRequests } from "@/components/admin/AdminPaymentRequests"
 import { AdminMentorshipBookings } from "@/components/admin/AdminMentorshipBookings"
 import { AdminSupportQueue } from "@/components/admin/AdminSupportQueue"
 import { ApiUsageMonitor } from "@/components/admin/ApiUsageMonitor"
+import { AdminFeedbackQueue } from "@/components/admin/AdminFeedbackQueue"
 import { AdminTabs } from "@/components/admin/AdminTabs"
 
 
@@ -369,38 +370,37 @@ export default async function AdminPage() {
                             {/* Mentorship Bookings */}
                             <AdminMentorshipBookings />
 
-                            {/* Recent Activity */}
-                            <div className="bg-gray-800 rounded-2xl p-6 border border-gray-700">
-                                <h2 className="text-lg font-black mb-6 flex items-center gap-2 text-white">
-                                    <Activity className="text-green-400" size={20} />
-                                    Activity Log
-                                </h2>
-                                <div className="space-y-3 max-h-[400px] overflow-y-auto pr-2">
-                                    {recentActivities.map((activity) => (
-                                        <div key={activity.id} className="p-3 bg-gray-700/50 rounded-xl">
-                                            <div className="flex items-center gap-2 mb-1">
-                                                <div className={`w-2 h-2 rounded-full ${activity.action === 'login' ? 'bg-green-500' :
-                                                    activity.action === 'page_view' ? 'bg-blue-500' :
-                                                        activity.action === 'submission' ? 'bg-purple-500' :
-                                                            'bg-gray-400'
-                                                    }`}></div>
-                                                <p className="text-xs font-bold uppercase text-gray-400">
-                                                    {activity.action}
-                                                </p>
-                                            </div>
-                                            <p className="text-sm font-medium text-white truncate">
-                                                {activity.user?.email || 'Anonymous'}
-                                            </p>
-                                            <p className="text-xs text-gray-500">
-                                                {formatDate(activity.createdAt)}
-                                            </p>
-                                        </div>
-                                    ))}
-                                    {recentActivities.length === 0 && (
-                                        <p className="text-gray-500 text-center py-8">No activity recorded yet.</p>
-                                    )}
-                                </div>
-                            </div>
+                            {/* Recent Feedback */}
+                            <AdminFeedbackQueue feedbacks={[
+                                ...await prisma.mentorshipFeedback.findMany({
+                                    include: { booking: true },
+                                    orderBy: { createdAt: 'desc' },
+                                    take: 20
+                                }).then(items => items.map(item => ({
+                                    id: item.id,
+                                    type: 'MENTORSHIP' as const,
+                                    userName: item.name,
+                                    userEmail: item.email,
+                                    rating: item.rating,
+                                    feedback: item.feedback,
+                                    createdAt: item.createdAt,
+                                    serviceType: item.booking.serviceType
+                                }))),
+                                ...await prisma.practiceFeedback.findMany({
+                                    include: { user: true },
+                                    orderBy: { createdAt: 'desc' },
+                                    take: 20
+                                }).then(items => items.map(item => ({
+                                    id: item.id,
+                                    type: 'APP_PRACTICE' as const,
+                                    userName: item.user.name || 'Anonymous',
+                                    userEmail: item.user.email,
+                                    rating: item.npsScore,
+                                    feedback: item.comments,
+                                    createdAt: item.createdAt
+                                })))
+                            ].sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())} />
+
 
                             {/* Support Queue */}
                             <AdminSupportQueue submissions={contactSubmissions as any} />
