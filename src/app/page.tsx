@@ -260,7 +260,7 @@ export default async function Home() {
           <div className="container mx-auto px-4 text-center max-w-3xl relative z-10">
             <h2 className="text-4xl font-black mb-6 text-white">Stay Ahead of the Curve</h2>
             <p className="text-lg text-white/80 mb-10 font-medium">
-              We release new case studies and interview guides every Tuesday. Join our mailing list to never miss a deep dive.
+              We regularly release new case studies and interview guides. Join our mailing list to never miss a deep dive.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center max-w-md mx-auto">
               <input type="email" placeholder="Enter your email" className="px-6 py-4 rounded-full border-2 border-white/20 bg-white/10 backdrop-blur-sm flex-grow focus:ring-2 focus:ring-white/50 outline-none text-white placeholder:text-white/60 font-medium" />
