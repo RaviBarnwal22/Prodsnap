@@ -56,10 +56,10 @@ export default function ContactPage() {
                             <div className="p-8 rounded-3xl bg-blue-50 dark:bg-blue-900/10 border border-blue-100 dark:border-blue-900/30">
                                 <h3 className="text-xl font-bold mb-3 flex items-center gap-2">
                                     <MessageCircle className="text-blue-600" size={24} />
-                                    Office Hours
+                                    Response Time
                                 </h3>
                                 <p className="text-gray-600 dark:text-gray-400 leading-relaxed">
-                                    I typically respond to emails within 24-48 hours. For urgent matters,
+                                    Our team typically responds to emails within 24-48 hours. For urgent matters,
                                     reaching out on LinkedIn is usually faster.
                                 </p>
                             </div>

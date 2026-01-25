@@ -339,21 +339,25 @@ export function PremiumUpgradeModal({ isOpen, onClose, category, attemptsUsed = 
                 {/* Step 4: Success */}
                 {step === 'success' && (
                     <div className="p-8 text-center">
-                        <div className="w-24 h-24 bg-gradient-to-br from-green-400 to-emerald-500 rounded-full flex items-center justify-center mx-auto mb-6 animate-bounce" style={{ animationDuration: '2s' }}>
+                        <div className="w-24 h-24 bg-gradient-to-br from-amber-400 to-orange-500 rounded-full flex items-center justify-center mx-auto mb-6 animate-bounce" style={{ animationDuration: '2s' }}>
                             <PartyPopper className="text-white" size={40} />
                         </div>
                         <h3 className="text-2xl font-bold mb-3">
-                            You're Leveling Up! 🚀
+                            Request Submitted! 🎉
                         </h3>
                         <p className="text-gray-600 dark:text-gray-400 mb-6 leading-relaxed">
-                            Congratulations on taking the first step towards mastering Product Management!
-                            Our admin is reviewing your payment and will activate your premium access shortly.
+                            Thank you for your interest in upgrading to Premium!
+                            Our team is reviewing your payment screenshot.
                         </p>
-                        <div className="bg-violet-50 dark:bg-violet-900/20 p-4 rounded-xl mb-6">
-                            <p className="text-sm text-violet-700 dark:text-violet-300">
-                                <strong>What's next?</strong><br />
-                                You'll see your premium badge once your payment is verified (usually within 24 hours).
+                        <div className="bg-amber-50 dark:bg-amber-900/20 p-4 rounded-xl mb-6 text-left">
+                            <p className="text-sm text-amber-900 dark:text-amber-100 font-medium mb-2">
+                                <strong>What's next?</strong>
                             </p>
+                            <ul className="text-sm text-amber-800 dark:text-amber-200 space-y-1">
+                                <li>• Our admin will verify your payment within 24 hours</li>
+                                <li>• You'll receive an email confirmation once approved</li>
+                                <li>• Your premium badge will appear automatically</li>
+                            </ul>
                         </div>
                         <button
                             onClick={handleClose}

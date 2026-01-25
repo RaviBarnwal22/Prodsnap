@@ -709,3 +709,81 @@ export async function sendSupportReply(data: {
         type: 'support_reply'
     })
 }
+
+// Send rejection notification to user
+export async function sendRejectionNotification(data: {
+    name: string
+    email: string
+    reason: string
+    type: 'subscription' | 'mentorship'
+}) {
+    const html = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <style>
+                body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: #333; }
+                .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+                .header { background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); color: white; padding: 40px; border-radius: 12px 12px 0 0; text-align: center; }
+                .content { background: #f8f9fa; padding: 30px; border-radius: 0 0 12px 12px; }
+                .alert-box { background: #fee2e2; border: 1px solid #ef4444; padding: 20px; border-radius: 8px; margin: 20px 0; }
+                .reason-box { background: white; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #ef4444; }
+                .info-box { background: #dbeafe; padding: 15px; border-radius: 8px; margin: 15px 0; border-left: 4px solid #3b82f6; }
+                .cta { display: inline-block; background: #3b82f6; color: white; padding: 15px 30px; border-radius: 8px; text-decoration: none; font-weight: bold; margin-top: 20px; }
+                .footer { text-align: center; margin-top: 30px; color: #999; font-size: 12px; }
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <div class="header">
+                    <h1 style="margin: 0;">Payment Request Update</h1>
+                    <p style="margin: 10px 0 0 0; opacity: 0.9;">Regarding your ${data.type === 'subscription' ? 'Premium Subscription' : 'Mentorship Booking'} request</p>
+                </div>
+                <div class="content">
+                    <p>Hi <strong>${data.name}</strong>,</p>
+                    
+                    <div class="alert-box">
+                        <p style="margin: 0; color: #991b1b; font-weight: 600;">Unfortunately, we were unable to verify your payment at this time.</p>
+                    </div>
+                    
+                    <div class="reason-box">
+                        <strong style="color: #ef4444;">Reason:</strong>
+                        <p style="margin: 10px 0 0 0; color: #374151;">${data.reason}</p>
+                    </div>
+                    
+                    <div class="info-box">
+                        <strong style="color: #1e40af;">What can you do?</strong>
+                        <ul style="margin: 10px 0 0 0; padding-left: 20px; color: #1e40af;">
+                            <li>Double-check your payment screenshot and resubmit</li>
+                            <li>Ensure the payment amount matches the ${data.type === 'subscription' ? 'subscription' : 'service'} price</li>
+                            <li>Make sure the screenshot is clear and readable</li>
+                            <li>Contact us if you believe this was an error</li>
+                        </ul>
+                    </div>
+                    
+                    <div style="text-align: center;">
+                        <a href="${process.env.NEXT_PUBLIC_APP_URL || 'https://prodsnap-gamma.vercel.app'}/${data.type === 'subscription' ? 'practice' : 'mentorship'}" class="cta">
+                            Try Again →
+                        </a>
+                    </div>
+                    
+                    <p style="margin-top: 30px; color: #666; font-size: 14px;">
+                        If you have any questions or need assistance, please reply to this email or contact us at info.prodsnap@gmail.com
+                    </p>
+                </div>
+                <div class="footer">
+                    <p>Thank you for your understanding</p>
+                    <p>© Prodsnap - Master PM Interviews with AI Feedback</p>
+                </div>
+            </div>
+        </body>
+        </html>
+    `
+
+    return sendEmail({
+        to: data.email,
+        subject: `Payment Request Update - ${data.type === 'subscription' ? 'Premium Subscription' : 'Mentorship Booking'} | Prodsnap`,
+        html,
+        type: 'rejection'
+    })
+}
