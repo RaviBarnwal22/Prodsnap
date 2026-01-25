@@ -195,7 +195,7 @@ export default function MentorshipClient() {
         setPaymentStatus('idle')
         // Reset form
         setFullName('')
-        setEmail('')
+
         setPhone('')
         setPaymentProof(null)
         setErrors({})
@@ -213,12 +213,7 @@ export default function MentorshipClient() {
         }
 
         // Email validation
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-        if (!email.trim()) {
-            newErrors.email = 'Email address is required'
-        } else if (!emailRegex.test(email)) {
-            newErrors.email = 'Please enter a valid email address'
-        }
+
 
         // Phone validation (Indian phone numbers)
         const phoneRegex = /^[+]?[0-9\s-]{10,15}$/
@@ -469,20 +464,7 @@ export default function MentorshipClient() {
                                             />
                                             {errors.fullName && <p className="text-red-500 text-xs mt-1 font-medium">{errors.fullName}</p>}
                                         </div>
-                                        <div>
-                                            <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Email Address <span className="text-red-500">*</span></label>
-                                            <input
-                                                type="email"
-                                                value={email}
-                                                onChange={(e) => {
-                                                    setEmail(e.target.value)
-                                                    if (errors.email) setErrors(prev => ({ ...prev, email: undefined }))
-                                                }}
-                                                className={`w-full px-4 py-3 rounded-xl border ${errors.email ? 'border-red-500 bg-red-50 dark:bg-red-900/10' : 'border-gray-200 dark:border-gray-700'} bg-gray-50 dark:bg-gray-900 transition-all focus:border-violet-500 focus:ring-2 focus:ring-violet-500/20 outline-none`}
-                                                placeholder="Enter your email"
-                                            />
-                                            {errors.email && <p className="text-red-500 text-xs mt-1 font-medium">{errors.email}</p>}
-                                        </div>
+
                                         <div>
                                             <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Phone Number <span className="text-red-500">*</span></label>
                                             <input
