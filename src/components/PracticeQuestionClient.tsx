@@ -28,6 +28,7 @@ interface PracticeQuestionClientProps {
         aiScore?: string
         createdAt: string
     }[]
+    isLocked?: boolean
 }
 
 export function PracticeQuestionClient({
@@ -41,7 +42,8 @@ export function PracticeQuestionClient({
     solutionText,
     sampleAnswer,
     previousSubmission,
-    history = []
+    history = [],
+    isLocked = false
 }: PracticeQuestionClientProps) {
     const [showUpgradeModal, setShowUpgradeModal] = useState(false)
     const [attemptStatus, setAttemptStatus] = useState<{
@@ -207,6 +209,50 @@ export function PracticeQuestionClient({
         )
     }
 
+    // If it's a PREMIUM LOCKED case
+    if (isLocked) {
+        return (
+            <>
+                <div className="bg-white dark:bg-gray-900 rounded-[2.5rem] border border-gray-200 dark:border-gray-800 p-12 text-center flex flex-col items-center justify-center min-h-[500px] shadow-2xl relative overflow-hidden group">
+                    {/* Decorative elements */}
+                    <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-violet-600 via-fuchsia-600 to-indigo-600"></div>
+                    <div className="absolute -right-20 -bottom-20 w-64 h-64 bg-violet-500/5 rounded-full blur-3xl group-hover:bg-violet-500/10 transition-colors"></div>
+
+                    <div className="relative z-10 max-w-md">
+                        <div className="w-24 h-24 bg-gradient-to-br from-violet-600 to-indigo-600 rounded-[2rem] flex items-center justify-center mb-8 shadow-2xl mx-auto rotate-3 group-hover:rotate-0 transition-transform duration-500">
+                            <Crown size={48} className="text-white" />
+                        </div>
+                        <h2 className="text-4xl font-black mb-4 tracking-tight">Unlock This Case</h2>
+                        <p className="text-gray-500 dark:text-gray-400 text-lg mb-10 leading-relaxed font-medium">
+                            This is a high-yield premium case used in actual interviews at Tier-1 companies. Upgrade to practice with our AI Interviewer.
+                        </p>
+
+                        <div className="space-y-4 w-full">
+                            <button
+                                onClick={() => setShowUpgradeModal(true)}
+                                className="block w-full bg-black dark:bg-white text-white dark:text-black py-4 rounded-2xl font-black text-lg hover:scale-[1.02] transition-transform shadow-xl"
+                            >
+                                Get Premium Access
+                            </button>
+                            <p className="text-[10px] text-gray-400 font-bold uppercase tracking-[0.2em]">
+                                Unlocks 50+ Real Interview Questions
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <PremiumUpgradeModal
+                    isOpen={showUpgradeModal}
+                    onClose={() => setShowUpgradeModal(false)}
+                    category={category}
+                    attemptsUsed={attemptStatus?.attemptsUsed || 0}
+                    userEmail={userEmail}
+                    userName={userName}
+                />
+            </>
+        )
+    }
+
     // If user has exceeded limit and hasn't started an attempt
     // AND they have NOT previously solved this (if they have, they can re-attempt)
     if (attemptStatus && !attemptStatus.canAttempt && !hasStartedAttempt && !previousSubmission) {
@@ -340,6 +386,7 @@ export function PracticeQuestionClient({
                         onSubmitted={() => setIsFinished(true)}
                         onRetry={handleRetry}
                         previousSubmission={previousSubmission}
+                        isPremium={attemptStatus?.isPremium}
                     />
                 </>
             ) : null}

@@ -2,9 +2,12 @@ export const dynamic = "force-dynamic"
 import { prisma } from "@/lib/prisma"
 import Link from "next/link"
 import { Header } from "@/components/Header"
-import { Briefcase, BarChart3, TrendingUp, ArrowRight, Sparkles, ChevronLeft, Cpu, Rocket, Users, Search, Calculator } from "lucide-react"
+import { Briefcase, BarChart3, TrendingUp, ArrowRight, Sparkles, ChevronLeft, Cpu, Rocket, Users, Search, Calculator, Lock, Unlock } from "lucide-react"
 import { getUser } from "@/lib/auth"
 import { SkillRadarChart } from "@/components/SkillRadarChart"
+import { getTotalAttemptCount, hasActiveSubscription } from "@/lib/subscription"
+import { FREE_ATTEMPT_LIMIT } from "@/lib/constants"
+import { Crown } from "lucide-react"
 
 // Helper for difficulty color
 const getDifficultyColor = (diff: string) => {
@@ -128,13 +131,18 @@ export default async function PracticePage({
         groupedQuestions[category].sort((a, b) => {
             const orderA = difficultyOrder[a.difficulty] || 999
             const orderB = difficultyOrder[b.difficulty] || 999
-            return orderA - orderB
+            if (orderA !== orderB) return orderA - orderB
+            return a.id.localeCompare(b.id) // Stable secondary sort
         })
     })
 
     const categoryOrder = ['CONSUMER_PRODUCT_DESIGN', 'METRICS', 'GROWTH_RETENTION', 'TECH_ACUMEN', 'GTM', 'BEHAVIORAL', 'RCA', 'GUESTIMATES']
 
     const user = await getUser()
+    const isAdmin = user?.email === 'ravibarnwal89@gmail.com' || (user as any)?.role === 'ADMIN'
+    const isPremium = (await hasActiveSubscription()) || isAdmin
+    const totalAttempts = await getTotalAttemptCount()
+    const attemptsRemaining = Math.max(0, FREE_ATTEMPT_LIMIT - totalAttempts)
 
     return (
         <div className="min-h-screen bg-white dark:bg-gray-950 flex flex-col">
@@ -155,6 +163,20 @@ export default async function PracticePage({
                                 Pick a focus area to start your practice. Each track contains
                                 hand-picked cases designed by senior PMs to test specific skills.
                             </p>
+
+                            {user && !isPremium && (
+                                <div className="inline-flex items-center gap-3 p-4 bg-violet-50 dark:bg-violet-900/20 border border-violet-100 dark:border-violet-800 rounded-2xl">
+                                    <div className="w-10 h-10 rounded-xl bg-violet-600 flex items-center justify-center text-white shadow-lg">
+                                        <Sparkles size={20} />
+                                    </div>
+                                    <div className="text-left">
+                                        <p className="text-xs font-black uppercase tracking-widest text-violet-600 dark:text-violet-400">Trial Usage</p>
+                                        <p className="text-sm font-bold text-violet-900 dark:text-white">
+                                            {attemptsRemaining} of {FREE_ATTEMPT_LIMIT} cases remaining
+                                        </p>
+                                    </div>
+                                </div>
+                            )}
                         </div>
                         <div className="lg:col-span-2">
                             {user ? (
@@ -204,31 +226,59 @@ export default async function PracticePage({
 
                         {/* Questions List */}
                         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                            {(groupedQuestions[selectedCategory] || []).map((q, index) => (
-                                <Link
-                                    key={q.id}
-                                    href={`/practice/${q.id}`}
-                                    className="group block p-8 rounded-[2rem] bg-gray-50 dark:bg-gray-900 border border-transparent hover:border-blue-500/50 hover:bg-white dark:hover:bg-gray-800 transition-all duration-300 shadow-sm hover:shadow-2xl hover:shadow-blue-500/10 hover:-translate-y-1"
-                                >
-                                    <div className="mb-6 flex items-center justify-between">
-                                        <div className="w-10 h-10 rounded-xl bg-white dark:bg-gray-800 flex items-center justify-center text-blue-600 shadow-sm font-bold text-sm">
-                                            #{index + 1}
+                            {(groupedQuestions[selectedCategory] || []).map((q: any, index) => {
+                                // FIRST CASE is always Viewable (Trial Open). Others are locked.
+                                const isFirstCase = index === 0;
+                                const isLocked = !isFirstCase && !isPremium;
+                                const hasHitLimit = !isPremium && totalAttempts >= FREE_ATTEMPT_LIMIT;
+
+                                return (
+                                    <Link
+                                        key={q.id}
+                                        href={`/practice/${q.id}`}
+                                        className={`group block p-8 rounded-[2rem] bg-gray-50 dark:bg-gray-900 border border-transparent hover:border-blue-500/50 hover:bg-white dark:hover:bg-gray-800 transition-all duration-300 shadow-sm hover:shadow-2xl hover:shadow-blue-500/10 hover:-translate-y-1 relative overflow-hidden ${isLocked ? 'grayscale opacity-70' : ''}`}
+                                    >
+                                        {isLocked && (
+                                            <div className="absolute top-4 right-4 text-gray-400">
+                                                <Lock size={16} />
+                                            </div>
+                                        )}
+                                        {isPremium ? (
+                                            <div className="absolute top-4 right-4 flex gap-2">
+                                                <span className="bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400 text-[8px] font-black px-2 py-0.5 rounded-full uppercase tracking-widest border border-violet-200 dark:border-violet-800 flex items-center gap-1">
+                                                    <Crown size={8} />
+                                                    Premium Access
+                                                </span>
+                                            </div>
+                                        ) : !isLocked && (
+                                            <div className="absolute top-4 right-4 flex gap-2">
+                                                <span className={`${hasHitLimit ? 'bg-amber-100 text-amber-600 border-amber-200' : 'bg-green-100 text-green-600 border-green-200'} dark:bg-opacity-20 text-[8px] font-black px-2 py-0.5 rounded-full uppercase tracking-widest border`}>
+                                                    {hasHitLimit ? 'Viewable (Trial Used)' : 'Solve (Trial Open)'}
+                                                </span>
+                                            </div>
+                                        )}
+
+                                        <div className="mb-6 flex items-center justify-between">
+                                            <div className="w-10 h-10 rounded-xl bg-white dark:bg-gray-800 flex items-center justify-center text-blue-600 shadow-sm font-bold text-sm">
+                                                #{index + 1}
+                                            </div>
+                                            <span className={`text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full border border-current ${getDifficultyColor(q.difficulty)}`}>
+                                                {q.difficulty}
+                                            </span>
                                         </div>
-                                        <span className={`text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full border border-current ${getDifficultyColor(q.difficulty)}`}>
-                                            {q.difficulty}
-                                        </span>
-                                    </div>
-                                    <h3 className="text-xl font-bold mb-4 leading-tight group-hover:text-blue-600 transition-colors">
-                                        Question #{index + 1}
-                                    </h3>
-                                    <p className="text-sm text-gray-500 dark:text-gray-400 mb-8 leading-relaxed italic">
-                                        {q.difficulty} level challenge • Click to reveal and practice
-                                    </p>
-                                    <div className="flex items-center gap-2 text-blue-600 font-bold text-sm">
-                                        Start Challenge <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
-                                    </div>
-                                </Link>
-                            ))}
+                                        <h3 className={`text-xl font-bold mb-4 leading-tight group-hover:text-blue-600 transition-colors ${isLocked ? 'text-gray-400' : ''}`}>
+                                            Case Challenge #{index + 1}
+                                        </h3>
+                                        <p className="text-sm text-gray-500 dark:text-gray-400 mb-8 leading-relaxed italic">
+                                            {isPremium ? "Unlocked for unlimited practice • Go for it!" : isLocked ? "Premium Challenge • Unlock to practice" : hasHitLimit ? "Trial consumed • Read case details" : `${q.difficulty} level challenge • Click to solve`}
+                                        </p>
+                                        <div className="flex items-center gap-2 text-blue-600 font-bold text-sm">
+                                            {isLocked ? "Learn More" : hasHitLimit ? "View Details" : "Start Challenge"}
+                                            <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
+                                        </div>
+                                    </Link>
+                                );
+                            })}
                             {(groupedQuestions[selectedCategory] || []).length === 0 && (
                                 <div className="col-span-full py-24 text-center border-2 border-dashed border-gray-200 dark:border-gray-800 rounded-[2.5rem]">
                                     <p className="text-gray-400 text-lg italic">More {categoryConfig[selectedCategory]?.label} tracks being formulated by experts...</p>

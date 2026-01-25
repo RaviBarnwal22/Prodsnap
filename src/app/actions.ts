@@ -310,134 +310,103 @@ export async function askClarifyingQuestion(data: {
     const user = await getUser()
     if (!user) return { success: false, error: "Please login to ask questions" }
 
-    const { GoogleGenerativeAI } = await import("@google/generative-ai");
     const { INTERVIEWER_CHAT_PROMPT } = await import("@/lib/ai/prompts");
 
-    function getApiKeys(): string[] {
-        const keys: string[] = [];
-        let i = 1;
-        while (process.env[`GEMINI_API_KEY_${i}`]) {
-            keys.push(process.env[`GEMINI_API_KEY_${i}`] as string);
-            i++;
-        }
-        if (keys.length === 0 && process.env.GEMINI_API_KEY) {
-            keys.push(process.env.GEMINI_API_KEY);
-        }
-        return keys.filter(key => key.trim() !== "");
-    }
+    const apiKey = process.env.PERPLEXITY_API_KEY || process.env.GEMINI_API_KEY || process.env.GEMINI_API_KEY_1 || process.env.GEMINI_API_KEY_2;
+    if (!apiKey) return { success: false, error: "AI Service unconfigured" }
 
-    const apiKeys = getApiKeys();
-    if (apiKeys.length === 0) return { success: false, error: "AI Service unconfigured" }
-
+    const isPerplexity = apiKey.startsWith("pplx-");
     const systemPrompt = INTERVIEWER_CHAT_PROMPT(data.questionTitle, data.questionDescription);
 
-    // AI Model Cycling Logic
-    let lastError = "All AI models are currently saturated.";
-    let totalAttempts = 0;
+    try {
+        if (isPerplexity) {
+            const messages: { role: "system" | "user" | "assistant", content: string }[] = [
+                { role: "system", content: systemPrompt }
+            ];
 
-    for (const key of apiKeys) {
-        if (key.startsWith("pplx-")) continue;
+            // Add history with strict alternating check
+            let lastRole: "user" | "assistant" | null = null;
 
-        // Use only v1beta - v1 doesn't work with newer Google AI Studio keys
-        const apiVersions = ["v1beta"];
-        // Use only models confirmed to work with generateContent on v1beta
-        const models = ["gemini-1.5-flash", "gemini-1.5-pro"];
+            for (const h of data.history) {
+                const currentRole = h.role === 'model' ? 'assistant' : 'user';
 
-        for (const version of apiVersions) {
-            for (const modelName of models) {
-                totalAttempts++;
-                try {
-                    const contents = [];
-                    let lastRole = "model";
+                // Perplexity requires the first message after system to be 'user'
+                if (lastRole === null && currentRole === 'assistant') {
+                    messages.push({ role: "user", content: "Can you provide a hint or some context?" });
+                    lastRole = 'user';
+                }
 
-                    // Handle first turn vs subsequent turns
-                    if (data.history.length === 0) {
-                        contents.push({
-                            role: "user",
-                            parts: [{ text: `INSTRUCTIONS: ${systemPrompt}\n\nUSER QUESTION: ${data.userMessage}` }]
-                        });
-                    } else {
-                        // For subsequent turns, we re-inject instructions to keep context strong
-                        contents.push({
-                            role: "user",
-                            parts: [{ text: `REMINDER OF YOUR ROLE & CONTEXT: ${systemPrompt}` }]
-                        });
-                        contents.push({
-                            role: "model",
-                            parts: [{ text: "Understood. I'm continuing as your interviewer." }]
-                        });
-
-                        for (const m of data.history) {
-                            const currentRole = m.role === 'user' ? 'user' : 'model';
-                            if (currentRole !== lastRole) {
-                                contents.push({
-                                    role: currentRole,
-                                    parts: [{ text: m.parts?.[0]?.text || '' }]
-                                });
-                                lastRole = currentRole;
-                            }
-                        }
-
-                        if (lastRole === "user") {
-                            contents[contents.length - 1].parts[0].text += `\n\n${data.userMessage}`;
-                        } else {
-                            contents.push({
-                                role: "user",
-                                parts: [{ text: data.userMessage }]
-                            });
-                        }
-                    }
-
-                    const response = await fetch(`https://generativelanguage.googleapis.com/${version}/models/${modelName}:generateContent?key=${key}`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            contents,
-                            generationConfig: {
-                                temperature: 0.7,
-                                maxOutputTokens: 800,
-                            }
-                        })
+                // Strictly alternate: if same role as last, skip or merge (here we skip for safety)
+                if (currentRole !== lastRole) {
+                    messages.push({
+                        role: currentRole,
+                        content: h.parts?.[0]?.text || ''
                     });
-
-                    if (!response.ok) {
-                        const errorData = await response.json();
-                        const msg = errorData.error?.message || response.statusText;
-
-                        // Always capture the error for diagnostics
-                        lastError = `${modelName}: ${msg}`;
-
-                        if (msg.toLowerCase().includes("not found") || msg.toLowerCase().includes("not supported")) continue;
-                        if (msg.includes("API key not valid")) {
-                            lastError = "API key invalid or expired.";
-                            break;
-                        }
-                        if (response.status === 429) {
-                            lastError = "Rate limit exhausted. Wait 1 min or add another API key.";
-                            continue;
-                        }
-                        continue;
-                    }
-
-                    const result = await response.json();
-                    const text = result.candidates?.[0]?.content?.parts?.[0]?.text;
-                    if (text) return { success: true, text };
-
-                    if (result.candidates?.[0]?.finishReason === "SAFETY") {
-                        return { success: false, error: "SAFETY_BLOCK: Please rephrase." };
-                    }
-                } catch (error: any) {
-                    lastError = error.message || String(error);
-                    console.error(`[askClarifyingQuestion] ${modelName} error:`, lastError);
+                    lastRole = currentRole;
                 }
             }
-        }
-    }
 
-    return {
-        success: false,
-        error: `Interviewer is having trouble: ${lastError} (Try count: ${totalAttempts})`
-    };
+            // Current message must be user. If last was also user, we merge them.
+            if (lastRole === 'user') {
+                messages[messages.length - 1].content += `\n\n${data.userMessage}`;
+            } else {
+                messages.push({ role: "user", content: data.userMessage });
+            }
+
+            const res = await fetch("https://api.perplexity.ai/chat/completions", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${apiKey}`
+                },
+                body: JSON.stringify({
+                    model: "sonar",
+                    messages,
+                    temperature: 0.2, // Lower temperature for more consistent, to-the-point responses
+                    max_tokens: 400
+                })
+            });
+
+            if (!res.ok) {
+                const errorText = await res.text();
+                throw new Error(`Perplexity Error: ${res.status} - ${errorText}`);
+            }
+
+            const result = await res.json();
+            let text = result.choices[0].message.content || "";
+
+            // FAILSAVE: Strip citations, remove bold/italics, and strip leading dashes/bullets
+            text = text.replace(/\[\d+\]/g, '')
+                .replace(/\*\*/g, '')
+                .replace(/\*/g, '')
+                .replace(/^\s*[-•]\s*/gm, '')
+                .trim();
+
+            return { success: true, text };
+        } else {
+            // Fallback to Gemini if no Perplexity key
+            const { GoogleGenerativeAI } = await import("@google/generative-ai");
+            const genAI = new GoogleGenerativeAI(apiKey);
+            const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+
+            const chat = model.startChat({
+                history: data.history.map(h => ({
+                    role: h.role,
+                    parts: h.parts
+                })),
+                generationConfig: {
+                    maxOutputTokens: 500,
+                },
+            });
+
+            const result = await chat.sendMessage(data.userMessage);
+            const response = await result.response;
+            return { success: true, text: response.text() };
+        }
+    } catch (error: any) {
+        console.error("[askClarifyingQuestion] Error:", error);
+        return { success: false, error: "Interviewer is having trouble responding. Please try again." };
+    }
 }
 
 export async function getInterviewerHint(data: {
@@ -448,40 +417,58 @@ export async function getInterviewerHint(data: {
     const user = await getUser()
     if (!user) return { success: false, error: "Please login to ask questions" }
 
-    const { GoogleGenerativeAI } = await import("@google/generative-ai");
     const { HINT_PROMPT } = await import("@/lib/ai/prompts");
 
-    function getApiKeys(): string[] {
-        const keys: string[] = [];
-        let i = 1;
-        while (process.env[`GEMINI_API_KEY_${i}`]) {
-            keys.push(process.env[`GEMINI_API_KEY_${i}`] as string);
-            i++;
-        }
-        if (keys.length === 0 && process.env.GEMINI_API_KEY) {
-            keys.push(process.env.GEMINI_API_KEY);
-        }
-        return keys.filter(key => key.trim() !== "");
-    }
-
-    const apiKeys = getApiKeys();
-    if (apiKeys.length === 0) return { success: false, error: "AI Service unconfigured" }
+    const apiKey = process.env.PERPLEXITY_API_KEY || process.env.GEMINI_API_KEY || process.env.GEMINI_API_KEY_1 || process.env.GEMINI_API_KEY_2;
+    if (!apiKey) return { success: false, error: "AI Service unconfigured" }
 
     const currentChat = data.history.map(m => `${m.role.toUpperCase()}: ${m.text}`).join('\n');
     const systemPrompt = HINT_PROMPT(data.questionTitle, data.questionDescription, currentChat);
+    const isPerplexity = apiKey.startsWith("pplx-");
 
-    for (const key of apiKeys) {
-        try {
-            const genAI = new GoogleGenerativeAI(key);
+    try {
+        if (isPerplexity) {
+            const res = await fetch("https://api.perplexity.ai/chat/completions", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${apiKey}`
+                },
+                body: JSON.stringify({
+                    model: "sonar",
+                    messages: [
+                        { role: "system", content: "You are a helpful PM interviewer giving brief hints." },
+                        { role: "user", content: systemPrompt }
+                    ],
+                    temperature: 0.3,
+                    max_tokens: 200
+                })
+            });
+
+            if (!res.ok) throw new Error(`Perplexity Error: ${res.status}`);
+
+            const result = await res.json();
+            let text = result.choices[0].message.content || "";
+
+            // FAILSAVE: Strip citations, remove bold/italics, and strip leading dashes/bullets
+            text = text.replace(/\[\d+\]/g, '')
+                .replace(/\*\*/g, '')
+                .replace(/\*/g, '')
+                .replace(/^\s*[-•]\s*/gm, '')
+                .trim();
+
+            return { success: true, text };
+        } else {
+            const { GoogleGenerativeAI } = await import("@google/generative-ai");
+            const genAI = new GoogleGenerativeAI(apiKey);
             const model = genAI.getGenerativeModel({ model: "gemini-pro" });
 
             const result = await model.generateContent(systemPrompt);
             const response = await result.response;
             return { success: true, text: response.text() };
-        } catch (error) {
-            console.error(`Hint error with key:`, error);
         }
+    } catch (error) {
+        console.error(`Hint error:`, error);
+        return { success: false, error: "Interviewer is currently busy." };
     }
-
-    return { success: false, error: "Interviewer is currently busy." };
 }

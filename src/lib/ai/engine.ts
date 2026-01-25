@@ -31,15 +31,23 @@ export interface AIEvaluationResponse {
 // Helper to get all API keys from environment
 function getApiKeys(): string[] {
     const keys: string[] = [];
+
+    // Prioritize Gemini first
     let i = 1;
     while (process.env[`GEMINI_API_KEY_${i}`]) {
         keys.push(process.env[`GEMINI_API_KEY_${i}`] as string);
         i++;
     }
-    // Fallback to the legacy single key if no numbered keys are found
+    // Fallback to the legacy single key
     if (keys.length === 0 && process.env.GEMINI_API_KEY) {
         keys.push(process.env.GEMINI_API_KEY);
     }
+
+    // Add Perplexity key as the final fallback
+    if (process.env.PERPLEXITY_API_KEY) {
+        keys.push(process.env.PERPLEXITY_API_KEY);
+    }
+
     return keys.filter(key => key.trim() !== "");
 }
 
@@ -167,7 +175,27 @@ export async function evaluateAnswer(questionTitle: string, userAnswer: string, 
             const jsonData = JSON.parse(rawJson);
 
             console.log(`[AI Engine] SUCCESS on attempt ${i + 1}`);
-            return { ...jsonData, isMock: false };
+
+            // Recursive cleanup to strip bullets/dashes from all feedback strings
+            const cleanupResponse = (obj: any): any => {
+                if (typeof obj === 'string') {
+                    return obj.replace(/^\s*[-•]\s*/gm, '').trim();
+                }
+                if (Array.isArray(obj)) {
+                    return obj.map(cleanupResponse);
+                }
+                if (obj !== null && typeof obj === 'object') {
+                    const newObj: any = {};
+                    for (const key in obj) {
+                        newObj[key] = cleanupResponse(obj[key]);
+                    }
+                    return newObj;
+                }
+                return obj;
+            };
+
+            const finalizedData = cleanupResponse(jsonData);
+            return { ...finalizedData, isMock: false };
 
         } catch (error: unknown) {
             const errorMessage = error instanceof Error ? error.message : "Unknown error";

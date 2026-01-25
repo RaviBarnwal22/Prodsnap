@@ -19,6 +19,8 @@ const features = [
     { icon: Sparkles, text: "Priority access to new content & features" },
 ]
 
+import { createPortal } from 'react-dom'
+
 export function PremiumUpgradeModal({ isOpen, onClose, category, attemptsUsed = 2, userEmail = '', userName = '' }: PremiumUpgradeModalProps) {
     const [step, setStep] = useState<'info' | 'payment' | 'form' | 'success'>('info')
     const [isLoading, setIsLoading] = useState(false)
@@ -109,10 +111,10 @@ export function PremiumUpgradeModal({ isOpen, onClose, category, attemptsUsed = 
         onClose()
     }
 
-    if (!isOpen) return null
+    if (!isOpen || typeof document === 'undefined') return null
 
-    return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+    return createPortal(
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 overflow-y-auto">
             {/* Backdrop */}
             <div
                 className="absolute inset-0 bg-black/60 backdrop-blur-sm"
@@ -362,6 +364,7 @@ export function PremiumUpgradeModal({ isOpen, onClose, category, attemptsUsed = 
                     </div>
                 )}
             </div>
-        </div>
+        </div>,
+        document.body
     )
 }

@@ -54,6 +54,7 @@ model PracticeQuestion {
   difficulty   String
   solutionText String?
   sampleAnswer String?
+  isFree       Boolean              @default(false)
   createdAt    DateTime             @default(now())
   submissions  PracticeSubmission[]
 }
@@ -231,6 +232,7 @@ model MentorshipBooking {
   reviewedAt   DateTime?
   createdAt    DateTime            @default(now())
   feedback     MentorshipFeedback?
+  emailLogs    EmailLog[]
 }
 
 model MentorshipFeedback {
@@ -268,4 +270,20 @@ model ApiUsageLog {
   
   @@index([createdAt])
   @@index([provider])
+}
+
+model EmailLog {
+  id          String   @id @default(cuid())
+  type        String   // "payment", "approval", "mentorship", "contact", "reply"
+  recipient   String
+  subject     String
+  status      String   // "success", "error"
+  errorMessage String?
+  bookingId   String?  // Optional, if related to a mentorship booking
+  createdAt   DateTime @default(now())
+
+  booking     MentorshipBooking? @relation(fields: [bookingId], references: [id])
+  
+  @@index([createdAt])
+  @@index([type])
 }

@@ -1,4 +1,5 @@
 import nodemailer from 'nodemailer'
+import { prisma } from './prisma'
 
 // Create transporter using SMTP
 const transporter = nodemailer.createTransport({
@@ -23,9 +24,11 @@ interface EmailOptions {
     to: string
     subject: string
     html: string
+    type?: string
+    bookingId?: string
 }
 
-export async function sendEmail({ to, subject, html }: EmailOptions) {
+export async function sendEmail({ to, subject, html, type = "general", bookingId }: EmailOptions) {
     try {
         const senderName = "Prodsnap Support"
         const senderEmail = process.env.SMTP_SENDER || 'support@prodsnap.in'
@@ -39,9 +42,42 @@ export async function sendEmail({ to, subject, html }: EmailOptions) {
             html
         })
         console.log('[Email] SUCCESS:', info.messageId)
+
+        // Log to DB for usage tracking
+        try {
+            await prisma.emailLog.create({
+                data: {
+                    type,
+                    recipient: to,
+                    subject,
+                    status: 'success',
+                    bookingId: bookingId || null
+                }
+            });
+        } catch (logErr) {
+            console.error('[Email Log] DB failed:', logErr);
+        }
+
         return { success: true, messageId: info.messageId }
     } catch (error) {
         console.error('[Email] FAILED to send email:', error)
+
+        // Log failure to DB
+        try {
+            await prisma.emailLog.create({
+                data: {
+                    type,
+                    recipient: to,
+                    subject,
+                    status: 'error',
+                    errorMessage: error instanceof Error ? error.message : String(error),
+                    bookingId: bookingId || null
+                }
+            });
+        } catch (logErr) {
+            console.error('[Email Log Fail] DB failed:', logErr);
+        }
+
         return { success: false, error }
     }
 }
@@ -115,7 +151,8 @@ export async function sendPaymentNotification(data: {
     return sendEmail({
         to: adminEmail,
         subject: `💰 New Payment Request from ${data.name} - ₹${data.amount}`,
-        html
+        html,
+        type: 'payment'
     })
 }
 
@@ -175,7 +212,8 @@ export async function sendPaymentConfirmationToUser(data: {
     return sendEmail({
         to: data.email,
         subject: `⏳ Payment Received - Awaiting Approval | Prodsnap`,
-        html
+        html,
+        type: 'payment_confirmation'
     })
 }
 
@@ -255,7 +293,8 @@ export async function sendApprovalNotification(data: {
     return sendEmail({
         to: data.email,
         subject: `🎉 Congratulations! Your Premium Access is Activated | Prodsnap`,
-        html
+        html,
+        type: 'approval'
     })
 }
 
@@ -316,7 +355,8 @@ export async function sendMentorshipBookingConfirmation(data: {
     return sendEmail({
         to: data.email,
         subject: `🎉 Session Booked! ${data.serviceType} Confirmed | Prodsnap`,
-        html
+        html,
+        type: 'mentorship'
     })
 }
 
@@ -394,7 +434,8 @@ export async function sendMentorshipPaymentNotification(data: {
     return sendEmail({
         to: adminEmail,
         subject: `📚 New Mentorship Booking from ${data.name} - ${data.serviceType} (₹${data.amount})`,
-        html
+        html,
+        type: 'mentorship_notification'
     })
 }
 
@@ -457,7 +498,8 @@ export async function sendFeedbackRequestEmail(data: {
     return sendEmail({
         to: data.email,
         subject: `✨ Share Your Feedback - ${data.serviceType} Session | Prodsnap`,
-        html
+        html,
+        type: 'feedback_request'
     })
 }
 
@@ -530,7 +572,8 @@ export async function sendMentorshipScheduledEmail(data: {
     return sendEmail({
         to: data.email,
         subject: `📅 Scheduled: ${data.serviceType} with Ravi Barnwal - ${date}`,
-        html
+        html,
+        type: 'mentorship_scheduled'
     })
 }
 
@@ -599,7 +642,8 @@ export async function sendContactFormNotification(data: {
     return sendEmail({
         to: adminEmail,
         subject: `📬 New Contact Form Submission from ${data.name}`,
-        html
+        html,
+        type: 'contact_form'
     })
 }
 // Send reply to support inquiry
@@ -661,6 +705,7 @@ export async function sendSupportReply(data: {
     return sendEmail({
         to: data.email,
         subject: `Re: Your Inquiry on Prodsnap - Response from Support`,
-        html
+        html,
+        type: 'support_reply'
     })
 }

@@ -14,7 +14,7 @@ const API_LIMITS = {
     }
 };
 
-export async function GET() {
+export async function GET(request: Request) {
     try {
         const user = await getUser();
 
@@ -24,17 +24,26 @@ export async function GET() {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
-        // Get today's date range
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-        const tomorrow = new Date(today);
-        tomorrow.setDate(tomorrow.getDate() + 1);
+        const { searchParams } = new URL(request.url);
+        const startDateStr = searchParams.get('startDate');
+        const endDateStr = searchParams.get('endDate');
 
-        // Get last 7 days for trend
+        // Default to today if no date provided
+        const today = startDateStr ? new Date(startDateStr) : new Date();
+        today.setHours(0, 0, 0, 0);
+
+        const tomorrow = endDateStr ? new Date(endDateStr) : new Date(today);
+        if (!endDateStr) {
+            tomorrow.setDate(tomorrow.getDate() + 1);
+        } else {
+            tomorrow.setHours(23, 59, 59, 999);
+        }
+
+        // Get last 7 days for trend (always show some trend regardless of selection)
         const last7Days = new Date(today);
         last7Days.setDate(last7Days.getDate() - 7);
 
-        // Fetch today's usage
+        // Fetch today's usage from database
         const todayUsage = await prisma.apiUsageLog.groupBy({
             by: ['provider', 'status'],
             where: {
@@ -66,8 +75,54 @@ export async function GET() {
             }
         });
 
+        // Fetch today's email usage - Use dynamic access for safety with stale generated clients
+        const emailLogModel = (prisma as any).emailLog;
+        let todayEmailUsage = 0;
+        let weekEmailUsage: any[] = [];
+        let recentEmailErrors: any[] = [];
+
+        if (emailLogModel) {
+            todayEmailUsage = await emailLogModel.count({
+                where: {
+                    createdAt: {
+                        gte: today,
+                        lt: tomorrow
+                    }
+                }
+            });
+
+            weekEmailUsage = await emailLogModel.findMany({
+                where: {
+                    createdAt: {
+                        gte: last7Days
+                    }
+                },
+                select: {
+                    createdAt: true,
+                    status: true
+                }
+            });
+
+            recentEmailErrors = await emailLogModel.findMany({
+                where: {
+                    status: 'error',
+                    createdAt: { gte: last7Days }
+                },
+                select: {
+                    recipient: true,
+                    status: true,
+                    errorMessage: true,
+                    createdAt: true
+                },
+                orderBy: {
+                    createdAt: 'desc'
+                },
+                take: 5
+            });
+        }
+
         // Calculate statistics
-        const stats = {
+        const stats: any = {
             gemini: {
                 total: 0,
                 success: 0,
@@ -83,17 +138,21 @@ export async function GET() {
                 rate_limit: 0,
                 capacity: API_LIMITS.perplexity.free,
                 model: API_LIMITS.perplexity.model
+            },
+            email: {
+                total: todayEmailUsage,
+                capacity: 300, // Brevo Free Tier daily limit
+                model: 'Brevo SMTP'
             }
         };
 
-        todayUsage.forEach((item: { provider: string; status: string; _count: { id: number } }) => {
+        todayUsage.forEach((item: any) => {
             const provider = item.provider as 'gemini' | 'perplexity';
             const count = item._count.id;
             const status = item.status;
 
             if (stats[provider]) {
                 stats[provider].total += count;
-                // Update specific status count
                 if (status === 'success' || status === 'error' || status === 'rate_limit') {
                     stats[provider][status] = count;
                 }
@@ -101,14 +160,25 @@ export async function GET() {
         });
 
         // Calculate daily breakdown for last 7 days
-        const dailyBreakdown: Record<string, { gemini: number; perplexity: number }> = {};
+        const dailyBreakdown: Record<string, { gemini: number; perplexity: number; email: number }> = {};
 
-        weekUsage.forEach((log: { provider: string; createdAt: Date }) => {
+        weekUsage.forEach((log: any) => {
             const dateKey = log.createdAt.toISOString().split('T')[0];
             if (!dailyBreakdown[dateKey]) {
-                dailyBreakdown[dateKey] = { gemini: 0, perplexity: 0 };
+                dailyBreakdown[dateKey] = { gemini: 0, perplexity: 0, email: 0 };
             }
-            dailyBreakdown[dateKey][log.provider as 'gemini' | 'perplexity']++;
+            if (log.provider === 'gemini' || log.provider === 'perplexity') {
+                dailyBreakdown[dateKey][log.provider as 'gemini' | 'perplexity']++;
+            }
+        });
+
+        // Add email breakdown
+        weekEmailUsage.forEach((log: any) => {
+            const dateKey = log.createdAt.toISOString().split('T')[0];
+            if (!dailyBreakdown[dateKey]) {
+                dailyBreakdown[dateKey] = { gemini: 0, perplexity: 0, email: 0 };
+            }
+            dailyBreakdown[dateKey].email++;
         });
 
         // Calculate average response times
@@ -125,11 +195,11 @@ export async function GET() {
         });
 
         const responseTimeMap: Record<string, number> = {};
-        avgResponseTimes.forEach((item: { provider: string; _avg: { responseTime: number | null } }) => {
+        avgResponseTimes.forEach((item: any) => {
             responseTimeMap[item.provider] = Math.round(item._avg.responseTime || 0);
         });
 
-        // Get recent errors
+        // Get recent errors from API Usage
         const recentErrors = await prisma.apiUsageLog.findMany({
             where: {
                 status: { in: ['error', 'rate_limit'] },
@@ -151,14 +221,25 @@ export async function GET() {
             stats,
             dailyBreakdown,
             responseTimeMap,
-            recentErrors,
-            limits: API_LIMITS
+            recentErrors: [
+                ...recentErrors,
+                ...recentEmailErrors.map((e: any) => ({
+                    provider: 'Brevo',
+                    status: e.status,
+                    errorMessage: e.errorMessage,
+                    createdAt: e.createdAt
+                }))
+            ],
+            limits: {
+                ...API_LIMITS,
+                email: { free: 300, model: 'Brevo SMTP' }
+            }
         });
 
     } catch (error) {
-        console.error('[API Usage Stats] Error:', error);
+        console.error('[API Usage Stats] CRITICAL ERROR:', error);
         return NextResponse.json(
-            { error: 'Failed to fetch API usage statistics' },
+            { error: error instanceof Error ? error.message : 'Failed to fetch API usage statistics' },
             { status: 500 }
         );
     }

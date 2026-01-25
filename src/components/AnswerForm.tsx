@@ -26,9 +26,10 @@ interface AnswerFormProps {
         aiScore?: string
         createdAt: string
     }
+    isPremium?: boolean
 }
 
-export function AnswerForm({ questionId, questionTitle, userId, category, description, solutionText, sampleAnswer, elapsedTime = 0, onSubmitted, onRetry, previousSubmission }: AnswerFormProps) {
+export function AnswerForm({ questionId, questionTitle, userId, category, description, solutionText, sampleAnswer, elapsedTime = 0, onSubmitted, onRetry, previousSubmission, isPremium = false }: AnswerFormProps) {
     // Initialize result with previous submission if it exists
     const [result, setResult] = useState<AIEvaluationResponse | null>(() => {
         if (previousSubmission?.aiScore) {
@@ -75,7 +76,9 @@ export function AnswerForm({ questionId, questionTitle, userId, category, descri
             })
 
             if (resp.success && resp.text) {
-                setChatMessages([...chatMessages, { role: 'model', text: `💡 HINT: ${resp.text}` }])
+                // Strip existing "HINT" prefixes if AI tried to mimic the history
+                const cleanText = resp.text.replace(/^(\s*💡?\s*HINT\s*:?\s*)+/i, '').trim();
+                setChatMessages([...chatMessages, { role: 'model', text: `💡 HINT: ${cleanText}` }])
                 setHintCount(prev => prev + 1)
                 setChatOpen(true)
             } else {
@@ -88,11 +91,15 @@ export function AnswerForm({ questionId, questionTitle, userId, category, descri
         }
     }
 
-    const handleAskClarification = async (e: React.FormEvent) => {
-        e.preventDefault()
-        if (!chatInput.trim() || isAsking || chatMessages.filter(m => m.role === 'user').length >= 10) return
+    const handleAskClarification = async (e?: React.FormEvent, customMsg?: string) => {
+        if (e) e.preventDefault()
+        const userMsg = customMsg || chatInput.trim()
 
-        const userMsg = chatInput.trim()
+        const clarifyingQuestionCount = chatMessages.filter(m => m.role === 'user').length
+        const limit = isPremium ? 50 : 5 // Use 50 as a high practical limit for premium, or true infinity
+
+        if (!userMsg || isAsking || clarifyingQuestionCount >= limit) return
+
         setChatInput('')
         setIsAsking(true)
         setChatError('')
@@ -125,6 +132,7 @@ export function AnswerForm({ questionId, questionTitle, userId, category, descri
             setIsAsking(false)
         }
     }
+
 
     const loadingMessages = [
         "Analyzing your product framework...",
@@ -623,13 +631,123 @@ export function AnswerForm({ questionId, questionTitle, userId, category, descri
                     </button>
                 </div>
 
-                {/* Clarification Hub - DISABLED due to Gemini API issues
+                {/* Clarification Hub - Powered by Perplexity AI */}
                 {!result && (
                     <div className="bg-white dark:bg-gray-900 border rounded-2xl overflow-hidden shadow-sm transition-all border-violet-100 dark:border-violet-900/30">
-                        Clarification Hub UI was here
+                        {/* Hub Header */}
+                        <div
+                            onClick={() => setChatOpen(!chatOpen)}
+                            className="p-4 bg-gradient-to-r from-violet-50 to-indigo-50 dark:from-violet-950/20 dark:to-indigo-950/20 flex items-center justify-between cursor-pointer hover:opacity-90 transition-all border-b border-violet-100 dark:border-violet-900/30"
+                        >
+                            <div className="flex items-center gap-3">
+                                <div className="w-8 h-8 rounded-lg bg-violet-600 flex items-center justify-center text-white shadow-lg shadow-violet-500/20">
+                                    <MessageSquare size={16} />
+                                </div>
+                                <div className="text-left">
+                                    <h4 className="text-xs font-black uppercase tracking-wider text-violet-900 dark:text-violet-100">
+                                        Interviewer Hub (Clarifying Questions)
+                                    </h4>
+                                    <p className="text-[10px] text-violet-600 dark:text-violet-400 font-bold">
+                                        {isPremium
+                                            ? "Unlimited clarifying questions active"
+                                            : `Trial: ${chatMessages.filter(m => m.role === 'user').length}/5 clarifying questions used`}
+                                    </p>
+                                </div>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <button
+                                    type="button"
+                                    onClick={(e) => { e.stopPropagation(); handleGetHint(); }}
+                                    disabled={hintCount >= 3 || isAsking}
+                                    className="px-3 py-1.5 rounded-lg bg-violet-600 text-white text-[10px] font-black hover:bg-violet-700 transition-all disabled:opacity-30 disabled:cursor-not-allowed flex items-center gap-1.5"
+                                >
+                                    <Lightbulb size={12} />
+                                    {hintCount === 0 ? "Get Hint" : `${3 - hintCount} Hints Left`}
+                                </button>
+                                <motion.div animate={{ rotate: chatOpen ? 180 : 0 }}>
+                                    <ArrowRight size={16} className="text-violet-400 rotate-90" />
+                                </motion.div>
+                            </div>
+                        </div>
+
+                        <AnimatePresence>
+                            {chatOpen && (
+                                <motion.div
+                                    initial={{ height: 0, opacity: 0 }}
+                                    animate={{ height: 'auto', opacity: 1 }}
+                                    exit={{ height: 0, opacity: 0 }}
+                                    className="overflow-hidden"
+                                >
+                                    <div className="p-4 space-y-4">
+                                        {/* Chat Messages */}
+                                        <div className="max-h-[300px] overflow-y-auto space-y-3 pr-2 scrollbar-thin scrollbar-thumb-violet-100">
+                                            {chatMessages.length === 0 ? (
+                                                <div className="text-center py-6 text-gray-400">
+                                                    <Info size={24} className="mx-auto mb-2 opacity-20" />
+                                                    <p className="text-xs font-medium">No questions asked yet. Clarify the case goal, ask about user segments, or get context from the interviewer.</p>
+                                                </div>
+                                            ) : (
+                                                chatMessages.map((msg, i) => (
+                                                    <div
+                                                        key={i}
+                                                        className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
+                                                    >
+                                                        <div className={`max-w-[85%] p-3 rounded-2xl text-xs font-medium leading-relaxed shadow-sm ${msg.role === 'user'
+                                                            ? 'bg-violet-600 text-white rounded-tr-none'
+                                                            : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-tl-none border border-gray-200 dark:border-gray-700'
+                                                            }`}>
+                                                            {msg.text}
+                                                        </div>
+                                                    </div>
+                                                ))
+                                            )}
+                                            {isAsking && (
+                                                <div className="flex justify-start">
+                                                    <div className="bg-gray-100 dark:bg-gray-800 p-3 rounded-2xl rounded-tl-none flex items-center gap-2">
+                                                        <div className="flex gap-1">
+                                                            <div className="w-1.5 h-1.5 bg-violet-400 rounded-full animate-bounce [animation-delay:-0.3s]"></div>
+                                                            <div className="w-1.5 h-1.5 bg-violet-500 rounded-full animate-bounce [animation-delay:-0.15s]"></div>
+                                                            <div className="w-1.5 h-1.5 bg-violet-600 rounded-full animate-bounce"></div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            )}
+                                            {chatError && (
+                                                <div className="text-[10px] text-red-500 font-bold text-center bg-red-50 dark:bg-red-900/10 py-2 rounded-lg border border-red-100 dark:border-red-900/30">
+                                                    {chatError}
+                                                </div>
+                                            )}
+                                        </div>
+
+
+                                        {/* Chat Input */}
+                                        <div className="flex gap-2">
+                                            <input
+                                                type="text"
+                                                value={chatInput}
+                                                onChange={(e) => setChatInput(e.target.value)}
+                                                onKeyDown={(e) => e.key === 'Enter' && handleAskClarification(e)}
+                                                placeholder={!isPremium && chatMessages.filter(m => m.role === 'user').length >= 5
+                                                    ? "Clarification limit reached"
+                                                    : "Ask a clarifying question..."}
+                                                disabled={!isPremium && chatMessages.filter(m => m.role === 'user').length >= 5}
+                                                className="flex-1 px-4 py-2 bg-gray-50 dark:bg-gray-800 border-2 border-gray-100 dark:border-gray-700 rounded-xl text-xs focus:ring-4 focus:ring-violet-500/10 focus:border-violet-600 transition-all outline-none disabled:bg-gray-200 dark:disabled:bg-gray-900 disabled:cursor-not-allowed"
+                                            />
+                                            <button
+                                                type="button"
+                                                onClick={handleAskClarification}
+                                                disabled={isAsking || !chatInput.trim()}
+                                                className="w-10 h-10 bg-violet-600 text-white rounded-xl flex items-center justify-center hover:bg-violet-700 transition shadow-lg shadow-violet-500/20 disabled:opacity-50 disabled:cursor-not-allowed"
+                                            >
+                                                <ArrowRight size={18} />
+                                            </button>
+                                        </div>
+                                    </div>
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
                     </div>
                 )}
-                */}
 
                 {errors.answer && (
                     <p className="text-red-500 text-sm">Please provide an answer before submitting.</p>
