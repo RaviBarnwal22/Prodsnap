@@ -1,7 +1,8 @@
 'use client'
 
-import { useState, useRef } from "react"
+import { useState, useRef, useEffect } from "react"
 import { useRouter } from "next/navigation"
+import { createClient } from '@/lib/supabase/client'
 import {
     Star,
     GraduationCap,
@@ -41,6 +42,18 @@ export default function MentorshipClient() {
     const [paymentProof, setPaymentProof] = useState<string | null>(null)
     const [isUploading, setIsUploading] = useState(false)
     const fileInputRef = useRef<HTMLInputElement>(null)
+
+    // Auto-fill email from logged-in user
+    useEffect(() => {
+        const fetchUserEmail = async () => {
+            const supabase = createClient()
+            const { data: { user } } = await supabase.auth.getUser()
+            if (user?.email) {
+                setEmail(user.email)
+            }
+        }
+        fetchUserEmail()
+    }, [])
 
     // UPI Details
     const UPI_ID = "ravibarnwal22@okhdfcbank"
