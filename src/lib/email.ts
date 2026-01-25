@@ -517,8 +517,19 @@ export async function sendMentorshipScheduledEmail(data: {
     scheduledAt: Date
     meetingLink: string
 }) {
-    const date = data.scheduledAt.toLocaleDateString('en-IN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })
-    const time = data.scheduledAt.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })
+    // Format date and time in IST (Asia/Kolkata timezone)
+    const date = data.scheduledAt.toLocaleDateString('en-IN', {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        timeZone: 'Asia/Kolkata'
+    })
+    const time = data.scheduledAt.toLocaleTimeString('en-IN', {
+        hour: '2-digit',
+        minute: '2-digit',
+        timeZone: 'Asia/Kolkata'
+    })
 
     // Google Calendar Link generator
     // Format: YYYYMMDDTHHmmssZ (UTC)
