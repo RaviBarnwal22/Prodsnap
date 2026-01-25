@@ -1,5 +1,7 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { PRODUCT_SENSE_PROMPT } from "./prompts";
+import { prisma } from "@/lib/prisma";
+
 
 export interface AIEvaluationResponse {
     scores: {
@@ -41,6 +43,32 @@ function getApiKeys(): string[] {
     return keys.filter(key => key.trim() !== "");
 }
 
+// Helper to log API usage
+async function logApiUsage(
+    provider: string,
+    model: string,
+    status: string,
+    responseTime?: number,
+    errorMessage?: string,
+    tokenCount?: number
+) {
+    try {
+        await prisma.apiUsageLog.create({
+            data: {
+                provider,
+                model,
+                status,
+                responseTime,
+                errorMessage: errorMessage?.substring(0, 500), // Limit error message length
+                tokenCount
+            }
+        });
+    } catch (error) {
+        console.error('[API Usage Log] Failed to log:', error);
+    }
+}
+
+
 export async function evaluateAnswer(questionTitle: string, userAnswer: string, elapsedTimeSeconds?: number, chatContext?: string): Promise<AIEvaluationResponse> {
     const apiKeys = getApiKeys();
     console.log(`[AI Engine] Total keys found: ${apiKeys.length}`);
@@ -56,6 +84,9 @@ export async function evaluateAnswer(questionTitle: string, userAnswer: string, 
     for (let i = 0; i < apiKeys.length; i++) {
         const key = apiKeys[i];
         const isPerplexity = key.startsWith("pplx-");
+        const provider = isPerplexity ? 'perplexity' : 'gemini';
+        const modelName = isPerplexity ? 'sonar' : 'gemini-pro';
+        const startTime = Date.now();
 
         console.log(`[AI Engine] Attempt ${i + 1}/${apiKeys.length} using ${isPerplexity ? 'Perplexity' : 'Gemini'}`);
 
@@ -82,12 +113,22 @@ export async function evaluateAnswer(questionTitle: string, userAnswer: string, 
 
                 if (!res.ok) {
                     const errorText = await res.text();
+                    const responseTime = Date.now() - startTime;
+
+                    // Check if it's a rate limit error
+                    const isRateLimit = res.status === 429 || errorText.toLowerCase().includes('rate limit');
+                    await logApiUsage(provider, modelName, isRateLimit ? 'rate_limit' : 'error', responseTime, `${res.status}: ${errorText}`);
+
                     console.error(`[AI Engine] Perplexity Error detail: ${errorText}`);
                     throw new Error(`Perplexity API Error: ${res.status}`);
                 }
 
                 const data = await res.json();
                 text = data.choices[0].message.content;
+
+                const responseTime = Date.now() - startTime;
+                const estimatedTokens = Math.ceil((prompt.length + text.length) / 4);
+                await logApiUsage(provider, modelName, 'success', responseTime, undefined, estimatedTokens);
             } else {
                 // Handle Gemini
                 try {
@@ -97,7 +138,21 @@ export async function evaluateAnswer(questionTitle: string, userAnswer: string, 
 
                     const result = await model.generateContent(prompt);
                     text = result.response.text();
+
+                    const responseTime = Date.now() - startTime;
+                    const estimatedTokens = Math.ceil((prompt.length + text.length) / 4);
+                    await logApiUsage(provider, modelName, 'success', responseTime, undefined, estimatedTokens);
                 } catch (geminiError: unknown) {
+                    const responseTime = Date.now() - startTime;
+                    const errorMessage = geminiError instanceof Error ? geminiError.message : 'Unknown error';
+
+                    // Check if it's a rate limit or quota error
+                    const isRateLimit = errorMessage.toLowerCase().includes('quota') ||
+                        errorMessage.toLowerCase().includes('rate limit') ||
+                        errorMessage.toLowerCase().includes('resource_exhausted');
+
+                    await logApiUsage(provider, modelName, isRateLimit ? 'rate_limit' : 'error', responseTime, errorMessage);
+
                     console.error(`[AI Engine] Gemini Error detail:`, geminiError);
                     throw geminiError;
                 }

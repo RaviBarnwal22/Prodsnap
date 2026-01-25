@@ -165,8 +165,7 @@ export async function submitExpertReview(data: {
 }) {
     const user = await getUser()
 
-    // Check if user is admin OR specifically ravibarnwal89@gmail.com
-    const isAdminEmail = user?.email === 'ravibarnwal89@gmail.com'
+    const isAdminEmail = user?.email === (process.env.ADMIN_EMAIL || 'ravibarnwal89@gmail.com')
     if (!user || (!isAdminEmail && user.role !== 'ADMIN')) {
         return { success: false, error: "Only admins can submit expert reviews" }
     }
@@ -205,8 +204,7 @@ export async function replyToSupport(data: {
 }) {
     const user = await getUser()
 
-    // Check if user is admin OR specifically ravibarnwal89@gmail.com
-    const isAdminEmail = user?.email === 'ravibarnwal89@gmail.com'
+    const isAdminEmail = user?.email === (process.env.ADMIN_EMAIL || 'ravibarnwal89@gmail.com')
     if (!user || (!isAdminEmail && user.role !== 'ADMIN')) {
         return { success: false, error: "Only admins can reply to support inquiries" }
     }

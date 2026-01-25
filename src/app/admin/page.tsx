@@ -8,6 +8,9 @@ import { AdminUserList } from "@/components/admin/AdminUserList"
 import { AdminPaymentRequests } from "@/components/admin/AdminPaymentRequests"
 import { AdminMentorshipBookings } from "@/components/admin/AdminMentorshipBookings"
 import { AdminSupportQueue } from "@/components/admin/AdminSupportQueue"
+import { ApiUsageMonitor } from "@/components/admin/ApiUsageMonitor"
+import { AdminTabs } from "@/components/admin/AdminTabs"
+
 
 // Helper to format date
 function formatDate(date: Date) {
@@ -214,187 +217,196 @@ export default async function AdminPage() {
                     </div>
                 </div>
 
-                {/* Stats Grid */}
-                <div className="grid grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
-                    <div className="bg-gray-800 rounded-2xl p-6 border border-gray-700">
-                        <div className="flex flex-col gap-3">
-                            <div className="bg-blue-500/20 w-10 h-10 flex items-center justify-center rounded-xl text-blue-400">
-                                <Users size={20} />
-                            </div>
-                            <div>
-                                <p className="text-2xl font-black text-white">{users.length}</p>
-                                <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Total Users</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div className="bg-gray-800 rounded-2xl p-6 border border-gray-700">
-                        <div className="flex flex-col gap-3">
-                            <div className="bg-green-500/20 w-10 h-10 flex items-center justify-center rounded-xl text-green-400">
-                                <FileText size={20} />
-                            </div>
-                            <div>
-                                <p className="text-2xl font-black text-white">{totalSubmissions}</p>
-                                <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Case Submissions</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div className="bg-gray-800 rounded-2xl p-6 border border-gray-700 border-violet-500/30">
-                        <div className="flex flex-col gap-3">
-                            <div className="bg-violet-500/20 w-10 h-10 flex items-center justify-center rounded-xl text-violet-400">
-                                <Calendar size={20} />
-                            </div>
-                            <div>
-                                <p className="text-2xl font-black text-white">{totalBookings}</p>
-                                <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Mentorships</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div className="bg-gray-800 rounded-2xl p-6 border border-gray-700">
-                        <div className="flex flex-col gap-3">
-                            <div className="bg-purple-500/20 w-10 h-10 flex items-center justify-center rounded-xl text-purple-400">
-                                <BarChart3 size={20} />
-                            </div>
-                            <div>
-                                <p className="text-2xl font-black text-white">{totalQuestions}</p>
-                                <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Live Tracks</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div className="bg-gray-800 rounded-2xl p-6 border border-gray-700">
-                        <div className="flex flex-col gap-3">
-                            <div className="bg-orange-500/20 w-10 h-10 flex items-center justify-center rounded-xl text-orange-400">
-                                <Activity size={20} />
-                            </div>
-                            <div>
-                                <p className="text-2xl font-black text-white">{totalActivities}</p>
-                                <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Engagement</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Usage Analytics - Today, Week, Month */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                    <div className="bg-gradient-to-br from-green-600 to-emerald-700 rounded-2xl p-6 text-white">
-                        <h3 className="text-sm font-bold uppercase tracking-widest opacity-80 mb-4">Today&apos;s Activity</h3>
-                        <div className="grid grid-cols-3 gap-4">
-                            <div>
-                                <p className="text-3xl font-black">{todayUsers}</p>
-                                <p className="text-xs font-bold uppercase tracking-widest opacity-70">Users</p>
-                            </div>
-                            <div>
-                                <p className="text-3xl font-black">{todaySubmissions}</p>
-                                <p className="text-xs font-bold uppercase tracking-widest opacity-70">Cases</p>
-                            </div>
-                            <div>
-                                <p className="text-3xl font-black">{todayActivities}</p>
-                                <p className="text-xs font-bold uppercase tracking-widest opacity-70">Views</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div className="bg-gradient-to-br from-blue-600 to-indigo-700 rounded-2xl p-6 text-white">
-                        <h3 className="text-sm font-bold uppercase tracking-widest opacity-80 mb-4">This Week (7 Days)</h3>
-                        <div className="grid grid-cols-2 gap-4">
-                            <div>
-                                <p className="text-3xl font-black">{weekUsers}</p>
-                                <p className="text-xs font-bold uppercase tracking-widest opacity-70">Users</p>
-                            </div>
-                            <div>
-                                <p className="text-3xl font-black">{weekSubmissions}</p>
-                                <p className="text-xs font-bold uppercase tracking-widest opacity-70">Cases</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div className="bg-gradient-to-br from-purple-600 to-pink-700 rounded-2xl p-6 text-white">
-                        <h3 className="text-sm font-bold uppercase tracking-widest opacity-80 mb-4">This Month</h3>
-                        <div className="grid grid-cols-2 gap-4">
-                            <div>
-                                <p className="text-3xl font-black">{monthUsers}</p>
-                                <p className="text-xs font-bold uppercase tracking-widest opacity-70">Users</p>
-                            </div>
-                            <div>
-                                <p className="text-3xl font-black">{monthSubmissions}</p>
-                                <p className="text-xs font-bold uppercase tracking-widest opacity-70">Cases</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div className="grid lg:grid-cols-3 gap-8">
-                    {/* Main User List Section - 2 columns span */}
-                    <div className="lg:col-span-2 space-y-8">
-                        {/* Users List (Client Component) */}
-                        <AdminUserList users={users} />
-
-                        {/* Daily Signups Chart */}
-                        <div className="bg-gray-800 rounded-2xl p-6 border border-gray-700">
-                            <h2 className="text-lg font-black mb-6 flex items-center gap-2 text-white">
-                                <Calendar className="text-blue-400" size={20} />
-                                User Signup Trajectory (7 Days)
-                            </h2>
-                            <div className="flex items-end gap-4 h-40 px-4">
-                                {usersByDay.map((day, i) => (
-                                    <div key={i} className="flex-1 flex flex-col items-center group">
-                                        <div className="invisible group-hover:visible mb-2 px-2 py-1 bg-white text-gray-900 text-xs rounded-lg font-bold">
-                                            {day.count}
+                {/* Tabbed Interface */}
+                <AdminTabs
+                    overviewContent={
+                        <>
+                            {/* Stats Grid */}
+                            <div className="grid grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
+                                <div className="bg-gray-800 rounded-2xl p-6 border border-gray-700">
+                                    <div className="flex flex-col gap-3">
+                                        <div className="bg-blue-500/20 w-10 h-10 flex items-center justify-center rounded-xl text-blue-400">
+                                            <Users size={20} />
                                         </div>
-                                        <div
-                                            className="w-full bg-blue-500/30 rounded-t-lg group-hover:bg-blue-500 transition-all duration-300"
-                                            style={{
-                                                height: `${Math.max(day.count * 30, 8)}px`,
-                                            }}
-                                        ></div>
-                                        <p className="text-xs font-bold text-gray-500 mt-3">{day.date}</p>
+                                        <div>
+                                            <p className="text-2xl font-black text-white">{users.length}</p>
+                                            <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Total Users</p>
+                                        </div>
                                     </div>
-                                ))}
+                                </div>
+                                <div className="bg-gray-800 rounded-2xl p-6 border border-gray-700">
+                                    <div className="flex flex-col gap-3">
+                                        <div className="bg-green-500/20 w-10 h-10 flex items-center justify-center rounded-xl text-green-400">
+                                            <FileText size={20} />
+                                        </div>
+                                        <div>
+                                            <p className="text-2xl font-black text-white">{totalSubmissions}</p>
+                                            <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Case Submissions</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="bg-gray-800 rounded-2xl p-6 border border-gray-700">
+                                    <div className="flex flex-col gap-3">
+                                        <div className="bg-cyan-500/20 w-10 h-10 flex items-center justify-center rounded-xl text-cyan-400">
+                                            <Calendar size={20} />
+                                        </div>
+                                        <div>
+                                            <p className="text-2xl font-black text-white">{totalBookings}</p>
+                                            <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Mentorships</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="bg-gray-800 rounded-2xl p-6 border border-gray-700">
+                                    <div className="flex flex-col gap-3">
+                                        <div className="bg-purple-500/20 w-10 h-10 flex items-center justify-center rounded-xl text-purple-400">
+                                            <BarChart3 size={20} />
+                                        </div>
+                                        <div>
+                                            <p className="text-2xl font-black text-white">{totalQuestions}</p>
+                                            <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Live Tracks</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="bg-gray-800 rounded-2xl p-6 border border-gray-700">
+                                    <div className="flex flex-col gap-3">
+                                        <div className="bg-orange-500/20 w-10 h-10 flex items-center justify-center rounded-xl text-orange-400">
+                                            <Activity size={20} />
+                                        </div>
+                                        <div>
+                                            <p className="text-2xl font-black text-white">{totalActivities}</p>
+                                            <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Engagement</p>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
+
+                            {/* Usage Analytics - Today, Week, Month */}
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                                <div className="bg-gradient-to-br from-green-600 to-emerald-700 rounded-2xl p-6 text-white">
+                                    <h3 className="text-sm font-bold uppercase tracking-widest opacity-80 mb-4">Today&apos;s Activity</h3>
+                                    <div className="grid grid-cols-3 gap-4">
+                                        <div>
+                                            <p className="text-3xl font-black">{todayUsers}</p>
+                                            <p className="text-xs font-bold uppercase tracking-widest opacity-70">Users</p>
+                                        </div>
+                                        <div>
+                                            <p className="text-3xl font-black">{todaySubmissions}</p>
+                                            <p className="text-xs font-bold uppercase tracking-widest opacity-70">Cases</p>
+                                        </div>
+                                        <div>
+                                            <p className="text-3xl font-black">{todayActivities}</p>
+                                            <p className="text-xs font-bold uppercase tracking-widest opacity-70">Views</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="bg-gradient-to-br from-blue-600 to-indigo-700 rounded-2xl p-6 text-white">
+                                    <h3 className="text-sm font-bold uppercase tracking-widest opacity-80 mb-4">This Week (7 Days)</h3>
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div>
+                                            <p className="text-3xl font-black">{weekUsers}</p>
+                                            <p className="text-xs font-bold uppercase tracking-widest opacity-70">Users</p>
+                                        </div>
+                                        <div>
+                                            <p className="text-3xl font-black">{weekSubmissions}</p>
+                                            <p className="text-xs font-bold uppercase tracking-widest opacity-70">Cases</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="bg-gradient-to-br from-purple-600 to-pink-700 rounded-2xl p-6 text-white">
+                                    <h3 className="text-sm font-bold uppercase tracking-widest opacity-80 mb-4">This Month</h3>
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div>
+                                            <p className="text-3xl font-black">{monthUsers}</p>
+                                            <p className="text-xs font-bold uppercase tracking-widest opacity-70">Users</p>
+                                        </div>
+                                        <div>
+                                            <p className="text-3xl font-black">{monthSubmissions}</p>
+                                            <p className="text-xs font-bold uppercase tracking-widest opacity-70">Cases</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Daily Signups Chart */}
+                            <div className="bg-gray-800 rounded-2xl p-6 border border-gray-700">
+                                <h2 className="text-lg font-black mb-6 flex items-center gap-2 text-white">
+                                    <Calendar className="text-blue-400" size={20} />
+                                    User Signup Trajectory (7 Days)
+                                </h2>
+                                <div className="flex items-end gap-4 h-40 px-4">
+                                    {usersByDay.map((day, i) => (
+                                        <div key={i} className="flex-1 flex flex-col items-center group">
+                                            <div className="invisible group-hover:visible mb-2 px-2 py-1 bg-white text-gray-900 text-xs rounded-lg font-bold">
+                                                {day.count}
+                                            </div>
+                                            <div
+                                                className="w-full bg-blue-500/30 rounded-t-lg group-hover:bg-blue-500 transition-all duration-300"
+                                                style={{
+                                                    height: `${Math.max(day.count * 30, 8)}px`,
+                                                }}
+                                            ></div>
+                                            <p className="text-xs font-bold text-gray-500 mt-3">{day.date}</p>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        </>
+                    }
+                    apiUsageContent={
+                        <ApiUsageMonitor />
+                    }
+                    usersContent={
+                        <div className="space-y-8">
+                            {/* Users List (Client Component) */}
+                            <AdminUserList users={users} />
                         </div>
-                    </div>
+                    }
+                    supportContent={
+                        <div className="grid lg:grid-cols-2 gap-8">
+                            {/* Payment Requests */}
+                            <AdminPaymentRequests />
 
-                    {/* Sidebar section - 1 column span */}
-                    <div className="space-y-8">
-                        {/* Payment Requests */}
-                        <AdminPaymentRequests />
+                            {/* Mentorship Bookings */}
+                            <AdminMentorshipBookings />
 
-                        {/* Mentorship Bookings */}
-                        <AdminMentorshipBookings />
-
-                        {/* Recent Activity */}
-                        <div className="bg-gray-800 rounded-2xl p-6 border border-gray-700">
-                            <h2 className="text-lg font-black mb-6 flex items-center gap-2 text-white">
-                                <Activity className="text-green-400" size={20} />
-                                Activity Log
-                            </h2>
-                            <div className="space-y-3 max-h-[400px] overflow-y-auto pr-2">
-                                {recentActivities.map((activity) => (
-                                    <div key={activity.id} className="p-3 bg-gray-700/50 rounded-xl">
-                                        <div className="flex items-center gap-2 mb-1">
-                                            <div className={`w-2 h-2 rounded-full ${activity.action === 'login' ? 'bg-green-500' :
-                                                activity.action === 'page_view' ? 'bg-blue-500' :
-                                                    activity.action === 'submission' ? 'bg-purple-500' :
-                                                        'bg-gray-400'
-                                                }`}></div>
-                                            <p className="text-xs font-bold uppercase text-gray-400">
-                                                {activity.action}
+                            {/* Recent Activity */}
+                            <div className="bg-gray-800 rounded-2xl p-6 border border-gray-700">
+                                <h2 className="text-lg font-black mb-6 flex items-center gap-2 text-white">
+                                    <Activity className="text-green-400" size={20} />
+                                    Activity Log
+                                </h2>
+                                <div className="space-y-3 max-h-[400px] overflow-y-auto pr-2">
+                                    {recentActivities.map((activity) => (
+                                        <div key={activity.id} className="p-3 bg-gray-700/50 rounded-xl">
+                                            <div className="flex items-center gap-2 mb-1">
+                                                <div className={`w-2 h-2 rounded-full ${activity.action === 'login' ? 'bg-green-500' :
+                                                    activity.action === 'page_view' ? 'bg-blue-500' :
+                                                        activity.action === 'submission' ? 'bg-purple-500' :
+                                                            'bg-gray-400'
+                                                    }`}></div>
+                                                <p className="text-xs font-bold uppercase text-gray-400">
+                                                    {activity.action}
+                                                </p>
+                                            </div>
+                                            <p className="text-sm font-medium text-white truncate">
+                                                {activity.user?.email || 'Anonymous'}
+                                            </p>
+                                            <p className="text-xs text-gray-500">
+                                                {formatDate(activity.createdAt)}
                                             </p>
                                         </div>
-                                        <p className="text-sm font-medium text-white truncate">
-                                            {activity.user?.email || 'Anonymous'}
-                                        </p>
-                                        <p className="text-xs text-gray-500">
-                                            {formatDate(activity.createdAt)}
-                                        </p>
-                                    </div>
-                                ))}
-                                {recentActivities.length === 0 && (
-                                    <p className="text-gray-500 text-center py-8">No activity recorded yet.</p>
-                                )}
+                                    ))}
+                                    {recentActivities.length === 0 && (
+                                        <p className="text-gray-500 text-center py-8">No activity recorded yet.</p>
+                                    )}
+                                </div>
                             </div>
-                        </div>
 
-                        <AdminSupportQueue submissions={contactSubmissions as any} />
-                    </div>
-                </div>
+                            {/* Support Queue */}
+                            <AdminSupportQueue submissions={contactSubmissions as any} />
+                        </div>
+                    }
+                />
             </main>
         </div>
     )

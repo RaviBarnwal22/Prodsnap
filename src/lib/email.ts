@@ -4,13 +4,21 @@ import nodemailer from 'nodemailer'
 // For Zoho: Use ZOHO_EMAIL and ZOHO_PASSWORD
 // For Gmail: Use GMAIL_USER and GMAIL_APP_PASSWORD
 const transporter = nodemailer.createTransport({
-    host: process.env.SMTP_HOST || 'smtp.zoho.com',
+    host: process.env.SMTP_HOST || 'smtp-relay.brevo.com',
     port: parseInt(process.env.SMTP_PORT || '587'),
-    secure: process.env.SMTP_PORT === '465', // true for 465, false for other ports
+    secure: process.env.SMTP_PORT === '465',
     auth: {
-        user: process.env.SMTP_USER || process.env.GMAIL_USER || 'ravibarnwal89@gmail.com',
-        pass: process.env.SMTP_PASSWORD || process.env.GMAIL_APP_PASSWORD
+        user: process.env.SMTP_USER,
+        pass: process.env.SMTP_PASSWORD
     }
+})
+
+// Debugging logs to verify env vars are present
+console.log('[Email] Transporter initialized with:', {
+    host: process.env.SMTP_HOST || 'smtp-relay.brevo.com',
+    user: process.env.SMTP_USER ? 'PRESENT' : 'MISSING',
+    pass: process.env.SMTP_PASSWORD ? 'PRESENT' : 'MISSING',
+    sender: process.env.SMTP_SENDER || 'support@prodsnap.in'
 })
 
 interface EmailOptions {
@@ -21,10 +29,13 @@ interface EmailOptions {
 
 export async function sendEmail({ to, subject, html }: EmailOptions) {
     try {
+        const senderName = "Prodsnap Support"
+        const senderEmail = process.env.SMTP_SENDER || 'support@prodsnap.in'
+
         console.log(`[Email] Attempting to send email to: ${to} | Subject: ${subject}`)
-        const senderEmail = process.env.SMTP_USER || process.env.GMAIL_USER || 'ravibarnwal89@gmail.com'
+
         const info = await transporter.sendMail({
-            from: `"Prodsnap" <${senderEmail}>`,
+            from: `"${senderName}" <${senderEmail}>`,
             to,
             subject,
             html
@@ -44,7 +55,7 @@ export async function sendPaymentNotification(data: {
     phone: string
     amount: number
 }) {
-    const adminEmail = 'info.prodsnap@gmail.com'
+    const adminEmail = process.env.SMTP_SENDER || 'support@prodsnap.in'
 
     const html = `
         <!DOCTYPE html>
@@ -319,7 +330,7 @@ export async function sendMentorshipPaymentNotification(data: {
     serviceType: string
     amount: number
 }) {
-    const adminEmail = 'info.prodsnap@gmail.com'
+    const adminEmail = process.env.SMTP_SENDER || 'support@prodsnap.in'
 
     const html = `
         <!DOCTYPE html>
@@ -531,7 +542,7 @@ export async function sendContactFormNotification(data: {
     email: string
     message: string
 }) {
-    const adminEmail = 'info.prodsnap@gmail.com'
+    const adminEmail = process.env.SMTP_SENDER || 'support@prodsnap.in'
 
     const html = `
         <!DOCTYPE html>
