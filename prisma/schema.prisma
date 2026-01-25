@@ -8,46 +8,121 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
-model ApiUsageLog {
-  id           String   @id
-  provider     String
-  model        String
-  status       String
-  responseTime Int?
-  errorMessage String?
-  tokenCount   Int?
-  createdAt    DateTime @default(now())
+model User {
+  id               String               @id @default(cuid())
+  email            String               @unique
+  authId           String?              @unique
+  name             String?
+  image            String?
+  role             String               @default("STUDENT")
+  createdAt        DateTime             @default(now())
+  updatedAt        DateTime             @updatedAt
+  firstName        String?
+  lastName         String?
+  bookings         Booking[]
+  mentorSessions   Booking[]            @relation("MentorBookings")
+  categoryAttempts CategoryAttempt[]
+  expertProfile    ExpertProfile?
+  practiceFeedback PracticeFeedback[]
+  submissions      PracticeSubmission[]
+  puzzleAttempts   PuzzleAttempt[]
+  reviews          Review[]
+  subscription     Subscription?
+  activities       UserActivity[]
+  streak           UserStreak?
+}
 
-  @@index([createdAt])
-  @@index([provider])
+model ExpertProfile {
+  id              String    @id @default(cuid())
+  userId          String    @unique
+  company         String
+  role            String
+  experienceYears Int
+  linkedInUrl     String?
+  isVerified      Boolean   @default(false)
+  hourlyRateINR   Int
+  skills          String
+  user            User      @relation(fields: [userId], references: [id])
+  services        Service[]
+}
+
+model PracticeQuestion {
+  id           String               @id @default(cuid())
+  title        String
+  description  String
+  category     String
+  difficulty   String
+  solutionText String?
+  sampleAnswer String?
+  createdAt    DateTime             @default(now())
+  submissions  PracticeSubmission[]
+}
+
+model PracticeSubmission {
+  id             String           @id @default(cuid())
+  userId         String
+  questionId     String
+  answerText     String
+  aiScore        String?
+  timeSpent      Int?
+  isGoldStandard Boolean          @default(false)
+  createdAt      DateTime         @default(now())
+  user           User             @relation(fields: [userId], references: [id])
+  question       PracticeQuestion @relation(fields: [questionId], references: [id])
+  reviews        Review[]
+}
+
+model Review {
+  id           String             @id @default(cuid())
+  submissionId String
+  reviewerId   String?
+  type         String
+  content      String
+  score        Int
+  details      String?
+  createdAt    DateTime           @default(now())
+  aiAccuracy   Int?
+  submission   PracticeSubmission @relation(fields: [submissionId], references: [id])
+  reviewer     User?              @relation(fields: [reviewerId], references: [id])
+}
+
+model Service {
+  id          String        @id @default(cuid())
+  expertId    String
+  type        String
+  title       String
+  durationMin Int
+  priceINR    Int
+  expert      ExpertProfile @relation(fields: [expertId], references: [id])
 }
 
 model Booking {
-  id                          String   @id
-  menteeId                    String
-  mentorId                    String
-  serviceId                   String
-  status                      String   @default("PENDING")
-  scheduledAt                 DateTime
-  meetingUrl                  String?
-  createdAt                   DateTime @default(now())
-  User_Booking_menteeIdToUser User     @relation("Booking_menteeIdToUser", fields: [menteeId], references: [id])
-  User_Booking_mentorIdToUser User     @relation("Booking_mentorIdToUser", fields: [mentorId], references: [id])
+  id          String   @id @default(cuid())
+  menteeId    String
+  mentorId    String
+  serviceId   String
+  status      String   @default("PENDING")
+  scheduledAt DateTime
+  meetingUrl  String?
+  createdAt   DateTime @default(now())
+  mentee      User     @relation(fields: [menteeId], references: [id])
+  mentor      User     @relation("MentorBookings", fields: [mentorId], references: [id])
 }
 
-model CategoryAttempt {
-  id        String   @id
-  userId    String
-  category  String
-  count     Int      @default(0)
-  updatedAt DateTime
-  User      User     @relation(fields: [userId], references: [id])
-
-  @@unique([userId, category])
+model UserActivity {
+  id        String   @id @default(cuid())
+  userId    String?
+  page      String
+  action    String
+  metadata  String?
+  ipAddress String?
+  userAgent String?
+  createdAt DateTime @default(now())
+  user      User?    @relation(fields: [userId], references: [id])
 }
 
 model ContactSubmission {
-  id        String    @id
+  id        String    @id @default(cuid())
   name      String
   email     String
   message   String
@@ -57,7 +132,7 @@ model ContactSubmission {
 }
 
 model DailyPuzzle {
-  id            String          @id
+  id            String          @id @default(cuid())
   question      String
   context       String?
   optionA       String
@@ -70,130 +145,34 @@ model DailyPuzzle {
   difficulty    String          @default("Medium")
   publishDate   DateTime
   createdAt     DateTime        @default(now())
-  PuzzleAttempt PuzzleAttempt[]
-}
-
-model ExpertProfile {
-  id              String    @id
-  userId          String    @unique
-  company         String
-  role            String
-  experienceYears Int
-  linkedInUrl     String?
-  isVerified      Boolean   @default(false)
-  hourlyRateINR   Int
-  skills          String
-  User            User      @relation(fields: [userId], references: [id])
-  Service         Service[]
-}
-
-model MentorshipBooking {
-  id                 String              @id
-  userId             String?
-  name               String
-  email              String
-  phone              String
-  serviceType        String
-  paymentProof       String
-  amount             Int
-  status             String              @default("pending")
-  adminNotes         String?
-  scheduledAt        DateTime?
-  meetingLink        String?
-  completedAt        DateTime?
-  reviewedBy         String?
-  reviewedAt         DateTime?
-  createdAt          DateTime            @default(now())
-  MentorshipFeedback MentorshipFeedback?
-}
-
-model MentorshipFeedback {
-  id                String            @id
-  bookingId         String            @unique
-  name              String
-  email             String
-  rating            Int
-  feedback          String
-  wouldRecommend    Boolean           @default(true)
-  createdAt         DateTime          @default(now())
-  MentorshipBooking MentorshipBooking @relation(fields: [bookingId], references: [id])
-}
-
-model PracticeFeedback {
-  id           String   @id
-  userId       String
-  submissionId String?
-  experience   String
-  comments     String?
-  npsScore     Int
-  createdAt    DateTime @default(now())
-  User         User     @relation(fields: [userId], references: [id])
-}
-
-model PracticeQuestion {
-  id                 String               @id
-  title              String
-  description        String
-  category           String
-  difficulty         String
-  solutionText       String?
-  sampleAnswer       String?
-  createdAt          DateTime             @default(now())
-  PracticeSubmission PracticeSubmission[]
-}
-
-model PracticeSubmission {
-  id               String           @id
-  userId           String
-  questionId       String
-  answerText       String
-  aiScore          String?
-  timeSpent        Int?
-  isGoldStandard   Boolean          @default(false)
-  createdAt        DateTime         @default(now())
-  PracticeQuestion PracticeQuestion @relation(fields: [questionId], references: [id])
-  User             User             @relation(fields: [userId], references: [id])
-  Review           Review[]
+  attempts      PuzzleAttempt[]
 }
 
 model PuzzleAttempt {
-  id          String      @id
-  userId      String
-  puzzleId    String
-  answer      String
-  isCorrect   Boolean
-  timeTaken   Int?
-  createdAt   DateTime    @default(now())
-  DailyPuzzle DailyPuzzle @relation(fields: [puzzleId], references: [id])
-  User        User        @relation(fields: [userId], references: [id])
+  id        String      @id @default(cuid())
+  userId    String
+  puzzleId  String
+  answer    String
+  isCorrect Boolean
+  timeTaken Int?
+  createdAt DateTime    @default(now())
+  puzzle    DailyPuzzle @relation(fields: [puzzleId], references: [id])
+  user      User        @relation(fields: [userId], references: [id])
 }
 
-model Review {
-  id                 String             @id
-  submissionId       String
-  reviewerId         String?
-  type               String
-  content            String
-  score              Int
-  details            String?
-  createdAt          DateTime           @default(now())
-  aiAccuracy         Int?
-  User               User?              @relation(fields: [reviewerId], references: [id])
-  PracticeSubmission PracticeSubmission @relation(fields: [submissionId], references: [id])
-}
-
-model Service {
-  id            String        @id
-  expertId      String
-  type          String
-  title         String
-  durationMin   Int
-  priceINR      Int
-  ExpertProfile ExpertProfile @relation(fields: [expertId], references: [id])
+model UserStreak {
+  id            String    @id @default(cuid())
+  userId        String    @unique
+  currentStreak Int       @default(0)
+  longestStreak Int       @default(0)
+  lastPlayedAt  DateTime?
+  totalCorrect  Int       @default(0)
+  totalPlayed   Int       @default(0)
+  user          User      @relation(fields: [userId], references: [id])
 }
 
 model Subscription {
-  id                     String    @id
+  id                     String    @id @default(cuid())
   userId                 String    @unique
   status                 String    @default("inactive")
   planType               String    @default("monthly")
@@ -204,12 +183,23 @@ model Subscription {
   startDate              DateTime?
   endDate                DateTime?
   createdAt              DateTime  @default(now())
-  updatedAt              DateTime
-  User                   User      @relation(fields: [userId], references: [id])
+  updatedAt              DateTime  @updatedAt
+  user                   User      @relation(fields: [userId], references: [id])
+}
+
+model CategoryAttempt {
+  id        String   @id @default(cuid())
+  userId    String
+  category  String
+  count     Int      @default(0)
+  updatedAt DateTime @updatedAt
+  user      User     @relation(fields: [userId], references: [id])
+
+  @@unique([userId, category])
 }
 
 model SubscriptionRequest {
-  id           String    @id
+  id           String    @id @default(cuid())
   userId       String
   name         String
   email        String
@@ -223,49 +213,59 @@ model SubscriptionRequest {
   createdAt    DateTime  @default(now())
 }
 
-model User {
-  id                             String               @id
-  email                          String               @unique
-  authId                         String?              @unique
-  name                           String?
-  image                          String?
-  role                           String               @default("STUDENT")
-  createdAt                      DateTime             @default(now())
-  updatedAt                      DateTime
-  firstName                      String?
-  lastName                       String?
-  Booking_Booking_menteeIdToUser Booking[]            @relation("Booking_menteeIdToUser")
-  Booking_Booking_mentorIdToUser Booking[]            @relation("Booking_mentorIdToUser")
-  CategoryAttempt                CategoryAttempt[]
-  ExpertProfile                  ExpertProfile?
-  PracticeFeedback               PracticeFeedback[]
-  PracticeSubmission             PracticeSubmission[]
-  PuzzleAttempt                  PuzzleAttempt[]
-  Review                         Review[]
-  Subscription                   Subscription?
-  UserActivity                   UserActivity[]
-  UserStreak                     UserStreak?
+model MentorshipBooking {
+  id           String              @id @default(cuid())
+  userId       String?
+  name         String
+  email        String
+  phone        String
+  serviceType  String
+  paymentProof String
+  amount       Int
+  status       String              @default("pending")
+  adminNotes   String?
+  scheduledAt  DateTime?
+  meetingLink  String?
+  completedAt  DateTime?
+  reviewedBy   String?
+  reviewedAt   DateTime?
+  createdAt    DateTime            @default(now())
+  feedback     MentorshipFeedback?
 }
 
-model UserActivity {
-  id        String   @id
-  userId    String?
-  page      String
-  action    String
-  metadata  String?
-  ipAddress String?
-  userAgent String?
-  createdAt DateTime @default(now())
-  User      User?    @relation(fields: [userId], references: [id])
+model MentorshipFeedback {
+  id             String            @id @default(cuid())
+  bookingId      String            @unique
+  name           String
+  email          String
+  rating         Int
+  feedback       String
+  wouldRecommend Boolean           @default(true)
+  createdAt      DateTime          @default(now())
+  booking        MentorshipBooking @relation(fields: [bookingId], references: [id])
 }
 
-model UserStreak {
-  id            String    @id
-  userId        String    @unique
-  currentStreak Int       @default(0)
-  longestStreak Int       @default(0)
-  lastPlayedAt  DateTime?
-  totalCorrect  Int       @default(0)
-  totalPlayed   Int       @default(0)
-  User          User      @relation(fields: [userId], references: [id])
+model PracticeFeedback {
+  id           String   @id @default(cuid())
+  userId       String
+  submissionId String?
+  experience   String
+  comments     String?
+  npsScore     Int
+  createdAt    DateTime @default(now())
+  user         User     @relation(fields: [userId], references: [id])
+}
+
+model ApiUsageLog {
+  id           String   @id @default(cuid())
+  provider     String   // "gemini" or "perplexity"
+  model        String   // e.g., "gemini-pro", "sonar"
+  status       String   // "success", "error", "rate_limit"
+  responseTime Int?     // in milliseconds
+  errorMessage String?
+  tokenCount   Int?     // estimated tokens used
+  createdAt    DateTime @default(now())
+  
+  @@index([createdAt])
+  @@index([provider])
 }
