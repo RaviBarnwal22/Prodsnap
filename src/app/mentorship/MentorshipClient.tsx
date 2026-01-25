@@ -1,7 +1,8 @@
 'use client'
 
-import { useState, useRef } from "react"
+import { useState, useRef, useEffect } from "react"
 import { useRouter } from "next/navigation"
+import { createClient } from '@/lib/supabase/client'
 import {
     Star,
     GraduationCap,
@@ -41,6 +42,18 @@ export default function MentorshipClient() {
     const [paymentProof, setPaymentProof] = useState<string | null>(null)
     const [isUploading, setIsUploading] = useState(false)
     const fileInputRef = useRef<HTMLInputElement>(null)
+
+    // Auto-fill email from logged-in user
+    useEffect(() => {
+        const fetchUserEmail = async () => {
+            const supabase = createClient()
+            const { data: { user } } = await supabase.auth.getUser()
+            if (user?.email) {
+                setEmail(user.email)
+            }
+        }
+        fetchUserEmail()
+    }, [])
 
     // UPI Details
     const UPI_ID = "ravibarnwal22@okhdfcbank"
@@ -182,7 +195,7 @@ export default function MentorshipClient() {
         setPaymentStatus('idle')
         // Reset form
         setFullName('')
-        setEmail('')
+
         setPhone('')
         setPaymentProof(null)
         setErrors({})
@@ -200,12 +213,7 @@ export default function MentorshipClient() {
         }
 
         // Email validation
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-        if (!email.trim()) {
-            newErrors.email = 'Email address is required'
-        } else if (!emailRegex.test(email)) {
-            newErrors.email = 'Please enter a valid email address'
-        }
+
 
         // Phone validation (Indian phone numbers)
         const phoneRegex = /^[+]?[0-9\s-]{10,15}$/
@@ -320,17 +328,24 @@ export default function MentorshipClient() {
                         <div className="p-6">
                             {paymentStatus === 'success' ? (
                                 <div className="text-center py-8">
-                                    <div className="w-20 h-20 bg-green-100 dark:bg-green-900/30 text-green-600 rounded-full flex items-center justify-center mx-auto mb-6 animate-in zoom-in spin-in-12 duration-500">
-                                        <CheckCircle size={40} />
+                                    <div className="w-20 h-20 bg-amber-100 dark:bg-amber-900/30 text-amber-600 rounded-full flex items-center justify-center mx-auto mb-6 animate-in zoom-in spin-in-12 duration-500">
+                                        <Clock size={40} />
                                     </div>
-                                    <h4 className="text-2xl font-bold mb-2">Booking Confirmed!</h4>
+                                    <h4 className="text-2xl font-bold mb-2">Payment Under Review</h4>
                                     <p className="text-gray-600 dark:text-gray-400 mb-8 max-w-xs mx-auto">
-                                        <span className="block mb-2">You have successfully booked:</span>
+                                        <span className="block mb-2">Thank you for submitting your booking request for:</span>
                                         <strong className="text-violet-600">{selectedService.title}</strong>
                                     </p>
-                                    <p className="text-sm text-gray-500 mb-6 bg-gray-50 dark:bg-gray-900 p-4 rounded-xl">
-                                        We sent a confirmation email to <strong>{email}</strong>. Our mentor will reach out shortly.
-                                    </p>
+                                    <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 p-4 rounded-xl mb-6 text-left">
+                                        <p className="text-sm text-amber-900 dark:text-amber-100 font-medium mb-2">
+                                            <strong>What happens next?</strong>
+                                        </p>
+                                        <ul className="text-sm text-amber-800 dark:text-amber-200 space-y-1">
+                                            <li>• Our team will verify your payment screenshot</li>
+                                            <li>• You'll receive a confirmation email at <strong>{email}</strong></li>
+                                            <li>• Verification typically takes 2-24 hours</li>
+                                        </ul>
+                                    </div>
                                     <button
                                         onClick={() => setSelectedService(null)}
                                         className="w-full py-3 bg-violet-600 hover:bg-violet-700 text-white rounded-xl font-bold transition-all"
@@ -350,8 +365,7 @@ export default function MentorshipClient() {
                                             />
                                         </div>
                                         <p className="text-sm font-mono font-bold text-gray-600 dark:text-gray-400 mb-2 select-all break-all px-4">{UPI_ID}</p>
-                                        <p className="font-bold text-xl text-violet-600 mb-1">{selectedService.price}</p>
-                                        <p className="text-xs text-gray-400">Time remaining: 15:00</p>
+                                        <p className="font-bold text-xl text-violet-600">{selectedService.price}</p>
                                     </div>
 
                                     <div className="bg-gray-50 dark:bg-gray-900/50 p-4 rounded-xl space-y-4">
@@ -450,20 +464,7 @@ export default function MentorshipClient() {
                                             />
                                             {errors.fullName && <p className="text-red-500 text-xs mt-1 font-medium">{errors.fullName}</p>}
                                         </div>
-                                        <div>
-                                            <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Email Address <span className="text-red-500">*</span></label>
-                                            <input
-                                                type="email"
-                                                value={email}
-                                                onChange={(e) => {
-                                                    setEmail(e.target.value)
-                                                    if (errors.email) setErrors(prev => ({ ...prev, email: undefined }))
-                                                }}
-                                                className={`w-full px-4 py-3 rounded-xl border ${errors.email ? 'border-red-500 bg-red-50 dark:bg-red-900/10' : 'border-gray-200 dark:border-gray-700'} bg-gray-50 dark:bg-gray-900 transition-all focus:border-violet-500 focus:ring-2 focus:ring-violet-500/20 outline-none`}
-                                                placeholder="Enter your email"
-                                            />
-                                            {errors.email && <p className="text-red-500 text-xs mt-1 font-medium">{errors.email}</p>}
-                                        </div>
+
                                         <div>
                                             <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Phone Number <span className="text-red-500">*</span></label>
                                             <input
@@ -560,6 +561,12 @@ export default function MentorshipClient() {
             {/* Accolades Section */}
             <section className="bg-gray-50 dark:bg-gray-900/50 py-16 px-4">
                 <div className="container mx-auto max-w-6xl">
+                    <div className="text-center mb-12">
+                        <h2 className="text-3xl font-black mb-4">About Ravi</h2>
+                        <p className="text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
+                            Credentials and achievements that make a difference
+                        </p>
+                    </div>
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
                         {mentor.accolades.map((accolade, i) => (
                             <div key={i} className="bg-white dark:bg-gray-800 p-6 rounded-2xl border border-gray-100 dark:border-gray-700 flex flex-col items-center text-center hover:-translate-y-1 transition-transform">

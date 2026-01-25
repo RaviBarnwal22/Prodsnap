@@ -26,6 +26,8 @@ export function AdminPaymentRequests() {
     const [processingId, setProcessingId] = useState<string | null>(null)
     const [selectedEndDate, setSelectedEndDate] = useState<string>('')
     const [searchQuery, setSearchQuery] = useState('')
+    const [rejectingId, setRejectingId] = useState<string | null>(null)
+    const [rejectionReason, setRejectionReason] = useState('')
 
     // Filter requests based on search query (email, name, phone)
     const filteredRequests = requests.filter(r => {
@@ -92,7 +94,7 @@ export function AdminPaymentRequests() {
         }
     }
 
-    const handleAction = async (requestId: string, action: 'approve' | 'reject') => {
+    const handleAction = async (requestId: string, action: 'approve' | 'reject', rejectionReason?: string) => {
         setProcessingId(requestId)
         try {
             const response = await fetch('/api/admin/subscription-requests', {
@@ -101,7 +103,8 @@ export function AdminPaymentRequests() {
                 body: JSON.stringify({
                     requestId,
                     action,
-                    endDate: action === 'approve' ? selectedEndDate || undefined : undefined
+                    endDate: action === 'approve' ? selectedEndDate || undefined : undefined,
+                    rejectionReason: action === 'reject' ? rejectionReason : undefined
                 })
             })
 
@@ -109,6 +112,8 @@ export function AdminPaymentRequests() {
                 fetchRequests()
                 setExpandedId(null)
                 setSelectedEndDate('')
+                setRejectingId(null)
+                setRejectionReason('')
             } else {
                 const data = await response.json()
                 alert(data.error)
@@ -300,15 +305,11 @@ export function AdminPaymentRequests() {
                                                         Approve
                                                     </button>
                                                     <button
-                                                        onClick={() => handleAction(req.id, 'reject')}
+                                                        onClick={() => setRejectingId(req.id)}
                                                         disabled={processingId === req.id}
                                                         className="flex-1 bg-red-600 hover:bg-red-700 text-white py-2 rounded-lg font-bold text-sm flex items-center justify-center gap-2 disabled:opacity-50"
                                                     >
-                                                        {processingId === req.id ? (
-                                                            <Loader2 className="animate-spin" size={16} />
-                                                        ) : (
-                                                            <XCircle size={16} />
-                                                        )}
+                                                        <XCircle size={16} />
                                                         Reject
                                                     </button>
                                                 </div>
@@ -353,6 +354,79 @@ export function AdminPaymentRequests() {
                     <p className="absolute bottom-6 left-1/2 -translate-x-1/2 text-white/60 text-sm">
                         Click anywhere outside or press the close button to dismiss
                     </p>
+                </div>
+            )}
+
+            {/* Rejection Reason Modal */}
+            {rejectingId && (
+                <div
+                    className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80"
+                    onClick={() => {
+                        setRejectingId(null)
+                        setRejectionReason('')
+                    }}
+                >
+                    <div
+                        className="bg-gray-800 rounded-2xl p-6 max-w-md w-full border border-gray-700"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <div className="flex items-center justify-between mb-4">
+                            <h3 className="text-lg font-bold text-white">Reject Payment Request</h3>
+                            <button
+                                onClick={() => {
+                                    setRejectingId(null)
+                                    setRejectionReason('')
+                                }}
+                                className="text-gray-400 hover:text-white"
+                            >
+                                <X size={20} />
+                            </button>
+                        </div>
+                        <p className="text-sm text-gray-400 mb-4">
+                            Please provide a reason for rejecting this payment. This message will be sent to the user via email.
+                        </p>
+                        <textarea
+                            value={rejectionReason}
+                            onChange={(e) => setRejectionReason(e.target.value)}
+                            placeholder="E.g., Payment screenshot is unclear, amount doesn't match, etc."
+                            className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-xl text-white text-sm placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent resize-none"
+                            rows={4}
+                        />
+                        <div className="flex gap-3 mt-4">
+                            <button
+                                onClick={() => {
+                                    setRejectingId(null)
+                                    setRejectionReason('')
+                                }}
+                                className="flex-1 bg-gray-700 hover:bg-gray-600 text-white py-2 rounded-lg font-bold text-sm"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={() => {
+                                    if (!rejectionReason.trim()) {
+                                        alert('Please provide a rejection reason')
+                                        return
+                                    }
+                                    handleAction(rejectingId, 'reject', rejectionReason)
+                                }}
+                                disabled={!rejectionReason.trim() || processingId === rejectingId}
+                                className="flex-1 bg-red-600 hover:bg-red-700 text-white py-2 rounded-lg font-bold text-sm flex items-center justify-center gap-2 disabled:opacity-50"
+                            >
+                                {processingId === rejectingId ? (
+                                    <>
+                                        <Loader2 className="animate-spin" size={16} />
+                                        Rejecting...
+                                    </>
+                                ) : (
+                                    <>
+                                        <XCircle size={16} />
+                                        Confirm Rejection
+                                    </>
+                                )}
+                            </button>
+                        </div>
+                    </div>
                 </div>
             )}
         </>

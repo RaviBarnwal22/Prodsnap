@@ -312,22 +312,23 @@ export async function sendMentorshipBookingConfirmation(data: {
             <style>
                 body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: #333; }
                 .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-                .header { background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; padding: 40px; border-radius: 12px 12px 0 0; text-align: center; }
+                .header { background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: white; padding: 40px; border-radius: 12px 12px 0 0; text-align: center; }
                 .content { background: #f8f9fa; padding: 30px; border-radius: 0 0 12px 12px; }
-                .success-box { background: #d4edda; border: 1px solid #28a745; padding: 20px; border-radius: 8px; margin: 20px 0; text-align: center; }
-                .info-box { background: white; padding: 15px; border-radius: 8px; margin: 15px 0; border-left: 4px solid #10b981; }
+                .pending-box { background: #fff3cd; border: 1px solid #ffc107; padding: 20px; border-radius: 8px; margin: 20px 0; text-align: center; }
+                .info-box { background: white; padding: 15px; border-radius: 8px; margin: 15px 0; border-left: 4px solid #f59e0b; }
                 .footer { text-align: center; margin-top: 30px; color: #999; font-size: 12px; }
             </style>
         </head>
         <body>
             <div class="container">
                 <div class="header">
-                    <h1 style="margin: 0;">🎉 Session Booked!</h1>
-                    <p style="margin: 10px 0 0 0; opacity: 0.9;">Congratulations ${data.name}!</p>
+                    <h1 style="margin: 0;">📧 Payment Received!</h1>
+                    <p style="margin: 10px 0 0 0; opacity: 0.9;">Thank you ${data.name}!</p>
                 </div>
                 <div class="content">
-                    <div class="success-box">
-                        <h2 style="margin: 0; color: #155724;">Your mentorship session is confirmed!</h2>
+                    <div class="pending-box">
+                        <h2 style="margin: 0; color: #856404;">⏳ Payment Under Review</h2>
+                        <p style="margin: 10px 0 0 0; color: #856404;">Your payment is being verified by our team</p>
                     </div>
                     
                     <div class="info-box">
@@ -340,12 +341,17 @@ export async function sendMentorshipBookingConfirmation(data: {
                     
                     <div class="info-box">
                         <strong>📞 What's Next?</strong>
-                        <p style="margin: 5px 0 0 0;">Our mentor will reach out to you shortly on your registered phone number to schedule the session.</p>
+                        <p style="margin: 5px 0 0 0;">Our team will verify your payment screenshot within 2-24 hours. Once approved, our mentor will reach out to you on your registered phone number to schedule the session.</p>
+                    </div>
+
+                    <div class="info-box" style="background: #e0f2fe; border-left-color: #3b82f6;">
+                        <strong style="color: #1e40af;">Need Help?</strong>
+                        <p style="margin: 5px 0 0 0; color: #1e40af;">Contact us at info.prodsnap@gmail.com if you have any questions.</p>
                     </div>
                 </div>
                 <div class="footer">
                     <p>Thank you for choosing Prodsnap Mentorship!</p>
-                    <p>Questions? Contact us at info.prodsnap@gmail.com</p>
+                    <p>© Prodsnap - Master PM Interviews with AI Feedback</p>
                 </div>
             </div>
         </body>
@@ -354,7 +360,7 @@ export async function sendMentorshipBookingConfirmation(data: {
 
     return sendEmail({
         to: data.email,
-        subject: `🎉 Session Booked! ${data.serviceType} Confirmed | Prodsnap`,
+        subject: `⏳ Payment Received - Under Review | ${data.serviceType} | Prodsnap`,
         html,
         type: 'mentorship'
     })
@@ -511,8 +517,19 @@ export async function sendMentorshipScheduledEmail(data: {
     scheduledAt: Date
     meetingLink: string
 }) {
-    const date = data.scheduledAt.toLocaleDateString('en-IN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })
-    const time = data.scheduledAt.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })
+    // Format date and time in IST (Asia/Kolkata timezone)
+    const date = data.scheduledAt.toLocaleDateString('en-IN', {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        timeZone: 'Asia/Kolkata'
+    })
+    const time = data.scheduledAt.toLocaleTimeString('en-IN', {
+        hour: '2-digit',
+        minute: '2-digit',
+        timeZone: 'Asia/Kolkata'
+    })
 
     // Google Calendar Link generator
     // Format: YYYYMMDDTHHmmssZ (UTC)
@@ -707,5 +724,83 @@ export async function sendSupportReply(data: {
         subject: `Re: Your Inquiry on Prodsnap - Response from Support`,
         html,
         type: 'support_reply'
+    })
+}
+
+// Send rejection notification to user
+export async function sendRejectionNotification(data: {
+    name: string
+    email: string
+    reason: string
+    type: 'subscription' | 'mentorship'
+}) {
+    const html = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <style>
+                body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: #333; }
+                .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+                .header { background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); color: white; padding: 40px; border-radius: 12px 12px 0 0; text-align: center; }
+                .content { background: #f8f9fa; padding: 30px; border-radius: 0 0 12px 12px; }
+                .alert-box { background: #fee2e2; border: 1px solid #ef4444; padding: 20px; border-radius: 8px; margin: 20px 0; }
+                .reason-box { background: white; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #ef4444; }
+                .info-box { background: #dbeafe; padding: 15px; border-radius: 8px; margin: 15px 0; border-left: 4px solid #3b82f6; }
+                .cta { display: inline-block; background: #3b82f6; color: white; padding: 15px 30px; border-radius: 8px; text-decoration: none; font-weight: bold; margin-top: 20px; }
+                .footer { text-align: center; margin-top: 30px; color: #999; font-size: 12px; }
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <div class="header">
+                    <h1 style="margin: 0;">Payment Request Update</h1>
+                    <p style="margin: 10px 0 0 0; opacity: 0.9;">Regarding your ${data.type === 'subscription' ? 'Premium Subscription' : 'Mentorship Booking'} request</p>
+                </div>
+                <div class="content">
+                    <p>Hi <strong>${data.name}</strong>,</p>
+                    
+                    <div class="alert-box">
+                        <p style="margin: 0; color: #991b1b; font-weight: 600;">Unfortunately, we were unable to verify your payment at this time.</p>
+                    </div>
+                    
+                    <div class="reason-box">
+                        <strong style="color: #ef4444;">Reason:</strong>
+                        <p style="margin: 10px 0 0 0; color: #374151;">${data.reason}</p>
+                    </div>
+                    
+                    <div class="info-box">
+                        <strong style="color: #1e40af;">What can you do?</strong>
+                        <ul style="margin: 10px 0 0 0; padding-left: 20px; color: #1e40af;">
+                            <li>Double-check your payment screenshot and resubmit</li>
+                            <li>Ensure the payment amount matches the ${data.type === 'subscription' ? 'subscription' : 'service'} price</li>
+                            <li>Make sure the screenshot is clear and readable</li>
+                            <li>Contact us if you believe this was an error</li>
+                        </ul>
+                    </div>
+                    
+                    <div style="text-align: center;">
+                        <a href="${process.env.NEXT_PUBLIC_APP_URL || 'https://prodsnap-gamma.vercel.app'}/${data.type === 'subscription' ? 'practice' : 'mentorship'}" class="cta">
+                            Try Again →
+                        </a>
+                    </div>
+                    
+                    <p style="margin-top: 30px; color: #666; font-size: 14px;">
+                        If you have any questions or need assistance, please reply to this email or contact us at info.prodsnap@gmail.com
+                    </p>
+                </div>
+                <div class="footer">
+                    <p>Thank you for your understanding</p>
+                    <p>© Prodsnap - Master PM Interviews with AI Feedback</p>
+                </div>
+            </div>
+        </body>
+        </html>
+    `
+
+    return sendEmail({
+        to: data.email,
+        subject: `Payment Request Update - ${data.type === 'subscription' ? 'Premium Subscription' : 'Mentorship Booking'} | Prodsnap`,
+        html,
+        type: 'rejection'
     })
 }

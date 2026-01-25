@@ -237,7 +237,7 @@ export default function BlogPage() {
                 <section className="py-20 bg-blue-50 dark:bg-blue-900/10 flex justify-center">
                     <div className="text-center px-4">
                         <h3 className="text-2xl font-bold mb-2">Want new articles in your inbox?</h3>
-                        <p className="text-gray-500 mb-6">Join 15,000+ ambitious PMs subscribing to our weekly newsletter.</p>
+                        <p className="text-gray-500 mb-6">Join 2,000+ ambitious PMs subscribing to our weekly newsletter.</p>
                         <form className="flex flex-col sm:row gap-2 max-w-md mx-auto">
                             <input type="email" placeholder="email@example.com" className="px-6 py-3 rounded-full border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800" />
                             <button className="bg-blue-600 text-white px-8 py-3 rounded-full font-bold">Subscribe</button>

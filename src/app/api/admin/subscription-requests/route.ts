@@ -40,7 +40,7 @@ export async function PUT(request: NextRequest) {
         }
 
         const body = await request.json()
-        const { requestId, action, endDate, notes } = body
+        const { requestId, action, endDate, rejectionReason } = body
 
         if (!requestId || !action) {
             return NextResponse.json(
@@ -52,6 +52,13 @@ export async function PUT(request: NextRequest) {
         if (action !== "approve" && action !== "reject") {
             return NextResponse.json(
                 { error: "Invalid action. Must be 'approve' or 'reject'" },
+                { status: 400 }
+            )
+        }
+
+        if (action === "reject" && !rejectionReason?.trim()) {
+            return NextResponse.json(
+                { error: "Rejection reason is required" },
                 { status: 400 }
             )
         }
@@ -75,7 +82,7 @@ export async function PUT(request: NextRequest) {
                 status: action === "approve" ? "approved" : "rejected",
                 reviewedBy: user.id,
                 reviewedAt: new Date(),
-                adminNotes: notes || null
+                adminNotes: action === "reject" ? rejectionReason : null
             }
         })
 
@@ -107,6 +114,15 @@ export async function PUT(request: NextRequest) {
                 email: subscriptionRequest.email,
                 endDate: subscriptionEndDate
             }).catch(err => console.error('Approval email failed:', err))
+        } else {
+            // Send rejection email with reason
+            const { sendRejectionNotification } = await import('@/lib/email')
+            await sendRejectionNotification({
+                name: subscriptionRequest.name,
+                email: subscriptionRequest.email,
+                reason: rejectionReason,
+                type: 'subscription'
+            }).catch(err => console.error('Rejection email failed:', err))
         }
 
         return NextResponse.json({

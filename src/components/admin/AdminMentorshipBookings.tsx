@@ -91,8 +91,15 @@ export function AdminMentorshipBookings() {
         if (!schedulingBooking) return
 
         try {
-            // Combine date and time
-            const scheduledAt = new Date(`${scheduledDate}T${scheduledTime}`)
+            // Combine date and time - treat as IST (UTC+5:30)
+            // The input date/time is what the admin sees in IST
+            const localDateTime = `${scheduledDate}T${scheduledTime}:00`
+            const scheduledAt = new Date(localDateTime)
+
+            // Verify the date is valid
+            if (isNaN(scheduledAt.getTime())) {
+                throw new Error('Invalid date/time')
+            }
 
             await handleAction(schedulingBooking.id, 'approve', {
                 scheduledAt: scheduledAt.toISOString(),
@@ -104,7 +111,7 @@ export function AdminMentorshipBookings() {
             setScheduledTime('')
             setMeetingLink('')
         } catch (e) {
-            alert('Invalid date/time')
+            alert('Invalid date/time. Please check your inputs.')
         }
     }
 

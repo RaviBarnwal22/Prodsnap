@@ -249,31 +249,9 @@ export default async function Home() {
           </div>
         </section>
 
-        {/* Newsletter Section */}
-        <section className="py-24 bg-gradient-to-r from-violet-600 via-purple-600 to-indigo-600 relative overflow-hidden">
-          {/* Decorative elements */}
-          <div className="absolute inset-0 pointer-events-none overflow-hidden">
-            <div className="absolute -top-20 -right-20 w-60 h-60 bg-white/10 rounded-full blur-2xl"></div>
-            <div className="absolute -bottom-20 -left-20 w-60 h-60 bg-white/10 rounded-full blur-2xl"></div>
-          </div>
-
-          <div className="container mx-auto px-4 text-center max-w-3xl relative z-10">
-            <h2 className="text-4xl font-black mb-6 text-white">Stay Ahead of the Curve</h2>
-            <p className="text-lg text-white/80 mb-10 font-medium">
-              We release new case studies and interview guides every Tuesday. Join our mailing list to never miss a deep dive.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center max-w-md mx-auto">
-              <input type="email" placeholder="Enter your email" className="px-6 py-4 rounded-full border-2 border-white/20 bg-white/10 backdrop-blur-sm flex-grow focus:ring-2 focus:ring-white/50 outline-none text-white placeholder:text-white/60 font-medium" />
-              <button className="bg-white text-purple-600 px-8 py-4 rounded-full font-black hover:bg-white/90 transition shadow-lg">
-                Subscribe
-              </button>
-            </div>
-          </div>
-        </section>
       </main>
 
       <Footer />
     </div>
   )
 }
-
