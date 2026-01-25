@@ -197,7 +197,7 @@ export async function sendPaymentConfirmationToUser(data: {
                     
                     <div class="info-box">
                         <strong>Need help?</strong>
-                        <p style="margin: 5px 0 0 0;">Contact us at info.prodsnap@gmail.com if you have any questions.</p>
+                        <p style="margin: 5px 0 0 0;">Contact us at support@prodsnap.in if you have any questions.</p>
                     </div>
                 </div>
                 <div class="footer">
@@ -282,7 +282,7 @@ export async function sendApprovalNotification(data: {
                 </div>
                 <div class="footer">
                     <p>Thank you for trusting Prodsnap!</p>
-                    <p>Questions? Contact us at info.prodsnap@gmail.com</p>
+                    <p>Questions? Contact us at support@prodsnap.in</p>
                     <p>© Prodsnap - Master PM Interviews with AI Feedback</p>
                 </div>
             </div>
@@ -346,7 +346,7 @@ export async function sendMentorshipBookingConfirmation(data: {
 
                     <div class="info-box" style="background: #e0f2fe; border-left-color: #3b82f6;">
                         <strong style="color: #1e40af;">Need Help?</strong>
-                        <p style="margin: 5px 0 0 0; color: #1e40af;">Contact us at info.prodsnap@gmail.com if you have any questions.</p>
+                        <p style="margin: 5px 0 0 0; color: #1e40af;">Contact us at support@prodsnap.in if you have any questions.</p>
                     </div>
                 </div>
                 <div class="footer">
@@ -785,7 +785,7 @@ export async function sendRejectionNotification(data: {
                     </div>
                     
                     <p style="margin-top: 30px; color: #666; font-size: 14px;">
-                        If you have any questions or need assistance, please reply to this email or contact us at info.prodsnap@gmail.com
+                        If you have any questions or need assistance, please reply to this email or contact us at support@prodsnap.in
                     </p>
                 </div>
                 <div class="footer">

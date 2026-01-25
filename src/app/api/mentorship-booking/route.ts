@@ -7,7 +7,7 @@ export async function POST(request: NextRequest) {
     try {
         const user = await getUser()
         const body = await request.json()
-        const { name, phone, serviceType, paymentProof, amount, email } = body
+        const { name, phone, serviceType, paymentProof, amount, email, linkedinProfile, messageToMentor } = body
 
         // If user is logged in, use their email as fallback or override
         const contactEmail = user?.email || email
@@ -37,6 +37,8 @@ export async function POST(request: NextRequest) {
                 serviceType,
                 paymentProof,
                 amount,
+                linkedinProfile,
+                messageToMentor,
                 status: "pending"
             }
         })

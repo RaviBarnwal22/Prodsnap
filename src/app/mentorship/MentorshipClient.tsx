@@ -36,6 +36,8 @@ export default function MentorshipClient() {
     const [fullName, setFullName] = useState('')
     const [email, setEmail] = useState('')
     const [phone, setPhone] = useState('')
+    const [linkedin, setLinkedin] = useState('')
+    const [message, setMessage] = useState('')
     const [errors, setErrors] = useState<{ fullName?: string; email?: string; phone?: string }>({})
 
     // Payment proof state
@@ -197,6 +199,8 @@ export default function MentorshipClient() {
         setFullName('')
 
         setPhone('')
+        setLinkedin('')
+        setMessage('')
         setPaymentProof(null)
         setErrors({})
         setErrorMessage('')
@@ -283,6 +287,8 @@ export default function MentorshipClient() {
                     name: fullName,
                     email,
                     phone,
+                    linkedinProfile: linkedin,
+                    messageToMentor: message,
                     serviceType: selectedService.title,
                     paymentProof,
                     amount: getServicePrice(selectedService.price)
@@ -478,6 +484,38 @@ export default function MentorshipClient() {
                                                 placeholder="+91 98765 43210"
                                             />
                                             {errors.phone && <p className="text-red-500 text-xs mt-1 font-medium">{errors.phone}</p>}
+                                        </div>
+
+                                        <div>
+                                            <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">
+                                                LinkedIn Profile <span className="text-gray-400 font-normal text-xs">(Optional)</span>
+                                            </label>
+                                            <input
+                                                type="url"
+                                                value={linkedin}
+                                                onChange={(e) => setLinkedin(e.target.value)}
+                                                className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 transition-all focus:border-violet-500 focus:ring-2 focus:ring-violet-500/20 outline-none"
+                                                placeholder="https://linkedin.com/in/your-profile"
+                                            />
+                                            <p className="text-xs text-gray-500 mt-1">
+                                                Helping the mentor understand your background.
+                                            </p>
+                                        </div>
+
+                                        <div>
+                                            <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">
+                                                Message to Mentor <span className="text-gray-400 font-normal text-xs">(Optional)</span>
+                                            </label>
+                                            <textarea
+                                                value={message}
+                                                onChange={(e) => setMessage(e.target.value)}
+                                                rows={3}
+                                                className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 transition-all focus:border-violet-500 focus:ring-2 focus:ring-violet-500/20 outline-none resize-none"
+                                                placeholder="Any specific goals, topics, or context you'd like to share..."
+                                            />
+                                            <p className="text-xs text-gray-500 mt-1">
+                                                Share your goals so the mentor can be better prepared.
+                                            </p>
                                         </div>
                                     </div>
 
