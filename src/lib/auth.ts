@@ -14,6 +14,14 @@ export const getUser = cache(async () => {
         where: { authId: user.id }
     })
 
+    if (prismaUser) {
+        // Update last login time asynchronously
+        await prisma.user.update({
+            where: { id: prismaUser.id },
+            data: { lastLoginAt: new Date() }
+        })
+    }
+
     if (!prismaUser) {
         // Check if user exists by email and update them
         const existingUserByEmail = await prisma.user.findUnique({

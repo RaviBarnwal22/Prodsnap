@@ -17,6 +17,7 @@ model User {
   role             String               @default("STUDENT")
   createdAt        DateTime             @default(now())
   updatedAt        DateTime             @updatedAt
+  lastLoginAt      DateTime?
   firstName        String?
   lastName         String?
   bookings         Booking[]

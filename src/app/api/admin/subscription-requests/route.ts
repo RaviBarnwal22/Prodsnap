@@ -139,3 +139,31 @@ export async function PUT(request: NextRequest) {
         )
     }
 }
+
+// Delete a subscription request
+export async function DELETE(request: NextRequest) {
+    try {
+        const user = await getUser()
+        const { searchParams } = new URL(request.url)
+        const requestId = searchParams.get('id')
+
+        // Check admin access
+        const isAdmin = user?.email === 'ravibarnwal89@gmail.com' || user?.role === 'ADMIN'
+        if (!user || !isAdmin) {
+            return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+        }
+
+        if (!requestId) {
+            return NextResponse.json({ error: "Request ID is required" }, { status: 400 })
+        }
+
+        await prisma.subscriptionRequest.delete({
+            where: { id: requestId }
+        })
+
+        return NextResponse.json({ success: true, message: "Request deleted successfully" })
+    } catch (error) {
+        console.error("Error deleting request:", error)
+        return NextResponse.json({ error: "Failed to delete request" }, { status: 500 })
+    }
+}
