@@ -5,6 +5,7 @@ import Link from "next/link"
 import Image from "next/image"
 import { Users, Activity, FileText, Calendar, MessageSquare, BarChart3, ShieldCheck, LogOut, Home } from "lucide-react"
 import { AdminUserList } from "@/components/admin/AdminUserList"
+import { UserFeedbackList } from "@/components/admin/UserFeedbackList"
 import { AdminPaymentRequests } from "@/components/admin/AdminPaymentRequests"
 import { AdminMentorshipBookings } from "@/components/admin/AdminMentorshipBookings"
 import { AdminSupportQueue } from "@/components/admin/AdminSupportQueue"
@@ -360,6 +361,29 @@ export default async function AdminPage() {
                         <div className="space-y-8">
                             {/* Users List (Client Component) */}
                             <AdminUserList users={users} />
+
+                            {/* User Feedback List */}
+                            <div className="bg-gray-800 rounded-2xl p-6 border border-gray-700">
+                                <UserFeedbackList feedbacks={await prisma.practiceFeedback.findMany({
+                                    orderBy: { createdAt: 'desc' },
+                                    include: {
+                                        user: {
+                                            select: {
+                                                id: true,
+                                                name: true,
+                                                email: true
+                                            }
+                                        },
+                                        submission: {
+                                            select: {
+                                                question: {
+                                                    select: { title: true }
+                                                }
+                                            }
+                                        }
+                                    }
+                                })} />
+                            </div>
                         </div>
                     }
                     supportContent={
