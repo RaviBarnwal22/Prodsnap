@@ -2,7 +2,7 @@ export const dynamic = "force-dynamic"
 import { prisma } from "@/lib/prisma"
 import Link from "next/link"
 import { Header } from "@/components/Header"
-import { Briefcase, BarChart3, TrendingUp, ArrowRight, Sparkles, ChevronLeft, Cpu, Rocket, Users, Search, Calculator, Lock, Unlock } from "lucide-react"
+import { Briefcase, BarChart3, TrendingUp, ArrowRight, Sparkles, ChevronLeft, Cpu, Rocket, Users, Search, Calculator, Lock, Unlock, CheckCircle } from "lucide-react"
 import { getUser } from "@/lib/auth"
 import { SkillRadarChart } from "@/components/SkillRadarChart"
 import { getTotalAttemptCount, hasActiveSubscription } from "@/lib/subscription"
@@ -144,6 +144,20 @@ export default async function PracticePage({
     const totalAttempts = await getTotalAttemptCount()
     const attemptsRemaining = Math.max(0, FREE_ATTEMPT_LIMIT - totalAttempts)
 
+    // Fetch user's attempted question IDs
+    let attemptedQuestionIds = new Set<string>()
+    if (user) {
+        const submissions = await prisma.practiceSubmission.findMany({
+            where: {
+                userId: user.id
+            },
+            select: {
+                questionId: true
+            }
+        })
+        attemptedQuestionIds = new Set(submissions.map(s => s.questionId))
+    }
+
     return (
         <div className="min-h-screen bg-white dark:bg-gray-950 flex flex-col">
             <Header />
@@ -245,6 +259,12 @@ export default async function PracticePage({
                                         )}
                                         {isPremium ? (
                                             <div className="absolute top-4 right-4 flex gap-2">
+                                                {attemptedQuestionIds.has(q.id) && (
+                                                    <span className="bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 text-[8px] font-black px-2 py-0.5 rounded-full uppercase tracking-widest border border-green-200 dark:border-green-800 flex items-center gap-1">
+                                                        <CheckCircle size={8} />
+                                                        Attempted
+                                                    </span>
+                                                )}
                                                 <span className="bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400 text-[8px] font-black px-2 py-0.5 rounded-full uppercase tracking-widest border border-violet-200 dark:border-violet-800 flex items-center gap-1">
                                                     <Crown size={8} />
                                                     Premium Access
@@ -252,6 +272,12 @@ export default async function PracticePage({
                                             </div>
                                         ) : !isLocked && (
                                             <div className="absolute top-4 right-4 flex gap-2">
+                                                {attemptedQuestionIds.has(q.id) && (
+                                                    <span className="bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 text-[8px] font-black px-2 py-0.5 rounded-full uppercase tracking-widest border border-green-200 dark:border-green-800 flex items-center gap-1">
+                                                        <CheckCircle size={8} />
+                                                        Attempted
+                                                    </span>
+                                                )}
                                                 <span className={`${hasHitLimit ? 'bg-amber-100 text-amber-600 border-amber-200' : 'bg-green-100 text-green-600 border-green-200'} dark:bg-opacity-20 text-[8px] font-black px-2 py-0.5 rounded-full uppercase tracking-widest border`}>
                                                     {hasHitLimit ? 'Viewable (Trial Used)' : 'Solve (Trial Open)'}
                                                 </span>
