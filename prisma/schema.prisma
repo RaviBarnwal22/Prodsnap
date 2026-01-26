@@ -72,6 +72,7 @@ model PracticeSubmission {
   user           User             @relation(fields: [userId], references: [id])
   question       PracticeQuestion @relation(fields: [questionId], references: [id])
   reviews        Review[]
+  feedbacks      PracticeFeedback[]
 }
 
 model Review {
@@ -257,8 +258,9 @@ model PracticeFeedback {
   experience   String
   comments     String?
   npsScore     Int
-  createdAt    DateTime @default(now())
-  user         User     @relation(fields: [userId], references: [id])
+  createdAt    DateTime           @default(now())
+  user         User               @relation(fields: [userId], references: [id])
+  submission   PracticeSubmission? @relation(fields: [submissionId], references: [id])
 }
 
 model ApiUsageLog {

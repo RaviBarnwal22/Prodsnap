@@ -249,10 +249,25 @@ export function AnswerForm({ questionId, questionTitle, userId, category, descri
                 setSubmissionId(response.submissionId || null)
 
 
-                // Show feedback modal after 2 seconds
+                // Wait 30 seconds, then check for scroll depth
                 setTimeout(() => {
-                    setShowFeedbackModal(true)
-                }, 2000)
+                    const handleScrollCheck = () => {
+                        const scrollPosition = window.innerHeight + window.scrollY;
+                        const pageHeight = document.documentElement.scrollHeight;
+
+                        // If user is within 100px of the bottom (or end of content)
+                        if (scrollPosition >= pageHeight - 500) {
+                            setShowFeedbackModal(true);
+                            window.removeEventListener('scroll', handleScrollCheck);
+                        }
+                    };
+
+                    // Check immediately in case they are already at bottom
+                    handleScrollCheck();
+
+                    // If not shown yet, listen for scroll
+                    window.addEventListener('scroll', handleScrollCheck);
+                }, 30000);
 
                 // Fetch submission count to check if we should show mentor suggestion
                 try {
@@ -422,6 +437,16 @@ export function AnswerForm({ questionId, questionTitle, userId, category, descri
                         <p className="text-violet-50 leading-relaxed font-medium text-base whitespace-pre-wrap">
                             {result.feedback}
                         </p>
+                        <div className="mt-8 pt-4 border-t border-white/20 flex flex-col items-center">
+                            <p className="text-sm font-medium mb-3 opacity-90">How helpful was this AI feedback?</p>
+                            <button
+                                onClick={() => setShowFeedbackModal(true)}
+                                className="bg-white text-violet-700 hover:bg-violet-50 px-6 py-2 rounded-full font-bold transition-all shadow-md flex items-center gap-2 group"
+                            >
+                                <Sparkles size={16} className="text-violet-500 group-hover:text-violet-600" />
+                                Rate Feedback
+                            </button>
+                        </div>
                     </div>
 
                     {/* Strengths & Weaknesses */}
@@ -508,6 +533,33 @@ export function AnswerForm({ questionId, questionTitle, userId, category, descri
                         Clear & Retry
                     </button>
                 </div>
+
+                {/* Modals for Result View */}
+                <PracticeFeedbackModal
+                    isOpen={showFeedbackModal}
+                    onClose={() => setShowFeedbackModal(false)}
+                    onSubmit={async (data) => {
+                        await submitPracticeFeedback({
+                            ...data,
+                            submissionId: submissionId || undefined
+                        })
+                    }}
+                />
+
+                <MentorSuggestionModal
+                    isOpen={showMentorSuggestion}
+                    onClose={() => setShowMentorSuggestion(false)}
+                    completedSessions={submissionCount}
+                />
+
+                <ErrorModal
+                    isOpen={showErrorModal}
+                    onClose={() => {
+                        setShowErrorModal(false)
+                        setError(null)
+                    }}
+                    errorMessage={error || undefined}
+                />
             </div>
         )
     }
