@@ -372,6 +372,11 @@ export default function MentorshipClient() {
                                         </div>
                                         <p className="text-sm font-mono font-bold text-gray-600 dark:text-gray-400 mb-2 select-all break-all px-4">{UPI_ID}</p>
                                         <p className="font-bold text-xl text-violet-600">{selectedService.price}</p>
+                                        <div className="mt-4 pt-4 border-t border-gray-100 dark:border-gray-700 w-full max-w-xs mx-auto">
+                                            <p className="text-xs text-center text-gray-500 italic">
+                                                If you are from outside India, kindly drop a line to <a href="mailto:support@prodsnap.in" className="text-violet-600 hover:underline">support@prodsnap.in</a> and we will assist you.
+                                            </p>
+                                        </div>
                                     </div>
 
                                     <div className="bg-gray-50 dark:bg-gray-900/50 p-4 rounded-xl space-y-4">

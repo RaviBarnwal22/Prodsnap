@@ -18,6 +18,7 @@ interface UserWithStats {
     createdAt: Date;
     firstName: string | null;
     lastName: string | null;
+    lastLoginAt: Date | null;
     subscription: Subscription | null;
     _count: {
         submissions: number;
@@ -64,7 +65,10 @@ export function AdminUserList({ users }: { users: UserWithStats[] }) {
     const [pendingPremiumUser, setPendingPremiumUser] = useState<UserWithStats | null>(null)
     const [endDate, setEndDate] = useState('')
     const [isUpdating, setIsUpdating] = useState<string | null>(null)
+    const [isDeleting, setIsDeleting] = useState<string | null>(null)
     const [localUsers, setLocalUsers] = useState(users)
+    const [filterStartDate, setFilterStartDate] = useState('')
+    const [filterEndDate, setFilterEndDate] = useState('')
     const [searchQuery, setSearchQuery] = useState('')
     const [showPremiumOnly, setShowPremiumOnly] = useState(false)
     const [selectedSubmission, setSelectedSubmission] = useState<SelectedSubmission | null>(null)
@@ -93,6 +97,7 @@ export function AdminUserList({ users }: { users: UserWithStats[] }) {
     }
 
     // Filter users based on search query and premium filter
+    // Filter users based on search query, premium filter, and date range
     const filteredUsers = localUsers.filter(u => {
         const matchesSearch = u.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
             (u.firstName && u.firstName.toLowerCase().includes(searchQuery.toLowerCase())) ||
@@ -101,7 +106,18 @@ export function AdminUserList({ users }: { users: UserWithStats[] }) {
 
         const matchesPremium = showPremiumOnly ? checkIsPremium(u) : true
 
-        return matchesSearch && matchesPremium
+        let matchesDate = true
+        if (filterStartDate) {
+            matchesDate = matchesDate && new Date(u.createdAt) >= new Date(filterStartDate)
+        }
+        if (filterEndDate) {
+            // Set end date to end of day
+            const end = new Date(filterEndDate)
+            end.setHours(23, 59, 59, 999)
+            matchesDate = matchesDate && new Date(u.createdAt) <= end
+        }
+
+        return matchesSearch && matchesPremium && matchesDate
     })
 
     // Helper function to escape CSV values
@@ -222,6 +238,35 @@ export function AdminUserList({ users }: { users: UserWithStats[] }) {
         }
     }
 
+    const handleDeleteUser = async (userId: string) => {
+        if (!confirm('Are you sure you want to delete this user? This action cannot be undone and will delete all their data.')) {
+            return
+        }
+
+        setIsDeleting(userId)
+        try {
+            const res = await fetch(`/api/admin/users?id=${userId}`, {
+                method: 'DELETE'
+            })
+
+            if (res.ok) {
+                setLocalUsers(prev => prev.filter(u => u.id !== userId))
+                if (selectedUser?.id === userId) {
+                    setSelectedUser(null)
+                }
+                alert('User deleted successfully')
+            } else {
+                const data = await res.json()
+                alert(data.error || 'Failed to delete user')
+            }
+        } catch (error) {
+            console.error('Failed to delete user:', error)
+            alert('Failed to delete user')
+        } finally {
+            setIsDeleting(null)
+        }
+    }
+
     return (
         <div className="bg-gray-800 rounded-2xl p-6 border border-gray-700 relative">
             <div className="flex items-center justify-between mb-4 flex-wrap gap-4">
@@ -249,7 +294,7 @@ export function AdminUserList({ users }: { users: UserWithStats[] }) {
             </div>
 
             {/* Search Bar and Filters */}
-            <div className="flex gap-3 mb-4">
+            <div className="flex flex-col md:flex-row gap-3 mb-4">
                 <div className="relative flex-1">
                     <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
                     <input
@@ -260,6 +305,30 @@ export function AdminUserList({ users }: { users: UserWithStats[] }) {
                         className="w-full pl-12 pr-4 py-3 bg-gray-700 border border-gray-600 rounded-xl text-white placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     />
                 </div>
+
+                {/* Date Range Filter */}
+                <div className="flex items-center gap-2 bg-gray-700 rounded-xl px-3 border border-gray-600">
+                    <div className="flex items-center gap-2">
+                        <span className="text-xs text-gray-400 font-bold uppercase">From</span>
+                        <input
+                            type="date"
+                            value={filterStartDate}
+                            onChange={(e) => setFilterStartDate(e.target.value)}
+                            className="bg-transparent text-white text-sm outline-none py-2"
+                        />
+                    </div>
+                    <div className="w-px h-6 bg-gray-600"></div>
+                    <div className="flex items-center gap-2">
+                        <span className="text-xs text-gray-400 font-bold uppercase">To</span>
+                        <input
+                            type="date"
+                            value={filterEndDate}
+                            onChange={(e) => setFilterEndDate(e.target.value)}
+                            className="bg-transparent text-white text-sm outline-none py-2"
+                        />
+                    </div>
+                </div>
+
                 <button
                     onClick={() => setShowPremiumOnly(!showPremiumOnly)}
                     className={`flex items-center gap-2 px-4 py-3 rounded-xl font-bold text-sm transition-colors whitespace-nowrap ${showPremiumOnly
@@ -305,7 +374,15 @@ export function AdminUserList({ users }: { users: UserWithStats[] }) {
                                         </span>
                                     )}
                                 </h3>
-                                <p className="text-sm text-gray-400">{u.email}</p>
+                                <div className="flex flex-col gap-0.5 mt-1">
+                                    <p className="text-sm text-gray-400">{u.email}</p>
+                                    <div className="flex gap-4 text-[10px] text-gray-500 font-medium">
+                                        <span>Joined: {formatDate(u.createdAt)}</span>
+                                        {u.lastLoginAt && (
+                                            <span className="text-blue-400">Active: {formatDate(u.lastLoginAt)}</span>
+                                        )}
+                                    </div>
+                                </div>
                             </div>
                         </button>
 
@@ -423,12 +500,25 @@ export function AdminUserList({ users }: { users: UserWithStats[] }) {
                                 </div>
                                 <p className="text-gray-400 font-medium">{selectedUser.email}</p>
                             </div>
-                            <button
-                                onClick={() => setSelectedUser(null)}
-                                className="p-2 hover:bg-gray-700 rounded-full transition-colors"
-                            >
-                                <X size={24} className="text-gray-400" />
-                            </button>
+                            <div className="flex gap-2">
+                                {/* Delete Button */}
+                                <button
+                                    onClick={() => handleDeleteUser(selectedUser.id)}
+                                    disabled={isDeleting === selectedUser.id}
+                                    className="p-2 hover:bg-red-500/20 text-red-400 rounded-full transition-colors disabled:opacity-50"
+                                    title="Delete User"
+                                >
+                                    <Brain size={20} className={isDeleting === selectedUser.id ? "animate-spin" : ""} />
+                                    {isDeleting !== selectedUser.id && <X size={20} className="rotate-45" />}
+                                    {/* Using rotated X as makeshift delete or just use Trash icon if imported */}
+                                </button>
+                                <button
+                                    onClick={() => setSelectedUser(null)}
+                                    className="p-2 hover:bg-gray-700 rounded-full transition-colors"
+                                >
+                                    <X size={24} className="text-gray-400" />
+                                </button>
+                            </div>
                         </div>
 
                         <div className="p-8 max-h-[70vh] overflow-y-auto custom-scrollbar">
@@ -487,6 +577,23 @@ export function AdminUserList({ users }: { users: UserWithStats[] }) {
                                 <div className="p-4 bg-purple-500/10 rounded-2xl border border-purple-500/20">
                                     <p className="text-[10px] font-black uppercase text-purple-400/60 tracking-widest mb-1">Join Date</p>
                                     <p className="text-lg font-black text-purple-400">{formatDate(selectedUser.createdAt)}</p>
+                                </div>
+                                <div className="p-4 bg-orange-500/10 rounded-2xl border border-orange-500/20 col-span-3 mt-2">
+                                    <div className="flex justify-between items-center">
+                                        <div>
+                                            <p className="text-[10px] font-black uppercase text-orange-400/60 tracking-widest mb-1">Last Active</p>
+                                            <p className="text-lg font-black text-orange-400">
+                                                {selectedUser.lastLoginAt ? new Date(selectedUser.lastLoginAt).toLocaleString() : 'Never'}
+                                            </p>
+                                        </div>
+                                        <button
+                                            onClick={() => handleDeleteUser(selectedUser.id)}
+                                            disabled={isDeleting === selectedUser.id}
+                                            className="px-4 py-2 bg-red-600/20 text-red-500 hover:bg-red-600 hover:text-white rounded-lg text-xs font-bold transition-colors"
+                                        >
+                                            {isDeleting === selectedUser.id ? 'Deleting...' : 'Delete User Permanently'}
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
 

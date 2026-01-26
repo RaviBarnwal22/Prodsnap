@@ -151,6 +151,11 @@ export function SubscribeModal({ isOpen, onClose, userEmail, userName }: Subscri
                             <p className="text-xs text-gray-500 mt-4">
                                 After payment, you'll submit the screenshot for verification
                             </p>
+                            <div className="mt-4 pt-4 border-t border-gray-100 dark:border-gray-800">
+                                <p className="text-xs text-center text-gray-500 italic">
+                                    If you are from outside India, kindly drop a line to <a href="mailto:support@prodsnap.in" className="text-violet-600 hover:underline">support@prodsnap.in</a> and we will assist you.
+                                </p>
+                            </div>
                         </div>
                     )}
 

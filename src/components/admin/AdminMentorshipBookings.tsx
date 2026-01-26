@@ -39,6 +39,8 @@ export function AdminMentorshipBookings() {
     const [viewingProof, setViewingProof] = useState<string | null>(null)
     const [processingId, setProcessingId] = useState<string | null>(null)
     const [searchQuery, setSearchQuery] = useState('')
+    const [filterStatus, setFilterStatus] = useState<'all' | 'pending' | 'approved' | 'completed' | 'cancelled'>('all')
+    const [deletingId, setDeletingId] = useState<string | null>(null)
 
     // Scheduling State
     const [schedulingBooking, setSchedulingBooking] = useState<MentorshipBooking | null>(null)
@@ -124,6 +126,27 @@ export function AdminMentorshipBookings() {
         }
     }
 
+    const handleDelete = async (bookingId: string) => {
+        if (!confirm('Are you sure you want to delete this specific booking? This cannot be undone.')) return
+
+        setDeletingId(bookingId)
+        try {
+            const response = await fetch(`/api/admin/mentorship-bookings?id=${bookingId}`, {
+                method: 'DELETE'
+            })
+            if (response.ok) {
+                fetchBookings() // Refresh list
+                setExpandedId(null)
+            } else {
+                alert('Failed to delete booking')
+            }
+        } catch (err) {
+            alert('Error deleting booking')
+        } finally {
+            setDeletingId(null)
+        }
+    }
+
     const formatDate = (dateStr: string) => {
         return new Intl.DateTimeFormat('en-IN', {
             day: 'numeric',
@@ -135,6 +158,10 @@ export function AdminMentorshipBookings() {
     }
 
     const filteredBookings = bookings.filter(b => {
+        // First filter by tab status
+        if (filterStatus !== 'all' && b.status !== filterStatus) return false
+
+        // Then filter by search query
         if (!searchQuery.trim()) return true
         const query = searchQuery.toLowerCase().trim()
         return (
@@ -182,6 +209,7 @@ export function AdminMentorshipBookings() {
     const pendingCount = bookings.filter(b => b.status === 'pending').length
     const approvedCount = bookings.filter(b => b.status === 'approved').length
     const completedCount = bookings.filter(b => b.status === 'completed').length
+    const cancelledCount = bookings.filter(b => b.status === 'cancelled').length
 
     const getStatusColor = (status: string) => {
         switch (status) {
@@ -221,15 +249,36 @@ export function AdminMentorshipBookings() {
                     </h2>
                     <div className="flex items-center gap-3">
                         <div className="flex gap-2 text-xs">
-                            <span className="px-2 py-1 bg-yellow-500/20 text-yellow-400 rounded-full font-bold">
-                                {pendingCount} Pending
-                            </span>
-                            <span className="px-2 py-1 bg-blue-500/20 text-blue-400 rounded-full font-bold">
-                                {approvedCount} Scheduled
-                            </span>
-                            <span className="px-2 py-1 bg-green-500/20 text-green-400 rounded-full font-bold">
-                                {completedCount} Completed
-                            </span>
+                            <button
+                                onClick={() => setFilterStatus('all')}
+                                className={`px-2 py-1 rounded-full font-bold transition-all ${filterStatus === 'all' ? 'bg-gray-700 text-white ring-1 ring-gray-500' : 'bg-gray-800 text-gray-400 hover:bg-gray-700'}`}
+                            >
+                                All ({bookings.length})
+                            </button>
+                            <button
+                                onClick={() => setFilterStatus('pending')}
+                                className={`px-2 py-1 rounded-full font-bold transition-all ${filterStatus === 'pending' ? 'bg-yellow-500/20 text-yellow-400 ring-1 ring-yellow-500/50' : 'bg-gray-800 text-gray-400 hover:bg-gray-700'}`}
+                            >
+                                Pending ({pendingCount})
+                            </button>
+                            <button
+                                onClick={() => setFilterStatus('approved')}
+                                className={`px-2 py-1 rounded-full font-bold transition-all ${filterStatus === 'approved' ? 'bg-blue-500/20 text-blue-400 ring-1 ring-blue-500/50' : 'bg-gray-800 text-gray-400 hover:bg-gray-700'}`}
+                            >
+                                Scheduled ({approvedCount})
+                            </button>
+                            <button
+                                onClick={() => setFilterStatus('completed')}
+                                className={`px-2 py-1 rounded-full font-bold transition-all ${filterStatus === 'completed' ? 'bg-green-500/20 text-green-400 ring-1 ring-green-500/50' : 'bg-gray-800 text-gray-400 hover:bg-gray-700'}`}
+                            >
+                                Completed ({completedCount})
+                            </button>
+                            <button
+                                onClick={() => setFilterStatus('cancelled')}
+                                className={`px-2 py-1 rounded-full font-bold transition-all ${filterStatus === 'cancelled' ? 'bg-red-500/20 text-red-400 ring-1 ring-red-500/50' : 'bg-gray-800 text-gray-400 hover:bg-gray-700'}`}
+                            >
+                                Cancelled ({cancelledCount})
+                            </button>
                         </div>
                         <button
                             onClick={exportToExcel}
@@ -410,18 +459,51 @@ export function AdminMentorshipBookings() {
                                         )}
 
                                         {booking.status === 'approved' && (
-                                            <button
-                                                onClick={() => handleAction(booking.id, 'complete')}
-                                                disabled={processingId === booking.id}
-                                                className="w-full bg-green-600 hover:bg-green-700 text-white py-2 rounded-lg font-bold text-sm flex items-center justify-center gap-2 disabled:opacity-50"
-                                            >
-                                                {processingId === booking.id ? (
-                                                    <Loader2 className="animate-spin" size={16} />
-                                                ) : (
-                                                    <CheckCircle size={16} />
-                                                )}
-                                                Mark as Complete (Sends Feedback Request)
-                                            </button>
+                                            <div className="space-y-3">
+                                                <div className="bg-blue-500/10 border border-blue-500/30 rounded-xl p-4">
+                                                    <h4 className="text-xs font-bold text-blue-400 uppercase tracking-widest mb-3 flex items-center gap-2">
+                                                        <Clock size={14} />
+                                                        Scheduled Session
+                                                    </h4>
+                                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                        <div>
+                                                            <p className="text-gray-500 text-xs mb-1">Time</p>
+                                                            <p className="text-white font-medium">
+                                                                {booking.scheduledAt ? formatDate(booking.scheduledAt) : 'N/A'}
+                                                            </p>
+                                                        </div>
+                                                        <div>
+                                                            <p className="text-gray-500 text-xs mb-1">Meeting Link</p>
+                                                            {booking.meetingLink ? (
+                                                                <a
+                                                                    href={booking.meetingLink}
+                                                                    target="_blank"
+                                                                    rel="noopener noreferrer"
+                                                                    className="text-blue-400 hover:text-blue-300 font-medium flex items-center gap-1 underline truncate"
+                                                                >
+                                                                    Join Meeting
+                                                                    <ExternalLink size={14} />
+                                                                </a>
+                                                            ) : (
+                                                                <p className="text-gray-400 italic">No link provided</p>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <button
+                                                    onClick={() => handleAction(booking.id, 'complete')}
+                                                    disabled={processingId === booking.id}
+                                                    className="w-full bg-green-600 hover:bg-green-700 text-white py-2 rounded-lg font-bold text-sm flex items-center justify-center gap-2 disabled:opacity-50"
+                                                >
+                                                    {processingId === booking.id ? (
+                                                        <Loader2 className="animate-spin" size={16} />
+                                                    ) : (
+                                                        <CheckCircle size={16} />
+                                                    )}
+                                                    Mark as Complete (Sends Feedback Request)
+                                                </button>
+                                            </div>
                                         )}
 
                                         {booking.completedAt && (
@@ -429,6 +511,25 @@ export function AdminMentorshipBookings() {
                                                 Completed on {formatDate(booking.completedAt)}
                                             </p>
                                         )}
+
+                                        {/* Delete Action (Always available) */}
+                                        <div className="mt-4 pt-4 border-t border-gray-700/50 flex justify-end">
+                                            <button
+                                                onClick={(e) => {
+                                                    e.stopPropagation()
+                                                    handleDelete(booking.id)
+                                                }}
+                                                disabled={deletingId === booking.id}
+                                                className="text-xs text-red-500 hover:text-red-400 flex items-center gap-1 opacity-70 hover:opacity-100 transition-opacity"
+                                            >
+                                                {deletingId === booking.id ? (
+                                                    <Loader2 size={12} className="animate-spin" />
+                                                ) : (
+                                                    <X size={12} />
+                                                )}
+                                                Delete Booking
+                                            </button>
+                                        </div>
                                     </div>
                                 )}
                             </div>

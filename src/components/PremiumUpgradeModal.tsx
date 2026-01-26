@@ -227,6 +227,11 @@ export function PremiumUpgradeModal({ isOpen, onClose, category, attemptsUsed = 
                                 >
                                     ← Back
                                 </button>
+                                <div className="mt-4 pt-4 border-t border-gray-100 dark:border-gray-800">
+                                    <p className="text-xs text-center text-gray-500 italic">
+                                        If you are from outside India, kindly drop a line to <a href="mailto:support@prodsnap.in" className="text-violet-600 hover:underline">support@prodsnap.in</a> and we will assist you.
+                                    </p>
+                                </div>
                             </div>
                         </div>
                     </>

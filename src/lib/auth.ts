@@ -17,6 +17,14 @@ export async function getUser() {
         where: { authId: user.id }
     })
 
+    if (prismaUser) {
+        // Update last login time asynchronously
+        await prisma.user.update({
+            where: { id: prismaUser.id },
+            data: { lastLoginAt: new Date() }
+        })
+    }
+
     if (!prismaUser) {
         console.log(`[getUser] Prisma user NOT found by authId. Checking by email...`)
         // Check if user exists by email and update them

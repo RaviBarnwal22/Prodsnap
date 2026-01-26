@@ -19,6 +19,7 @@ interface SubscriptionRequest {
 
 export function AdminPaymentRequests() {
     const [requests, setRequests] = useState<SubscriptionRequest[]>([])
+    const [filterStatus, setFilterStatus] = useState<'all' | 'pending' | 'approved' | 'rejected'>('all')
     const [isLoading, setIsLoading] = useState(true)
     const [error, setError] = useState('')
     const [expandedId, setExpandedId] = useState<string | null>(null)
@@ -28,9 +29,15 @@ export function AdminPaymentRequests() {
     const [searchQuery, setSearchQuery] = useState('')
     const [rejectingId, setRejectingId] = useState<string | null>(null)
     const [rejectionReason, setRejectionReason] = useState('')
+    const [deletingId, setDeletingId] = useState<string | null>(null)
 
     // Filter requests based on search query (email, name, phone)
+    // Filter requests based on search query (email, name, phone)
     const filteredRequests = requests.filter(r => {
+        // First filter by tab status
+        if (filterStatus !== 'all' && r.status !== filterStatus) return false
+
+        // Then filter by search query
         if (!searchQuery.trim()) return true
         const query = searchQuery.toLowerCase().trim()
         return (
@@ -141,6 +148,27 @@ export function AdminPaymentRequests() {
         return date.toISOString().split('T')[0]
     }
 
+    const handleDelete = async (requestId: string) => {
+        if (!confirm('Are you sure you want to delete this specific request? This cannot be undone.')) return
+
+        setDeletingId(requestId)
+        try {
+            const response = await fetch(`/api/admin/subscription-requests?id=${requestId}`, {
+                method: 'DELETE'
+            })
+            if (response.ok) {
+                fetchRequests() // Refresh list
+                setExpandedId(null)
+            } else {
+                alert('Failed to delete request')
+            }
+        } catch (err) {
+            alert('Error deleting request')
+        } finally {
+            setDeletingId(null)
+        }
+    }
+
     const pendingCount = requests.filter(r => r.status === 'pending').length
     const approvedCount = requests.filter(r => r.status === 'approved').length
     const rejectedCount = requests.filter(r => r.status === 'rejected').length
@@ -163,12 +191,30 @@ export function AdminPaymentRequests() {
                     </h2>
                     <div className="flex items-center gap-3">
                         <div className="flex gap-2 text-xs">
-                            <span className="px-2 py-1 bg-yellow-500/20 text-yellow-400 rounded-full font-bold">
-                                {pendingCount} Pending
-                            </span>
-                            <span className="px-2 py-1 bg-green-500/20 text-green-400 rounded-full font-bold">
-                                {approvedCount} Approved
-                            </span>
+                            <button
+                                onClick={() => setFilterStatus('all')}
+                                className={`px-2 py-1 rounded-full font-bold transition-all ${filterStatus === 'all' ? 'bg-gray-700 text-white ring-1 ring-gray-500' : 'bg-gray-800 text-gray-400 hover:bg-gray-700'}`}
+                            >
+                                All ({requests.length})
+                            </button>
+                            <button
+                                onClick={() => setFilterStatus('pending')}
+                                className={`px-2 py-1 rounded-full font-bold transition-all ${filterStatus === 'pending' ? 'bg-yellow-500/20 text-yellow-400 ring-1 ring-yellow-500/50' : 'bg-gray-800 text-gray-400 hover:bg-gray-700'}`}
+                            >
+                                Pending ({pendingCount})
+                            </button>
+                            <button
+                                onClick={() => setFilterStatus('approved')}
+                                className={`px-2 py-1 rounded-full font-bold transition-all ${filterStatus === 'approved' ? 'bg-green-500/20 text-green-400 ring-1 ring-green-500/50' : 'bg-gray-800 text-gray-400 hover:bg-gray-700'}`}
+                            >
+                                Approved ({approvedCount})
+                            </button>
+                            <button
+                                onClick={() => setFilterStatus('rejected')}
+                                className={`px-2 py-1 rounded-full font-bold transition-all ${filterStatus === 'rejected' ? 'bg-red-500/20 text-red-400 ring-1 ring-red-500/50' : 'bg-gray-800 text-gray-400 hover:bg-gray-700'}`}
+                            >
+                                Rejected ({rejectedCount})
+                            </button>
                         </div>
                         <button
                             onClick={exportToExcel}
@@ -321,6 +367,25 @@ export function AdminPaymentRequests() {
                                                 Reviewed on {formatDate(req.reviewedAt)}
                                             </p>
                                         )}
+
+                                        {/* Delete Action (Always available) */}
+                                        <div className="mt-4 pt-4 border-t border-gray-700/50 flex justify-end">
+                                            <button
+                                                onClick={(e) => {
+                                                    e.stopPropagation()
+                                                    handleDelete(req.id)
+                                                }}
+                                                disabled={deletingId === req.id}
+                                                className="text-xs text-red-500 hover:text-red-400 flex items-center gap-1 opacity-70 hover:opacity-100 transition-opacity"
+                                            >
+                                                {deletingId === req.id ? (
+                                                    <Loader2 size={12} className="animate-spin" />
+                                                ) : (
+                                                    <X size={12} />
+                                                )}
+                                                Delete Request
+                                            </button>
+                                        </div>
                                     </div>
                                 )}
                             </div>

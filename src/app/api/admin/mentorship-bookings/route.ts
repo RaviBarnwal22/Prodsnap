@@ -153,3 +153,31 @@ export async function PUT(request: NextRequest) {
         )
     }
 }
+
+// Delete a mentorship booking
+export async function DELETE(request: NextRequest) {
+    try {
+        const user = await getUser()
+        const { searchParams } = new URL(request.url)
+        const bookingId = searchParams.get('id')
+
+        // Check admin access
+        const isAdmin = user?.email === 'ravibarnwal89@gmail.com' || user?.role === 'ADMIN'
+        if (!user || !isAdmin) {
+            return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+        }
+
+        if (!bookingId) {
+            return NextResponse.json({ error: "Booking ID is required" }, { status: 400 })
+        }
+
+        await prisma.mentorshipBooking.delete({
+            where: { id: bookingId }
+        })
+
+        return NextResponse.json({ success: true, message: "Booking deleted successfully" })
+    } catch (error) {
+        console.error("Error deleting booking:", error)
+        return NextResponse.json({ error: "Failed to delete booking" }, { status: 500 })
+    }
+}
