@@ -1,6 +1,6 @@
 import { Header } from "@/components/Header"
 import { Footer } from "@/components/Footer"
-import { Mail, MessageCircle, Linkedin } from "lucide-react"
+import { Mail, MessageCircle, Linkedin, Instagram } from "lucide-react"
 import { ContactForm } from "./ContactForm"
 
 export default function ContactPage() {
@@ -49,6 +49,21 @@ export default function ContactPage() {
                                     <div>
                                         <p className="text-sm font-bold text-gray-400 uppercase tracking-widest mb-1">LinkedIn</p>
                                         <p className="text-lg font-bold">in/barnwalravi</p>
+                                    </div>
+                                </a>
+
+                                <a
+                                    href="https://www.instagram.com/thinkwithravi"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="flex items-center gap-6 p-6 rounded-3xl bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 shadow-sm hover:shadow-md transition-all group"
+                                >
+                                    <div className="w-14 h-14 bg-pink-50 dark:bg-pink-900/20 rounded-2xl flex items-center justify-center text-[#E4405F] group-hover:bg-gradient-to-br group-hover:from-purple-600 group-hover:to-pink-600 group-hover:text-white transition-all">
+                                        <Instagram size={28} />
+                                    </div>
+                                    <div>
+                                        <p className="text-sm font-bold text-gray-400 uppercase tracking-widest mb-1">Instagram</p>
+                                        <p className="text-lg font-bold">@thinkwithravi</p>
                                     </div>
                                 </a>
                             </div>
