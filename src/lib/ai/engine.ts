@@ -29,7 +29,7 @@ export interface AIEvaluationResponse {
 }
 
 // Helper to get all API keys from environment
-function getApiKeys(): string[] {
+export function getApiKeys(): string[] {
     const keys: string[] = [];
 
     // Prioritize Gemini first
@@ -138,30 +138,49 @@ export async function evaluateAnswer(questionTitle: string, userAnswer: string, 
                 const estimatedTokens = Math.ceil((prompt.length + text.length) / 4);
                 await logApiUsage(provider, modelName, 'success', responseTime, undefined, estimatedTokens);
             } else {
-                // Handle Gemini
-                try {
-                    const genAI = new GoogleGenerativeAI(key);
-                    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+                // Handle Gemini with automatic model fallbacks
+                const modelsToTry = ["gemini-1.5-flash", "gemini-1.5-pro", "gemini-pro"];
+                let geminiSuccess = false;
+                let geminiLastException: any = null;
 
-                    const result = await model.generateContent(prompt);
-                    text = result.response.text();
+                for (const modelId of modelsToTry) {
+                    try {
+                        console.log(`[AI Engine] Trying Gemini model: ${modelId}`);
+                        const genAI = new GoogleGenerativeAI(key);
+                        const model = genAI.getGenerativeModel({ model: modelId });
 
+                        const result = await model.generateContent(prompt);
+                        text = result.response.text();
+
+                        const responseTime = Date.now() - startTime;
+                        const estimatedTokens = Math.ceil((prompt.length + text.length) / 4);
+                        await logApiUsage(provider, modelId, 'success', responseTime, undefined, estimatedTokens);
+
+                        geminiSuccess = true;
+                        break; // Exit model loop on success
+                    } catch (geminiError: any) {
+                        geminiLastException = geminiError;
+                        const errorMessage = geminiError instanceof Error ? geminiError.message : 'Unknown error';
+
+                        // Log each model failure specifically
+                        console.warn(`[AI Engine] Gemini model ${modelId} failed: ${errorMessage}`);
+
+                        // If it's a rate limit, we might want to skip other models or try them if they have separate quotas?
+                        // For now, continue to next model.
+                        continue;
+                    }
+                }
+
+                if (!geminiSuccess) {
                     const responseTime = Date.now() - startTime;
-                    const estimatedTokens = Math.ceil((prompt.length + text.length) / 4);
-                    await logApiUsage(provider, modelName, 'success', responseTime, undefined, estimatedTokens);
-                } catch (geminiError: unknown) {
-                    const responseTime = Date.now() - startTime;
-                    const errorMessage = geminiError instanceof Error ? geminiError.message : 'Unknown error';
+                    const finalErrorMessage = geminiLastException instanceof Error ? geminiLastException.message : 'All Gemini models failed';
 
-                    // Check if it's a rate limit or quota error
-                    const isRateLimit = errorMessage.toLowerCase().includes('quota') ||
-                        errorMessage.toLowerCase().includes('rate limit') ||
-                        errorMessage.toLowerCase().includes('resource_exhausted');
+                    const isRateLimit = finalErrorMessage.toLowerCase().includes('quota') ||
+                        finalErrorMessage.toLowerCase().includes('rate limit') ||
+                        finalErrorMessage.toLowerCase().includes('resource_exhausted');
 
-                    await logApiUsage(provider, modelName, isRateLimit ? 'rate_limit' : 'error', responseTime, errorMessage);
-
-                    console.error(`[AI Engine] Gemini Error detail:`, geminiError);
-                    throw geminiError;
+                    await logApiUsage(provider, 'gemini-all', isRateLimit ? 'rate_limit' : 'error', responseTime, finalErrorMessage);
+                    throw geminiLastException || new Error("All Gemini models failed");
                 }
             }
 

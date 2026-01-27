@@ -156,6 +156,20 @@ export default async function AdminPage() {
         where: { createdAt: { gte: monthStart } }
     })
 
+    // Calculate Unique Visitors (using raw SQL for efficiency)
+    const totalVisitorsRaw = await prisma.$queryRaw<[{ count: bigint }]>`
+        SELECT COUNT(DISTINCT COALESCE("userId", "ipAddress")) as count 
+        FROM "UserActivity"
+    `
+    const totalVisitors = Number(totalVisitorsRaw[0]?.count || 0)
+
+    const todayVisitorsRaw = await prisma.$queryRaw<[{ count: bigint }]>`
+        SELECT COUNT(DISTINCT COALESCE("userId", "ipAddress")) as count 
+        FROM "UserActivity" 
+        WHERE "createdAt" >= ${today}
+    `
+    const todayVisitors = Number(todayVisitorsRaw[0]?.count || 0)
+
     return (
         <div className="min-h-screen bg-gray-900">
             {/* Admin Header - Clean, no normal user views */}
@@ -224,7 +238,7 @@ export default async function AdminPage() {
                     overviewContent={
                         <>
                             {/* Stats Grid */}
-                            <div className="grid grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
+                            <div className="grid grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
                                 <div className="bg-gray-800 rounded-2xl p-6 border border-gray-700">
                                     <div className="flex flex-col gap-3">
                                         <div className="bg-blue-500/20 w-10 h-10 flex items-center justify-center rounded-xl text-blue-400">
@@ -233,6 +247,17 @@ export default async function AdminPage() {
                                         <div>
                                             <p className="text-2xl font-black text-white">{users.length}</p>
                                             <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Total Users</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="bg-gray-800 rounded-2xl p-6 border border-gray-700">
+                                    <div className="flex flex-col gap-3">
+                                        <div className="bg-indigo-500/20 w-10 h-10 flex items-center justify-center rounded-xl text-indigo-400">
+                                            <Activity size={20} />
+                                        </div>
+                                        <div>
+                                            <p className="text-2xl font-black text-white">{totalVisitors}</p>
+                                            <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Unique Visitors</p>
                                         </div>
                                     </div>
                                 </div>
@@ -276,7 +301,7 @@ export default async function AdminPage() {
                                         </div>
                                         <div>
                                             <p className="text-2xl font-black text-white">{totalActivities}</p>
-                                            <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Engagement</p>
+                                            <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Engagement (Views)</p>
                                         </div>
                                     </div>
                                 </div>
@@ -286,18 +311,22 @@ export default async function AdminPage() {
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
                                 <div className="bg-gradient-to-br from-green-600 to-emerald-700 rounded-2xl p-6 text-white">
                                     <h3 className="text-sm font-bold uppercase tracking-widest opacity-80 mb-4">Today&apos;s Activity</h3>
-                                    <div className="grid grid-cols-3 gap-4">
+                                    <div className="grid grid-cols-2 gap-4">
                                         <div>
                                             <p className="text-3xl font-black">{todayUsers}</p>
-                                            <p className="text-xs font-bold uppercase tracking-widest opacity-70">Users</p>
+                                            <p className="text-xs font-bold uppercase tracking-widest opacity-70">New Users</p>
+                                        </div>
+                                        <div>
+                                            <p className="text-3xl font-black">{todayVisitors}</p>
+                                            <p className="text-xs font-bold uppercase tracking-widest opacity-70">Visitors</p>
                                         </div>
                                         <div>
                                             <p className="text-3xl font-black">{todaySubmissions}</p>
-                                            <p className="text-xs font-bold uppercase tracking-widest opacity-70">Cases</p>
+                                            <p className="text-xs font-bold uppercase tracking-widest opacity-70">Submissions</p>
                                         </div>
                                         <div>
                                             <p className="text-3xl font-black">{todayActivities}</p>
-                                            <p className="text-xs font-bold uppercase tracking-widest opacity-70">Views</p>
+                                            <p className="text-xs font-bold uppercase tracking-widest opacity-70">Total Views</p>
                                         </div>
                                     </div>
                                 </div>
@@ -360,7 +389,10 @@ export default async function AdminPage() {
                     usersContent={
                         <div className="space-y-8">
                             {/* Users List (Client Component) */}
-                            <AdminUserList users={users} />
+                            <AdminUserList users={users.map(u => ({
+                                ...u,
+                                lastLoginAt: u.lastLoginAt || null
+                            })) as any} />
 
                             {/* User Feedback List */}
                             <div className="bg-gray-800 rounded-2xl p-6 border border-gray-700">
@@ -382,7 +414,7 @@ export default async function AdminPage() {
                                             }
                                         }
                                     }
-                                })} />
+                                }) as any} />
                             </div>
                         </div>
                     }
@@ -423,7 +455,7 @@ export default async function AdminPage() {
                                     feedback: item.comments,
                                     createdAt: item.createdAt
                                 })))
-                            ].sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())} />
+                            ].sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime()) as any} />
 
 
                             {/* Support Queue */}
