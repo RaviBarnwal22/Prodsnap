@@ -213,41 +213,7 @@ export default async function Home() {
           </div>
         </section>
 
-        {/* Featured Testimonial Section */}
-        <section className="py-24 px-4 bg-gray-50 dark:bg-gray-900/50 relative overflow-hidden">
-          {/* Background pattern */}
-          <div className="absolute inset-0 opacity-5">
-            <div className="absolute inset-0" style={{
-              backgroundImage: 'radial-gradient(circle at 1px 1px, currentColor 1px, transparent 0)',
-              backgroundSize: '40px 40px'
-            }}></div>
-          </div>
 
-          <div className="container mx-auto max-w-6xl relative z-10">
-            <div className="text-center mb-16">
-              <h2 className="text-xs uppercase tracking-[0.3em] font-black text-violet-600 mb-4">Success Stories</h2>
-              <h3 className="text-4xl font-black tracking-tight">Real People, Real Results</h3>
-            </div>
-
-            <div className="grid md:grid-cols-3 gap-8">
-              {testimonialPeople.slice(0, 6).map((person, i) => (
-                <div key={i} className="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-lg border border-gray-100 dark:border-gray-700 hover:shadow-xl transition-shadow group">
-                  <div className="flex items-center gap-4 mb-4">
-                    <img src={person.img} alt={person.name} className="w-14 h-14 rounded-full border-2 border-violet-200 group-hover:scale-110 transition-transform" />
-                    <div>
-                      <p className="font-bold text-gray-900 dark:text-white">{person.name}</p>
-                      <p className="text-sm text-violet-600 font-medium">{person.role}</p>
-                    </div>
-                  </div>
-                  <div className="flex text-yellow-400 mb-3">
-                    {[...Array(5)].map((_, i) => <Star key={i} size={16} fill="currentColor" />)}
-                  </div>
-                  <p className="text-gray-600 dark:text-gray-300 italic">&ldquo;{person.quote}&rdquo;</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
 
       </main>
 

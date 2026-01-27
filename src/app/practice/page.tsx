@@ -293,7 +293,7 @@ export default async function PracticePage({
                                             </span>
                                         </div>
                                         <h3 className={`text-xl font-bold mb-4 leading-tight group-hover:text-blue-600 transition-colors ${isLocked ? 'text-gray-400' : ''}`}>
-                                            Case Challenge #{index + 1}
+                                            {q.title}
                                         </h3>
                                         <p className="text-sm text-gray-500 dark:text-gray-400 mb-8 leading-relaxed italic">
                                             {isPremium ? "Unlocked for unlimited practice • Go for it!" : isLocked ? "Premium Challenge • Unlock to practice" : hasHitLimit ? "Trial consumed • Read case details" : `${q.difficulty} level challenge • Click to solve`}

@@ -19,8 +19,7 @@ export async function Header() {
                     <Link href="/practice" className="hover:text-violet-600 transition-colors">Case Simulator</Link>
                     {/* <Link href="/prodsense" className="hover:text-violet-600 transition-colors">Prodsense</Link> */}
                     <Link href="/mentorship" className="hover:text-violet-600 transition-colors">Mentorship</Link>
-                    <Link href="/community" className="hover:text-violet-600 transition-colors">Community</Link>
-                    <Link href="/blog" className="hover:text-violet-600 transition-colors">Blog</Link>
+                    <Link href="/community" className="hover:text-violet-600 transition-colors">Community & Blogs</Link>
                     <Link href="/contact" className="hover:text-violet-600 transition-colors">Contact Us</Link>
                 </nav>
 

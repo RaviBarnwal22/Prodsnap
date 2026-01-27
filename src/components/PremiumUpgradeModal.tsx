@@ -1,5 +1,6 @@
 'use client'
 
+import { FREE_ATTEMPT_LIMIT } from '@/lib/constants'
 import { useState } from 'react'
 import { X, Crown, Check, Zap, BookOpen, Trophy, Sparkles, Upload, CheckCircle, Loader2, Phone, User, PartyPopper } from 'lucide-react'
 
@@ -21,7 +22,7 @@ const features = [
 
 import { createPortal } from 'react-dom'
 
-export function PremiumUpgradeModal({ isOpen, onClose, category, attemptsUsed = 2, userEmail = '', userName = '' }: PremiumUpgradeModalProps) {
+export function PremiumUpgradeModal({ isOpen, onClose, category, attemptsUsed = FREE_ATTEMPT_LIMIT, userEmail = '', userName = '' }: PremiumUpgradeModalProps) {
     const [step, setStep] = useState<'info' | 'payment' | 'form' | 'success'>('info')
     const [isLoading, setIsLoading] = useState(false)
     const [error, setError] = useState<string | null>(null)
@@ -143,8 +144,8 @@ export function PremiumUpgradeModal({ isOpen, onClose, category, attemptsUsed = 
                                 Upgrade to Premium
                             </h2>
                             <p className="text-blue-100 text-sm">
-                                {attemptsUsed !== undefined && attemptsUsed >= 2
-                                    ? `You've used ${attemptsUsed}/2 free attempts`
+                                {attemptsUsed !== undefined && attemptsUsed >= FREE_ATTEMPT_LIMIT
+                                    ? `You've used ${attemptsUsed}/${FREE_ATTEMPT_LIMIT} free attempts`
                                     : 'Unlock unlimited practice across all categories'
                                 }
                             </p>
