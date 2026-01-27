@@ -472,3 +472,21 @@ export async function getInterviewerHint(data: {
         return { success: false, error: "Interviewer is currently busy." };
     }
 }
+
+export async function logEmailEvent(recipient: string, type: string, subject: string) {
+    console.log(`[logEmailEvent] Manual log: ${type} to ${recipient}`);
+    try {
+        await prisma.emailLog.create({
+            data: {
+                recipient,
+                type: type.toLowerCase(),
+                subject,
+                status: 'success'
+            }
+        });
+        return { success: true };
+    } catch (error) {
+        console.error('[logEmailEvent] Failed:', error);
+        return { success: false };
+    }
+}
