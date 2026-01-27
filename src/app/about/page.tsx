@@ -112,10 +112,7 @@ export default function AboutPage() {
                                             <CheckCircle2 className="text-green-500 flex-shrink-0" size={20} />
                                             <span>Practice with 100+ real-world case studies</span>
                                         </div>
-                                        <div className="flex items-center gap-3">
-                                            <CheckCircle2 className="text-green-500 flex-shrink-0" size={20} />
-                                            <span>Get instant feedback on your CIRCLES framework application</span>
-                                        </div>
+
                                         <div className="flex items-center gap-3">
                                             <CheckCircle2 className="text-green-500 flex-shrink-0" size={20} />
                                             <span>Refine your communication with voice-to-text submissions</span>
