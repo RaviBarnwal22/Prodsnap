@@ -57,7 +57,7 @@ export function AnswerForm({ questionId, questionTitle, userId, category, descri
     const [chatMessages, setChatMessages] = useState<{ role: 'user' | 'model', text: string }[]>([])
     const [chatInput, setChatInput] = useState('')
     const [isAsking, setIsAsking] = useState(false)
-    const [chatOpen, setChatOpen] = useState(false)
+    const [chatOpen, setChatOpen] = useState(true)
     const [chatError, setChatError] = useState('')
     const [hintCount, setHintCount] = useState(0)
 
@@ -663,6 +663,21 @@ export function AnswerForm({ questionId, questionTitle, userId, category, descri
                         ))
                     })()}
                 </div>
+
+                {/* Simulation Note */}
+                {!result && (
+                    <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800 p-6 rounded-[1.5rem] flex items-start gap-4 shadow-sm mb-6">
+                        <div className="bg-blue-600 text-white p-2 rounded-xl shrink-0">
+                            <Sparkles size={18} />
+                        </div>
+                        <div>
+                            <p className="text-blue-800 dark:text-blue-200 text-sm leading-relaxed font-medium">
+                                <span className="font-black uppercase text-[10px] tracking-widest block mb-1.5 opacity-70">Simulation Tip</span>
+                                You are now in a live interview simulation. Use the <strong className="text-blue-900 dark:text-blue-100 font-black">Interviewer Hub</strong> below to clarify any assumptions or ask for data points before finalizing your answer.
+                            </p>
+                        </div>
+                    </div>
+                )}
 
                 {/* Clarification Hub - Powered by Perplexity AI */}
                 {!result && (

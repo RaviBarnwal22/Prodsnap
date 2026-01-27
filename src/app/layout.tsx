@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import SessionTimeout from "@/components/SessionTimeout";
+import PageTracker from "@/components/PageTracker";
 import NextTopLoader from 'nextjs-toploader';
 
 const geistSans = Geist({
@@ -39,6 +40,7 @@ export default function RootLayout({
           speed={200}
         />
         <SessionTimeout />
+        <PageTracker />
         {children}
       </body>
     </html>

@@ -1,7 +1,8 @@
 'use client'
 
 import { useState } from 'react'
-import { Users, ChevronRight, X, Calendar, FileText, Crown, ToggleLeft, ToggleRight, Search, Download, Brain } from 'lucide-react'
+import { Users, ChevronRight, X, Calendar, FileText, Crown, ToggleLeft, ToggleRight, Search, Download, Brain, Mail, Send, Loader2 } from 'lucide-react'
+import { sendManualUserReply } from '@/app/actions'
 
 interface Subscription {
     id: string;
@@ -91,6 +92,38 @@ export function AdminUserList({ users }: { users: UserWithStats[] }) {
     }
 
     const [isSubmittingReview, setIsSubmittingReview] = useState(false)
+
+    // Manual Email State
+    const [emailSubject, setEmailSubject] = useState('')
+    const [emailMessage, setEmailMessage] = useState('')
+    const [isSendingEmail, setIsSendingEmail] = useState(false)
+    const [emailSent, setEmailSent] = useState(false)
+
+    const handleSendEmail = async () => {
+        if (!selectedUser || !emailSubject.trim() || !emailMessage.trim()) return
+        setIsSendingEmail(true)
+
+        try {
+            const res = await sendManualUserReply({
+                email: selectedUser.email,
+                name: selectedUser.firstName || selectedUser.name || 'User',
+                subject: emailSubject,
+                message: emailMessage
+            })
+
+            if (res.success) {
+                setEmailSent(true)
+                setEmailMessage('')
+                setEmailSubject('')
+            } else {
+                alert(res.error || 'Failed to send email')
+            }
+        } catch (err) {
+            alert('An error occurred while sending email')
+        } finally {
+            setIsSendingEmail(false)
+        }
+    }
 
     const checkIsPremium = (u: UserWithStats) => {
         return u.subscription?.status === 'active' && (!u.subscription?.endDate || new Date(u.subscription.endDate) > new Date())
@@ -595,6 +628,56 @@ export function AdminUserList({ users }: { users: UserWithStats[] }) {
                                         </button>
                                     </div>
                                 </div>
+                            </div>
+
+                            {/* Manual Email Section */}
+                            <div className="mb-8 p-6 bg-blue-500/5 rounded-2xl border border-blue-500/20">
+                                <h3 className="text-sm font-black text-white mb-4 flex items-center gap-2">
+                                    <Mail size={16} className="text-blue-400" />
+                                    Send Direct Email
+                                </h3>
+
+                                {emailSent ? (
+                                    <div className="bg-green-500/10 border border-green-500/20 p-4 rounded-xl flex items-center gap-3 text-green-400 text-sm font-bold">
+                                        <Send size={18} />
+                                        Email sent successfully to {selectedUser.email}
+                                        <button
+                                            onClick={() => setEmailSent(false)}
+                                            className="ml-auto text-xs bg-green-500/20 px-2 py-1 rounded-lg hover:bg-green-500/30"
+                                        >
+                                            Send Another
+                                        </button>
+                                    </div>
+                                ) : (
+                                    <div className="space-y-4">
+                                        <div>
+                                            <input
+                                                type="text"
+                                                placeholder="Subject line..."
+                                                value={emailSubject}
+                                                onChange={(e) => setEmailSubject(e.target.value)}
+                                                className="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-2 text-sm text-white focus:outline-none focus:ring-1 focus:ring-blue-500"
+                                            />
+                                        </div>
+                                        <div>
+                                            <textarea
+                                                placeholder="Type your message here..."
+                                                rows={4}
+                                                value={emailMessage}
+                                                onChange={(e) => setEmailMessage(e.target.value)}
+                                                className="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:ring-1 focus:ring-blue-500"
+                                            />
+                                        </div>
+                                        <button
+                                            onClick={handleSendEmail}
+                                            disabled={isSendingEmail || !emailMessage.trim() || !emailSubject.trim()}
+                                            className="w-full py-3 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white rounded-xl text-sm font-black flex items-center justify-center gap-2 shadow-lg shadow-blue-600/20 transition-all"
+                                        >
+                                            {isSendingEmail ? <Loader2 size={18} className="animate-spin" /> : <Send size={18} />}
+                                            Send Email from support@prodsnap.in
+                                        </button>
+                                    </div>
+                                )}
                             </div>
 
                             <h3 className="font-black text-sm uppercase tracking-widest text-gray-500 mb-4 flex items-center gap-2">

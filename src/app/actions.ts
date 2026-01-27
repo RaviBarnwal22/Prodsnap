@@ -4,7 +4,7 @@ import { prisma } from "@/lib/prisma"
 import { evaluateAnswer } from "@/lib/ai/engine"
 import { revalidatePath } from "next/cache"
 import { getUser } from "@/lib/auth"
-import { sendContactFormNotification, sendSupportReply } from "@/lib/email"
+import { sendContactFormNotification, sendSupportReply, sendAdminManualReply } from "@/lib/email"
 
 export async function submitAnswer(questionId: string, answer: string, elapsedTimeSeconds?: number, chatContext?: string) {
     const user = await getUser()
@@ -109,6 +109,11 @@ export async function submitContactForm(data: { name: string, email: string, mes
 // Track user activity (server action)
 export async function trackActivity(page: string, action: string, metadata?: string) {
     const user = await getUser()
+    const { headers } = await import('next/headers')
+    const headerLists = await headers()
+
+    const ip = headerLists.get('x-forwarded-for') || 'unknown'
+    const ua = headerLists.get('user-agent') || 'unknown'
 
     try {
         await prisma.userActivity.create({
@@ -116,7 +121,9 @@ export async function trackActivity(page: string, action: string, metadata?: str
                 userId: user?.id || null,
                 page,
                 action,
-                metadata
+                metadata,
+                ipAddress: ip,
+                userAgent: ua
             }
         })
     } catch (error) {
@@ -243,6 +250,36 @@ export async function replyToSupport(data: {
         return { success: false, error: "Failed to send reply" }
     }
 }
+// Send manual email reply to any user
+export async function sendManualUserReply(data: {
+    email: string
+    name: string
+    subject: string
+    message: string
+    originalFeedback?: string
+}) {
+    const user = await getUser()
+
+    const isAdminEmail = user?.email === (process.env.ADMIN_EMAIL || 'ravibarnwal89@gmail.com')
+    if (!user || (!isAdminEmail && user.role !== 'ADMIN')) {
+        return { success: false, error: "Only admins can send manual replies" }
+    }
+
+    try {
+        await sendAdminManualReply({
+            name: data.name,
+            email: data.email,
+            subject: data.subject,
+            replyMessage: data.message,
+            originalMessage: data.originalFeedback
+        })
+
+        return { success: true }
+    } catch (error) {
+        console.error("[sendManualUserReply] Error:", error);
+        return { success: false, error: "Failed to send email" }
+    }
+}
 
 export async function getUserSkillScores() {
     const user = await getUser()
@@ -310,101 +347,123 @@ export async function askClarifyingQuestion(data: {
     const user = await getUser()
     if (!user) return { success: false, error: "Please login to ask questions" }
 
+    const { getApiKeys } = await import("@/lib/ai/engine");
+    const apiKeys = getApiKeys();
+
+    if (apiKeys.length === 0) return { success: false, error: "AI Service unconfigured" }
+
     const { INTERVIEWER_CHAT_PROMPT } = await import("@/lib/ai/prompts");
-
-    const apiKey = process.env.PERPLEXITY_API_KEY || process.env.GEMINI_API_KEY || process.env.GEMINI_API_KEY_1 || process.env.GEMINI_API_KEY_2;
-    if (!apiKey) return { success: false, error: "AI Service unconfigured" }
-
-    const isPerplexity = apiKey.startsWith("pplx-");
     const systemPrompt = INTERVIEWER_CHAT_PROMPT(data.questionTitle, data.questionDescription);
+    let lastError: any = null;
 
     try {
-        if (isPerplexity) {
-            const messages: { role: "system" | "user" | "assistant", content: string }[] = [
-                { role: "system", content: systemPrompt }
-            ];
+        for (const apiKey of apiKeys) {
+            const isPerplexity = apiKey.startsWith("pplx-");
 
-            // Add history with strict alternating check
-            let lastRole: "user" | "assistant" | null = null;
+            try {
+                if (isPerplexity) {
+                    const messages: { role: "system" | "user" | "assistant", content: string }[] = [
+                        { role: "system", content: systemPrompt }
+                    ];
 
-            for (const h of data.history) {
-                const currentRole = h.role === 'model' ? 'assistant' : 'user';
+                    // Add history with strict alternating check
+                    let lastRole: "user" | "assistant" | null = null;
 
-                // Perplexity requires the first message after system to be 'user'
-                if (lastRole === null && currentRole === 'assistant') {
-                    messages.push({ role: "user", content: "Can you provide a hint or some context?" });
-                    lastRole = 'user';
-                }
+                    for (const h of data.history) {
+                        const currentRole = h.role === 'model' ? 'assistant' : 'user';
 
-                // Strictly alternate: if same role as last, skip or merge (here we skip for safety)
-                if (currentRole !== lastRole) {
-                    messages.push({
-                        role: currentRole,
-                        content: h.parts?.[0]?.text || ''
+                        // Perplexity requires the first message after system to be 'user'
+                        if (lastRole === null && currentRole === 'assistant') {
+                            messages.push({ role: "user", content: "Can you provide a hint or some context?" });
+                            lastRole = 'user';
+                        }
+
+                        // Strictly alternate: if same role as last, skip or merge (here we skip for safety)
+                        if (currentRole !== lastRole) {
+                            messages.push({
+                                role: currentRole,
+                                content: h.parts?.[0]?.text || ''
+                            });
+                            lastRole = currentRole;
+                        }
+                    }
+
+                    // Current message must be user. If last was also user, we merge them.
+                    if (lastRole === 'user') {
+                        messages[messages.length - 1].content += `\n\n${data.userMessage}`;
+                    } else {
+                        messages.push({ role: "user", content: data.userMessage });
+                    }
+
+                    const res = await fetch("https://api.perplexity.ai/chat/completions", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                            "Authorization": `Bearer ${apiKey}`
+                        },
+                        body: JSON.stringify({
+                            model: "sonar",
+                            messages,
+                            temperature: 0.2,
+                            max_tokens: 400
+                        })
                     });
-                    lastRole = currentRole;
+
+                    if (!res.ok) {
+                        const errorText = await res.text();
+                        throw new Error(`Perplexity Error: ${res.status} - ${errorText}`);
+                    }
+
+                    const result = await res.json();
+                    let text = result.choices[0].message.content || "";
+
+                    // FAILSAVE: Strip citations, remove bold/italics, and strip leading dashes/bullets
+                    text = text.replace(/\[\d+\]/g, '')
+                        .replace(/\*\*/g, '')
+                        .replace(/\*/g, '')
+                        .replace(/^\s*[-•]\s*/gm, '')
+                        .trim();
+
+                    return { success: true, text };
+                } else {
+                    // Gemini with model fallbacks
+                    const { GoogleGenerativeAI } = await import("@google/generative-ai");
+                    const modelsToTry = ["gemini-1.5-flash", "gemini-1.5-pro", "gemini-pro"];
+
+                    for (const modelId of modelsToTry) {
+                        try {
+                            const genAI = new GoogleGenerativeAI(apiKey);
+                            const model = genAI.getGenerativeModel({ model: modelId });
+
+                            const chat = model.startChat({
+                                history: data.history.map(h => ({
+                                    role: h.role,
+                                    parts: h.parts
+                                })),
+                                generationConfig: {
+                                    maxOutputTokens: 500,
+                                },
+                            });
+
+                            const result = await chat.sendMessage(data.userMessage);
+                            const response = await result.response;
+                            return { success: true, text: response.text() };
+                        } catch (e) {
+                            console.warn(`[askClarifyingQuestion] Gemini model ${modelId} failed for current key, trying next...`);
+                            lastError = e;
+                            continue;
+                        }
+                    }
                 }
+            } catch (error: any) {
+                console.error(`[askClarifyingQuestion] Key attempt failed:`, error.message);
+                lastError = error;
+                continue;
             }
-
-            // Current message must be user. If last was also user, we merge them.
-            if (lastRole === 'user') {
-                messages[messages.length - 1].content += `\n\n${data.userMessage}`;
-            } else {
-                messages.push({ role: "user", content: data.userMessage });
-            }
-
-            const res = await fetch("https://api.perplexity.ai/chat/completions", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": `Bearer ${apiKey}`
-                },
-                body: JSON.stringify({
-                    model: "sonar",
-                    messages,
-                    temperature: 0.2, // Lower temperature for more consistent, to-the-point responses
-                    max_tokens: 400
-                })
-            });
-
-            if (!res.ok) {
-                const errorText = await res.text();
-                throw new Error(`Perplexity Error: ${res.status} - ${errorText}`);
-            }
-
-            const result = await res.json();
-            let text = result.choices[0].message.content || "";
-
-            // FAILSAVE: Strip citations, remove bold/italics, and strip leading dashes/bullets
-            text = text.replace(/\[\d+\]/g, '')
-                .replace(/\*\*/g, '')
-                .replace(/\*/g, '')
-                .replace(/^\s*[-•]\s*/gm, '')
-                .trim();
-
-            return { success: true, text };
-        } else {
-            // Fallback to Gemini if no Perplexity key
-            const { GoogleGenerativeAI } = await import("@google/generative-ai");
-            const genAI = new GoogleGenerativeAI(apiKey);
-            const model = genAI.getGenerativeModel({ model: "gemini-pro" });
-
-            const chat = model.startChat({
-                history: data.history.map(h => ({
-                    role: h.role,
-                    parts: h.parts
-                })),
-                generationConfig: {
-                    maxOutputTokens: 500,
-                },
-            });
-
-            const result = await chat.sendMessage(data.userMessage);
-            const response = await result.response;
-            return { success: true, text: response.text() };
         }
+        throw lastError || new Error("All AI providers (Gemini & Perplexity) failed.");
     } catch (error: any) {
-        console.error("[askClarifyingQuestion] Error:", error);
+        console.error("[askClarifyingQuestion] FINAL Error:", error);
         return { success: false, error: "Interviewer is having trouble responding. Please try again." };
     }
 }
@@ -417,58 +476,78 @@ export async function getInterviewerHint(data: {
     const user = await getUser()
     if (!user) return { success: false, error: "Please login to ask questions" }
 
+    const { getApiKeys } = await import("@/lib/ai/engine");
+    const apiKeys = getApiKeys();
+    if (apiKeys.length === 0) return { success: false, error: "AI Service unconfigured" }
+
     const { HINT_PROMPT } = await import("@/lib/ai/prompts");
-
-    const apiKey = process.env.PERPLEXITY_API_KEY || process.env.GEMINI_API_KEY || process.env.GEMINI_API_KEY_1 || process.env.GEMINI_API_KEY_2;
-    if (!apiKey) return { success: false, error: "AI Service unconfigured" }
-
     const currentChat = data.history.map(m => `${m.role.toUpperCase()}: ${m.text}`).join('\n');
     const systemPrompt = HINT_PROMPT(data.questionTitle, data.questionDescription, currentChat);
-    const isPerplexity = apiKey.startsWith("pplx-");
+    let lastError: any = null;
 
     try {
-        if (isPerplexity) {
-            const res = await fetch("https://api.perplexity.ai/chat/completions", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": `Bearer ${apiKey}`
-                },
-                body: JSON.stringify({
-                    model: "sonar",
-                    messages: [
-                        { role: "system", content: "You are a helpful PM interviewer giving brief hints." },
-                        { role: "user", content: systemPrompt }
-                    ],
-                    temperature: 0.3,
-                    max_tokens: 200
-                })
-            });
+        for (const apiKey of apiKeys) {
+            const isPerplexity = apiKey.startsWith("pplx-");
 
-            if (!res.ok) throw new Error(`Perplexity Error: ${res.status}`);
+            try {
+                if (isPerplexity) {
+                    const res = await fetch("https://api.perplexity.ai/chat/completions", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                            "Authorization": `Bearer ${apiKey}`
+                        },
+                        body: JSON.stringify({
+                            model: "sonar",
+                            messages: [
+                                { role: "system", content: "You are a helpful PM interviewer giving brief hints." },
+                                { role: "user", content: systemPrompt }
+                            ],
+                            temperature: 0.3,
+                            max_tokens: 200
+                        })
+                    });
 
-            const result = await res.json();
-            let text = result.choices[0].message.content || "";
+                    if (!res.ok) throw new Error(`Perplexity Error: ${res.status}`);
 
-            // FAILSAVE: Strip citations, remove bold/italics, and strip leading dashes/bullets
-            text = text.replace(/\[\d+\]/g, '')
-                .replace(/\*\*/g, '')
-                .replace(/\*/g, '')
-                .replace(/^\s*[-•]\s*/gm, '')
-                .trim();
+                    const result = await res.json();
+                    let text = result.choices[0].message.content || "";
 
-            return { success: true, text };
-        } else {
-            const { GoogleGenerativeAI } = await import("@google/generative-ai");
-            const genAI = new GoogleGenerativeAI(apiKey);
-            const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+                    text = text.replace(/\[\d+\]/g, '')
+                        .replace(/\*\*/g, '')
+                        .replace(/\*/g, '')
+                        .replace(/^\s*[-•]\s*/gm, '')
+                        .trim();
 
-            const result = await model.generateContent(systemPrompt);
-            const response = await result.response;
-            return { success: true, text: response.text() };
+                    return { success: true, text };
+                } else {
+                    const { GoogleGenerativeAI } = await import("@google/generative-ai");
+                    const modelsToTry = ["gemini-1.5-flash", "gemini-1.5-pro", "gemini-pro"];
+
+                    for (const modelId of modelsToTry) {
+                        try {
+                            const genAI = new GoogleGenerativeAI(apiKey);
+                            const model = genAI.getGenerativeModel({ model: modelId });
+
+                            const result = await model.generateContent(systemPrompt);
+                            const response = await result.response;
+                            return { success: true, text: response.text() };
+                        } catch (e) {
+                            console.warn(`[getInterviewerHint] Gemini model ${modelId} failed, trying next...`);
+                            lastError = e;
+                            continue;
+                        }
+                    }
+                }
+            } catch (error: any) {
+                console.error(`[getInterviewerHint] Key attempt failed:`, error.message);
+                lastError = error;
+                continue;
+            }
         }
+        throw lastError || new Error("All AI providers (Gemini & Perplexity) failed.");
     } catch (error) {
-        console.error(`Hint error:`, error);
+        console.error(`[getInterviewerHint] FINAL Error:`, error);
         return { success: false, error: "Interviewer is currently busy." };
     }
 }

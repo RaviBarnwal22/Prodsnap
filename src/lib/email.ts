@@ -804,3 +804,69 @@ export async function sendRejectionNotification(data: {
         type: 'rejection'
     })
 }
+// Send a manual reply from admin
+export async function sendAdminManualReply(data: {
+    name: string
+    email: string
+    subject: string
+    replyMessage: string
+    originalMessage?: string
+}) {
+    const html = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <style>
+                body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: #333; }
+                .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+                .header { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: white; padding: 30px; border-radius: 12px 12px 0 0; }
+                .content { background: #f8f9fa; padding: 30px; border-radius: 0 0 12px 12px; border: 1px solid #e5e7eb; border-top: none; }
+                .reply-box { background: white; padding: 25px; border-radius: 8px; margin-bottom: 25px; border-left: 4px solid #3b82f6; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+                .original-message { background: #f1f5f9; padding: 20px; border-radius: 8px; font-size: 14px; color: #64748b; margin-top: 20px; }
+                .label { font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; color: #94a3b8; margin-bottom: 8px; }
+                .footer { text-align: center; margin-top: 30px; color: #94a3b8; font-size: 12px; }
+                .signature { margin-top: 20px; font-weight: 600; color: #1e40af; }
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <div class="header">
+                    <h2 style="margin: 0;">Message from Prodsnap Support</h2>
+                </div>
+                <div class="content">
+                    <p>Hi <strong>${data.name}</strong>,</p>
+                    <p>We're writing to you regarding your recent interaction on Prodsnap.</p>
+                    
+                    <div class="reply-box">
+                        <div class="label">Our Response</div>
+                        <div style="white-space: pre-wrap; color: #1e293b; font-size: 16px;">${data.replyMessage}</div>
+                    </div>
+
+                    <div class="signature">
+                        Best regards,<br>
+                        The Prodsnap Team
+                    </div>
+
+                    ${data.originalMessage ? `
+                    <div class="original-message">
+                        <div class="label">Context / Original Feedback</div>
+                        <div style="font-style: italic;">"${data.originalMessage}"</div>
+                    </div>
+                    ` : ''}
+                </div>
+                <div class="footer">
+                    <p>© Prodsnap - Master PM Interviews with AI Feedback</p>
+                    <p>If you have further questions, feel free to reply to this email.</p>
+                </div>
+            </div>
+        </body>
+        </html>
+    `
+
+    return sendEmail({
+        to: data.email,
+        subject: data.subject,
+        html,
+        type: 'admin_manual_reply'
+    })
+}

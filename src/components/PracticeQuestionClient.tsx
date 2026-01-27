@@ -338,31 +338,46 @@ export function PracticeQuestionClient({
 
             {/* Show start button or answer form */}
             {!hasStartedAttempt && (attemptStatus?.canAttempt || previousSubmission) ? (
-                <div className="bg-white dark:bg-gray-900 p-8 rounded-2xl border shadow-sm text-center">
-                    <h3 className="text-xl font-bold mb-4 text-gray-900 dark:text-white">
-                        {previousSubmission ? "Want to try again?" : "Ready to Practice?"}
-                    </h3>
-                    <p className="text-gray-600 dark:text-gray-400 mb-6">
-                        {previousSubmission
-                            ? "This will safely replace your display answer without using your daily attempts."
-                            : "Click below to start your attempt. This will count as one of your practice attempts."
-                        }
-                    </p>
-                    <button
-                        onClick={handleStartAttempt}
-                        disabled={isStarting}
-                        className={`text-white px-8 py-3 rounded-xl font-bold transition-all flex items-center justify-center gap-2 mx-auto min-w-[200px] ${previousSubmission ? "bg-emerald-600 hover:bg-emerald-700" : "bg-violet-600 hover:bg-violet-700"
-                            } ${isStarting ? 'opacity-80 cursor-wait' : ''}`}
-                    >
-                        {isStarting ? (
-                            <>
-                                <Loader2 size={20} className="animate-spin" />
-                                Setting Up...
-                            </>
-                        ) : (
-                            previousSubmission ? "View Previous Try (Free)" : "Start Practice"
-                        )}
-                    </button>
+                <div className="space-y-6">
+                    {/* Simulation Note */}
+                    <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800 p-6 rounded-[1.5rem] flex items-start gap-4 shadow-sm">
+                        <div className="bg-blue-600 text-white p-2 rounded-xl shrink-0">
+                            <Sparkles size={18} />
+                        </div>
+                        <div>
+                            <p className="text-blue-800 dark:text-blue-200 text-sm leading-relaxed font-medium">
+                                <span className="font-black uppercase text-[10px] tracking-widest block mb-1.5 opacity-70">Case Simulation Mode</span>
+                                You are about to enter a live interview simulation. Just like a real-world product interview, you can ask for context using the <strong className="text-blue-900 dark:text-blue-100 font-black">Interviewer Hub</strong> after starting. Gather your thoughts, clarify the goals, and then submit your response for a detailed AI critique.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div className="bg-white dark:bg-gray-900 p-8 rounded-2xl border shadow-sm text-center">
+                        <h3 className="text-xl font-bold mb-4 text-gray-900 dark:text-white">
+                            {previousSubmission ? "Want to try again?" : "Ready to Practice?"}
+                        </h3>
+                        <p className="text-gray-600 dark:text-gray-400 mb-6">
+                            {previousSubmission
+                                ? "This will safely replace your display answer without using your daily attempts."
+                                : "Click below to start your attempt. This will count as one of your practice attempts."
+                            }
+                        </p>
+                        <button
+                            onClick={handleStartAttempt}
+                            disabled={isStarting}
+                            className={`text-white px-8 py-3 rounded-xl font-bold transition-all flex items-center justify-center gap-2 mx-auto min-w-[200px] ${previousSubmission ? "bg-emerald-600 hover:bg-emerald-700" : "bg-violet-600 hover:bg-violet-700"
+                                } ${isStarting ? 'opacity-80 cursor-wait' : ''}`}
+                        >
+                            {isStarting ? (
+                                <>
+                                    <Loader2 size={20} className="animate-spin" />
+                                    Setting Up...
+                                </>
+                            ) : (
+                                previousSubmission ? "View Previous Try (Free)" : "Start Practice"
+                            )}
+                        </button>
+                    </div>
                 </div>
             ) : hasStartedAttempt || attemptStatus?.isPremium ? (
                 <>
