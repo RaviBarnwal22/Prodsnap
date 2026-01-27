@@ -157,6 +157,14 @@ export default function LoginPage() {
             setVerificationEmail(email)
             setVerificationState('pending')
             setResendCountdown(50)
+
+            // Log the email event for admin usage tracking
+            try {
+                const { logEmailEvent } = await import('@/app/actions')
+                await logEmailEvent(email, 'auth_verification', 'Verification Email')
+            } catch (err) {
+                console.error("Failed to log email event:", err)
+            }
         }
     }
 
@@ -246,6 +254,15 @@ export default function LoginPage() {
             }
         } else {
             setMessage("Check your email for a password reset link!")
+
+            // Log the email event for admin usage tracking
+            try {
+                const { logEmailEvent } = await import('@/app/actions')
+                await logEmailEvent(email, 'auth_reset_password', 'Password Reset Email')
+            } catch (err) {
+                console.error("Failed to log email event:", err)
+            }
+
             // Set cooldown after successful request
             setResetPasswordCountdown(60)
             localStorage.setItem(lastResetKey, Date.now().toString())

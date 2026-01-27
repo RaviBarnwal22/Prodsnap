@@ -47,7 +47,7 @@ export async function sendEmail({ to, subject, html, type = "general", bookingId
         try {
             await prisma.emailLog.create({
                 data: {
-                    type,
+                    type: type.toLowerCase(),
                     recipient: to,
                     subject,
                     status: 'success',
@@ -66,7 +66,7 @@ export async function sendEmail({ to, subject, html, type = "general", bookingId
         try {
             await prisma.emailLog.create({
                 data: {
-                    type,
+                    type: type.toLowerCase(),
                     recipient: to,
                     subject,
                     status: 'error',

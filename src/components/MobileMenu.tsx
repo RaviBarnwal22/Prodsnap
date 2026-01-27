@@ -21,6 +21,7 @@ export function MobileMenu({ isLoggedIn, userName }: MobileMenuProps) {
         { name: 'Practice', href: '/practice' },
         { name: 'Mentorship', href: '/mentorship' },
         { name: 'Community', href: '/community' },
+        { name: 'About Us', href: '/about' },
         { name: 'Blog', href: '/blog' },
         { name: 'Contact Us', href: '/contact' },
     ]

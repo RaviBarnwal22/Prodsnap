@@ -8,7 +8,7 @@ interface PracticeFeedback {
     experience: string
     comments: string
     npsScore: number
-    createdAt: Date
+    createdAt: Date | string
     user: {
         id: string
         name: string | null
@@ -21,7 +21,7 @@ interface PracticeFeedback {
     } | null
 }
 
-export function UserFeedbackList({ feedbacks }: { feedbacks: any[] }) {
+export function UserFeedbackList({ feedbacks }: { feedbacks: PracticeFeedback[] }) {
     const [searchQuery, setSearchQuery] = useState('')
 
     const filteredFeedbacks = feedbacks.filter(f =>
