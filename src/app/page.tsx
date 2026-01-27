@@ -48,11 +48,12 @@ export default async function Home() {
 
       <main className="flex-grow">
         {/* Hero Section with Real Person Image */}
-        <section className="bg-white dark:bg-[#050505] py-16 md:py-24 px-4 relative overflow-hidden">
-          {/* Animated gradient orbs - Gen Z Style */}
+        <section className="bg-gradient-to-b from-violet-50 via-blue-50 to-white dark:from-gray-900 dark:via-gray-900 dark:to-gray-950 py-16 md:py-24 px-4 relative overflow-hidden">
+          {/* Animated gradient orbs (Pulse removed for performance) */}
           <div className="absolute inset-0 overflow-hidden pointer-events-none">
-            <div className="absolute -top-40 -left-40 w-96 h-96 bg-[#ccff00]/20 rounded-full blur-[100px] animate-pulse"></div>
-            <div className="absolute top-20 right-0 w-80 h-80 bg-[#ff00cc]/20 rounded-full blur-[100px] animate-pulse" style={{ animationDelay: '1s' }}></div>
+            <div className="absolute -top-40 -left-40 w-96 h-96 bg-purple-300/30 dark:bg-purple-900/20 rounded-full blur-3xl"></div>
+            <div className="absolute -top-20 -right-40 w-80 h-80 bg-blue-300/30 dark:bg-blue-900/20 rounded-full blur-3xl" style={{ animationDelay: '1s' }}></div>
+            <div className="absolute bottom-0 left-1/4 w-72 h-72 bg-pink-300/20 dark:bg-pink-900/20 rounded-full blur-3xl" style={{ animationDelay: '2s' }}></div>
           </div>
 
           <div className="container mx-auto max-w-7xl relative z-10">
@@ -61,16 +62,16 @@ export default async function Home() {
               <div className="text-center lg:text-left">
 
 
-                <h1 className="text-4xl md:text-6xl lg:text-7xl font-black tracking-tighter mb-8 text-black dark:text-white leading-[1.0] uppercase italic">
+                <h1 className="text-4xl md:text-6xl lg:text-7xl font-black tracking-tight mb-8 text-gray-900 dark:text-white leading-[1.1]">
                   Master Product Management <br className="hidden md:block" />
-                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#ccff00] via-[#ff00cc] to-[#7c3aed]">With AI-Guided Precision</span>
+                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-600 via-blue-600 to-cyan-500">With AI-Guided Precision</span>
                 </h1>
-                <p className="text-lg md:text-xl text-gray-700 dark:text-gray-300 max-w-xl mb-10 leading-relaxed font-bold lg:mx-0 mx-auto">
+                <p className="text-lg md:text-xl text-gray-600 dark:text-gray-300 max-w-xl mb-10 leading-relaxed font-medium lg:mx-0 mx-auto">
                   The only platform that evaluates your product sensing questions using adaptive case frameworks and instant Gemini-powered feedback.
                 </p>
                 <div className="flex flex-col sm:flex-row justify-center lg:justify-start gap-4">
-                  <Link href="/practice" className="bg-[#ccff00] text-black border-2 border-black dark:border-white px-12 py-5 rounded-none skew-x-[-12deg] font-black text-xl hover:shadow-[8px_8px_0px_0px_rgba(255,0,204,1)] hover:-translate-y-1 transition-all flex items-center justify-center gap-2 group">
-                    <span className="skew-x-[12deg] flex items-center gap-2">Start Practice with AI Simulation <ArrowRight size={24} className="group-hover:translate-x-1 transition-transform" /></span>
+                  <Link href="/practice" className="bg-gradient-to-r from-violet-600 to-blue-600 text-white px-12 py-5 rounded-full font-black text-xl hover:shadow-xl hover:shadow-violet-500/30 transition-all flex items-center justify-center gap-2 group">
+                    Start Practice with AI Simulation <ArrowRight size={24} className="group-hover:translate-x-1 transition-transform" />
                   </Link>
                   {/* <Link href="/prodsense" className="bg-white dark:bg-gray-800 text-gray-900 dark:text-white px-10 py-4 rounded-full font-black text-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition border border-gray-200 dark:border-gray-700 shadow-lg">
                     Explore Prodsense
@@ -149,7 +150,7 @@ export default async function Home() {
         </section>
 
         {/* Application Features Strip */}
-        <section className="py-4 bg-black border-y-2 border-white overflow-hidden rotate-[-1deg] scale-105 z-20 relative shadow-[0_10px_40px_rgba(255,0,204,0.3)]">
+        <section className="py-8 bg-gradient-to-r from-violet-600 via-purple-600 to-indigo-600 overflow-hidden">
           <div className="flex animate-marquee whitespace-nowrap">
             {[
               { icon: "🎯", text: "Custom Framework Evaluation" },
@@ -169,10 +170,10 @@ export default async function Home() {
               { icon: "🚀", text: "Unlimited Practice Sessions" },
               { icon: "📱", text: "Mobile-Friendly Interface" },
             ].map((feature, i) => (
-              <div key={i} className="flex items-center gap-6 mx-8 text-[#ccff00]">
-                <span className="text-3xl">{feature.icon}</span>
-                <p className="text-xl font-black uppercase tracking-widest italic">{feature.text}</p>
-                <span className="mx-4 text-white">•</span>
+              <div key={i} className="flex items-center gap-3 mx-8 text-white">
+                <span className="text-2xl">{feature.icon}</span>
+                <p className="text-sm font-semibold tracking-wide">{feature.text}</p>
+                <span className="mx-4 text-white/30">•</span>
               </div>
             ))}
           </div>
@@ -181,67 +182,67 @@ export default async function Home() {
         {/* Core Pillars */}
         <section className="py-24 px-4 container mx-auto border-b border-gray-100 dark:border-gray-800">
           <div className="text-center mb-16">
-            <h2 className="text-sm uppercase tracking-[0.3em] font-black text-[#ff00cc] mb-4 bg-black inline-block text-white px-2 py-1 rotate-2">The Ecosystem</h2>
-            <h3 className="text-5xl font-black tracking-tighter text-black dark:text-white uppercase">Everything you need to <span className="italic text-transparent bg-clip-text bg-gradient-to-r from-[#ccff00] to-[#00ff99]">scale</span>.</h3>
+            <h2 className="text-xs uppercase tracking-[0.3em] font-black text-violet-600 mb-4">The Ecosystem</h2>
+            <h3 className="text-4xl font-black tracking-tight">Everything you need to <span className="italic text-transparent bg-clip-text bg-gradient-to-r from-violet-600 to-blue-600">scale</span>.</h3>
           </div>
           <div className="grid md:grid-cols-3 gap-12 max-w-6xl mx-auto">
-            <div className="group bg-white dark:bg-[#111] p-8 border-2 border-black dark:border-white shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] dark:shadow-[8px_8px_0px_0px_rgba(255,255,255,1)] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-all">
-              <div className="bg-[#ccff00] text-black w-16 h-16 flex items-center justify-center border-2 border-black mb-6 group-hover:rotate-12 transition-transform shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+            <div className="group bg-gradient-to-br from-violet-50 to-white dark:from-gray-900 dark:to-gray-900 p-8 rounded-3xl border border-violet-100 dark:border-gray-800 hover:shadow-xl hover:shadow-violet-500/10 transition-all">
+              <div className="bg-gradient-to-br from-violet-500 to-purple-600 text-white w-16 h-16 flex items-center justify-center rounded-2xl mb-6 group-hover:scale-110 transition-transform shadow-lg">
                 <Sparkles size={32} />
               </div>
-              <h3 className="text-2xl font-black uppercase mb-4 text-black dark:text-white">Practice Engine</h3>
-              <p className="text-gray-700 dark:text-gray-300 leading-relaxed font-bold mb-4">Real-time feedback on your verbal and written answers using industry-standard frameworks.</p>
-              <Link href="/practice" className="inline-flex items-center gap-2 text-black dark:text-white font-black uppercase bg-[#ccff00] px-4 py-2 border-2 border-black hover:bg-[#b3ff00] transition-colors">Launch engine <ArrowRight size={16} /></Link>
+              <h3 className="text-2xl font-bold mb-4">Practice Engine</h3>
+              <p className="text-gray-500 dark:text-gray-400 leading-relaxed font-medium mb-4">Real-time feedback on your verbal and written answers using industry-standard frameworks.</p>
+              <Link href="/practice" className="inline-flex items-center gap-2 text-violet-600 font-bold hover:underline group-hover:gap-3 transition-all">Launch engine <ArrowRight size={16} /></Link>
             </div>
-            <div className="group bg-white dark:bg-[#111] p-8 border-2 border-black dark:border-white shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] dark:shadow-[8px_8px_0px_0px_rgba(255,255,255,1)] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-all">
-              <div className="bg-[#00ffff] text-black w-16 h-16 flex items-center justify-center border-2 border-black mb-6 group-hover:-rotate-12 transition-transform shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+            <div className="group bg-gradient-to-br from-blue-50 to-white dark:from-gray-900 dark:to-gray-900 p-8 rounded-3xl border border-blue-100 dark:border-gray-800 hover:shadow-xl hover:shadow-blue-500/10 transition-all">
+              <div className="bg-gradient-to-br from-blue-500 to-cyan-600 text-white w-16 h-16 flex items-center justify-center rounded-2xl mb-6 group-hover:scale-110 transition-transform shadow-lg">
                 <BookOpen size={32} />
               </div>
-              <h3 className="text-2xl font-black uppercase mb-4 text-black dark:text-white">Knowledge & Blogs</h3>
-              <p className="text-gray-700 dark:text-gray-300 leading-relaxed font-bold mb-4">Explore insightful articles, PM frameworks, and interview guides curated by industry experts.</p>
-              <Link href="/blog" className="inline-flex items-center gap-2 text-black dark:text-white font-black uppercase bg-[#00ffff] px-4 py-2 border-2 border-black hover:bg-[#00eefe] transition-colors">Read blogs <ArrowRight size={16} /></Link>
+              <h3 className="text-2xl font-bold mb-4">Knowledge & Blogs</h3>
+              <p className="text-gray-500 dark:text-gray-400 leading-relaxed font-medium mb-4">Explore insightful articles, PM frameworks, and interview guides curated by industry experts.</p>
+              <Link href="/blog" className="inline-flex items-center gap-2 text-blue-600 font-bold hover:underline group-hover:gap-3 transition-all">Read blogs <ArrowRight size={16} /></Link>
             </div>
-            <div className="group bg-white dark:bg-[#111] p-8 border-2 border-black dark:border-white shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] dark:shadow-[8px_8px_0px_0px_rgba(255,255,255,1)] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-all">
-              <div className="bg-[#ff00cc] text-black w-16 h-16 flex items-center justify-center border-2 border-black mb-6 group-hover:rotate-12 transition-transform shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+            <div className="group bg-gradient-to-br from-emerald-50 to-white dark:from-gray-900 dark:to-gray-900 p-8 rounded-3xl border border-emerald-100 dark:border-gray-800 hover:shadow-xl hover:shadow-emerald-500/10 transition-all">
+              <div className="bg-gradient-to-br from-emerald-500 to-green-600 text-white w-16 h-16 flex items-center justify-center rounded-2xl mb-6 group-hover:scale-110 transition-transform shadow-lg">
                 <Users size={32} />
               </div>
-              <h3 className="text-2xl font-black uppercase mb-4 text-black dark:text-white">Community</h3>
-              <p className="text-gray-700 dark:text-gray-300 leading-relaxed font-bold mb-4">Join our WhatsApp community for PM openings, exclusive materials, peer learning, and expert guidance.</p>
-              <Link href="/community" className="inline-flex items-center gap-2 text-black dark:text-white font-black uppercase bg-[#ff00cc] px-4 py-2 border-2 border-black hover:bg-[#e600b8] transition-colors">Join community <ArrowRight size={16} /></Link>
+              <h3 className="text-2xl font-bold mb-4">Community</h3>
+              <p className="text-gray-500 dark:text-gray-400 leading-relaxed font-medium mb-4">Join our WhatsApp community for PM openings, exclusive materials, peer learning, and expert guidance.</p>
+              <Link href="/community" className="inline-flex items-center gap-2 text-emerald-600 font-bold hover:underline group-hover:gap-3 transition-all">Join community <ArrowRight size={16} /></Link>
             </div>
           </div>
         </section>
 
         {/* Featured Testimonial Section */}
-        <section className="py-24 px-4 bg-[#f0f0f0] dark:bg-[#0a0a0a] relative overflow-hidden border-t-2 border-black dark:border-white">
-          {/* Background pattern - Gen Z Grid */}
-          <div className="absolute inset-0 opacity-20 pointer-events-none">
+        <section className="py-24 px-4 bg-gray-50 dark:bg-gray-900/50 relative overflow-hidden">
+          {/* Background pattern */}
+          <div className="absolute inset-0 opacity-5">
             <div className="absolute inset-0" style={{
-              backgroundImage: 'linear-gradient(#000 1px, transparent 1px), linear-gradient(90deg, #000 1px, transparent 1px)',
+              backgroundImage: 'radial-gradient(circle at 1px 1px, currentColor 1px, transparent 0)',
               backgroundSize: '40px 40px'
             }}></div>
           </div>
 
           <div className="container mx-auto max-w-6xl relative z-10">
             <div className="text-center mb-16">
-              <h2 className="text-sm uppercase tracking-[0.3em] font-black text-black mb-4 bg-[#ccff00] inline-block px-2 py-1 -rotate-1 border-2 border-black">Success Stories</h2>
-              <h3 className="text-5xl font-black tracking-tighter text-black dark:text-white uppercase italic">Real People, <span className="text-[#ff00cc]">Real Results</span></h3>
+              <h2 className="text-xs uppercase tracking-[0.3em] font-black text-violet-600 mb-4">Success Stories</h2>
+              <h3 className="text-4xl font-black tracking-tight">Real People, Real Results</h3>
             </div>
 
             <div className="grid md:grid-cols-3 gap-8">
               {testimonialPeople.slice(0, 6).map((person, i) => (
-                <div key={i} className="bg-white dark:bg-[#111] p-6 border-2 border-black dark:border-white shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] dark:shadow-[8px_8px_0px_0px_rgba(255,255,255,1)] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-all group">
+                <div key={i} className="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-lg border border-gray-100 dark:border-gray-700 hover:shadow-xl transition-shadow group">
                   <div className="flex items-center gap-4 mb-4">
-                    <img src={person.img} alt={person.name} className="w-14 h-14 rounded-full border-2 border-black dark:border-white group-hover:scale-110 transition-transform grayscale hover:grayscale-0" />
+                    <img src={person.img} alt={person.name} className="w-14 h-14 rounded-full border-2 border-violet-200 group-hover:scale-110 transition-transform" />
                     <div>
-                      <p className="font-black text-xl uppercase text-black dark:text-white">{person.name}</p>
-                      <p className="text-sm text-[#ff00cc] font-bold tracking-widest uppercase">{person.role || "Product Manager"}</p>
+                      <p className="font-bold text-gray-900 dark:text-white">{person.name}</p>
+                      <p className="text-sm text-violet-600 font-medium">{person.role}</p>
                     </div>
                   </div>
-                  <div className="flex text-black dark:text-white mb-3 gap-1">
-                    {[...Array(5)].map((_, i) => <Star key={i} size={18} fill="currentColor" strokeWidth={0} className="text-[#ccff00]" />)}
+                  <div className="flex text-yellow-400 mb-3">
+                    {[...Array(5)].map((_, i) => <Star key={i} size={16} fill="currentColor" />)}
                   </div>
-                  <p className="text-gray-800 dark:text-gray-300 font-bold italic leading-relaxed">&ldquo;{person.quote}&rdquo;</p>
+                  <p className="text-gray-600 dark:text-gray-300 italic">&ldquo;{person.quote}&rdquo;</p>
                 </div>
               ))}
             </div>
