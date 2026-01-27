@@ -15,6 +15,7 @@ export async function Header() {
                 </Link>
 
                 <nav className="hidden md:flex gap-8 text-[13px] font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                    <Link href="/about" className="hover:text-violet-600 transition-colors">About Us</Link>
                     <Link href="/practice" className="hover:text-violet-600 transition-colors">Practice</Link>
                     {/* <Link href="/prodsense" className="hover:text-violet-600 transition-colors">Prodsense</Link> */}
                     <Link href="/mentorship" className="hover:text-violet-600 transition-colors">Mentorship</Link>
