@@ -8,48 +8,56 @@ export default function AboutPage() {
     const categories = [
         {
             label: "Product Design",
+            key: "CONSUMER_PRODUCT_DESIGN",
             icon: <Briefcase size={24} />,
             color: "text-blue-600",
             description: "Master the art of designing products for the next billion users. This track covers everything from hyperlocal Indian logistics to vernacular fintech solutions."
         },
         {
             label: "Success Metrics",
+            key: "METRICS",
             icon: <BarChart3 size={24} />,
             color: "text-purple-600",
             description: "Develop deep analytical rigor. Learn to define North Star metrics, handle metric trade-offs, and measure success for multi-faceted platforms."
         },
         {
             label: "Growth Strategy",
+            key: "GROWTH_RETENTION",
             icon: <TrendingUp size={24} />,
             color: "text-orange-600",
             description: "Learn how to drive sustainable growth. Focus on habit formation, referral loops, and retention mechanics for competitive markets."
         },
         {
             label: "Tech Acumen",
+            key: "TECH_ACUMEN",
             icon: <Cpu size={24} />,
             color: "text-cyan-600",
             description: "Bridge the gap between product and engineering. Learn to articulate technical concepts and understand system design."
         },
         {
             label: "Go-to-Market",
+            key: "GTM",
             icon: <Rocket size={24} />,
             color: "text-pink-600",
             description: "Master the art of product launches. From pricing to positioning, learn how to take products to market effectively."
         },
         {
             label: "Behavioral",
+            key: "BEHAVIORAL",
             icon: <Users size={24} />,
             color: "text-indigo-600",
             description: "Prepare for the human side of PM interviews. Practice storytelling and leadership scenarios using the STAR method."
         },
         {
             label: "Root Cause Analysis",
+            key: "RCA",
             icon: <Search size={24} />,
             color: "text-red-600",
             description: "When things break, PMs need to find out why. Learn systematic approaches to diagnosing metric drops and bugs."
         },
         {
             label: "Guestimates",
+            key: "GUESTIMATES",
             icon: <Calculator size={24} />,
             color: "text-emerald-600",
             description: "Sharpen your estimation skills. Practice breaking down complex numbers into logical assumptions and market sizing."
@@ -159,7 +167,7 @@ export default function AboutPage() {
 
                         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
                             {categories.map((cat, idx) => (
-                                <div key={idx} className="bg-white dark:bg-gray-800 p-6 rounded-2xl border border-gray-100 dark:border-gray-700 hover:shadow-xl transition-all duration-300 group">
+                                <Link href={`/practice?category=${cat.key}`} key={idx} className="bg-white dark:bg-gray-800 p-6 rounded-2xl border border-gray-100 dark:border-gray-700 hover:shadow-xl transition-all duration-300 group">
                                     <div className={`w-12 h-12 rounded-xl flex items-center justify-center mb-4 bg-gray-50 dark:bg-gray-700/50 ${cat.color} group-hover:scale-110 transition-transform`}>
                                         {cat.icon}
                                     </div>
@@ -167,7 +175,7 @@ export default function AboutPage() {
                                     <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed">
                                         {cat.description}
                                     </p>
-                                </div>
+                                </Link>
                             ))}
                         </div>
                     </div>
