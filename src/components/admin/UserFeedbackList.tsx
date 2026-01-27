@@ -6,7 +6,7 @@ import { MessageSquare, Star, User, Calendar, Search } from 'lucide-react'
 interface PracticeFeedback {
     id: string
     experience: string
-    comments: string
+    comments: string | null
     npsScore: number
     createdAt: Date | string
     user: {

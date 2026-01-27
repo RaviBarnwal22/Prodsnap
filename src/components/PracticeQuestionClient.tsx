@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react'
 import { AnswerForm } from '@/components/AnswerForm'
 import { PremiumUpgradeModal } from '@/components/PremiumUpgradeModal'
 import { canAttemptCategory, incrementCategoryAttempt } from '@/lib/subscription'
+import { FREE_ATTEMPT_LIMIT } from '@/lib/constants'
 import { Crown, Lock, Sparkles, Clock, CheckCircle2, Loader2 } from 'lucide-react'
 import Link from 'next/link'
 
@@ -266,7 +267,7 @@ export function PracticeQuestionClient({
                         Free Attempts Exhausted
                     </h3>
                     <p className="text-gray-600 dark:text-gray-400 mb-6">
-                        You've used {attemptStatus.attemptsUsed}/2 free attempts across all categories.
+                        You've used {attemptStatus.attemptsUsed}/{FREE_ATTEMPT_LIMIT} free attempts across all categories.
                         <br />
                         Upgrade to Premium for unlimited practice!
                     </p>
@@ -302,7 +303,7 @@ export function PracticeQuestionClient({
                     <div className="flex items-center gap-3">
                         <Sparkles size={20} className="text-violet-600 dark:text-violet-400" />
                         <span className="text-sm font-medium text-violet-800 dark:text-violet-200">
-                            Free Attempts: {attemptStatus.attemptsRemaining}/2 remaining (across all categories)
+                            Free Attempts: {attemptStatus.attemptsRemaining}/{FREE_ATTEMPT_LIMIT} remaining (across all categories)
                         </span>
                     </div>
                     <button

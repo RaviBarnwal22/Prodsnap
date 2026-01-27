@@ -6,7 +6,7 @@ import { PracticeHistory } from "@/components/PracticeHistory"
 import { hasActiveSubscription } from "@/lib/subscription"
 import { PracticeLockOverlay } from "@/components/PracticeLockOverlay"
 import Link from "next/link"
-import { Crown, Lock, Unlock } from "lucide-react"
+import { Crown, Lock, Unlock, ChevronLeft } from "lucide-react"
 
 export default async function QuestionPage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = await params
@@ -60,6 +60,13 @@ export default async function QuestionPage({ params }: { params: Promise<{ id: s
         <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
             <Header />
             <main className="container mx-auto px-4 py-16 max-w-7xl">
+                <Link
+                    href={`/practice?category=${question.category}`}
+                    className="inline-flex items-center gap-2 text-sm font-bold text-gray-500 hover:text-blue-600 transition-colors mb-8 group"
+                >
+                    <ChevronLeft size={16} className="group-hover:-translate-x-1 transition-transform" />
+                    Back to Challenges
+                </Link>
                 <div className="grid md:grid-cols-3 gap-8">
                     {/* Left Column: Question Details */}
                     <div className="md:col-span-1 space-y-6">

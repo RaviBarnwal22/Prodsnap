@@ -96,7 +96,7 @@ export function AnswerForm({ questionId, questionTitle, userId, category, descri
         const userMsg = customMsg || chatInput.trim()
 
         const clarifyingQuestionCount = chatMessages.filter(m => m.role === 'user').length
-        const limit = isPremium ? 50 : 5 // Use 50 as a high practical limit for premium, or true infinity
+        const limit = isPremium ? 50 : 10 // Use 50 as a high practical limit for premium, or true infinity
 
         if (!userMsg || isAsking || clarifyingQuestionCount >= limit) return
 
@@ -664,28 +664,9 @@ export function AnswerForm({ questionId, questionTitle, userId, category, descri
                     })()}
                 </div>
 
-                <div className="relative">
-                    <textarea
-                        {...register("answer", { required: true })}
-                        className="w-full h-64 p-4 pr-12 border rounded-lg focus:ring-2 focus:ring-violet-500 focus:outline-none dark:bg-gray-800 dark:border-gray-700"
-                        placeholder="Type or speak your answer here..."
-                    />
-                    <button
-                        type="button"
-                        onClick={toggleRecording}
-                        className={`absolute bottom-4 right-4 p-3 rounded-full transition ${isRecording
-                            ? 'bg-red-100 text-red-600 animate-pulse dark:bg-red-900/30'
-                            : 'bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300'
-                            }`}
-                        title={isRecording ? "Stop Recording" : "Start Voice Input"}
-                    >
-                        {isRecording ? <Mic className="text-red-600" size={20} /> : <MicOff size={20} />}
-                    </button>
-                </div>
-
                 {/* Clarification Hub - Powered by Perplexity AI */}
                 {!result && (
-                    <div className="bg-white dark:bg-gray-900 border rounded-2xl overflow-hidden shadow-sm transition-all border-violet-100 dark:border-violet-900/30">
+                    <div className="bg-white dark:bg-gray-900 border rounded-2xl overflow-hidden shadow-sm transition-all border-violet-100 dark:border-violet-900/30 mb-8">
                         {/* Hub Header */}
                         <div
                             onClick={() => setChatOpen(!chatOpen)}
@@ -702,7 +683,7 @@ export function AnswerForm({ questionId, questionTitle, userId, category, descri
                                     <p className="text-[10px] text-violet-600 dark:text-violet-400 font-bold">
                                         {isPremium
                                             ? "Unlimited clarifying questions active"
-                                            : `Trial: ${chatMessages.filter(m => m.role === 'user').length}/5 clarifying questions used`}
+                                            : `Trial: ${chatMessages.filter(m => m.role === 'user').length}/10 clarifying questions used`}
                                     </p>
                                 </div>
                             </div>
@@ -779,10 +760,10 @@ export function AnswerForm({ questionId, questionTitle, userId, category, descri
                                                 value={chatInput}
                                                 onChange={(e) => setChatInput(e.target.value)}
                                                 onKeyDown={(e) => e.key === 'Enter' && handleAskClarification(e)}
-                                                placeholder={!isPremium && chatMessages.filter(m => m.role === 'user').length >= 5
+                                                placeholder={!isPremium && chatMessages.filter(m => m.role === 'user').length >= 10
                                                     ? "Clarification limit reached"
                                                     : "Ask a clarifying question..."}
-                                                disabled={!isPremium && chatMessages.filter(m => m.role === 'user').length >= 5}
+                                                disabled={!isPremium && chatMessages.filter(m => m.role === 'user').length >= 10}
                                                 className="flex-1 px-4 py-2 bg-gray-50 dark:bg-gray-800 border-2 border-gray-100 dark:border-gray-700 rounded-xl text-xs focus:ring-4 focus:ring-violet-500/10 focus:border-violet-600 transition-all outline-none disabled:bg-gray-200 dark:disabled:bg-gray-900 disabled:cursor-not-allowed"
                                             />
                                             <button
@@ -800,6 +781,24 @@ export function AnswerForm({ questionId, questionTitle, userId, category, descri
                         </AnimatePresence>
                     </div>
                 )}
+                <div className="relative">
+                    <textarea
+                        {...register("answer", { required: true })}
+                        className="w-full h-64 p-4 pr-12 border rounded-lg focus:ring-2 focus:ring-violet-500 focus:outline-none dark:bg-gray-800 dark:border-gray-700"
+                        placeholder="Type or speak your answer here..."
+                    />
+                    <button
+                        type="button"
+                        onClick={toggleRecording}
+                        className={`absolute bottom-4 right-4 p-3 rounded-full transition ${isRecording
+                            ? 'bg-red-100 text-red-600 animate-pulse dark:bg-red-900/30'
+                            : 'bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300'
+                            }`}
+                        title={isRecording ? "Stop Recording" : "Start Voice Input"}
+                    >
+                        {isRecording ? <Mic className="text-red-600" size={20} /> : <MicOff size={20} />}
+                    </button>
+                </div>
 
                 {errors.answer && (
                     <p className="text-red-500 text-sm">Please provide an answer before submitting.</p>
