@@ -49,11 +49,11 @@ export default async function Home() {
       <main className="flex-grow">
         {/* Hero Section with Real Person Image */}
         <section className="bg-gradient-to-b from-violet-50 via-blue-50 to-white dark:from-gray-900 dark:via-gray-900 dark:to-gray-950 py-16 md:py-24 px-4 relative overflow-hidden">
-          {/* Animated gradient orbs (Pulse removed for performance) */}
+          {/* Animated gradient orbs */}
           <div className="absolute inset-0 overflow-hidden pointer-events-none">
-            <div className="absolute -top-40 -left-40 w-96 h-96 bg-purple-300/30 dark:bg-purple-900/20 rounded-full blur-3xl"></div>
-            <div className="absolute -top-20 -right-40 w-80 h-80 bg-blue-300/30 dark:bg-blue-900/20 rounded-full blur-3xl" style={{ animationDelay: '1s' }}></div>
-            <div className="absolute bottom-0 left-1/4 w-72 h-72 bg-pink-300/20 dark:bg-pink-900/20 rounded-full blur-3xl" style={{ animationDelay: '2s' }}></div>
+            <div className="absolute -top-40 -left-40 w-96 h-96 bg-purple-300/30 dark:bg-purple-900/20 rounded-full blur-3xl animate-pulse"></div>
+            <div className="absolute -top-20 -right-40 w-80 h-80 bg-blue-300/30 dark:bg-blue-900/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>
+            <div className="absolute bottom-0 left-1/4 w-72 h-72 bg-pink-300/20 dark:bg-pink-900/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }}></div>
           </div>
 
           <div className="container mx-auto max-w-7xl relative z-10">

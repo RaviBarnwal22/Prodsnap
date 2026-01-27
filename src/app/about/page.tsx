@@ -188,8 +188,40 @@ export default function AboutPage() {
                                 Join thousands of aspiring Product Managers who are leveling up their skills with Prodsnap.
                             </p>
                             <Link href="/practice" className="inline-block bg-white text-violet-600 px-10 py-4 rounded-full font-black text-lg hover:bg-gray-50 hover:scale-105 transition-all shadow-xl">
-                                Start Practicing for Free
+                                Start practicing with AI simulator for free
                             </Link>
+                        </div>
+                    </div>
+                </section>
+
+                {/* Meet the Creator */}
+                <section className="py-20 px-4 bg-gray-50 dark:bg-gray-900/30">
+                    <div className="container mx-auto max-w-4xl text-center">
+                        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 text-xs font-bold uppercase tracking-widest mb-8">
+                            Meet the Founder
+                        </div>
+                        <div className="flex flex-col md:flex-row items-center gap-8 md:gap-12">
+                            <div className="w-48 h-48 md:w-64 md:h-64 relative flex-shrink-0">
+                                <div className="absolute inset-0 bg-violet-600 rounded-full blur-2xl opacity-20"></div>
+                                <img
+                                    src="/ravi-barnwal-new.png"
+                                    alt="Ravi Shankar Barnwal"
+                                    className="w-full h-full object-cover rounded-full border-4 border-white dark:border-gray-800 shadow-xl relative z-10"
+                                />
+                            </div>
+                            <div className="text-left">
+                                <h3 className="text-3xl font-black text-gray-900 dark:text-white mb-4">Ravi Shankar Barnwal</h3>
+                                <p className="text-gray-600 dark:text-gray-400 text-lg leading-relaxed mb-6">
+                                    A product leader with a passion for democratizing access to top-tier career coaching.
+                                    Ravi built Prodsnap to solve the gap between theoretical knowledge and practical application in Product Management interviews.
+                                    With deep experience in building scalable products, he's on a mission to help the next generation of PMs land their dream roles through AI-driven mentorship.
+                                </p>
+                                <div className="flex gap-4">
+                                    <a href="https://www.linkedin.com/in/barnwal3008/" target="_blank" rel="noopener noreferrer" className="text-gray-500 hover:text-[#0077b5] transition-colors">
+                                        <svg className="w-6 h-6 fill-current" viewBox="0 0 24 24"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z" /></svg>
+                                    </a>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </section>
