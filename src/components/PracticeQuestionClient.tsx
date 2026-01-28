@@ -178,8 +178,8 @@ export function PracticeQuestionClient({
 
     return (
         <div className="space-y-6">
-            {/* Contextual Banners */}
-            {!userId && !hasStartedAttempt && (
+            {/* Guest Banner - only show on unlocked cases */}
+            {!userId && !isLocked && !hasStartedAttempt && (
                 <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800 p-6 rounded-[2rem] flex items-center justify-between shadow-sm">
                     <div className="flex items-center gap-4">
                         <div className="bg-blue-600 text-white p-2 rounded-xl">
@@ -195,24 +195,54 @@ export function PracticeQuestionClient({
                 </div>
             )}
 
-            {isLocked && !attemptStatus?.isPremium && (
-                <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-100 dark:border-amber-800 p-6 rounded-[2rem] flex items-center justify-between shadow-sm">
-                    <div className="flex items-center gap-4">
-                        <div className="bg-amber-500 text-white p-2 rounded-xl">
-                            <Crown size={18} />
+            {/* Locked Case - Guest: Must sign in first */}
+            {isLocked && !userId && (
+                <div className="bg-white dark:bg-gray-900 p-12 rounded-[2.5rem] border border-gray-100 dark:border-gray-800 shadow-2xl text-center relative overflow-hidden">
+                    <div className="absolute inset-0 backdrop-blur-sm bg-white/60 dark:bg-gray-900/60 z-10"></div>
+                    <div className="relative z-20 flex flex-col items-center justify-center min-h-[300px]">
+                        <div className="w-20 h-20 bg-amber-100 dark:bg-amber-900/30 rounded-3xl flex items-center justify-center mb-6 text-amber-600">
+                            <Lock size={32} />
                         </div>
-                        <p className="text-amber-800 dark:text-amber-200 text-sm font-medium">
-                            Premium Case. <strong>Detailed AI mapping only for Premium members.</strong>
+                        <h2 className="text-2xl font-black mb-3 tracking-tight">Premium Case</h2>
+                        <p className="text-gray-500 dark:text-gray-400 text-base mb-8 leading-relaxed font-medium max-w-sm mx-auto">
+                            Sign in to your account first. Then upgrade to Premium to unlock all cases and detailed AI evaluations.
                         </p>
+                        <Link
+                            href={`/login?redirectedFrom=/practice/${questionId}`}
+                            className="bg-blue-600 text-white px-8 py-4 rounded-2xl font-black text-lg hover:scale-[1.02] transition-all shadow-xl shadow-blue-500/20 flex items-center gap-2"
+                        >
+                            Sign In to Continue
+                            <ChevronRight size={20} />
+                        </Link>
                     </div>
-                    <button onClick={() => setShowUpgradeModal(true)} className="text-xs font-black uppercase tracking-widest text-amber-600 hover:underline">
-                        Upgrade
-                    </button>
+                </div>
+            )}
+
+            {/* Locked Case - Logged in but not premium: Show upgrade */}
+            {isLocked && userId && !attemptStatus?.isPremium && (
+                <div className="bg-white dark:bg-gray-900 p-12 rounded-[2.5rem] border border-gray-100 dark:border-gray-800 shadow-2xl text-center relative overflow-hidden">
+                    <div className="absolute inset-0 backdrop-blur-sm bg-white/60 dark:bg-gray-900/60 z-10"></div>
+                    <div className="relative z-20 flex flex-col items-center justify-center min-h-[300px]">
+                        <div className="w-20 h-20 bg-amber-100 dark:bg-amber-900/30 rounded-3xl flex items-center justify-center mb-6 text-amber-600">
+                            <Crown size={32} />
+                        </div>
+                        <h2 className="text-2xl font-black mb-3 tracking-tight">Premium Case</h2>
+                        <p className="text-gray-500 dark:text-gray-400 text-base mb-8 leading-relaxed font-medium max-w-sm mx-auto">
+                            Upgrade to Premium to unlock all cases, get detailed AI-powered feedback, and track your progress.
+                        </p>
+                        <button
+                            onClick={() => setShowUpgradeModal(true)}
+                            className="bg-gradient-to-r from-amber-500 to-orange-500 text-white px-8 py-4 rounded-2xl font-black text-lg hover:scale-[1.02] transition-all shadow-xl shadow-amber-500/20 flex items-center gap-2"
+                        >
+                            <Crown size={20} />
+                            Upgrade to Premium
+                        </button>
+                    </div>
                 </div>
             )}
 
             {/* Previously Solved Banner */}
-            {previousSubmission && !hasStartedAttempt && (
+            {!isLocked && previousSubmission && !hasStartedAttempt && (
                 <div className="p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-xl flex items-center gap-3">
                     <CheckCircle2 size={20} className="text-green-600 dark:text-green-400" />
                     <span className="text-sm font-medium text-green-800 dark:text-green-200">
@@ -221,8 +251,8 @@ export function PracticeQuestionClient({
                 </div>
             )}
 
-            {/* Main Content Area */}
-            {!hasStartedAttempt ? (
+            {/* Main Content Area - Only show if not locked */}
+            {!isLocked && !hasStartedAttempt && (
                 <div className="bg-white dark:bg-gray-900 p-12 rounded-[2.5rem] border border-gray-100 dark:border-gray-800 shadow-2xl text-center relative overflow-hidden group">
                     <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-blue-600 to-indigo-600"></div>
                     <div className="absolute -right-20 -bottom-20 w-64 h-64 bg-blue-500/5 rounded-full blur-3xl group-hover:bg-blue-500/10 transition-colors"></div>
@@ -263,7 +293,10 @@ export function PracticeQuestionClient({
                         </div>
                     </div>
                 </div>
-            ) : (
+            )}
+
+            {/* Active Simulation */}
+            {!isLocked && hasStartedAttempt && (
                 <div className="space-y-6">
                     {/* Timer */}
                     <div className="p-4 bg-gray-50 dark:bg-gray-800/50 border border-gray-100 dark:border-gray-800 rounded-2xl flex items-center justify-center gap-3">
