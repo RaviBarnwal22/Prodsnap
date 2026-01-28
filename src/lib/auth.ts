@@ -8,7 +8,10 @@ export async function getUser() {
         const { data: { user: authUser }, error } = await supabase.auth.getUser()
 
         if (error || !authUser) {
-            if (error) console.error("[getUser] Supabase error:", error.message)
+            // "Auth session missing!" is expected for guests - don't log it as an error
+            if (error && error.message !== "Auth session missing!") {
+                console.error("[getUser] Supabase error:", error.message)
+            }
             return null
         }
         user = authUser

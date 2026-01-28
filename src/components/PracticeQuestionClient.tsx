@@ -265,7 +265,7 @@ export function PracticeQuestionClient({
                             {previousSubmission ? "Polish Your Strategy" : "Ready to Solve?"}
                         </h2>
                         <p className="text-gray-500 dark:text-gray-400 text-lg mb-10 leading-relaxed font-medium max-w-md mx-auto">
-                            Step into the role of a Product Manager at Google. Clarify the case, frame your thinking, and get industry-standard feedback.
+                            Step into the role of a Product Manager at your dream company. Clarify the case, frame your thinking, and get industry-standard feedback.
                         </p>
 
                         <div className="flex flex-col items-center gap-4">
