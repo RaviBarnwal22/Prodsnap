@@ -12,6 +12,7 @@ interface PracticeQuestionClientProps {
     questionTitle: string
     category: string
     description: string
+    userId?: string
     solutionText?: string
     sampleAnswer?: string
     isLocked: boolean
@@ -32,6 +33,7 @@ export function PracticeQuestionClient({
     questionTitle,
     category,
     description,
+    userId: initialUserId,
     solutionText,
     sampleAnswer,
     isLocked,
@@ -40,7 +42,7 @@ export function PracticeQuestionClient({
     previousSubmission: initialPreviousSubmission,
     history = []
 }: PracticeQuestionClientProps) {
-    const [userId, setUserId] = useState<string | null>(null)
+    const [userId, setUserId] = useState<string | null>(initialUserId || null)
     const [isLoading, setIsLoading] = useState(true)
     const [hasStartedAttempt, setHasStartedAttempt] = useState(false)
     const [elapsedTime, setElapsedTime] = useState(0)
