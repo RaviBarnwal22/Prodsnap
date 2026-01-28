@@ -1,79 +1,64 @@
-
 import { createClient } from './supabase/server'
 import { prisma } from './prisma'
 
 export async function getUser() {
-    const supabase = await createClient()
-    const { data: { user }, error } = await supabase.auth.getUser()
+    let user;
+    try {
+        const supabase = await createClient()
+        const { data: { user: authUser }, error } = await supabase.auth.getUser()
 
-    if (error || !user) {
-        if (error) console.error("[getUser] Supabase error:", error.message)
+        if (error || !authUser) {
+            if (error) console.error("[getUser] Supabase error:", error.message)
+            return null
+        }
+        user = authUser
+    } catch (e) {
+        console.error("[getUser] Exception:", e)
         return null
     }
 
-    console.log(`[getUser] Found Supabase user: ${user.id} (${user.email})`)
+    if (!user) return null
 
-    let prismaUser = await prisma.user.findUnique({
-        where: { authId: user.id }
-    })
-
-    if (prismaUser) {
-        // Update last login time asynchronously
-        await prisma.user.update({
-            where: { id: prismaUser.id },
-            data: { lastLoginAt: new Date() }
+    // 2. Sync / Update in Prisma
+    try {
+        // Try to update lastLoginAt if user exists
+        const prismaUser = await prisma.user.update({
+            where: { email: user.email! },
+            data: {
+                lastLoginAt: new Date(),
+                authId: user.id // Ensure authId is synced
+            }
         })
-    }
+        return prismaUser
+    } catch (e) {
+        // If update fails, user might not exist or field might be different
+        // Re-check schema: lastLoginAt exists according to my view_file (line 20)
 
-    if (!prismaUser) {
-        console.log(`[getUser] Prisma user NOT found by authId. Checking by email...`)
-        // Check if user exists by email and update them
-        const existingUserByEmail = await prisma.user.findUnique({
+        const existing = await prisma.user.findUnique({
             where: { email: user.email! }
         })
 
-        if (existingUserByEmail) {
-            console.log(`[getUser] Found existing user by email: ${existingUserByEmail.id}. Syncing authId...`)
-            prismaUser = await prisma.user.update({
-                where: { id: existingUserByEmail.id },
-                data: { authId: user.id }
-            })
-        } else {
-            console.log(`[getUser] Creating NEW user in Prisma...`)
-            // Create new user if not found
-            try {
-                prismaUser = await prisma.user.create({
-                    data: {
-                        authId: user.id,
-                        email: user.email!,
-                        firstName: user.user_metadata?.first_name || null,
-                        lastName: user.user_metadata?.last_name || null,
-                        name: user.user_metadata?.full_name || user.email?.split('@')[0],
-                        role: "STUDENT"
-                    }
-                })
-                console.log(`[getUser] Created new user: ${prismaUser.id}`)
-            } catch (createError) {
-                console.error("[getUser] Failed to create user:", createError)
-                // Re-attempt fetch by email in case of race condition
-                prismaUser = await prisma.user.findUnique({
-                    where: { email: user.email! }
-                })
-                if (prismaUser) {
-                    prismaUser = await prisma.user.update({
-                        where: { id: prismaUser.id },
-                        data: { authId: user.id }
-                    })
+        if (existing) {
+            // Already tried update and failed, maybe return existing or try a simpler update
+            return existing
+        }
+
+        // Create if doesn't exist
+        try {
+            return await prisma.user.create({
+                data: {
+                    email: user.email!,
+                    authId: user.id,
+                    name: user.user_metadata?.name || user.email?.split('@')[0],
+                    firstName: user.user_metadata?.first_name || null,
+                    lastName: user.user_metadata?.last_name || null,
+                    lastLoginAt: new Date(),
+                    role: "STUDENT"
                 }
-            }
+            })
+        } catch (createError) {
+            console.error("[getUser] Double Failure:", createError)
+            return null
         }
     }
-
-    if (prismaUser) {
-        console.log(`[getUser] Success: Returning Prisma user ${prismaUser.id}`)
-    } else {
-        console.error(`[getUser] Critical: Failed to resolve Prisma user for ${user.id}`)
-    }
-
-    return prismaUser
 }

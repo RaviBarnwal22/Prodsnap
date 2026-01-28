@@ -9,9 +9,7 @@ export default async function Home() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
-  if (!user) {
-    redirect('/login?redirectedFrom=/')
-  }
+  // Removed hard redirect - Everyone can see the landing page now
 
 
   // Professional headshots from Unsplash (diverse, professional-looking people)
@@ -74,7 +72,7 @@ export default async function Home() {
                     Start Practice with AI Simulation <ArrowRight size={24} className="group-hover:translate-x-1 transition-transform" />
                   </Link>
                   {/* <Link href="/prodsense" className="bg-white dark:bg-gray-800 text-gray-900 dark:text-white px-10 py-4 rounded-full font-black text-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition border border-gray-200 dark:border-gray-700 shadow-lg">
-                    Explore Prodsense
+                    Product Puzzles
                   </Link> */}
                 </div>
               </div>

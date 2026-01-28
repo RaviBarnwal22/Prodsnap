@@ -68,31 +68,34 @@ export async function middleware(request: NextRequest) {
 
     // Auth routes (where logged-in users shouldn't go)
     const authRoutes = ['/login', '/signup', '/admin/login']
-    const isAuthRoute = authRoutes.includes(pathname)
+    const isAuthRoute = authRoutes.some(route => pathname === route || pathname === route + '/')
 
-    // Define protected routes
-    const protectedRoutes = ['/', '/home', '/practice', '/prodsense', '/contact', '/mentorship', '/blog', '/community', '/admin']
-    // A route is protected if it's in the list and NOT an auth route
-    const isProtected = protectedRoutes.some(route => pathname === route || pathname.startsWith(route + '/')) && !isAuthRoute
+    // List of routes that are explicitly PUBLIC (No login required)
+    const publicRoutes = ['/', '/about', '/practice', '/mentorship', '/community', '/contact', '/blog', '/prodsense', '/privacy', '/terms']
+    const isPublic = publicRoutes.some(route => pathname === route || pathname.startsWith(route + '/'))
+
+    // A route is protected IF it's not public AND not an auth route
+    // OR if it's explicitly an admin/feedback route
+    const isProtected = (pathname.startsWith('/admin') || pathname.startsWith('/feedback')) && !isAuthRoute
+
+    console.log(`[MW] Route: ${pathname} | isPublic: ${isPublic} | isProtected: ${isProtected}`)
 
     // Case A: Unauthenticated User trying to access Protected Route
     if (!user && isProtected) {
-        console.log('[MW] 🔒 PROTECTED ROUTE + NO USER → Redirecting to login')
-        // If it's an admin route, redirect to admin login
+        console.log('[MW] 🔒 ACCESS DENIED → Redirecting to login')
         const redirectPath = pathname.startsWith('/admin') ? '/admin/login' : '/login'
         const loginUrl = new URL(redirectPath, request.url)
-        loginUrl.searchParams.set('redirectedFrom', pathname)
-        console.log('[MW] Redirect URL:', loginUrl.toString())
-        console.log('┌─────────────────────────────────────┐')
+        loginUrl.searchParams.set('redirectedFrom', pathname) // Restore consistency
         return NextResponse.redirect(loginUrl)
     }
 
-    // Case B: Authenticated User trying to access Auth Pages
-    if (user && authRoutes.includes(pathname)) {
-        console.log('[MW] ✅ AUTHENTICATED + AUTH PAGE → Redirecting to home')
-        console.log('┌─────────────────────────────────────┐')
+    // Case B: Authenticated User trying to access Auth Pages (Login/Signup)
+    if (user && isAuthRoute) {
+        console.log('[MW] ✅ ALREADY AUTHENTICATED → Redirecting to home')
         return NextResponse.redirect(new URL('/', request.url))
     }
+
+    // Otherwise, allow
 
     console.log('[MW] ✅ ALLOWING REQUEST')
 

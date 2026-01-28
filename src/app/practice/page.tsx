@@ -206,39 +206,43 @@ export default async function PracticePage({
                                     <Link
                                         key={q.id}
                                         href={`/practice/${q.id}`}
-                                        className={`group block p-8 rounded-[2rem] bg-gray-50 dark:bg-gray-900 border border-transparent hover:border-blue-500/50 hover:bg-white dark:hover:bg-gray-800 transition-all duration-300 shadow-sm hover:shadow-2xl hover:shadow-blue-500/10 hover:-translate-y-1 relative overflow-hidden ${isLocked ? 'grayscale opacity-70' : ''}`}
+                                        className={`group block p-8 rounded-[2rem] bg-gray-50 dark:bg-gray-900 border border-transparent hover:border-blue-500/50 hover:bg-white dark:hover:bg-gray-800 transition-all duration-300 shadow-sm hover:shadow-2xl hover:shadow-blue-500/10 hover:-translate-y-1 relative overflow-hidden`}
                                     >
-                                        {isLocked && (
-                                            <div className="absolute top-4 right-4 text-gray-400">
-                                                <Lock size={16} />
-                                            </div>
-                                        )}
-                                        {isPremium ? (
-                                            <div className="absolute top-4 right-4 flex gap-2">
-                                                {attemptedQuestionIds.has(q.id) && (
-                                                    <span className="bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 text-[8px] font-black px-2 py-0.5 rounded-full uppercase tracking-widest border border-green-200 dark:border-green-800 flex items-center gap-1">
-                                                        <CheckCircle size={8} />
-                                                        Attempted
+                                        <div className="absolute top-4 right-4 flex gap-2">
+                                            {isPremium ? (
+                                                <>
+                                                    {attemptedQuestionIds.has(q.id) && (
+                                                        <span className="bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 text-[8px] font-black px-2 py-0.5 rounded-full uppercase tracking-widest border border-green-200 dark:border-green-800 flex items-center gap-1">
+                                                            <CheckCircle size={8} />
+                                                            Attempted
+                                                        </span>
+                                                    )}
+                                                    <span className="bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400 text-[8px] font-black px-2 py-0.5 rounded-full uppercase tracking-widest border border-violet-200 dark:border-violet-800 flex items-center gap-1">
+                                                        <Crown size={8} />
+                                                        Premium Access
                                                     </span>
-                                                )}
-                                                <span className="bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400 text-[8px] font-black px-2 py-0.5 rounded-full uppercase tracking-widest border border-violet-200 dark:border-violet-800 flex items-center gap-1">
-                                                    <Crown size={8} />
-                                                    Premium Access
-                                                </span>
-                                            </div>
-                                        ) : !isLocked && (
-                                            <div className="absolute top-4 right-4 flex gap-2">
-                                                {attemptedQuestionIds.has(q.id) && (
-                                                    <span className="bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 text-[8px] font-black px-2 py-0.5 rounded-full uppercase tracking-widest border border-green-200 dark:border-green-800 flex items-center gap-1">
-                                                        <CheckCircle size={8} />
-                                                        Attempted
-                                                    </span>
-                                                )}
-                                                <span className={`${hasHitLimit ? 'bg-amber-100 text-amber-600 border-amber-200' : 'bg-green-100 text-green-600 border-green-200'} dark:bg-opacity-20 text-[8px] font-black px-2 py-0.5 rounded-full uppercase tracking-widest border`}>
-                                                    {hasHitLimit ? 'Viewable (Trial Used)' : 'Solve (Trial Open)'}
-                                                </span>
-                                            </div>
-                                        )}
+                                                </>
+                                            ) : (
+                                                <>
+                                                    {attemptedQuestionIds.has(q.id) && (
+                                                        <span className="bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 text-[8px] font-black px-2 py-0.5 rounded-full uppercase tracking-widest border border-green-200 dark:border-green-800 flex items-center gap-1">
+                                                            <CheckCircle size={8} />
+                                                            Attempted
+                                                        </span>
+                                                    )}
+                                                    {isLocked ? (
+                                                        <span className="bg-amber-100 text-amber-600 border-amber-200 dark:bg-opacity-20 text-[8px] font-black px-2 py-0.5 rounded-full uppercase tracking-widest border flex items-center gap-1">
+                                                            <Lock size={8} />
+                                                            Premium
+                                                        </span>
+                                                    ) : (
+                                                        <span className="bg-green-100 text-green-600 border-green-200 dark:bg-opacity-20 text-[8px] font-black px-2 py-0.5 rounded-full uppercase tracking-widest border">
+                                                            Solve (Trial)
+                                                        </span>
+                                                    )}
+                                                </>
+                                            )}
+                                        </div>
 
                                         <div className="mb-6 flex items-center justify-between">
                                             <div className="w-10 h-10 rounded-xl bg-white dark:bg-gray-800 flex items-center justify-center text-blue-600 shadow-sm font-bold text-sm">
@@ -248,14 +252,14 @@ export default async function PracticePage({
                                                 {q.difficulty}
                                             </span>
                                         </div>
-                                        <h3 className={`text-xl font-bold mb-4 leading-tight group-hover:text-blue-600 transition-colors ${isLocked ? 'text-gray-400' : ''}`}>
+                                        <h3 className={`text-xl font-bold mb-4 leading-tight group-hover:text-blue-600 transition-colors`}>
                                             {q.title}
                                         </h3>
                                         <p className="text-sm text-gray-500 dark:text-gray-400 mb-8 leading-relaxed italic">
-                                            {isPremium ? "Unlocked for unlimited practice • Go for it!" : isLocked ? "Premium Challenge • Unlock to practice" : hasHitLimit ? "Trial consumed • Read case details" : `${q.difficulty} level challenge • Click to solve`}
+                                            {isPremium ? "Unlocked for unlimited practice • Go for it!" : isLocked ? "High-yield interview question • Explore details" : "Start your free attempt now"}
                                         </p>
                                         <div className="flex items-center gap-2 text-blue-600 font-bold text-sm">
-                                            {isLocked ? "Learn More" : hasHitLimit ? "View Details" : "Start Challenge"}
+                                            {isLocked ? "Explore Case" : "Start Challenge"}
                                             <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
                                         </div>
                                     </Link>
