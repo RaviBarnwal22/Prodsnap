@@ -70,13 +70,12 @@ export default async function QuestionPage({ params }: { params: Promise<{ id: s
                 <div className="grid md:grid-cols-3 gap-8">
                     {/* Left Column: Question Details */}
                     <div className="md:col-span-1 space-y-6">
-                        <div className="bg-white dark:bg-gray-900 p-8 rounded-[2rem] border shadow-sm sticky top-24 overflow-hidden relative">
+                        <div className="bg-white dark:bg-gray-900 p-8 rounded-[2rem] border shadow-sm sticky top-24 relative overflow-hidden">
+                            {/* Premium Lock Overlay for question details */}
                             {isLocked && (
-                                <PracticeLockOverlay
-                                    category={question.category}
-                                    userEmail={user?.email}
-                                    userName={user?.firstName || user?.name || ''}
-                                />
+                                <div className="absolute inset-0 z-10 pointer-events-none">
+                                    <div className="absolute top-0 left-0 right-0 h-32 bg-gradient-to-b from-transparent to-white/0 dark:to-gray-900/0"></div>
+                                </div>
                             )}
 
                             <div className="mb-4">
@@ -86,7 +85,8 @@ export default async function QuestionPage({ params }: { params: Promise<{ id: s
                             </div>
                             <h1 className="text-3xl font-black mb-6 leading-tight">{question.title}</h1>
 
-                            <div className={isLocked ? "blur-md select-none opacity-40 pointer-events-none" : ""}>
+                            {/* Blur description and tips for locked cases */}
+                            <div className={isLocked ? 'blur-sm select-none pointer-events-none' : ''}>
                                 <p className="text-gray-600 dark:text-gray-400 whitespace-pre-wrap leading-relaxed">
                                     {question.description}
                                 </p>

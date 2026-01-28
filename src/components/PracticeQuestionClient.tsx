@@ -1,185 +1,166 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
-import { AnswerForm } from '@/components/AnswerForm'
-import { PremiumUpgradeModal } from '@/components/PremiumUpgradeModal'
-import { canAttemptCategory, incrementCategoryAttempt } from '@/lib/subscription'
-import { FREE_ATTEMPT_LIMIT } from '@/lib/constants'
-import { Crown, Lock, Sparkles, Clock, CheckCircle2, Loader2 } from 'lucide-react'
+import { useState, useEffect } from 'react'
+import { AnswerForm } from './AnswerForm'
+import { createClient } from '@/lib/supabase/client'
+import { Lock, Crown, Loader2, Sparkles, CheckCircle2, Clock, ChevronRight } from 'lucide-react'
 import Link from 'next/link'
+import { PremiumUpgradeModal } from './PremiumUpgradeModal'
 
 interface PracticeQuestionClientProps {
     questionId: string
     questionTitle: string
-    userId?: string
-    userEmail?: string
-    userName?: string
     category: string
     description: string
+    userId?: string
     solutionText?: string
     sampleAnswer?: string
+    isLocked: boolean
+    userEmail?: string
+    userName?: string
     previousSubmission?: {
         answerText: string
         aiScore?: string
         createdAt: string
     }
-    history?: {
-        id: string
-        answerText: string
-        aiScore?: string
-        createdAt: string
-    }[]
-    isLocked?: boolean
+    history?: any[]
 }
+
+const FREE_ATTEMPT_LIMIT = 3
 
 export function PracticeQuestionClient({
     questionId,
     questionTitle,
-    userId,
-    userEmail,
-    userName,
     category,
     description,
+    userId: initialUserId,
     solutionText,
     sampleAnswer,
-    previousSubmission,
-    history = [],
-    isLocked = false
+    isLocked,
+    userEmail,
+    userName,
+    previousSubmission: initialPreviousSubmission,
+    history = []
 }: PracticeQuestionClientProps) {
-    const [showUpgradeModal, setShowUpgradeModal] = useState(false)
-    const [attemptStatus, setAttemptStatus] = useState<{
-        canAttempt: boolean
-        attemptsUsed: number
-        attemptsRemaining: number
-        isPremium: boolean
-    } | null>(null)
+    const [userId, setUserId] = useState<string | null>(initialUserId || null)
     const [isLoading, setIsLoading] = useState(true)
     const [hasStartedAttempt, setHasStartedAttempt] = useState(false)
-    const [startTime, setStartTime] = useState<number | null>(null)
     const [elapsedTime, setElapsedTime] = useState(0)
     const [isFinished, setIsFinished] = useState(false)
     const [isStarting, setIsStarting] = useState(false)
-    const timerRef = useRef<NodeJS.Timeout | null>(null)
+    const [attemptStatus, setAttemptStatus] = useState<{
+        attemptsUsed: number
+        attemptsRemaining: number
+        canAttempt: boolean
+        isPremium: boolean
+    } | null>(null)
+    const [previousSubmission, setPreviousSubmission] = useState<{
+        id?: string
+        answerText: string
+        aiScore?: string
+        createdAt: string
+    } | null>(initialPreviousSubmission || null)
+    const [showUpgradeModal, setShowUpgradeModal] = useState(false)
 
-    // State for client-side user fetching (fallback if server props are missing)
-    const [clientUser, setClientUser] = useState<{ id: string; email?: string; name?: string } | null>(null)
-
-    // Resolve final user data efficiently
-    const finalUserId = userId || clientUser?.id
-    const finalUserEmail = userEmail || clientUser?.email
-    const finalUserName = userName || clientUser?.name
-
-    // Effect: Fetch user client-side if missing from props
     useEffect(() => {
-        if (!userId) {
-            const fetchClientUser = async () => {
-                const { createClient } = await import('@/lib/supabase/client')
-                const supabase = createClient()
-                const { data: { user } } = await supabase.auth.getUser()
+        const checkAuthAndStatus = async () => {
+            const supabase = createClient()
+            const { data: { session } } = await supabase.auth.getSession()
+            const finalUserId = session?.user?.id || null
+            setUserId(finalUserId)
 
-                if (user) {
-                    setClientUser({
-                        id: user.id,
-                        email: user.email,
-                        name: user.user_metadata?.full_name
-                    })
+            if (finalUserId) {
+                try {
+                    // Fetch attempt status
+                    const statusRes = await fetch(`/api/user-status?category=${category}`)
+                    if (statusRes.ok) {
+                        const statusData = await statusRes.json()
+                        setAttemptStatus(statusData)
+                    }
+
+                    // Fetch previous submission for this specific question
+                    const prevRes = await fetch(`/api/previous-submission?questionId=${questionId}`)
+                    if (prevRes.ok) {
+                        const prevData = await prevRes.json()
+                        if (prevData.submission) {
+                            setPreviousSubmission(prevData.submission)
+                        }
+                    }
+                } catch (err) {
+                    console.error("Error fetching status:", err)
                 }
             }
-            fetchClientUser()
+            setIsLoading(false)
         }
-    }, [userId])
+
+        checkAuthAndStatus()
+    }, [category, questionId])
 
     useEffect(() => {
-        async function checkAttemptStatus() {
-            if (!finalUserId) {
-                // If we are still loading client user, don't stop yet
-                if (!userId && isLoading) return
-                setIsLoading(false)
-                return
-            }
-
-            try {
-                const status = await canAttemptCategory(category)
-                setAttemptStatus(status)
-            } catch (error) {
-                console.error('Error checking attempt status:', error)
-            } finally {
-                setIsLoading(false)
-            }
-        }
-
-        if (finalUserId) {
-            checkAttemptStatus()
-        } else if (!userId) {
-            // Allow a small delay for client fetch to kick in before showing "Please sign in"
-            setTimeout(() => setIsLoading(false), 2000)
-        }
-    }, [category, finalUserId, userId, isLoading])
-
-    // Auto-load if previous submission exists
-    useEffect(() => {
-        if (previousSubmission && !hasStartedAttempt) {
-            setHasStartedAttempt(true)
-            setIsFinished(true)
-            setElapsedTime(0)
-            setStartTime(null)
-        }
-    }, [previousSubmission])
-
-    // Timer effect
-    useEffect(() => {
-        if (hasStartedAttempt && startTime && !isFinished) {
-            timerRef.current = setInterval(() => {
-                setElapsedTime(Math.floor((Date.now() - startTime) / 1000))
+        let interval: NodeJS.Timeout
+        if (hasStartedAttempt && !isFinished) {
+            interval = setInterval(() => {
+                setElapsedTime((prev) => prev + 1)
             }, 1000)
-        } else {
-            if (timerRef.current) {
-                clearInterval(timerRef.current)
-            }
         }
-
-        return () => {
-            if (timerRef.current) {
-                clearInterval(timerRef.current)
-            }
-        }
-    }, [hasStartedAttempt, startTime, isFinished])
+        return () => clearInterval(interval)
+    }, [hasStartedAttempt, isFinished])
 
     const handleStartAttempt = async () => {
-        // If previous submission exists, this is a free re-attempt
-        if (previousSubmission) {
+        console.log('[handleStartAttempt] called, userId:', userId, 'isLocked:', isLocked)
+
+        if (!userId) {
+            // Guests can start the attempt to explore, but can't save/get AI feedback without login
+            console.log('[handleStartAttempt] Guest mode - setting hasStartedAttempt to true')
             setHasStartedAttempt(true)
-            setStartTime(null) // Don't start the clock yet
-            setElapsedTime(0)
-            setIsFinished(true) // Mark as "finished" (viewing result mode)
             return
         }
 
-        if (!attemptStatus?.canAttempt) {
-            setShowUpgradeModal(true)
-            return
-        }
-
-        // Increment attempt count when user starts
         setIsStarting(true)
         try {
-            await incrementCategoryAttempt(category)
-            setHasStartedAttempt(true)
-            setStartTime(Date.now())
-            setElapsedTime(0)
-            setIsFinished(false)
-        } catch (error) {
-            console.error('Error incrementing attempt:', error)
+            const res = await fetch('/api/start-attempt', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ category })
+            })
+
+            if (res.ok) {
+                setHasStartedAttempt(true)
+            } else {
+                const data = await res.json()
+                if (data.error === 'Attempt limit reached') {
+                    setShowUpgradeModal(true)
+                }
+            }
+        } catch (err) {
+            console.error("Error starting attempt:", err)
         } finally {
             setIsStarting(false)
         }
     }
 
     const handleRetry = () => {
-        setStartTime(Date.now())
         setElapsedTime(0)
         setIsFinished(false)
+        setHasStartedAttempt(true) // Immediately start on retry
     }
+
+    // Auto-start if there's a pending answer waiting for restoration
+    useEffect(() => {
+        if (typeof window !== 'undefined' && !hasStartedAttempt && userId) {
+            const pending = localStorage.getItem('pending_answer')
+            if (pending) {
+                try {
+                    const parsed = JSON.parse(pending)
+                    if (parsed.qId === questionId) {
+                        setHasStartedAttempt(true)
+                    }
+                } catch (e) {
+                    console.error("Error checking pending answer", e)
+                }
+            }
+        }
+    }, [questionId, userId, hasStartedAttempt])
 
     const formatTime = (seconds: number) => {
         const mins = Math.floor(seconds / 60)
@@ -187,138 +168,85 @@ export function PracticeQuestionClient({
         return `${mins}:${secs.toString().padStart(2, '0')}`
     }
 
-    // Only show "Please sign in" if we've finished loading and truly have no user
-    if (!finalUserId && !isLoading) {
-        return (
-            <div className="bg-blue-50 border-blue-200 border p-6 rounded-lg text-center">
-                <p className="mb-4 text-blue-800">Please sign in to practice and get AI feedback.</p>
-                <Link href="/login" className="inline-block bg-blue-600 text-white px-6 py-2 rounded">
-                    Sign In
-                </Link>
-            </div>
-        )
-    }
-
     if (isLoading) {
         return (
-            <div className="bg-white dark:bg-gray-900 p-8 rounded-2xl border shadow-sm">
-                <div className="flex items-center justify-center gap-3">
-                    <div className="w-5 h-5 border-2 border-blue-600/30 border-t-blue-600 rounded-full animate-spin" />
-                    <span className="text-gray-500">Loading...</span>
+            <div className="bg-white dark:bg-gray-900 p-8 rounded-2xl border shadow-sm flex items-center justify-center min-h-[400px]">
+                <div className="flex flex-col items-center gap-4">
+                    <Loader2 size={40} className="animate-spin text-blue-600" />
+                    <span className="text-gray-500 font-medium">Preparing Case Simulation...</span>
                 </div>
             </div>
         )
     }
 
-    // If it's a PREMIUM LOCKED case
-    if (isLocked) {
-        return (
-            <>
-                <div className="bg-white dark:bg-gray-900 rounded-[2.5rem] border border-gray-200 dark:border-gray-800 p-12 text-center flex flex-col items-center justify-center min-h-[500px] shadow-2xl relative overflow-hidden group">
-                    {/* Decorative elements */}
-                    <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-violet-600 via-fuchsia-600 to-indigo-600"></div>
-                    <div className="absolute -right-20 -bottom-20 w-64 h-64 bg-violet-500/5 rounded-full blur-3xl group-hover:bg-violet-500/10 transition-colors"></div>
-
-                    <div className="relative z-10 max-w-md">
-                        <div className="w-24 h-24 bg-gradient-to-br from-violet-600 to-indigo-600 rounded-[2rem] flex items-center justify-center mb-8 shadow-2xl mx-auto rotate-3 group-hover:rotate-0 transition-transform duration-500">
-                            <Crown size={48} className="text-white" />
-                        </div>
-                        <h2 className="text-4xl font-black mb-4 tracking-tight">Unlock This Case</h2>
-                        <p className="text-gray-500 dark:text-gray-400 text-lg mb-10 leading-relaxed font-medium">
-                            This is a high-yield premium case used in actual interviews at Tier-1 companies. Upgrade to practice with our AI Interviewer.
-                        </p>
-
-                        <div className="space-y-4 w-full">
-                            <button
-                                onClick={() => setShowUpgradeModal(true)}
-                                className="block w-full bg-black dark:bg-white text-white dark:text-black py-4 rounded-2xl font-black text-lg hover:scale-[1.02] transition-transform shadow-xl"
-                            >
-                                Get Premium Access
-                            </button>
-                            <p className="text-[10px] text-gray-400 font-bold uppercase tracking-[0.2em]">
-                                Unlocks 50+ Real Interview Questions
-                            </p>
-                        </div>
-                    </div>
-                </div>
-
-                <PremiumUpgradeModal
-                    isOpen={showUpgradeModal}
-                    onClose={() => setShowUpgradeModal(false)}
-                    category={category}
-                    attemptsUsed={attemptStatus?.attemptsUsed || 0}
-                    userEmail={userEmail}
-                    userName={userName}
-                />
-            </>
-        )
-    }
-
-    // If user has exceeded limit and hasn't started an attempt
-    // AND they have NOT previously solved this (if they have, they can re-attempt)
-    if (attemptStatus && !attemptStatus.canAttempt && !hasStartedAttempt && !previousSubmission) {
-        return (
-            <>
-                <div className="bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 border border-gray-200 dark:border-gray-700 p-8 rounded-2xl text-center">
-                    <div className="w-16 h-16 mx-auto mb-4 bg-amber-100 dark:bg-amber-900/30 rounded-2xl flex items-center justify-center">
-                        <Lock size={28} className="text-amber-600 dark:text-amber-400" />
-                    </div>
-                    <h3 className="text-xl font-bold mb-2 text-gray-900 dark:text-white">
-                        Free Attempts Exhausted
-                    </h3>
-                    <p className="text-gray-600 dark:text-gray-400 mb-6">
-                        You've used {attemptStatus.attemptsUsed}/{FREE_ATTEMPT_LIMIT} free attempts across all categories.
-                        <br />
-                        Upgrade to Premium for unlimited practice!
-                    </p>
-                    <button
-                        onClick={() => setShowUpgradeModal(true)}
-                        className="inline-flex items-center gap-2 bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white px-8 py-3 rounded-xl font-bold hover:shadow-lg hover:shadow-violet-500/30 transition-all"
-                    >
-                        <Crown size={18} />
-                        Upgrade to Premium - ₹199/month
-                    </button>
-                </div>
-
-                <PremiumUpgradeModal
-                    isOpen={showUpgradeModal}
-                    onClose={() => setShowUpgradeModal(false)}
-                    category={category}
-                    attemptsUsed={attemptStatus.attemptsUsed}
-                    userEmail={userEmail}
-                    userName={userName}
-                />
-            </>
-        )
-    }
-
-    // Show attempt status banner for free users
-    const showAttemptBanner = attemptStatus && !attemptStatus.isPremium && !hasStartedAttempt && !previousSubmission
-
     return (
-        <>
-            {/* Attempt Status Banner */}
-            {showAttemptBanner && (
-                <div className="mb-4 p-4 bg-violet-50 dark:bg-violet-900/20 border border-violet-200 dark:border-violet-800 rounded-xl flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                        <Sparkles size={20} className="text-violet-600 dark:text-violet-400" />
-                        <span className="text-sm font-medium text-violet-800 dark:text-violet-200">
-                            Free Attempts: {attemptStatus.attemptsRemaining}/{FREE_ATTEMPT_LIMIT} remaining (across all categories)
-                        </span>
+        <div className="space-y-6">
+            {/* Guest Banner - only show on unlocked cases */}
+            {!userId && !isLocked && !hasStartedAttempt && (
+                <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800 p-6 rounded-[2rem] flex items-center justify-between shadow-sm">
+                    <div className="flex items-center gap-4">
+                        <div className="bg-blue-600 text-white p-2 rounded-xl">
+                            <Sparkles size={18} />
+                        </div>
+                        <p className="text-blue-800 dark:text-blue-200 text-sm font-medium">
+                            Explore the simulation as a guest. <strong>Sign in to save progress.</strong>
+                        </p>
                     </div>
-                    <button
-                        onClick={() => setShowUpgradeModal(true)}
-                        className="text-xs font-bold text-violet-600 dark:text-violet-400 hover:underline flex items-center gap-1"
-                    >
-                        <Crown size={14} />
-                        Go Premium
-                    </button>
+                    <Link href="/login" className="text-xs font-black uppercase tracking-widest text-blue-600 hover:underline">
+                        Sign In
+                    </Link>
+                </div>
+            )}
+
+            {/* Locked Case - Guest: Must sign in first */}
+            {isLocked && !userId && (
+                <div className="bg-white dark:bg-gray-900 p-12 rounded-[2.5rem] border border-gray-100 dark:border-gray-800 shadow-2xl text-center relative overflow-hidden">
+                    <div className="absolute inset-0 backdrop-blur-sm bg-white/60 dark:bg-gray-900/60 z-10"></div>
+                    <div className="relative z-20 flex flex-col items-center justify-center min-h-[300px]">
+                        <div className="w-20 h-20 bg-amber-100 dark:bg-amber-900/30 rounded-3xl flex items-center justify-center mb-6 text-amber-600">
+                            <Lock size={32} />
+                        </div>
+                        <h2 className="text-2xl font-black mb-3 tracking-tight">Premium Case</h2>
+                        <p className="text-gray-500 dark:text-gray-400 text-base mb-8 leading-relaxed font-medium max-w-sm mx-auto">
+                            Sign in to your account first. Then upgrade to Premium to unlock all cases and detailed AI evaluations.
+                        </p>
+                        <Link
+                            href={`/login?redirectedFrom=/practice/${questionId}`}
+                            className="bg-blue-600 text-white px-8 py-4 rounded-2xl font-black text-lg hover:scale-[1.02] transition-all shadow-xl shadow-blue-500/20 flex items-center gap-2"
+                        >
+                            Sign In to Continue
+                            <ChevronRight size={20} />
+                        </Link>
+                    </div>
+                </div>
+            )}
+
+            {/* Locked Case - Logged in but not premium: Show upgrade */}
+            {isLocked && userId && !attemptStatus?.isPremium && (
+                <div className="bg-white dark:bg-gray-900 p-12 rounded-[2.5rem] border border-gray-100 dark:border-gray-800 shadow-2xl text-center relative overflow-hidden">
+                    <div className="absolute inset-0 backdrop-blur-sm bg-white/60 dark:bg-gray-900/60 z-10"></div>
+                    <div className="relative z-20 flex flex-col items-center justify-center min-h-[300px]">
+                        <div className="w-20 h-20 bg-amber-100 dark:bg-amber-900/30 rounded-3xl flex items-center justify-center mb-6 text-amber-600">
+                            <Crown size={32} />
+                        </div>
+                        <h2 className="text-2xl font-black mb-3 tracking-tight">Premium Case</h2>
+                        <p className="text-gray-500 dark:text-gray-400 text-base mb-8 leading-relaxed font-medium max-w-sm mx-auto">
+                            Upgrade to Premium to unlock all cases, get detailed AI-powered feedback, and track your progress.
+                        </p>
+                        <button
+                            onClick={() => setShowUpgradeModal(true)}
+                            className="bg-gradient-to-r from-amber-500 to-orange-500 text-white px-8 py-4 rounded-2xl font-black text-lg hover:scale-[1.02] transition-all shadow-xl shadow-amber-500/20 flex items-center gap-2"
+                        >
+                            <Crown size={20} />
+                            Upgrade to Premium
+                        </button>
+                    </div>
                 </div>
             )}
 
             {/* Previously Solved Banner */}
-            {previousSubmission && !hasStartedAttempt && (
-                <div className="mb-4 p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-xl flex items-center gap-3">
+            {!isLocked && previousSubmission && !hasStartedAttempt && (
+                <div className="p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-xl flex items-center gap-3">
                     <CheckCircle2 size={20} className="text-green-600 dark:text-green-400" />
                     <span className="text-sm font-medium text-green-800 dark:text-green-200">
                         You have already solved this case. Re-attempts are free!
@@ -326,74 +254,66 @@ export function PracticeQuestionClient({
                 </div>
             )}
 
-            {/* Premium Badge */}
-            {attemptStatus?.isPremium && (
-                <div className="mb-4 p-4 bg-gradient-to-r from-amber-50 to-yellow-50 dark:from-amber-900/20 dark:to-yellow-900/20 border border-amber-200 dark:border-amber-800 rounded-xl flex items-center gap-3">
-                    <Crown size={20} className="text-amber-500" />
-                    <span className="text-sm font-bold text-amber-800 dark:text-amber-200">
-                        Premium Member - Unlimited Practice
-                    </span>
+            {/* Main Content Area - Only show if not locked */}
+            {!isLocked && !hasStartedAttempt && (
+                <div className="bg-white dark:bg-gray-900 p-12 rounded-[2.5rem] border border-gray-100 dark:border-gray-800 shadow-2xl text-center relative overflow-hidden group">
+                    <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-blue-600 to-indigo-600"></div>
+                    <div className="absolute -right-20 -bottom-20 w-64 h-64 bg-blue-500/5 rounded-full blur-3xl group-hover:bg-blue-500/10 transition-colors"></div>
+
+                    <div className="relative z-10">
+                        <div className="w-20 h-20 bg-blue-50 dark:bg-blue-900/30 rounded-3xl flex items-center justify-center mb-8 mx-auto text-blue-600 dark:text-blue-400 transform group-hover:scale-110 transition-transform">
+                            <Sparkles size={32} />
+                        </div>
+                        <h2 className="text-3xl font-black mb-4 tracking-tight">
+                            {previousSubmission ? "Polish Your Strategy" : "Ready to Solve?"}
+                        </h2>
+                        <p className="text-gray-500 dark:text-gray-400 text-lg mb-10 leading-relaxed font-medium max-w-md mx-auto">
+                            Step into the role of a Product Manager at your dream company. Clarify the case, frame your thinking, and get industry-standard feedback.
+                        </p>
+
+                        <div className="flex flex-col items-center gap-4">
+                            <button
+                                type="button"
+                                onClick={handleStartAttempt}
+                                disabled={isStarting}
+                                className="w-full max-w-xs bg-blue-600 text-white py-4 rounded-2xl font-black text-lg hover:scale-[1.02] transition-all shadow-xl shadow-blue-500/20 flex items-center justify-center gap-2 cursor-pointer relative z-20"
+                            >
+                                {isStarting ? (
+                                    <>
+                                        <Loader2 size={20} className="animate-spin" />
+                                        Preparing...
+                                    </>
+                                ) : (
+                                    <>
+                                        {previousSubmission ? "Retry Challenge" : "Start Simulation"}
+                                        <ChevronRight size={20} />
+                                    </>
+                                )}
+                            </button>
+                            <div className="flex items-center gap-4 text-[10px] font-black uppercase tracking-widest text-gray-400">
+                                <span className="flex items-center gap-1.5"><CheckCircle2 size={14} className="text-green-500" /> AI Feedback</span>
+                                <span className="flex items-center gap-1.5"><CheckCircle2 size={14} className="text-green-500" /> Professional Frameworks</span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             )}
 
-            {/* Show start button or answer form */}
-            {!hasStartedAttempt && (attemptStatus?.canAttempt || previousSubmission) ? (
+            {/* Active Simulation */}
+            {!isLocked && hasStartedAttempt && (
                 <div className="space-y-6">
-                    {/* Simulation Note */}
-                    <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800 p-6 rounded-[1.5rem] flex items-start gap-4 shadow-sm">
-                        <div className="bg-blue-600 text-white p-2 rounded-xl shrink-0">
-                            <Sparkles size={18} />
-                        </div>
-                        <div>
-                            <p className="text-blue-800 dark:text-blue-200 text-sm leading-relaxed font-medium">
-                                <span className="font-black uppercase text-[10px] tracking-widest block mb-1.5 opacity-70">Case Simulation Mode</span>
-                                You are about to enter a live interview simulation. Just like a real-world product interview, you can ask for context using the <strong className="text-blue-900 dark:text-blue-100 font-black">Interviewer Hub</strong> after starting. Gather your thoughts, clarify the goals, and then submit your response for a detailed AI critique.
-                            </p>
-                        </div>
+                    {/* Timer */}
+                    <div className="p-4 bg-gray-50 dark:bg-gray-800/50 border border-gray-100 dark:border-gray-800 rounded-2xl flex items-center justify-center gap-3">
+                        <Clock size={20} className="text-gray-400" />
+                        <span className="text-lg font-mono font-bold text-gray-600 dark:text-gray-300">
+                            Time Elapsed: {formatTime(elapsedTime)}
+                        </span>
                     </div>
 
-                    <div className="bg-white dark:bg-gray-900 p-8 rounded-2xl border shadow-sm text-center">
-                        <h3 className="text-xl font-bold mb-4 text-gray-900 dark:text-white">
-                            {previousSubmission ? "Want to try again?" : "Ready to Practice?"}
-                        </h3>
-                        <p className="text-gray-600 dark:text-gray-400 mb-6">
-                            {previousSubmission
-                                ? "This will safely replace your display answer without using your daily attempts."
-                                : "Click below to start your attempt. This will count as one of your practice attempts."
-                            }
-                        </p>
-                        <button
-                            onClick={handleStartAttempt}
-                            disabled={isStarting}
-                            className={`text-white px-8 py-3 rounded-xl font-bold transition-all flex items-center justify-center gap-2 mx-auto min-w-[200px] ${previousSubmission ? "bg-emerald-600 hover:bg-emerald-700" : "bg-violet-600 hover:bg-violet-700"
-                                } ${isStarting ? 'opacity-80 cursor-wait' : ''}`}
-                        >
-                            {isStarting ? (
-                                <>
-                                    <Loader2 size={20} className="animate-spin" />
-                                    Setting Up...
-                                </>
-                            ) : (
-                                previousSubmission ? "View Previous Try (Free)" : "Start Practice"
-                            )}
-                        </button>
-                    </div>
-                </div>
-            ) : hasStartedAttempt || attemptStatus?.isPremium ? (
-                <>
-                    {/* Timer Display */}
-                    {hasStartedAttempt && (
-                        <div className="mb-4 p-4 bg-gradient-to-r from-violet-50 to-fuchsia-50 dark:from-violet-900/20 dark:to-fuchsia-900/20 border border-violet-200 dark:border-violet-800 rounded-xl flex items-center justify-center gap-3">
-                            <Clock size={20} className="text-violet-600 dark:text-violet-400" />
-                            <span className="text-lg font-mono font-bold text-violet-800 dark:text-violet-200">
-                                Time Elapsed: {formatTime(elapsedTime)}
-                            </span>
-                        </div>
-                    )}
                     <AnswerForm
                         questionId={questionId}
                         questionTitle={questionTitle}
-                        userId={userId}
+                        userId={userId || undefined}
                         category={category}
                         description={description}
                         solutionText={solutionText}
@@ -401,11 +321,11 @@ export function PracticeQuestionClient({
                         elapsedTime={elapsedTime}
                         onSubmitted={() => setIsFinished(true)}
                         onRetry={handleRetry}
-                        previousSubmission={previousSubmission}
-                        isPremium={attemptStatus?.isPremium}
+                        previousSubmission={previousSubmission || undefined}
+                        isPremium={attemptStatus?.isPremium || false}
                     />
-                </>
-            ) : null}
+                </div>
+            )}
 
             <PremiumUpgradeModal
                 isOpen={showUpgradeModal}
@@ -415,6 +335,6 @@ export function PracticeQuestionClient({
                 userEmail={userEmail}
                 userName={userName}
             />
-        </>
+        </div>
     )
 }

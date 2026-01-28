@@ -1,65 +1,65 @@
 import { createClient } from './supabase/server'
 import { prisma } from './prisma'
-import { cache } from 'react'
 
-export const getUser = cache(async () => {
-    const supabase = await createClient()
-    const { data: { user }, error } = await supabase.auth.getUser()
+export async function getUser() {
+    let user;
+    try {
+        const supabase = await createClient()
+        const { data: { user: authUser }, error } = await supabase.auth.getUser()
 
-    if (error || !user) {
+        if (error || !authUser) {
+            // "Auth session missing!" is expected for guests - don't log it as an error
+            if (error && error.message !== "Auth session missing!") {
+                console.error("[getUser] Supabase error:", error.message)
+            }
+            return null
+        }
+        user = authUser
+    } catch (e) {
+        console.error("[getUser] Exception:", e)
         return null
     }
 
-    let prismaUser = await prisma.user.findUnique({
-        where: { authId: user.id }
-    })
+    if (!user) return null
 
-    if (prismaUser) {
-        // Update last login time asynchronously
-        await prisma.user.update({
-            where: { id: prismaUser.id },
-            data: { lastLoginAt: new Date() }
+    // 2. Sync / Update in Prisma
+    try {
+        // Try to update lastLoginAt if user exists
+        const prismaUser = await prisma.user.update({
+            where: { email: user.email! },
+            data: {
+                lastLoginAt: new Date(),
+                authId: user.id // Ensure authId is synced
+            }
         })
-    }
-
-    if (!prismaUser) {
-        // Check if user exists by email and update them
-        const existingUserByEmail = await prisma.user.findUnique({
+        return prismaUser
+    } catch (e) {
+        // If update fails, user might not exist or field might be different
+        const existing = await prisma.user.findUnique({
             where: { email: user.email! }
         })
 
-        if (existingUserByEmail) {
-            prismaUser = await prisma.user.update({
-                where: { id: existingUserByEmail.id },
-                data: { authId: user.id }
-            })
-        } else {
-            // Create new user if not found
-            try {
-                prismaUser = await prisma.user.create({
-                    data: {
-                        authId: user.id,
-                        email: user.email!,
-                        firstName: user.user_metadata?.first_name || null,
-                        lastName: user.user_metadata?.last_name || null,
-                        name: user.user_metadata?.full_name || user.email?.split('@')[0],
-                        role: "STUDENT"
-                    }
-                })
-            } catch (createError) {
-                // Re-attempt fetch by email in case of race condition
-                prismaUser = await prisma.user.findUnique({
-                    where: { email: user.email! }
-                })
-                if (prismaUser) {
-                    prismaUser = await prisma.user.update({
-                        where: { id: prismaUser.id },
-                        data: { authId: user.id }
-                    })
+        if (existing) {
+            // Already tried update and failed, maybe return existing or try a simpler update
+            return existing
+        }
+
+        // Create if doesn't exist
+        try {
+            return await prisma.user.create({
+                data: {
+                    email: user.email!,
+                    authId: user.id,
+                    name: user.user_metadata?.name || user.email?.split('@')[0],
+                    firstName: user.user_metadata?.first_name || null,
+                    lastName: user.user_metadata?.last_name || null,
+                    lastLoginAt: new Date(),
+                    role: "STUDENT"
                 }
-            }
+            })
+        } catch (createError) {
+            console.error("[getUser] Double Failure:", createError)
+            return null
         }
     }
-
-    return prismaUser
-})
+}

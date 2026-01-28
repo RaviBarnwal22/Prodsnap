@@ -36,21 +36,30 @@ export async function middleware(request: NextRequest) {
 
     // 4. Protection Logic
     const authRoutes = ['/login', '/signup', '/admin/login']
-    const isAuthRoute = authRoutes.includes(pathname)
-    const protectedPrefixes = ['/practice', '/prodsense', '/admin', '/mentorship', '/home']
-    const isProtected = protectedPrefixes.some(prefix => pathname === prefix || pathname.startsWith(prefix + '/')) || pathname === '/'
+    const isAuthRoute = authRoutes.some(route => pathname === route || pathname === route + '/')
 
-    if (!user && isProtected && !isAuthRoute) {
+    // List of routes that are explicitly PUBLIC (No login required)
+    const publicRoutes = ['/', '/about', '/practice', '/mentorship', '/community', '/contact', '/blog', '/prodsense', '/privacy', '/terms']
+    const isPublic = publicRoutes.some(route => pathname === route || pathname.startsWith(route + '/'))
+
+    // A route is protected IF it's not public AND not an auth route
+    // OR if it's explicitly an admin/feedback route
+    const isProtected = (pathname.startsWith('/admin') || pathname.startsWith('/feedback')) && !isAuthRoute
+
+    // Case A: Unauthenticated User trying to access Protected Route
+    if (!user && isProtected) {
         const redirectPath = pathname.startsWith('/admin') ? '/admin/login' : '/login'
         const loginUrl = new URL(redirectPath, request.url)
-        if (pathname !== '/') loginUrl.searchParams.set('redirectedFrom', pathname)
+        loginUrl.searchParams.set('redirectedFrom', pathname)
         return NextResponse.redirect(loginUrl)
     }
 
+    // Case B: Authenticated User trying to access Auth Pages (Login/Signup)
     if (user && isAuthRoute) {
         return NextResponse.redirect(new URL('/', request.url))
     }
 
+    // Otherwise, allow
     return response
 }
 
@@ -67,4 +76,3 @@ export const config = {
         '/((?!_next/static|_next/image|favicon.ico|api|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
     ],
 }
-

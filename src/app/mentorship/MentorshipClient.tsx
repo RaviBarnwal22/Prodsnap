@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from "react"
 import { useRouter } from "next/navigation"
+import Link from "next/link"
 import { createClient } from '@/lib/supabase/client'
 import {
     Star,
@@ -21,7 +22,8 @@ import {
     Camera,
     AlertCircle,
     Mic,
-    Sparkles
+    Sparkles,
+    Lock
 } from "lucide-react"
 
 export default function MentorshipClient() {
@@ -45,6 +47,9 @@ export default function MentorshipClient() {
     const [isUploading, setIsUploading] = useState(false)
     const fileInputRef = useRef<HTMLInputElement>(null)
 
+    // User authentication state
+    const [userId, setUserId] = useState<string | null>(null)
+
     // Auto-fill email from logged-in user
     useEffect(() => {
         const fetchUserEmail = async () => {
@@ -52,6 +57,7 @@ export default function MentorshipClient() {
             const { data: { user } } = await supabase.auth.getUser()
             if (user?.email) {
                 setEmail(user.email)
+                setUserId(user.id)
             }
         }
         fetchUserEmail()
@@ -780,53 +786,73 @@ export default function MentorshipClient() {
                         </p>
                     </div>
 
-                    <div className="grid md:grid-cols-3 gap-8">
-                        {mentor.services.map((service, i) => (
-                            <div
-                                key={i}
-                                className={`relative bg-white dark:bg-gray-800 p-8 rounded-3xl border-2 ${service.popular
-                                    ? 'border-violet-500 shadow-xl shadow-violet-500/10'
-                                    : 'border-gray-200 dark:border-gray-700'
-                                    }`}
+                    {/* Show sign-in prompt for guests */}
+                    {!userId ? (
+                        <div className="bg-white dark:bg-gray-800 p-12 rounded-3xl border border-gray-200 dark:border-gray-700 text-center max-w-xl mx-auto shadow-lg">
+                            <div className="w-20 h-20 bg-violet-100 dark:bg-violet-900/30 rounded-3xl flex items-center justify-center mb-6 mx-auto text-violet-600">
+                                <Lock size={32} />
+                            </div>
+                            <h3 className="text-2xl font-black mb-3">Sign In to View Packages</h3>
+                            <p className="text-gray-500 dark:text-gray-400 mb-8 leading-relaxed">
+                                Create an account or sign in to explore our mentorship packages and book a personalized session with our expert mentor.
+                            </p>
+                            <Link
+                                href="/login?redirectedFrom=/mentorship"
+                                className="inline-flex items-center gap-2 bg-gradient-to-r from-violet-600 to-purple-600 text-white px-8 py-4 rounded-xl font-bold hover:shadow-lg hover:shadow-violet-500/20 transition-all"
                             >
-                                {service.popular && (
-                                    <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-gradient-to-r from-violet-600 to-purple-600 text-white px-4 py-1 rounded-full text-sm font-bold">
-                                        Most Popular
-                                    </div>
-                                )}
-
-                                <h3 className="text-xl font-bold mb-2">{service.title}</h3>
-                                <div className="flex items-center gap-2 text-gray-500 dark:text-gray-400 mb-4">
-                                    <Clock size={16} />
-                                    <span>{service.duration}</span>
-                                </div>
-
-                                <div className="text-3xl font-black text-violet-600 mb-6">{service.price}</div>
-
-                                <p className="text-gray-600 dark:text-gray-300 mb-6">{service.description}</p>
-
-                                <ul className="space-y-3 mb-8">
-                                    {service.features.map((feature, j) => (
-                                        <li key={j} className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
-                                            <CheckCircle size={16} className="text-green-500" />
-                                            {feature}
-                                        </li>
-                                    ))}
-                                </ul>
-
-                                <button
-                                    onClick={() => handleBookNow(service)}
-                                    className={`w-full py-3 rounded-xl font-bold flex items-center justify-center gap-2 transition-all ${service.popular
-                                        ? 'bg-gradient-to-r from-violet-600 to-purple-600 text-white hover:shadow-lg'
-                                        : 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white hover:bg-gray-200 dark:hover:bg-gray-600'
+                                <ArrowRight size={20} />
+                                Sign In to Continue
+                            </Link>
+                        </div>
+                    ) : (
+                        <div className="grid md:grid-cols-3 gap-8">
+                            {mentor.services.map((service, i) => (
+                                <div
+                                    key={i}
+                                    className={`relative bg-white dark:bg-gray-800 p-8 rounded-3xl border-2 ${service.popular
+                                        ? 'border-violet-500 shadow-xl shadow-violet-500/10'
+                                        : 'border-gray-200 dark:border-gray-700'
                                         }`}
                                 >
-                                    <Calendar size={18} />
-                                    Book Now
-                                </button>
-                            </div>
-                        ))}
-                    </div>
+                                    {service.popular && (
+                                        <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-gradient-to-r from-violet-600 to-purple-600 text-white px-4 py-1 rounded-full text-sm font-bold">
+                                            Most Popular
+                                        </div>
+                                    )}
+
+                                    <h3 className="text-xl font-bold mb-2">{service.title}</h3>
+                                    <div className="flex items-center gap-2 text-gray-500 dark:text-gray-400 mb-4">
+                                        <Clock size={16} />
+                                        <span>{service.duration}</span>
+                                    </div>
+
+                                    <div className="text-3xl font-black text-violet-600 mb-6">{service.price}</div>
+
+                                    <p className="text-gray-600 dark:text-gray-300 mb-6">{service.description}</p>
+
+                                    <ul className="space-y-3 mb-8">
+                                        {service.features.map((feature, j) => (
+                                            <li key={j} className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
+                                                <CheckCircle size={16} className="text-green-500" />
+                                                {feature}
+                                            </li>
+                                        ))}
+                                    </ul>
+
+                                    <button
+                                        onClick={() => handleBookNow(service)}
+                                        className={`w-full py-3 rounded-xl font-bold flex items-center justify-center gap-2 transition-all ${service.popular
+                                            ? 'bg-gradient-to-r from-violet-600 to-purple-600 text-white hover:shadow-lg'
+                                            : 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white hover:bg-gray-200 dark:hover:bg-gray-600'
+                                            }`}
+                                    >
+                                        <Calendar size={18} />
+                                        Book Now
+                                    </button>
+                                </div>
+                            ))}
+                        </div>
+                    )}
 
                     {/* Direct Contact CTA */}
                     <div className="mt-16 text-center">
