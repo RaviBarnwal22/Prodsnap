@@ -107,8 +107,11 @@ export function PracticeQuestionClient({
     }, [hasStartedAttempt, isFinished])
 
     const handleStartAttempt = async () => {
+        console.log('[handleStartAttempt] called, userId:', userId, 'isLocked:', isLocked)
+
         if (!userId) {
             // Guests can start the attempt to explore, but can't save/get AI feedback without login
+            console.log('[handleStartAttempt] Guest mode - setting hasStartedAttempt to true')
             setHasStartedAttempt(true)
             return
         }
@@ -270,9 +273,10 @@ export function PracticeQuestionClient({
 
                         <div className="flex flex-col items-center gap-4">
                             <button
+                                type="button"
                                 onClick={handleStartAttempt}
                                 disabled={isStarting}
-                                className="w-full max-w-xs bg-blue-600 text-white py-4 rounded-2xl font-black text-lg hover:scale-[1.02] transition-all shadow-xl shadow-blue-500/20 flex items-center justify-center gap-2"
+                                className="w-full max-w-xs bg-blue-600 text-white py-4 rounded-2xl font-black text-lg hover:scale-[1.02] transition-all shadow-xl shadow-blue-500/20 flex items-center justify-center gap-2 cursor-pointer relative z-20"
                             >
                                 {isStarting ? (
                                     <>
