@@ -134,6 +134,7 @@ export default async function QuestionPage({ params }: { params: Promise<{ id: s
                             solutionText={question.solutionText || undefined}
                             sampleAnswer={question.sampleAnswer || undefined}
                             isLocked={isLocked}
+                            isPremium={hasFullAccess}
                             previousSubmission={latestSubmission ? {
                                 answerText: latestSubmission.answerText,
                                 aiScore: latestSubmission.aiScore || undefined,

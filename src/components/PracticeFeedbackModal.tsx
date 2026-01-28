@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Star } from 'lucide-react'
+import { X } from 'lucide-react'
 
 interface PracticeFeedbackModalProps {
     isOpen: boolean
@@ -42,34 +42,40 @@ export function PracticeFeedbackModal({ isOpen, onClose, onSubmit }: PracticeFee
 
     return (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-            <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="bg-white dark:bg-gray-900 rounded-xl shadow-2xl max-w-md w-full max-h-[85vh] overflow-y-auto relative">
+                {/* Close Button */}
+                <button
+                    onClick={handleSkip}
+                    className="absolute top-3 right-3 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 z-10"
+                >
+                    <X size={18} />
+                </button>
+
                 {/* Header */}
-                <div className="bg-gradient-to-r from-blue-600 to-indigo-600 p-6 rounded-t-2xl">
-                    <h2 className="text-2xl font-black text-white mb-2">🎯 How was your experience?</h2>
-                    <p className="text-blue-100 text-sm">Your feedback helps us improve Prodsnap for everyone!</p>
+                <div className="bg-gradient-to-r from-blue-600 to-indigo-600 p-4 rounded-t-xl">
+                    <h2 className="text-lg font-bold text-white">🎯 Quick Feedback</h2>
+                    <p className="text-blue-100 text-xs">Help us improve Prodsnap!</p>
                 </div>
 
-                <form onSubmit={handleSubmit} className="p-6 space-y-6">
+                <form onSubmit={handleSubmit} className="p-4 space-y-4">
                     {/* NPS Score */}
                     <div>
-                        <label className="block text-sm font-bold text-gray-900 dark:text-white mb-3">
-                            How likely are you to recommend Prodsnap to a friend or colleague?
+                        <label className="block text-xs font-bold text-gray-900 dark:text-white mb-2">
+                            Would you recommend Prodsnap?
                         </label>
-                        <p className="text-xs text-gray-500 dark:text-gray-400 mb-4">Select a score from 0 (Not likely) to 10 (Extremely likely)</p>
-
-                        <div className="grid grid-cols-11 gap-2">
+                        <div className="grid grid-cols-11 gap-1">
                             {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((score) => (
                                 <button
                                     key={score}
                                     type="button"
                                     onClick={() => setNpsScore(score)}
                                     className={`
-                                        h-12 rounded-lg font-bold text-sm transition-all
+                                        h-8 rounded text-xs font-bold transition-all
                                         ${npsScore === score
                                             ? score >= 9 ? 'bg-green-600 text-white scale-110'
                                                 : score >= 7 ? 'bg-yellow-500 text-white scale-110'
                                                     : 'bg-red-500 text-white scale-110'
-                                            : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
+                                            : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200'
                                         }
                                     `}
                                 >
@@ -77,34 +83,32 @@ export function PracticeFeedbackModal({ isOpen, onClose, onSubmit }: PracticeFee
                                 </button>
                             ))}
                         </div>
-
-                        <div className="flex justify-between mt-2 text-xs text-gray-500 dark:text-gray-400">
+                        <div className="flex justify-between mt-1 text-[10px] text-gray-400">
                             <span>Not likely</span>
-                            <span>Extremely likely</span>
+                            <span>Very likely</span>
                         </div>
                     </div>
 
                     {/* Experience Rating */}
                     <div>
-                        <label className="block text-sm font-bold text-gray-900 dark:text-white mb-3">
-                            How would you rate your overall experience with this practice session?
+                        <label className="block text-xs font-bold text-gray-900 dark:text-white mb-2">
+                            Rate this session
                         </label>
-
-                        <div className="grid grid-cols-5 gap-3">
-                            {['😫 Poor', '😕 Fair', '😊 Good', '😃 Great', '🤩 Excellent'].map((rating, index) => (
+                        <div className="grid grid-cols-5 gap-1.5">
+                            {['😫', '😕', '😊', '😃', '🤩'].map((emoji, index) => (
                                 <button
-                                    key={rating}
+                                    key={emoji}
                                     type="button"
-                                    onClick={() => setExperience(rating)}
+                                    onClick={() => setExperience(['Poor', 'Fair', 'Good', 'Great', 'Excellent'][index])}
                                     className={`
-                                        p-3 rounded-lg border-2 transition-all text-center text-sm font-medium
-                                        ${experience === rating
-                                            ? 'border-blue-600 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300'
-                                            : 'border-gray-200 dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-700 text-gray-700 dark:text-gray-300'
+                                        p-2 rounded-lg border transition-all text-center text-lg
+                                        ${experience === ['Poor', 'Fair', 'Good', 'Great', 'Excellent'][index]
+                                            ? 'border-blue-600 bg-blue-50 dark:bg-blue-900/20 scale-110'
+                                            : 'border-gray-200 dark:border-gray-700 hover:border-blue-300'
                                         }
                                     `}
                                 >
-                                    {rating}
+                                    {emoji}
                                 </button>
                             ))}
                         </div>
@@ -112,39 +116,35 @@ export function PracticeFeedbackModal({ isOpen, onClose, onSubmit }: PracticeFee
 
                     {/* Comments */}
                     <div>
-                        <label className="block text-sm font-bold text-gray-900 dark:text-white mb-3">
-                            Any additional comments or suggestions? (Optional)
+                        <label className="block text-xs font-bold text-gray-900 dark:text-white mb-1">
+                            Any suggestions? <span className="font-normal text-gray-400">(Optional)</span>
                         </label>
                         <textarea
                             value={comments}
                             onChange={(e) => setComments(e.target.value)}
-                            placeholder="Share your thoughts, suggestions, or anything we can improve..."
-                            rows={4}
-                            className="w-full px-4 py-3 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-800 dark:text-white resize-none"
+                            placeholder="Share your thoughts..."
+                            rows={2}
+                            className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-800 dark:text-white resize-none"
                         />
                     </div>
 
                     {/* Action Buttons */}
-                    <div className="flex gap-3 pt-4">
+                    <div className="flex gap-2 pt-2">
                         <button
                             type="submit"
                             disabled={isSubmitting || npsScore === null || !experience}
-                            className="flex-1 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-bold py-3 px-6 rounded-lg transition-colors"
+                            className="flex-1 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-bold py-2.5 px-4 rounded-lg transition-colors text-sm"
                         >
-                            {isSubmitting ? 'Submitting...' : 'Submit Feedback'}
+                            {isSubmitting ? 'Submitting...' : 'Submit'}
                         </button>
                         <button
                             type="button"
                             onClick={handleSkip}
-                            className="px-6 py-3 border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 font-medium rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                            className="px-4 py-2.5 text-gray-500 font-medium text-sm hover:text-gray-700 dark:hover:text-gray-300"
                         >
                             Skip
                         </button>
                     </div>
-
-                    <p className="text-xs text-center text-gray-500 dark:text-gray-400">
-                        Thank you for helping us improve! 🙏
-                    </p>
                 </form>
             </div>
         </div>

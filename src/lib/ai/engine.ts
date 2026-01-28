@@ -186,10 +186,21 @@ export async function evaluateAnswer(questionTitle: string, userAnswer: string, 
 
             if (!text) throw new Error("Empty response received from AI");
 
-            // Extract JSON
+            // Extract JSON and Clean it
             console.log(`[AI Engine] Raw response: ${text.substring(0, 100)}...`);
             const jsonMatch = text.match(/\{[\s\S]*\}/);
-            const rawJson = jsonMatch ? jsonMatch[0] : text;
+            let rawJson = jsonMatch ? jsonMatch[0] : text;
+
+            // PRE-CLEAN: Remove control characters and fix common AI JSON issues
+            // 1. Replace literal newlines inside string values (the most common cause of "Bad control character")
+            rawJson = rawJson.replace(/":\s*"([^"]*)"/g, (match, p1) => {
+                // Escape only the newlines and other control characters in the value
+                const cleanedValue = p1.replace(/\n/g, '\\n')
+                    .replace(/\r/g, '\\r')
+                    .replace(/\t/g, '\\t');
+                return `": "${cleanedValue}"`;
+            });
+
             const jsonData = JSON.parse(rawJson);
 
             console.log(`[AI Engine] SUCCESS on attempt ${i + 1}`);
@@ -197,7 +208,10 @@ export async function evaluateAnswer(questionTitle: string, userAnswer: string, 
             // Recursive cleanup to strip bullets/dashes from all feedback strings
             const cleanupResponse = (obj: any): any => {
                 if (typeof obj === 'string') {
-                    return obj.replace(/^\s*[-•]\s*/gm, '').trim();
+                    // Only remove symbols usually used for bullet points at start of lines
+                    // We KEEP ** for bolding as requested for the headers
+                    return obj.replace(/^\s*[-•*]\s+/gm, '')
+                        .trim();
                 }
                 if (Array.isArray(obj)) {
                     return obj.map(cleanupResponse);
