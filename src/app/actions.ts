@@ -344,8 +344,7 @@ export async function askClarifyingQuestion(data: {
     userMessage: string,
     history: { role: 'user' | 'model', parts: { text: string }[] }[]
 }) {
-    const user = await getUser()
-    if (!user) return { success: false, error: "Please login to ask questions" }
+    // Note: Guests can use this (limit enforced client-side: 5 for guests, 10 for logged-in)
 
     const { getApiKeys } = await import("@/lib/ai/engine");
     const apiKeys = getApiKeys();

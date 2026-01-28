@@ -28,6 +28,7 @@ interface AnswerFormProps {
         createdAt: string
     }
     isPremium?: boolean
+    initialResult?: AIEvaluationResponse
 }
 
 export function AnswerForm({
@@ -42,19 +43,13 @@ export function AnswerForm({
     onSubmitted,
     onRetry,
     previousSubmission,
-    isPremium = false
+    isPremium = false,
+    initialResult
 }: AnswerFormProps) {
-    // Initialize result with previous submission if it exists
-    const [result, setResult] = useState<AIEvaluationResponse | null>(() => {
-        if (previousSubmission?.aiScore) {
-            try {
-                return JSON.parse(previousSubmission.aiScore)
-            } catch {
-                return null
-            }
-        }
-        return null
-    })
+    // Initialize result with prop if provided
+    const [result, setResult] = useState<AIEvaluationResponse | null>(initialResult || null)
+    const feedbackTimerRef = useRef<NodeJS.Timeout | null>(null)
+    const scrollHandlerRef = useRef<(() => void) | null>(null)
 
     const [isSubmitting, setIsSubmitting] = useState(false)
     const [error, setError] = useState<string | null>(null)
@@ -66,6 +61,10 @@ export function AnswerForm({
     const [showErrorModal, setShowErrorModal] = useState(false)
     const [loadingMessageIndex, setLoadingMessageIndex] = useState(0)
     const [previousAnswer, setPreviousAnswer] = useState(previousSubmission?.answerText || '')
+    const [npsScore, setNpsScore] = useState<number | null>(null)
+    const [additionalFeedback, setAdditionalFeedback] = useState('')
+    const [isSubmittingFeedback, setIsSubmittingFeedback] = useState(false)
+    const [feedbackSubmitted, setFeedbackSubmitted] = useState(false)
 
     // Clarification Chat State
     const [chatMessages, setChatMessages] = useState<{ role: 'user' | 'model', text: string }[]>([])
@@ -74,6 +73,14 @@ export function AnswerForm({
     const [chatOpen, setChatOpen] = useState(true)
     const [chatError, setChatError] = useState('')
     const [hintCount, setHintCount] = useState(0)
+    const chatMessagesRef = useRef<HTMLDivElement>(null)
+
+    // Auto-scroll chat messages to bottom
+    useEffect(() => {
+        if (chatMessagesRef.current) {
+            chatMessagesRef.current.scrollTop = chatMessagesRef.current.scrollHeight
+        }
+    }, [chatMessages])
 
     const loadingMessages = [
         "Analyzing your product framework...",
@@ -101,10 +108,38 @@ export function AnswerForm({
     const { register, handleSubmit, setValue, watch, formState: { errors } } = useForm<{ answer: string }>()
     const answerValue = watch("answer") || ""
 
-    // Keep answerRef in sync with form state
+    // Auto-save and Restore logic
+    useEffect(() => {
+        if (typeof window !== 'undefined') {
+            const draftKey = `draft_${questionId}`
+
+            // 1. Initial restoration
+            const saved = localStorage.getItem(draftKey) || localStorage.getItem('pending_answer')
+            if (saved) {
+                try {
+                    const parsed = JSON.parse(saved)
+                    if ((parsed.qId === questionId || parsed.questionId === questionId) && parsed.answer && !answerValue) {
+                        setValue("answer", parsed.answer, { shouldValidate: true })
+                    }
+                } catch (e) { console.error("Error restoring answer", e) }
+            }
+        }
+    }, [questionId]) // Run once on mount/id change
+
+    // 2. Continuous saving and Ref sync
     useEffect(() => {
         answerRef.current = answerValue
-    }, [answerValue])
+        if (typeof window !== 'undefined' && answerValue) {
+            const draftKey = `draft_${questionId}`
+            const currentDraft = {
+                qId: questionId,
+                answer: answerValue,
+                elapsedTime: elapsedTime,
+                updatedAt: new Date().toISOString()
+            }
+            localStorage.setItem(draftKey, JSON.stringify(currentDraft))
+        }
+    }, [answerValue, elapsedTime, questionId])
 
     // Handle Speech Recognition setup
     useEffect(() => {
@@ -157,8 +192,17 @@ export function AnswerForm({
         }
     }, [questionId, setValue])
 
+    // Cleanup timers and listeners on unmount
+    useEffect(() => {
+        return () => {
+            if (feedbackTimerRef.current) clearTimeout(feedbackTimerRef.current)
+            if (scrollHandlerRef.current) window.removeEventListener('scroll', scrollHandlerRef.current)
+        }
+    }, [])
+
     const handleGetHint = async () => {
-        if (hintCount >= 3 || isAsking) return
+        const hintLimit = isPremium ? 999 : 3
+        if (hintCount >= hintLimit || isAsking) return
         setIsAsking(true)
         setChatError('')
         try {
@@ -188,9 +232,12 @@ export function AnswerForm({
         if (e) e.preventDefault()
         const userMsg = customMsg || chatInput.trim()
         const clarifyingQuestionCount = chatMessages.filter(m => m.role === 'user').length
-        const limit = isPremium ? 50 : 10
 
-        if (!userMsg || isAsking || clarifyingQuestionCount >= limit) return
+        // Dynamic limits: Guest: 5, Logged-in: 10, Premium: Unlimited
+        const limit = !userId ? 5 : isPremium ? 999 : 10
+        const isOverLimit = clarifyingQuestionCount >= limit
+
+        if (!userMsg || isAsking || Boolean(isOverLimit)) return
 
         setChatInput('')
         setIsAsking(true)
@@ -224,6 +271,18 @@ export function AnswerForm({
         }
     }
 
+    const killFeedbackTriggers = () => {
+        if (feedbackTimerRef.current) {
+            clearTimeout(feedbackTimerRef.current)
+            feedbackTimerRef.current = null
+        }
+        if (scrollHandlerRef.current) {
+            window.removeEventListener('scroll', scrollHandlerRef.current)
+            scrollHandlerRef.current = null
+        }
+        setShowFeedbackModal(false)
+    }
+
     const toggleRecording = () => {
         if (isRecording) {
             recognitionRef.current?.stop()
@@ -244,6 +303,24 @@ export function AnswerForm({
 
     const onSubmit = async (data: { answer: string }) => {
         setError(null)
+
+        // Validate answer is not empty or just template
+        const trimmedAnswer = data.answer.trim()
+        if (!trimmedAnswer || trimmedAnswer.length < 50) {
+            setError("Please write a more detailed answer (at least 50 characters).")
+            return
+        }
+
+        // Check if answer is just the framework template without real content
+        const templatePatterns = ['**CIRCLES Framework**', '**STAR Framework**', '**HEART Framework**', '**GAME Framework**']
+        const isOnlyTemplate = templatePatterns.some(t =>
+            trimmedAnswer.startsWith(t) && trimmedAnswer.replace(/[\s\n\-:*]/g, '').length < 100
+        )
+        if (isOnlyTemplate) {
+            setError("Please fill in the framework with your actual answer.")
+            return
+        }
+
         if (!userId) {
             if (typeof window !== 'undefined') {
                 localStorage.setItem('pending_answer', JSON.stringify({ qId: questionId, answer: data.answer }))
@@ -257,20 +334,51 @@ export function AnswerForm({
             const chatContext = chatMessages.map(m => `${m.role.toUpperCase()}: ${m.text}`).join('\n')
             const response = await submitAnswer(questionId, data.answer, elapsedTime, chatContext)
             if (response.success && response.aiResponse) {
+                // SUCCESS: Clear local storage draft
+                if (typeof window !== 'undefined') {
+                    localStorage.removeItem(`draft_${questionId}`)
+                    localStorage.removeItem('pending_answer')
+                }
+
                 setPreviousAnswer(data.answer)
                 setResult(response.aiResponse)
                 setSubmissionId(response.submissionId || null)
 
-                // Feedback Modal Timer
-                setTimeout(() => {
+                // Auto-scroll to top of result
+                window.scrollTo({ top: 0, behavior: 'smooth' })
+
+                // Feedback Modal Logic: 30s delay + Scroll to bottom
+                // Clear any existing timer/listener first just in case
+                if (feedbackTimerRef.current) clearTimeout(feedbackTimerRef.current)
+                if (scrollHandlerRef.current) window.removeEventListener('scroll', scrollHandlerRef.current)
+
+                feedbackTimerRef.current = setTimeout(() => {
                     const handleScrollCheck = () => {
-                        if ((window.innerHeight + window.scrollY) >= document.documentElement.scrollHeight - 500) {
+                        // Check if user is near the bottom of the page (within 300px)
+                        const isAtBottom = (window.innerHeight + window.scrollY) >= (document.documentElement.scrollHeight - 300)
+
+                        if (isAtBottom) {
                             setShowFeedbackModal(true)
-                            window.removeEventListener('scroll', handleScrollCheck)
+                            if (scrollHandlerRef.current) {
+                                window.removeEventListener('scroll', scrollHandlerRef.current)
+                                scrollHandlerRef.current = null
+                            }
                         }
                     }
-                    handleScrollCheck()
+                    scrollHandlerRef.current = handleScrollCheck
+                    // Attach listener after 30 seconds
                     window.addEventListener('scroll', handleScrollCheck)
+                    // Also check immediately in case they already scrolled down
+                    handleScrollCheck()
+
+                    // Safety Fallback: If they stay on page for another 30s (total 60s), just show it
+                    setTimeout(() => {
+                        if (scrollHandlerRef.current) {
+                            setShowFeedbackModal(true)
+                            window.removeEventListener('scroll', scrollHandlerRef.current)
+                            scrollHandlerRef.current = null
+                        }
+                    }, 30000)
                 }, 30000)
 
                 // Submission count for mentor suggestion
@@ -321,6 +429,7 @@ export function AnswerForm({
                         </div>
                         <button
                             onClick={() => {
+                                killFeedbackTriggers()
                                 setResult(null)
                                 if (onRetry) onRetry()
                             }}
@@ -393,8 +502,113 @@ export function AnswerForm({
                         <p className="text-violet-50 leading-relaxed font-medium">{result.feedback}</p>
                     </div>
 
+                    {/* Gold Standard Solution */}
+                    {result.improved_example && (
+                        <div className="border-2 border-amber-100 dark:border-amber-900/30 rounded-[2rem] overflow-hidden">
+                            <div className="bg-amber-50 dark:bg-amber-900/20 px-8 py-6 border-b border-amber-100 dark:border-amber-900/30 flex items-center gap-3">
+                                <div className="bg-amber-500 text-white p-2 rounded-xl">
+                                    <Sparkles size={20} />
+                                </div>
+                                <div>
+                                    <h4 className="font-black text-lg text-amber-900 dark:text-amber-100">Gold Standard Solution</h4>
+                                    <p className="text-xs text-amber-700 dark:text-amber-400 font-bold uppercase tracking-widest">The Expert Approach</p>
+                                </div>
+                            </div>
+                            <div className="p-8 bg-white dark:bg-gray-900">
+                                <div className="prose dark:prose-invert max-w-none">
+                                    <p className="text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-wrap font-medium">
+                                        {result.improved_example}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Detailed Experience Feedback */}
+                    <div className="bg-white dark:bg-gray-800 border-2 border-dashed border-gray-100 dark:border-gray-700 rounded-3xl p-8 space-y-8">
+                        {feedbackSubmitted ? (
+                            <div className="text-center py-4 space-y-2">
+                                <div className="bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4">
+                                    <CheckCircle2 size={24} />
+                                </div>
+                                <h4 className="text-lg font-black text-gray-900 dark:text-white">Feedback Received!</h4>
+                                <p className="text-sm text-gray-500 font-medium">Thank you for helping us improve our AI evaluations.</p>
+                            </div>
+                        ) : (
+                            <>
+                                <div className="space-y-6">
+                                    <div className="text-center md:text-left">
+                                        <h4 className="text-lg font-black text-gray-900 dark:text-white">Rate your experience</h4>
+                                        <p className="text-sm text-gray-500 font-medium mt-1">How likely is it that you would recommend Prodsnap to a friend?</p>
+                                    </div>
+
+                                    {/* NPS Score Buttons 0-10 */}
+                                    <div className="flex flex-wrap justify-center md:justify-start gap-2">
+                                        {[...Array(11)].map((_, i) => (
+                                            <button
+                                                key={i}
+                                                type="button"
+                                                onClick={() => setNpsScore(i)}
+                                                className={`w-10 h-10 rounded-xl text-sm font-black transition-all flex items-center justify-center border-2 ${npsScore === i
+                                                    ? 'bg-violet-600 border-violet-600 text-white shadow-lg shadow-violet-600/20 scale-110'
+                                                    : 'bg-white dark:bg-gray-900 border-gray-100 dark:border-gray-800 text-gray-400 hover:border-violet-200 hover:text-violet-600'
+                                                    }`}
+                                            >
+                                                {i}
+                                            </button>
+                                        ))}
+                                    </div>
+                                    <div className="flex justify-between text-[10px] font-black uppercase tracking-widest text-gray-400 px-1">
+                                        <span>Not Likely</span>
+                                        <span>Extremely Likely</span>
+                                    </div>
+                                </div>
+
+                                <div className="space-y-3">
+                                    <label className="text-sm font-black text-gray-700 dark:text-gray-300 flex items-center gap-2">
+                                        <MessageSquare size={16} className="text-violet-600" />
+                                        Any additional feedback for the AI or the platform?
+                                    </label>
+                                    <textarea
+                                        value={additionalFeedback}
+                                        onChange={(e) => setAdditionalFeedback(e.target.value)}
+                                        placeholder="What did the AI get right? What could be improved?"
+                                        className="w-full bg-gray-50 dark:bg-gray-900/50 border-2 border-gray-100 dark:border-gray-800 rounded-2xl p-4 text-sm font-medium focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all outline-none min-h-[100px]"
+                                    />
+                                </div>
+
+                                <button
+                                    type="button"
+                                    disabled={npsScore === null || isSubmittingFeedback}
+                                    onClick={async () => {
+                                        if (npsScore === null) return
+                                        setIsSubmittingFeedback(true)
+                                        const res = await submitPracticeFeedback({
+                                            npsScore,
+                                            comments: additionalFeedback,
+                                            experience: npsScore >= 8 ? 'Good' : npsScore >= 5 ? 'Average' : 'Poor',
+                                            submissionId: submissionId || undefined
+                                        })
+                                        setIsSubmittingFeedback(false)
+                                        if (res.success) {
+                                            setFeedbackSubmitted(true)
+                                        }
+                                    }}
+                                    className="w-full bg-violet-600 hover:bg-violet-700 disabled:bg-gray-200 dark:disabled:bg-gray-800 text-white py-4 rounded-xl font-black transition-all shadow-lg shadow-violet-600/20 flex items-center justify-center gap-2"
+                                >
+                                    {isSubmittingFeedback ? (
+                                        <Loader2 className="animate-spin" size={18} />
+                                    ) : (
+                                        'Submit Feedback'
+                                    )}
+                                </button>
+                            </>
+                        )}
+                    </div>
+
                     <button
                         onClick={() => {
+                            killFeedbackTriggers()
                             setResult(null)
                             setPreviousAnswer('')
                             setValue('answer', '')
@@ -428,17 +642,101 @@ export function AnswerForm({
 
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
                 {/* Templates */}
-                <div className="flex flex-wrap gap-2">
-                    {['CIRCLES', 'STAR', 'HEART', 'GAME'].map((t) => (
+                <div className="space-y-2">
+                    <p className="text-[11px] text-gray-500 dark:text-gray-400 font-medium flex items-center gap-1.5">
+                        <Lightbulb size={12} className="text-amber-500" />
+                        Use these frameworks to structure your response
+                    </p>
+                    <div className="flex flex-wrap gap-2">
                         <button
-                            key={t}
                             type="button"
-                            onClick={() => setValue('answer', `[${t} Framework Outline]\n- \n- \n- `)}
+                            onClick={() => setValue('answer', `**CIRCLES Framework**
+
+C - Comprehend the Situation:
+
+
+I - Identify the Users:
+
+
+R - Report User Needs:
+
+
+C - Cut Through Prioritization:
+
+
+L - List Solutions:
+
+
+E - Evaluate Trade-offs:
+
+
+S - Summarize Your Recommendation:
+`)}
                             className="text-[10px] font-bold px-3 py-1.5 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-500 hover:bg-violet-600 hover:text-white transition-all border border-gray-200 dark:border-gray-700"
                         >
-                            {t} Framework
+                            CIRCLES Framework
                         </button>
-                    ))}
+                        <button
+                            type="button"
+                            onClick={() => setValue('answer', `**STAR Framework**
+
+S - Situation (Context & Background):
+
+
+T - Task (Your Role & Objective):
+
+
+A - Action (Steps You Took):
+
+
+R - Result (Outcome & Impact):
+`)}
+                            className="text-[10px] font-bold px-3 py-1.5 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-500 hover:bg-violet-600 hover:text-white transition-all border border-gray-200 dark:border-gray-700"
+                        >
+                            STAR Framework
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => setValue('answer', `**HEART Framework**
+
+H - Happiness (User Satisfaction):
+
+
+E - Engagement (User Activity Level):
+
+
+A - Adoption (New User Acquisition):
+
+
+R - Retention (User Loyalty):
+
+
+T - Task Success (Goal Completion Rate):
+`)}
+                            className="text-[10px] font-bold px-3 py-1.5 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-500 hover:bg-violet-600 hover:text-white transition-all border border-gray-200 dark:border-gray-700"
+                        >
+                            HEART Framework
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => setValue('answer', `**GAME Framework**
+
+G - Goals (Define Success Metrics):
+
+
+A - Actions (Key User Behaviors):
+
+
+M - Metrics (Measurable Indicators):
+
+
+E - Evaluate (Analyze & Iterate):
+`)}
+                            className="text-[10px] font-bold px-3 py-1.5 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-500 hover:bg-violet-600 hover:text-white transition-all border border-gray-200 dark:border-gray-700"
+                        >
+                            GAME Framework
+                        </button>
+                    </div>
                 </div>
 
                 {/* Clarification Hub */}
@@ -454,33 +752,16 @@ export function AnswerForm({
                         <button
                             type="button"
                             onClick={(e) => { e.stopPropagation(); if (userId) handleGetHint(); else window.location.href = '/login'; }}
-                            disabled={userId ? (hintCount >= 3 || isAsking) : false}
+                            disabled={userId ? (hintCount >= (isPremium ? 999 : 3) || isAsking) : false}
                             className="bg-violet-600 text-white px-3 py-1 rounded-lg text-[10px] font-black disabled:opacity-30 flex items-center gap-1"
                         >
                             {!userId && <Lock size={10} />}
-                            {hintCount === 0 ? "Get Hint" : `${3 - hintCount} Hints Left`}
+                            {isPremium ? "Get Hint" : (hintCount === 0 ? "Get Hint" : `${3 - hintCount} Hints Left`)}
                         </button>
                     </div>
                     {chatOpen && (
                         <div className="p-4 space-y-4 relative min-h-[160px]">
-                            {!userId && (
-                                <div className="absolute inset-0 z-10 bg-white/40 dark:bg-gray-900/40 backdrop-blur-[2px] flex flex-col items-center justify-center p-6 text-center">
-                                    <div className="bg-violet-100 dark:bg-violet-900/30 p-2.5 rounded-xl mb-2 text-violet-600">
-                                        <Lock size={20} />
-                                    </div>
-                                    <h5 className="text-xs font-black text-gray-900 dark:text-white mb-1 uppercase tracking-tight">Login to Unlock Interviewer</h5>
-                                    <p className="text-[10px] text-gray-500 font-bold mb-3 max-w-[180px] leading-relaxed">
-                                        Ask clarifying questions and get hints to structure your solution better.
-                                    </p>
-                                    <Link
-                                        href="/login"
-                                        className="text-[10px] font-black uppercase tracking-widest bg-violet-600 text-white px-4 py-2 rounded-lg hover:shadow-lg hover:shadow-violet-500/30 transition-all"
-                                    >
-                                        Sign In
-                                    </Link>
-                                </div>
-                            )}
-                            <div className={`max-h-[200px] overflow-y-auto space-y-3 ${!userId ? 'opacity-20 select-none' : ''}`}>
+                            <div ref={chatMessagesRef} className="max-h-[200px] overflow-y-auto space-y-3 scroll-smooth">
                                 {chatMessages.length === 0 && (
                                     <div className="text-[11px] text-gray-400 italic text-center py-4">
                                         No clarifications yet. Focus on identifying the core problem.
@@ -488,21 +769,61 @@ export function AnswerForm({
                                 )}
                                 {chatMessages.map((msg, i) => (
                                     <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                                        <div className={`p-3 rounded-2xl text-xs font-medium ${msg.role === 'user' ? 'bg-violet-600 text-white' : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300'}`}>
+                                        <div className={`p-3 rounded-2xl text-xs font-medium max-w-[85%] ${msg.role === 'user' ? 'bg-violet-600 text-white' : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300'}`}>
                                             {msg.text}
                                         </div>
                                     </div>
                                 ))}
                             </div>
-                            <div className={`flex gap-2 ${!userId ? 'opacity-20 pointer-events-none' : ''}`}>
+                            {/* Question limit warning */}
+                            {((!userId && chatMessages.filter(m => m.role === 'user').length >= 5) || (userId && !isPremium && chatMessages.filter(m => m.role === 'user').length >= 10)) && (
+                                <div className="bg-violet-50 dark:bg-violet-900/20 border border-violet-200 dark:border-violet-800 p-3 rounded-xl text-center">
+                                    <p className="text-xs font-bold text-violet-700 dark:text-violet-300 mb-2">
+                                        {!userId ? "You've used all 5 guest questions!" : "You've used all 10 free questions!"}
+                                    </p>
+                                    {!isPremium && (
+                                        <button
+                                            onClick={() => {
+                                                if (!userId) window.location.href = '/login'
+                                                else {
+                                                    // This is handled by common upgrade triggers
+                                                    alert("Upgrade to Premium for unlimited interviewer access!");
+                                                }
+                                            }}
+                                            className="text-[10px] font-black uppercase bg-violet-600 text-white px-4 py-1.5 rounded-lg hover:shadow-lg transition-all"
+                                        >
+                                            {!userId ? "Sign In for 10 More" : "Upgrade for Unlimited"}
+                                        </button>
+                                    )}
+                                </div>
+                            )}
+                            {/* Questions remaining indicator */}
+                            {!isPremium && chatMessages.filter(m => m.role === 'user').length > 0 && chatMessages.filter(m => m.role === 'user').length < (!userId ? 5 : 10) && (
+                                <p className="text-[10px] text-gray-400 text-center">
+                                    {(!userId ? 5 : 10) - chatMessages.filter(m => m.role === 'user').length} questions remaining
+                                </p>
+                            )}
+                            {isPremium && (
+                                <p className="text-[10px] text-violet-400 text-center font-bold">
+                                    Premium Access: Unlimited Questions
+                                </p>
+                            )}
+                            <div className="flex gap-2">
                                 <input
                                     type="text"
                                     value={chatInput}
                                     onChange={(e) => setChatInput(e.target.value)}
-                                    placeholder="Ask the interviewer a question..."
-                                    className="flex-1 px-4 py-2 bg-gray-50 dark:bg-gray-800 border-2 border-gray-100 dark:border-gray-700 rounded-xl text-xs outline-none"
+                                    onKeyDown={(e) => {
+                                        if (e.key === 'Enter' && !e.shiftKey && chatInput.trim()) {
+                                            e.preventDefault()
+                                            handleAskClarification()
+                                        }
+                                    }}
+                                    disabled={Boolean((!userId && chatMessages.filter(m => m.role === 'user').length >= 5) || (userId && !isPremium && chatMessages.filter(m => m.role === 'user').length >= 10))}
+                                    placeholder={(!userId && chatMessages.filter(m => m.role === 'user').length >= 5) || (userId && !isPremium && chatMessages.filter(m => m.role === 'user').length >= 10) ? "Limit reached..." : "Ask the interviewer a question..."}
+                                    className="flex-1 px-4 py-2 bg-gray-50 dark:bg-gray-800 border-2 border-gray-100 dark:border-gray-700 rounded-xl text-xs outline-none disabled:opacity-50"
                                 />
-                                <button type="button" onClick={handleAskClarification} className="p-2 bg-violet-600 text-white rounded-xl"><ArrowRight size={18} /></button>
+                                <button type="button" onClick={handleAskClarification} disabled={Boolean(!chatInput.trim() || isAsking || (!userId && chatMessages.filter(m => m.role === 'user').length >= 5) || (userId && !isPremium && chatMessages.filter(m => m.role === 'user').length >= 10))} className="p-2 bg-violet-600 text-white rounded-xl disabled:opacity-50"><ArrowRight size={18} /></button>
                             </div>
                         </div>
                     )}
@@ -511,10 +832,18 @@ export function AnswerForm({
                 {/* Main Input */}
                 <div className="relative">
                     <textarea
-                        {...register("answer", { required: true })}
-                        className="w-full h-80 p-6 border rounded-[1.5rem] focus:ring-4 focus:ring-violet-500/10 focus:border-violet-600 outline-none dark:bg-gray-800 dark:border-gray-700 transition-all font-medium leading-relaxed"
+                        {...register("answer", {
+                            required: "Please enter your answer",
+                            minLength: { value: 50, message: "Answer must be at least 50 characters" }
+                        })}
+                        className={`w-full h-80 p-6 border rounded-[1.5rem] focus:ring-4 focus:ring-violet-500/10 focus:border-violet-600 outline-none dark:bg-gray-800 dark:border-gray-700 transition-all font-medium leading-relaxed ${errors.answer ? 'border-red-500' : ''}`}
                         placeholder="Type your structured product response here..."
                     />
+                    {errors.answer && (
+                        <p className="absolute -bottom-6 left-6 text-xs text-red-500 font-medium">
+                            {errors.answer.message}
+                        </p>
+                    )}
                     <button
                         type="button"
                         onClick={toggleRecording}

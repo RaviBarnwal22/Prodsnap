@@ -16,6 +16,7 @@ interface PracticeQuestionClientProps {
     solutionText?: string
     sampleAnswer?: string
     isLocked: boolean
+    isPremium?: boolean
     userEmail?: string
     userName?: string
     previousSubmission?: {
@@ -24,6 +25,7 @@ interface PracticeQuestionClientProps {
         createdAt: string
     }
     history?: any[]
+    initialResult?: any
 }
 
 const FREE_ATTEMPT_LIMIT = 3
@@ -37,6 +39,7 @@ export function PracticeQuestionClient({
     solutionText,
     sampleAnswer,
     isLocked,
+    isPremium: initialIsPremium = false,
     userEmail,
     userName,
     previousSubmission: initialPreviousSubmission,
@@ -44,9 +47,9 @@ export function PracticeQuestionClient({
 }: PracticeQuestionClientProps) {
     const [userId, setUserId] = useState<string | null>(initialUserId || null)
     const [isLoading, setIsLoading] = useState(true)
-    const [hasStartedAttempt, setHasStartedAttempt] = useState(false)
+    const [hasStartedAttempt, setHasStartedAttempt] = useState(!!initialPreviousSubmission?.aiScore)
     const [elapsedTime, setElapsedTime] = useState(0)
-    const [isFinished, setIsFinished] = useState(false)
+    const [isFinished, setIsFinished] = useState(!!initialPreviousSubmission?.aiScore)
     const [isStarting, setIsStarting] = useState(false)
     const [attemptStatus, setAttemptStatus] = useState<{
         attemptsUsed: number
@@ -69,22 +72,33 @@ export function PracticeQuestionClient({
             const finalUserId = session?.user?.id || null
             setUserId(finalUserId)
 
+            // Initialize attempt status based on SSR props
+            setAttemptStatus(prev => ({
+                attemptsUsed: prev?.attemptsUsed || 0,
+                attemptsRemaining: prev?.attemptsRemaining || 999,
+                canAttempt: true,
+                isPremium: initialIsPremium
+            }))
+
+            // Restore draft (including timer)
+            if (typeof window !== 'undefined') {
+                const draftKey = `draft_${questionId}`
+                const draft = localStorage.getItem(draftKey) || localStorage.getItem('pending_answer') // check both for compatibility
+                if (draft) {
+                    try {
+                        const parsed = JSON.parse(draft)
+                        if (parsed.qId === questionId || parsed.questionId === questionId) {
+                            if (parsed.elapsedTime) setElapsedTime(parsed.elapsedTime)
+                            setHasStartedAttempt(true)
+                        }
+                    } catch (e) { console.error("Error restoring draft", e) }
+                }
+            }
+
             if (finalUserId) {
                 try {
-                    // Fetch attempt status
-                    const statusRes = await fetch(`/api/user-status?category=${category}`)
-                    if (statusRes.ok) {
-                        const statusData = await statusRes.json()
-                        setAttemptStatus(statusData)
-                    }
-
-                    // Fetch previous submission for this specific question
-                    const prevRes = await fetch(`/api/previous-submission?questionId=${questionId}`)
-                    if (prevRes.ok) {
-                        const prevData = await prevRes.json()
-                        if (prevData.submission) {
-                            setPreviousSubmission(prevData.submission)
-                        }
+                    if (initialPreviousSubmission) {
+                        setPreviousSubmission(initialPreviousSubmission)
                     }
                 } catch (err) {
                     console.error("Error fetching status:", err)
@@ -92,19 +106,35 @@ export function PracticeQuestionClient({
             }
             setIsLoading(false)
         }
-
         checkAuthAndStatus()
-    }, [category, questionId])
+    }, [category, questionId, initialPreviousSubmission])
 
     useEffect(() => {
         let interval: NodeJS.Timeout
         if (hasStartedAttempt && !isFinished) {
             interval = setInterval(() => {
-                setElapsedTime((prev) => prev + 1)
+                setElapsedTime((prev) => {
+                    const nextTime = prev + 1
+                    // Persist timer periodically
+                    if (nextTime % 5 === 0) {
+                        const draftKey = `draft_${questionId}`
+                        const existing = localStorage.getItem(draftKey)
+                        if (existing) {
+                            try {
+                                const parsed = JSON.parse(existing)
+                                parsed.elapsedTime = nextTime
+                                localStorage.setItem(draftKey, JSON.stringify(parsed))
+                            } catch (e) { /* ignore */ }
+                        }
+                    }
+                    return nextTime
+                })
             }, 1000)
         }
-        return () => clearInterval(interval)
-    }, [hasStartedAttempt, isFinished])
+        return () => {
+            if (interval) clearInterval(interval)
+        }
+    }, [hasStartedAttempt, isFinished, questionId])
 
     const handleStartAttempt = async () => {
         console.log('[handleStartAttempt] called, userId:', userId, 'isLocked:', isLocked)
@@ -145,22 +175,7 @@ export function PracticeQuestionClient({
         setHasStartedAttempt(true) // Immediately start on retry
     }
 
-    // Auto-start if there's a pending answer waiting for restoration
-    useEffect(() => {
-        if (typeof window !== 'undefined' && !hasStartedAttempt && userId) {
-            const pending = localStorage.getItem('pending_answer')
-            if (pending) {
-                try {
-                    const parsed = JSON.parse(pending)
-                    if (parsed.qId === questionId) {
-                        setHasStartedAttempt(true)
-                    }
-                } catch (e) {
-                    console.error("Error checking pending answer", e)
-                }
-            }
-        }
-    }, [questionId, userId, hasStartedAttempt])
+    // Auto-start logic handled in main effect
 
     const formatTime = (seconds: number) => {
         const mins = Math.floor(seconds / 60)
@@ -246,16 +261,29 @@ export function PracticeQuestionClient({
 
             {/* Previously Solved Banner */}
             {!isLocked && previousSubmission && !hasStartedAttempt && (
-                <div className="p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-xl flex items-center gap-3">
-                    <CheckCircle2 size={20} className="text-green-600 dark:text-green-400" />
-                    <span className="text-sm font-medium text-green-800 dark:text-green-200">
-                        You have already solved this case. Re-attempts are free!
-                    </span>
+                <div className="p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-xl flex items-center justify-between gap-3 shadow-sm">
+                    <div className="flex items-center gap-3">
+                        <CheckCircle2 size={20} className="text-green-600 dark:text-green-400" />
+                        <span className="text-sm font-medium text-green-800 dark:text-green-200">
+                            You have already solved this case.
+                        </span>
+                    </div>
+                    {previousSubmission.aiScore && (
+                        <button
+                            onClick={() => {
+                                setHasStartedAttempt(true);
+                                setIsFinished(true);
+                            }}
+                            className="text-xs font-bold text-green-600 hover:text-green-700 bg-white px-3 py-1.5 rounded-lg border border-green-200 shadow-sm transition-all"
+                        >
+                            View Evaluation
+                        </button>
+                    )}
                 </div>
             )}
 
-            {/* Main Content Area - Only show if not locked */}
-            {!isLocked && !hasStartedAttempt && (
+            {/* Main Content Area - Only show if not locked and not already solved */}
+            {!isLocked && !hasStartedAttempt && !previousSubmission && (
                 <div className="bg-white dark:bg-gray-900 p-12 rounded-[2.5rem] border border-gray-100 dark:border-gray-800 shadow-2xl text-center relative overflow-hidden group">
                     <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-blue-600 to-indigo-600"></div>
                     <div className="absolute -right-20 -bottom-20 w-64 h-64 bg-blue-500/5 rounded-full blur-3xl group-hover:bg-blue-500/10 transition-colors"></div>
@@ -302,13 +330,15 @@ export function PracticeQuestionClient({
             {/* Active Simulation */}
             {!isLocked && hasStartedAttempt && (
                 <div className="space-y-6">
-                    {/* Timer */}
-                    <div className="p-4 bg-gray-50 dark:bg-gray-800/50 border border-gray-100 dark:border-gray-800 rounded-2xl flex items-center justify-center gap-3">
-                        <Clock size={20} className="text-gray-400" />
-                        <span className="text-lg font-mono font-bold text-gray-600 dark:text-gray-300">
-                            Time Elapsed: {formatTime(elapsedTime)}
-                        </span>
-                    </div>
+                    {/* Timer - only show when not finished */}
+                    {!isFinished && (
+                        <div className="p-4 bg-gray-50 dark:bg-gray-800/50 border border-gray-100 dark:border-gray-800 rounded-2xl flex items-center justify-center gap-3">
+                            <Clock size={20} className="text-gray-400" />
+                            <span className="text-lg font-mono font-bold text-gray-600 dark:text-gray-300">
+                                Time Elapsed: {formatTime(elapsedTime)}
+                            </span>
+                        </div>
+                    )}
 
                     <AnswerForm
                         questionId={questionId}
@@ -322,7 +352,8 @@ export function PracticeQuestionClient({
                         onSubmitted={() => setIsFinished(true)}
                         onRetry={handleRetry}
                         previousSubmission={previousSubmission || undefined}
-                        isPremium={attemptStatus?.isPremium || false}
+                        isPremium={initialIsPremium}
+                        initialResult={previousSubmission?.aiScore ? JSON.parse(previousSubmission.aiScore) : undefined}
                     />
                 </div>
             )}

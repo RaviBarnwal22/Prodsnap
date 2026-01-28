@@ -16,7 +16,7 @@ export default async function Home() {
   // Professional headshots from Unsplash (diverse, professional-looking people)
   const testimonialPeople = [
     {
-      img: "/shivam.png",
+      img: "/shivam.jpg",
       name: "Shivam",
       role: "",
       quote: "The diverse product sense cases are incredibly relevant and thought-provoking.",
