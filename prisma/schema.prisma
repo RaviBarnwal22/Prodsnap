@@ -17,9 +17,9 @@ model User {
   role             String               @default("STUDENT")
   createdAt        DateTime             @default(now())
   updatedAt        DateTime             @updatedAt
-  lastLoginAt      DateTime?
   firstName        String?
   lastName         String?
+  lastLoginAt      DateTime?
   bookings         Booking[]
   mentorSessions   Booking[]            @relation("MentorBookings")
   categoryAttempts CategoryAttempt[]
@@ -55,24 +55,24 @@ model PracticeQuestion {
   difficulty   String
   solutionText String?
   sampleAnswer String?
-  isFree       Boolean              @default(false)
   createdAt    DateTime             @default(now())
+  isFree       Boolean              @default(false)
   submissions  PracticeSubmission[]
 }
 
 model PracticeSubmission {
-  id             String           @id @default(cuid())
+  id             String             @id @default(cuid())
   userId         String
   questionId     String
   answerText     String
   aiScore        String?
   timeSpent      Int?
-  isGoldStandard Boolean          @default(false)
-  createdAt      DateTime         @default(now())
-  user           User             @relation(fields: [userId], references: [id])
-  question       PracticeQuestion @relation(fields: [questionId], references: [id])
-  reviews        Review[]
+  isGoldStandard Boolean            @default(false)
+  createdAt      DateTime           @default(now())
   feedbacks      PracticeFeedback[]
+  question       PracticeQuestion   @relation(fields: [questionId], references: [id])
+  user           User               @relation(fields: [userId], references: [id])
+  reviews        Review[]
 }
 
 model Review {
@@ -85,8 +85,8 @@ model Review {
   details      String?
   createdAt    DateTime           @default(now())
   aiAccuracy   Int?
-  submission   PracticeSubmission @relation(fields: [submissionId], references: [id])
   reviewer     User?              @relation(fields: [reviewerId], references: [id])
+  submission   PracticeSubmission @relation(fields: [submissionId], references: [id])
 }
 
 model Service {
@@ -217,26 +217,26 @@ model SubscriptionRequest {
 }
 
 model MentorshipBooking {
-  id           String              @id @default(cuid())
-  userId       String?
-  name         String
-  email        String
-  phone        String
-  serviceType  String
-  paymentProof String
-  amount       Int
-  status       String              @default("pending")
-  adminNotes   String?
-  scheduledAt  DateTime?
-  meetingLink  String?
+  id              String              @id @default(cuid())
+  userId          String?
+  name            String
+  email           String
+  phone           String
+  serviceType     String
+  paymentProof    String
+  amount          Int
+  status          String              @default("pending")
+  adminNotes      String?
+  scheduledAt     DateTime?
+  meetingLink     String?
+  completedAt     DateTime?
+  reviewedBy      String?
+  reviewedAt      DateTime?
+  createdAt       DateTime            @default(now())
   linkedinProfile String?
   messageToMentor String?
-  completedAt  DateTime?
-  reviewedBy   String?
-  reviewedAt   DateTime?
-  createdAt    DateTime            @default(now())
-  feedback     MentorshipFeedback?
-  emailLogs    EmailLog[]
+  emailLogs       EmailLog[]
+  feedback        MentorshipFeedback?
 }
 
 model MentorshipFeedback {
@@ -252,43 +252,65 @@ model MentorshipFeedback {
 }
 
 model PracticeFeedback {
-  id           String   @id @default(cuid())
+  id           String              @id @default(cuid())
   userId       String
   submissionId String?
   experience   String
   comments     String?
   npsScore     Int
-  createdAt    DateTime           @default(now())
-  user         User               @relation(fields: [userId], references: [id])
+  createdAt    DateTime            @default(now())
   submission   PracticeSubmission? @relation(fields: [submissionId], references: [id])
+  user         User                @relation(fields: [userId], references: [id])
 }
 
 model ApiUsageLog {
   id           String   @id @default(cuid())
-  provider     String   // "gemini" or "perplexity"
-  model        String   // e.g., "gemini-pro", "sonar"
-  status       String   // "success", "error", "rate_limit"
-  responseTime Int?     // in milliseconds
+  provider     String
+  model        String
+  status       String
+  responseTime Int?
   errorMessage String?
-  tokenCount   Int?     // estimated tokens used
+  tokenCount   Int?
   createdAt    DateTime @default(now())
-  
+
   @@index([createdAt])
   @@index([provider])
 }
 
 model EmailLog {
-  id          String   @id @default(cuid())
-  type        String   // "payment", "approval", "mentorship", "contact", "reply"
-  recipient   String
-  subject     String
-  status      String   // "success", "error"
+  id           String             @id @default(cuid())
+  type         String
+  recipient    String
+  subject      String
+  status       String
   errorMessage String?
-  bookingId   String?  // Optional, if related to a mentorship booking
-  createdAt   DateTime @default(now())
+  bookingId    String?
+  createdAt    DateTime           @default(now())
+  booking      MentorshipBooking? @relation(fields: [bookingId], references: [id])
 
-  booking     MentorshipBooking? @relation(fields: [bookingId], references: [id])
-  
   @@index([createdAt])
   @@index([type])
+}
+
+model Article {
+  id               String      @id @default(cuid())
+  articleType      String      @default("DAILY") // DAILY, WEEKLY_TOP, MONTHLY_TOP
+  category         String
+  title            String
+  source           String
+  url              String
+  date             String      // Display date string
+  targetDate       DateTime    @default(now()) // For indexing/filtering
+  periodIdentifier String?     // e.g., "2026-06-01" for days, "2026-W05" for weeks, "2026-M02" for months
+  iconName         String
+  summary          String      @db.Text
+  pmPerspective    String      @db.Text
+  tags             String[]
+  publishedAt      DateTime    @default(now())
+  createdAt        DateTime    @default(now())
+  updatedAt        DateTime    @updatedAt
+
+  @@index([publishedAt])
+  @@index([articleType, targetDate])
+  @@index([periodIdentifier])
 }

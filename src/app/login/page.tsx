@@ -20,6 +20,7 @@ export default function LoginPage() {
     const [verificationEmail, setVerificationEmail] = useState("")
     const [resendCountdown, setResendCountdown] = useState(0)
     const [resetPasswordCountdown, setResetPasswordCountdown] = useState(0)
+    const [otpCode, setOtpCode] = useState<string[]>(new Array(8).fill(""))
     const [focusedField, setFocusedField] = useState<string | null>(null)
     const [showLongLoading, setShowLongLoading] = useState(false)
     const supabase = createClient()
@@ -100,18 +101,18 @@ export default function LoginPage() {
             const data = await response.json()
 
             if (!response.ok) {
-                setError(data.error || 'Login failed')
+                setError(data.error || 'Sign in failed')
                 setIsLoading(false)
                 return
             }
 
-            setMessage("Login successful! Redirecting...")
+            setMessage("Sign in successful! Redirecting...")
             // Give cookies time to be set
             setTimeout(() => {
                 window.location.href = data.redirectTo || '/'
             }, 500)
         } catch (error: any) {
-            setError(error.message || 'Login failed')
+            setError(error.message || 'Sign in failed')
             setIsLoading(false)
         }
     }
@@ -188,18 +189,32 @@ export default function LoginPage() {
         }
     }
 
-    const handleCheckVerification = async () => {
+    const handleVerifyOtp = async (e: React.FormEvent) => {
+        e.preventDefault()
+        const fullCode = otpCode.join("")
+        if (fullCode.length !== 8) {
+            setError("Please enter the 8-digit code")
+            return
+        }
+
         setVerificationState('checking')
+        setError("")
 
-        const { data } = await supabase.auth.getSession()
+        const { data, error } = await supabase.auth.verifyOtp({
+            email: verificationEmail,
+            token: fullCode,
+            type: 'signup',
+        })
 
-        if (data.session) {
-            router.push('/')
-            router.refresh()
-        } else {
+        if (error) {
             setVerificationState('pending')
-            setError("Email not verified yet. Please check your inbox and click the verification link.")
-            setTimeout(() => setError(""), 5000)
+            setError(error.message)
+        } else if (data.session) {
+            setMessage("Email verified successfully!")
+            setTimeout(() => {
+                router.push('/')
+                router.refresh()
+            }, 1000)
         }
     }
 
@@ -307,6 +322,30 @@ export default function LoginPage() {
 
     // Verification Modal
     if (verificationState !== 'none') {
+        const handleOtpChange = (element: HTMLInputElement, index: number) => {
+            if (isNaN(Number(element.value))) return false;
+
+            const newOtp = [...otpCode];
+            newOtp[index] = element.value;
+            setOtpCode(newOtp);
+
+            // Focus next input
+            if (element.nextSibling && element.value !== "") {
+                (element.nextSibling as HTMLInputElement).focus();
+            }
+        }
+
+        const handleOtpKeyDown = (e: React.KeyboardEvent<HTMLInputElement>, index: number) => {
+            if (e.key === 'Backspace') {
+                if (otpCode[index] === "" && index > 0) {
+                    const prevElement = (e.currentTarget.previousSibling as HTMLInputElement);
+                    if (prevElement) {
+                        prevElement.focus();
+                    }
+                }
+            }
+        }
+
         return (
             <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-violet-600 via-purple-600 to-indigo-700 px-4 relative overflow-hidden">
                 <div className="absolute inset-0 overflow-hidden">
@@ -324,45 +363,65 @@ export default function LoginPage() {
                             <X size={24} />
                         </button>
 
-                        <div className="w-24 h-24 bg-gradient-to-br from-white/20 to-white/5 rounded-full flex items-center justify-center mx-auto mb-6 animate-bounce" style={{ animationDuration: '2s' }}>
-                            <Mail className="text-white" size={48} />
+                        <div className="w-20 h-20 bg-gradient-to-br from-white/20 to-white/5 rounded-full flex items-center justify-center mx-auto mb-6">
+                            <Zap className="text-yellow-300" size={40} />
                         </div>
 
-                        <h2 className="text-3xl font-bold mb-2 text-white">Verify your email</h2>
+                        <h2 className="text-3xl font-bold mb-2 text-white">Enter OTP</h2>
 
-                        <p className="text-white/70 mb-2">
-                            We&apos;ve sent a verification link to
-                        </p>
-                        <p className="font-semibold text-white mb-4 bg-white/10 px-4 py-2 rounded-lg inline-block">
-                            {verificationEmail}
+                        <p className="text-white/70 mb-4">
+                            We&apos;ve sent an 8-digit code to<br />
+                            <span className="font-semibold text-white">{verificationEmail}</span>
                         </p>
 
-                        <p className="text-white/60 text-sm mb-6">
-                            Please check your inbox and click the link to activate your account.
-                        </p>
-
-                        {error && (
-                            <div className="bg-red-500/20 border border-red-500/30 text-red-200 text-sm p-3 rounded-lg mb-4">
-                                {error}
+                        <form onSubmit={handleVerifyOtp} className="space-y-6">
+                            <div className="flex justify-between gap-1 max-w-[340px] mx-auto">
+                                {otpCode.map((digit, index) => (
+                                    <input
+                                        key={index}
+                                        id={`otp-${index}`}
+                                        type="text"
+                                        maxLength={1}
+                                        value={digit}
+                                        className="w-8 h-10 bg-white/10 border-2 border-white/20 rounded-lg text-center text-lg font-bold text-white focus:border-white focus:ring-4 focus:ring-white/10 transition-all outline-none"
+                                        onChange={(e) => handleOtpChange(e.target, index)}
+                                        onKeyDown={(e) => handleOtpKeyDown(e, index)}
+                                        onFocus={() => setFocusedField(`otp-${index}`)}
+                                        onBlur={() => setFocusedField(null)}
+                                        autoFocus={index === 0}
+                                    />
+                                ))}
                             </div>
-                        )}
 
-                        <button
-                            onClick={handleCheckVerification}
-                            disabled={verificationState === 'checking'}
-                            className="w-full bg-white text-purple-600 rounded-xl py-3 font-bold hover:bg-white/90 transition flex items-center justify-center gap-2 disabled:opacity-50 mb-3 shadow-lg"
-                        >
-                            {verificationState === 'checking' ? (
-                                <Loader2 className="animate-spin" size={20} />
-                            ) : (
-                                "I've Verified ✓"
+                            {error && (
+                                <div className="bg-red-500/20 border border-red-500/30 text-red-200 text-sm p-3 rounded-lg animate-shake">
+                                    {error}
+                                </div>
                             )}
-                        </button>
 
-                        <div className="mb-4">
+                            {message && (
+                                <div className="bg-green-500/20 border border-green-500/30 text-green-200 text-sm p-3 rounded-lg">
+                                    {message}
+                                </div>
+                            )}
+
+                            <button
+                                type="submit"
+                                disabled={verificationState === 'checking' || otpCode.join('').length !== 8}
+                                className="w-full bg-white text-purple-600 rounded-xl py-4 font-bold hover:bg-white/90 transition flex items-center justify-center gap-2 disabled:opacity-50 shadow-lg"
+                            >
+                                {verificationState === 'checking' ? (
+                                    <Loader2 className="animate-spin" size={20} />
+                                ) : (
+                                    "Verify & Continue"
+                                )}
+                            </button>
+                        </form>
+
+                        <div className="mt-8">
                             {resendCountdown > 0 ? (
                                 <p className="text-white/60 text-sm">
-                                    Resend available in <span className="font-semibold text-yellow-300">{resendCountdown}s</span>
+                                    Resend code in <span className="font-semibold text-yellow-300">{resendCountdown}s</span>
                                 </p>
                             ) : (
                                 <button
@@ -375,7 +434,7 @@ export default function LoginPage() {
                                     ) : (
                                         <>
                                             <RefreshCw size={14} />
-                                            Resend verification email
+                                            Resend OTP
                                         </>
                                     )}
                                 </button>
@@ -723,7 +782,7 @@ export default function LoginPage() {
                             <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                             </svg>
-                            Admin Login
+                            Admin Sign In
                         </Link>
                     </div>
                 </div>

@@ -221,7 +221,7 @@ export default function AboutPage() {
                                         With deep experience in building scalable products, he's on a mission to help the next generation of PMs land their dream roles through AI-driven mentorship.
                                     </p>
 
-                                    <a href="https://www.linkedin.com/in/barnwal3008/" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 bg-[#0077b5] text-white px-6 py-3 rounded-full font-bold hover:bg-[#006396] transition-all hover:scale-105 shadow-lg shadow-blue-500/20">
+                                    <a href="https://www.linkedin.com/in/barnwalravi/" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 bg-[#0077b5] text-white px-6 py-3 rounded-full font-bold hover:bg-[#006396] transition-all hover:scale-105 shadow-lg shadow-blue-500/20">
                                         <Linkedin size={20} />
                                         <span>Connect on LinkedIn</span>
                                     </a>

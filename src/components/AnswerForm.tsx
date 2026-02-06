@@ -10,6 +10,7 @@ import { AIEvaluationResponse } from '@/lib/ai/engine'
 import { PracticeFeedbackModal } from './PracticeFeedbackModal'
 import { MentorSuggestionModal } from './MentorSuggestionModal'
 import { ErrorModal } from './ErrorModal'
+import { useAuth } from './AuthContext'
 
 interface AnswerFormProps {
     questionId: string
@@ -46,6 +47,7 @@ export function AnswerForm({
     isPremium = false,
     initialResult
 }: AnswerFormProps) {
+    const { openAuthModal } = useAuth()
     // Initialize result with prop if provided
     const [result, setResult] = useState<AIEvaluationResponse | null>(initialResult || null)
     const feedbackTimerRef = useRef<NodeJS.Timeout | null>(null)
@@ -878,13 +880,14 @@ E - Evaluate (Analyze & Iterate):
                             <ArrowRight size={20} />
                         </button>
                     ) : (
-                        <Link
-                            href={`/login?redirectedFrom=/practice/${questionId}`}
+                        <button
+                            type="button"
+                            onClick={() => openAuthModal()}
                             className="w-full md:w-auto bg-blue-600 hover:bg-blue-700 text-white px-10 py-5 rounded-2xl font-black text-lg transition-all shadow-xl shadow-blue-500/20 whitespace-nowrap active:scale-95 flex items-center justify-center gap-2"
                         >
                             Sign In to Submit
                             <ArrowRight size={20} />
-                        </Link>
+                        </button>
                     )}
                 </div>
             </form>

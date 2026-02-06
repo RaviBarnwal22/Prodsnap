@@ -10,7 +10,7 @@ export async function submitAnswer(questionId: string, answer: string, elapsedTi
     const user = await getUser()
 
     if (!user) {
-        return { success: false, error: "Please login to submit" }
+        return { success: false, error: "Please sign in to submit" }
     }
 
     const userId = user.id
@@ -141,7 +141,7 @@ export async function submitPracticeFeedback(data: {
     const user = await getUser()
 
     if (!user) {
-        return { success: false, error: "Please login to submit feedback" }
+        return { success: false, error: "Please sign in to submit feedback" }
     }
 
     try {
@@ -473,7 +473,7 @@ export async function getInterviewerHint(data: {
     history: { role: 'user' | 'model', text: string }[]
 }) {
     const user = await getUser()
-    if (!user) return { success: false, error: "Please login to ask questions" }
+    if (!user) return { success: false, error: "Please sign in to ask questions" }
 
     const { getApiKeys } = await import("@/lib/ai/engine");
     const apiKeys = getApiKeys();
@@ -566,5 +566,17 @@ export async function logEmailEvent(recipient: string, type: string, subject: st
     } catch (error) {
         console.error('[logEmailEvent] Failed:', error);
         return { success: false };
+    }
+}
+
+export async function checkUserExists(email: string) {
+    try {
+        const user = await prisma.user.findUnique({
+            where: { email }
+        })
+        return { exists: !!user }
+    } catch (error) {
+        console.error("[checkUserExists] Error:", error)
+        return { exists: false, error: "Database error" }
     }
 }

@@ -3,6 +3,7 @@ import Image from 'next/image'
 import { getUser } from '@/lib/auth'
 import { MobileMenu } from './MobileMenu'
 import { Navigation } from './Navigation'
+import { SignInButton } from './SignInButton'
 
 export async function Header() {
     const user = await getUser()
@@ -32,13 +33,11 @@ export async function Header() {
                                 )}
                                 <div className="flex items-center gap-3">
                                     <span className="text-sm font-medium">{user.firstName || user.name?.split(' ')[0] || user.email.split('@')[0]}</span>
-                                    <a href="/auth/signout" className="text-xs text-gray-500 hover:text-red-500 transition">Log Out</a>
+                                    <a href="/auth/signout" className="text-xs text-gray-500 hover:text-red-500 transition">Sign Out</a>
                                 </div>
                             </div>
                         ) : (
-                            <Link href="/login" className="bg-violet-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-violet-700 transition">
-                                Sign In
-                            </Link>
+                            <SignInButton className="bg-violet-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-violet-700 transition" />
                         )}
                     </div>
                     <MobileMenu

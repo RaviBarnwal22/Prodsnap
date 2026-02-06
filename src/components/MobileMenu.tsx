@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { Menu, X, ArrowRight } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { SignInButton } from './SignInButton'
 
 interface MobileMenuProps {
     isLoggedIn: boolean
@@ -22,6 +23,7 @@ export function MobileMenu({ isLoggedIn, userName }: MobileMenuProps) {
         { name: 'Case Simulator', href: '/practice' },
         { name: 'Mentorship', href: '/mentorship' },
         { name: 'Community & Blogs', href: '/community' },
+        { name: 'AI Daily', href: '/ai-news' },
         { name: 'Contact Us', href: '/contact' },
     ]
 
@@ -95,17 +97,14 @@ export function MobileMenu({ isLoggedIn, userName }: MobileMenuProps) {
                                             href="/auth/signout"
                                             className="block w-full text-center py-4 bg-gray-100 dark:bg-gray-800 rounded-2xl font-bold text-red-500 hover:bg-red-500 hover:text-white transition-all shadow-sm"
                                         >
-                                            Log Out
+                                            Sign Out
                                         </a>
                                     </div>
                                 ) : (
-                                    <Link
-                                        href="/login"
+                                    <SignInButton
                                         onClick={toggleMenu}
                                         className="block w-full text-center py-4 bg-gradient-to-r from-violet-600 to-indigo-600 text-white rounded-2xl font-bold hover:shadow-lg hover:shadow-violet-500/30 transition-all"
-                                    >
-                                        Sign In
-                                    </Link>
+                                    />
                                 )}
                             </div>
                         </motion.div>
