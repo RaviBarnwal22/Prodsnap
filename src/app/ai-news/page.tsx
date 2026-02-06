@@ -54,7 +54,7 @@ export default async function AINewsPage(props: {
     });
 
     const activePeriodLabel = period
-        ? availablePeriods.find(p => p.periodIdentifier === period)?.date || period
+        ? (availablePeriods as any[]).find((p: any) => p.periodIdentifier === period)?.date || period
         : "Latest Update";
 
     return (
@@ -115,7 +115,7 @@ export default async function AINewsPage(props: {
                                     Archive
                                 </h3>
                                 <div className="space-y-1">
-                                    {availablePeriods.map((p, i) => (
+                                    {(availablePeriods as any[]).map((p: any, i: number) => (
                                         <Link
                                             key={i}
                                             href={`/ai-news?view=${view.toLowerCase()}&period=${p.periodIdentifier}`}
