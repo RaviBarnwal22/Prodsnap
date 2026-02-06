@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { createClient } from '@/lib/supabase/client'
+import { useAuth } from "@/components/AuthContext"
 import {
     Star,
     GraduationCap,
@@ -28,6 +29,7 @@ import {
 
 export default function MentorshipClient() {
     const router = useRouter()
+    const { openAuthModal } = useAuth()
 
     const [selectedService, setSelectedService] = useState<any>(null)
     const [isPaymentProcessing, setIsPaymentProcessing] = useState(false)
@@ -50,17 +52,34 @@ export default function MentorshipClient() {
     // User authentication state
     const [userId, setUserId] = useState<string | null>(null)
 
-    // Auto-fill email from logged-in user
+    // Auto-fill email from logged-in user and listen for changes
     useEffect(() => {
         const fetchUserEmail = async () => {
             const supabase = createClient()
             const { data: { user } } = await supabase.auth.getUser()
-            if (user?.email) {
-                setEmail(user.email)
+            if (user) {
+                setEmail(user.email || "")
                 setUserId(user.id)
+            } else {
+                setUserId(null)
             }
         }
         fetchUserEmail()
+
+        // Listen for auth state changes (crucial for modal login)
+        const supabase = createClient()
+        const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+            if (session?.user) {
+                setEmail(session.user.email || "")
+                setUserId(session.user.id)
+            } else {
+                setUserId(null)
+            }
+        })
+
+        return () => {
+            subscription.unsubscribe()
+        }
     }, [])
 
     // UPI Details
@@ -796,13 +815,13 @@ export default function MentorshipClient() {
                             <p className="text-gray-500 dark:text-gray-400 mb-8 leading-relaxed">
                                 Create an account or sign in to explore our mentorship packages and book a personalized session with our expert mentor.
                             </p>
-                            <Link
-                                href="/login?redirectedFrom=/mentorship"
-                                className="inline-flex items-center gap-2 bg-gradient-to-r from-violet-600 to-purple-600 text-white px-8 py-4 rounded-xl font-bold hover:shadow-lg hover:shadow-violet-500/20 transition-all"
+                            <button
+                                onClick={() => openAuthModal()}
+                                className="inline-flex items-center gap-2 bg-gradient-to-r from-violet-600 to-purple-600 text-white px-8 py-4 rounded-xl font-bold hover:shadow-lg hover:shadow-violet-500/20 transition-all cursor-pointer"
                             >
                                 <ArrowRight size={20} />
                                 Sign In to Continue
-                            </Link>
+                            </button>
                         </div>
                     ) : (
                         <div className="grid md:grid-cols-3 gap-8">

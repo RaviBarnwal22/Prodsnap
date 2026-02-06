@@ -1,4 +1,12 @@
 import React from 'react'
+import { Metadata } from 'next'
+
+export const metadata: Metadata = {
+    title: "Practice PM Case Studies | Prodsnap Engine",
+    description: "Solve 100+ product management case studies with real-time AI feedback. Practice product design, metrics, growth, and GTM strategy questions.",
+    keywords: ["PM Case Study Practice", "Product Sensing Questions", "Guesstimates Practice", "Product Design Interview", "Root Cause Analysis PM", "Product Management Mock Interview"],
+}
+
 export const dynamic = "force-dynamic"
 import { prisma } from "@/lib/prisma"
 import Link from "next/link"
@@ -9,6 +17,7 @@ import { SkillRadarChart } from "@/components/SkillRadarChart"
 import { getTotalAttemptCount, hasActiveSubscription } from "@/lib/subscription"
 import { FREE_ATTEMPT_LIMIT } from "@/lib/constants"
 import { Crown } from "lucide-react"
+import { SignInButton } from "@/components/SignInButton"
 
 // Helper for difficulty color
 const getDifficultyColor = (diff: string) => {
@@ -343,7 +352,7 @@ export default async function PracticePage({
                                     <Users size={40} className="mx-auto text-gray-300 mb-4" />
                                     <h3 className="font-bold text-gray-900 dark:text-white mb-2 text-sm">Unlock Skill Analytics</h3>
                                     <p className="text-xs text-gray-500 mb-5">Sign in to track performance and see your skill radar matrix.</p>
-                                    <Link href="/login" className="inline-block bg-white dark:bg-gray-800 px-6 py-2 rounded-full font-bold text-xs shadow-sm border border-gray-100 dark:border-gray-700 hover:shadow-md transition-all">Sign In Now</Link>
+                                    <SignInButton className="inline-block bg-white dark:bg-gray-800 px-6 py-2 rounded-full font-bold text-xs shadow-sm border border-gray-100 dark:border-gray-700 hover:shadow-md transition-all">Sign In Now</SignInButton>
                                 </div>
                             )}
 

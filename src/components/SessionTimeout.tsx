@@ -145,7 +145,7 @@ export default function SessionTimeout() {
                 </div>
 
                 <p className="text-gray-600 dark:text-gray-300 mb-8 leading-relaxed">
-                    We've detected some inactivity. For your security, you'll be logged out soon.
+                    We've detected some inactivity. For your security, you'll be signed out soon.
                     Would you like to continue your session?
                 </p>
 
@@ -154,13 +154,13 @@ export default function SessionTimeout() {
                         onClick={extendSession}
                         className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold py-3.5 rounded-xl transition-all duration-300 shadow-lg shadow-blue-500/20"
                     >
-                        Yes, Stay Logged In
+                        Yes, Stay Signed In
                     </button>
                     <button
                         onClick={logout}
                         className="w-full bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 font-bold py-3.5 rounded-xl transition-all duration-300"
                     >
-                        Log Out Now
+                        Sign Out Now
                     </button>
                 </div>
             </div>

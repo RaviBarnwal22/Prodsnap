@@ -1,4 +1,21 @@
 import { prisma } from "@/lib/prisma"
+import { Metadata } from 'next'
+
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
+    const { id } = await params
+    const question = await prisma.practiceQuestion.findUnique({
+        where: { id },
+        select: { title: true, category: true, difficulty: true }
+    })
+
+    if (!question) return { title: "Question Not Found | Prodsnap" }
+
+    return {
+        title: `${question.title} | PM Interview Practice`,
+        description: `Master this ${question.difficulty} level ${question.category.replace(/_/g, ' ')} case study. Learn the frameworks and strategies used by top PMs at Google, Amazon, and Meta.`,
+        keywords: [question.title, "PM Interview Question", "Product Management Case", question.category],
+    }
+}
 import { Header } from "@/components/Header"
 import { PracticeQuestionClient } from "@/components/PracticeQuestionClient"
 import { getUser } from "@/lib/auth"

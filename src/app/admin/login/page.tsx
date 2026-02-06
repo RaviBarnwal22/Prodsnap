@@ -43,7 +43,7 @@ export default function AdminLoginPage() {
             const data = await response.json()
 
             if (!response.ok) {
-                setError(data.error || 'Login failed')
+                setError(data.error || 'Sign in failed')
                 setIsLoading(false)
                 return
             }
@@ -51,7 +51,7 @@ export default function AdminLoginPage() {
             // Redirect to admin dashboard
             window.location.href = '/admin'
         } catch (error: any) {
-            setError(error.message || 'Login failed')
+            setError(error.message || 'Sign in failed')
             setIsLoading(false)
         }
     }

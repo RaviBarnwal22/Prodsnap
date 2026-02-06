@@ -6,6 +6,7 @@ import { createClient } from '@/lib/supabase/client'
 import { Lock, Crown, Loader2, Sparkles, CheckCircle2, Clock, ChevronRight } from 'lucide-react'
 import Link from 'next/link'
 import { PremiumUpgradeModal } from './PremiumUpgradeModal'
+import { useAuth } from './AuthContext'
 
 interface PracticeQuestionClientProps {
     questionId: string
@@ -45,6 +46,7 @@ export function PracticeQuestionClient({
     previousSubmission: initialPreviousSubmission,
     history = []
 }: PracticeQuestionClientProps) {
+    const { openAuthModal } = useAuth()
     const [userId, setUserId] = useState<string | null>(initialUserId || null)
     const [isLoading, setIsLoading] = useState(true)
     const [hasStartedAttempt, setHasStartedAttempt] = useState(!!initialPreviousSubmission?.aiScore)
@@ -106,8 +108,19 @@ export function PracticeQuestionClient({
             }
             setIsLoading(false)
         }
+
         checkAuthAndStatus()
-    }, [category, questionId, initialPreviousSubmission])
+
+        // Listen for auth state changes (crucial for modal login)
+        const supabase = createClient()
+        const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+            setUserId(session?.user?.id || null)
+        })
+
+        return () => {
+            subscription.unsubscribe()
+        }
+    }, [category, questionId, initialPreviousSubmission, initialUserId, isLocked, initialIsPremium])
 
     useEffect(() => {
         let interval: NodeJS.Timeout
@@ -225,13 +238,13 @@ export function PracticeQuestionClient({
                         <p className="text-gray-500 dark:text-gray-400 text-base mb-8 leading-relaxed font-medium max-w-sm mx-auto">
                             Sign in to your account first. Then upgrade to Premium to unlock all cases and detailed AI evaluations.
                         </p>
-                        <Link
-                            href={`/login?redirectedFrom=/practice/${questionId}`}
+                        <button
+                            onClick={() => openAuthModal()}
                             className="bg-blue-600 text-white px-8 py-4 rounded-2xl font-black text-lg hover:scale-[1.02] transition-all shadow-xl shadow-blue-500/20 flex items-center gap-2"
                         >
                             Sign In to Continue
                             <ChevronRight size={20} />
-                        </Link>
+                        </button>
                     </div>
                 </div>
             )}

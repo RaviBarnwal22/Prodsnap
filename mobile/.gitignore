@@ -1,0 +1,10 @@
+node_modules/
+.expo/
+dist/
+npm-debug.*
+*.jks
+*.p8
+*.pyc
+*.keystore
+*.alias
+.DS_Store
