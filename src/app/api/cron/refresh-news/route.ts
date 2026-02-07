@@ -1,21 +1,31 @@
-import { NextResponse } from 'next/server'
-import { refreshAINews } from '@/app/ai-news/actions'
+import { refreshAINews } from "@/app/ai-news/actions";
+import { NextResponse } from "next/server";
 
-// This can be triggered by a CRON job or manually to refresh the news
+export const dynamic = 'force-dynamic';
+
 export async function GET(request: Request) {
-    // Optional: Add a simple secret key check for security
-    const { searchParams } = new URL(request.url)
-    const key = searchParams.get('key')
-
-    // Check if it matches an environment variable or just a simple placeholder for now
-    if (process.env.CRON_SECRET && key !== process.env.CRON_SECRET) {
-        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    const authHeader = request.headers.get('authorization');
+    if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+        return new Response('Unauthorized', { status: 401 });
     }
 
+    console.log("[Cron] Starting Daily AI Digest Refresh...");
+
     try {
-        const result = await refreshAINews()
-        return NextResponse.json(result)
+        const result = await refreshAINews();
+
+        if (result.success) {
+            console.log(`[Cron] Successfully refreshed AI news. Count: ${result.count}`);
+            return NextResponse.json({ success: true, count: result.count });
+        } else {
+            console.error(`[Cron] Failed to refresh AI news: ${result.error}`);
+            return NextResponse.json({ success: false, error: result.error }, { status: 500 });
+        }
     } catch (error) {
-        return NextResponse.json({ success: false, error: 'Failed to trigger refresh' }, { status: 500 })
+        console.error("[Cron] Unhandled error during refresh:", error);
+        return NextResponse.json({
+            success: false,
+            error: error instanceof Error ? error.message : "Unknown error"
+        }, { status: 500 });
     }
 }

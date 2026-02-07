@@ -12,6 +12,7 @@ import { AdminSupportQueue } from "@/components/admin/AdminSupportQueue"
 import { ApiUsageMonitor } from "@/components/admin/ApiUsageMonitor"
 import { AdminFeedbackQueue } from "@/components/admin/AdminFeedbackQueue"
 import { AdminTabs } from "@/components/admin/AdminTabs"
+import { AdminNewsletter } from "@/components/admin/AdminNewsletter"
 
 
 // Helper to format date
@@ -389,14 +390,14 @@ export default async function AdminPage() {
                     usersContent={
                         <div className="space-y-8">
                             {/* Users List (Client Component) */}
-                            <AdminUserList users={users.map(u => ({
+                            <AdminUserList users={users.map((u: any) => ({
                                 ...u,
                                 lastLoginAt: u.lastLoginAt || null
                             })) as any} />
 
                             {/* User Feedback List */}
                             <div className="bg-gray-800 rounded-2xl p-6 border border-gray-700">
-                                <UserFeedbackList feedbacks={await prisma.practiceFeedback.findMany({
+                                <UserFeedbackList feedbacks={await (prisma as any).practiceFeedback.findMany({
                                     orderBy: { createdAt: 'desc' },
                                     include: {
                                         user: {
@@ -461,6 +462,9 @@ export default async function AdminPage() {
                             {/* Support Queue */}
                             <AdminSupportQueue submissions={contactSubmissions as any} />
                         </div>
+                    }
+                    newsletterContent={
+                        <AdminNewsletter />
                     }
                 />
             </main>
