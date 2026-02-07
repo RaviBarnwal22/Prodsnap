@@ -113,21 +113,23 @@ async function createSnapshot(type: 'WEEKLY_TOP' | 'MONTHLY_TOP', periodId: stri
 }
 
 async function archiveOldNews() {
+    // 5 AM IST is 11:30 PM UTC (Feb 6 -> Feb 7).
+    // Shift by 6 hours to get the "IST Day".
     const now = new Date();
-    const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+    const istDate = new Date(now.getTime() + (6 * 60 * 60 * 1000));
+    const sevenDaysAgo = new Date(istDate.getTime() - 7 * 24 * 60 * 60 * 1000);
 
     // 1. Identify if we need to snapshot a week/month
-    // We snapshot the "previous" week if today is a new week start or just periodically
-    const currentWeekId = getWeekIdentifier(now);
-    const yesterday = new Date(now.getTime() - 24 * 60 * 60 * 1000);
-    const prevWeekId = getWeekIdentifier(yesterday);
+    const currentWeekId = getWeekIdentifier(istDate);
+    const dayBefore = new Date(istDate.getTime() - 24 * 60 * 60 * 1000);
+    const prevWeekId = getWeekIdentifier(dayBefore);
 
     if (currentWeekId !== prevWeekId) {
         await createSnapshot('WEEKLY_TOP', prevWeekId, 10);
     }
 
-    const currentMonthId = getMonthIdentifier(now);
-    const prevMonthId = getMonthIdentifier(yesterday);
+    const currentMonthId = getMonthIdentifier(istDate);
+    const prevMonthId = getMonthIdentifier(dayBefore);
     if (currentMonthId !== prevMonthId) {
         await createSnapshot('MONTHLY_TOP', prevMonthId, 25);
     }
@@ -151,41 +153,100 @@ export async function refreshAINews() {
     // Run archival logic
     await archiveOldNews();
 
-    const today = new Date();
-    const todayStr = today.toLocaleDateString('en-US', {
+    // 5 AM IST is 11:30 PM UTC. 
+    // We add 6 hours to "now" so that when the cron runs at 11:30 PM UTC, 
+    // it treats the date as the NEXT day (which is 5:30 AM IST).
+    const now = new Date();
+    const istDate = new Date(now.getTime() + (6 * 60 * 60 * 1000));
+
+    const todayStr = istDate.toLocaleDateString('en-US', {
         month: 'short',
         day: 'numeric',
         year: 'numeric'
     });
-    const dayIdentifier = today.toISOString().split('T')[0];
+    const dayIdentifier = istDate.toISOString().split('T')[0];
 
     const prompt = `
-        Search for the top 6 most significant AI news stories today (${todayStr}) or from the last 24 hours.
-        Focus on news that matters specifically to Product Managers (breakthroughs, M&A, regulation, new consumer features, industrial AI).
-        
-        For each story, provide:
-        1. category: A short category (e.g., Initiatives, Consumer Tech, Agentic AI, Robotics, Regulation, etc.)
-        2. title: A catchy but professional headline.
-        3. source: The news source name.
-        4. url: A valid URL to the news story.
-        5. summary: A 2-sentence summary of the news.
-        6. pmPerspective: A "PM's Perspective" explaining why this matters for Product Managers (1-2 sentences).
-        7. iconName: Choose the most appropriate Lucide React icon name from this list: [Rocket, Shield, Brain, Cpu, Globe, TrendingUp, Newspaper, Zap, MessageSquare, Bot, Box].
-        8. tags: 3 relevant tags as an array of strings.
+# 🔒 Hallucination-Resistant Daily AI Briefing Prompt
 
-        Respond ONLY with a valid JSON array of objects following this structure:
-        [
-            {
-                "category": "...",
-                "title": "...",
-                "source": "...",
-                "url": "...",
-                "summary": "...",
-                "pmPerspective": "...",
-                "iconName": "...",
-                "tags": ["...", "...", "..."]
-            }
-        ]
+## **System Role**
+You are an AI research assistant generating a **fact-checked daily AI news briefing for Product Managers**.
+Accuracy, source fidelity, and verifiability are **higher priority than creativity**.
+
+---
+
+## ⏱️ **Time Window (Flexible)**
+* Priority: News published on ${todayStr}.
+* Fallback: If today is a slow news day (like a weekend), include significant news from the **last 48 hours**.
+* Minimum: Always try to find at least 4-6 high-quality stories.
+
+---
+
+## 📰 **Source & Verification Rules (Critical)**
+Each story **must**:
+* Come from a **reputable, verifiable source** (e.g., Reuters, Bloomberg, Financial Times, WSJ, TechCrunch, The Verge, MIT Technology Review, official company blogs).
+* Have a **publicly accessible URL**.
+* Be independently verifiable via the source link.
+
+❌ Do NOT:
+* Speculate, infer, or extrapolate beyond the article.
+* Combine multiple articles into one story.
+* Paraphrase rumors, leaks, or unconfirmed claims.
+If information is unclear or incomplete → **exclude the story**.
+
+---
+
+## 🎯 **PM-Relevance Filter (Mandatory)**
+Only include stories with **clear, practical implications for Product Managers**, such as:
+* AI product launches, feature updates, or platform changes.
+* Enterprise or consumer AI adoption at scale.
+* AI-related mergers, acquisitions, or strategic partnerships.
+* Regulatory, compliance, or policy decisions impacting AI products.
+* Infrastructure, model, or agent breakthroughs with near-term product impact.
+
+Exclude: Pure academic research, opinion/editorial content, incremental updates without product impact.
+
+---
+
+## 🧠 **Output Requirements (Exact Schema)**
+Return a **JSON array** of up to 6 objects, each strictly following this schema:
+\`\`\`json
+{
+  "category": "string",
+  "title": "string",
+  "source": "string",
+  "url": "string",
+  "summary": "string",
+  "pmPerspective": "string",
+  "iconName": "string",
+  "tags": ["string", "string", "string"]
+}
+\`\`\`
+
+---
+
+## 🧾 **Field-Level Constraints**
+1. **category**: Short, factual classification (e.g., Enterprise AI, Agency AI, Regulation).
+2. **title**: Must accurately reflect article headline. No exaggeration.
+3. **source**: Exact publisher name (e.g., "Reuters").
+4. **url**: Direct link to the original article.
+5. **summary**: **Exactly 2 sentences**. Fact-based only.
+6. **pmPerspective**: 1-2 sentences answering: "What concrete product, roadmap, or strategy decision could a PM be influenced to rethink because of this?"
+7. **iconName**: Choose ONLY ONE from: [Rocket, Shield, Brain, Cpu, Globe, TrendingUp, Newspaper, Zap, MessageSquare, Bot, Box].
+8. **tags**: Exactly 3 short, factual tags.
+
+---
+
+## 🚫 **Hard Failure Rules**
+* If a fact cannot be confirmed → exclude the story.
+* If the URL is invalid → exclude the story.
+* Never fabricate placeholders.
+
+---
+
+## 📦 **Response Format (Strict Enforcement)**
+* Output **ONLY** a valid JSON array.
+* No markdown explanations, no extra text.
     `;
 
     try {
@@ -216,16 +277,24 @@ export async function refreshAINews() {
         if (!jsonMatch) throw new Error("Could not find JSON array in response");
         const newsItems = JSON.parse(jsonMatch[0]);
 
+        console.log(`[AI News Action] AI returned ${newsItems.length} items`);
+
         for (const item of newsItems) {
             const id = `art_${Math.random().toString(36).substr(2, 9)}`;
+            console.log(`[AI News Action] Saving article: ${item.title}`);
             await (prisma as any).$executeRawUnsafe(`
                 INSERT INTO "Article" ("id", "articleType", "category", "title", "source", "url", "date", "targetDate", "periodIdentifier", "iconName", "summary", "pmPerspective", "tags", "publishedAt", "createdAt", "updatedAt")
                 VALUES ($1, 'DAILY', $2, $3, $4, $5, $6, NOW(), $7, $8, $9, $10, $11::text[], NOW(), NOW(), NOW())
             `, id, item.category, item.title, item.source, item.url, todayStr, dayIdentifier, item.iconName, item.summary, item.pmPerspective, item.tags);
         }
 
-        const { revalidatePath } = await import('next/cache');
-        revalidatePath('/ai-news');
+        try {
+            const { revalidatePath } = await import('next/cache');
+            revalidatePath('/ai-news');
+            console.log(`[AI News Action] Path revalidated`);
+        } catch (e) {
+            console.warn("[AI News Action] Revalidate failed (falling back):", e instanceof Error ? e.message : e);
+        }
 
         return { success: true, count: newsItems.length };
     } catch (error) {
@@ -284,9 +353,10 @@ export async function getAINews(type: 'DAILY' | 'WEEKLY_TOP' | 'MONTHLY_TOP' = '
 export async function getAvailablePeriods(type: 'DAILY' | 'WEEKLY_TOP' | 'MONTHLY_TOP') {
     try {
         const periods = await (prisma as any).$queryRawUnsafe(`
-            SELECT DISTINCT "periodIdentifier", "date" 
+            SELECT "periodIdentifier", MAX("date") as "date"
             FROM "Article" 
-            WHERE "articleType" = $1 
+            WHERE "articleType" = $1 AND "periodIdentifier" IS NOT NULL
+            GROUP BY "periodIdentifier"
             ORDER BY "periodIdentifier" DESC
         `, type);
         return periods;

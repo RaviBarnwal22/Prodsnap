@@ -82,6 +82,45 @@ export async function sendEmail({ to, subject, html, type = "general", bookingId
     }
 }
 
+interface BulkEmailOptions {
+    recipients: string[]
+    subject: string
+    html: string
+    type?: string
+}
+
+export async function sendBulkEmail({ recipients, subject, html, type = "bulk" }: BulkEmailOptions) {
+    const uniqueRecipients = Array.from(new Set(recipients.map(r => r.toLowerCase())))
+    console.log(`[Email] Starting bulk send to ${uniqueRecipients.length} recipients...`)
+
+    const results = {
+        success: 0,
+        failed: 0,
+        errors: [] as { email: string; error: any }[]
+    }
+
+    // Process in small batches or one-by-one with small delay to avoid SMTP rate limiting
+    for (const to of uniqueRecipients) {
+        try {
+            const res = await sendEmail({ to, subject, html, type })
+            if (res.success) {
+                results.success++
+            } else {
+                results.failed++
+                results.errors.push({ email: to, error: res.error })
+            }
+            // Small delay to be gentle on SMTP server
+            await new Promise(resolve => setTimeout(resolve, 50))
+        } catch (err) {
+            results.failed++
+            results.errors.push({ email: to, error: err })
+        }
+    }
+
+    console.log(`[Email] Bulk send COMPLETE. Success: ${results.success}, Failed: ${results.failed}`)
+    return results
+}
+
 // Send notification to admin when a new payment request is submitted
 export async function sendPaymentNotification(data: {
     name: string

@@ -1,25 +1,27 @@
 'use client'
 
 import { useState } from 'react'
-import { Users, Activity, BarChart3, MessageSquare, Database } from 'lucide-react'
+import { Users, Activity, BarChart3, MessageSquare, Database, Mail } from 'lucide-react'
 
 interface AdminTabsProps {
     overviewContent: React.ReactNode
     apiUsageContent: React.ReactNode
     usersContent: React.ReactNode
     supportContent: React.ReactNode
+    newsletterContent: React.ReactNode
 }
 
-type TabId = 'overview' | 'api-usage' | 'users' | 'support'
+type TabId = 'overview' | 'api-usage' | 'users' | 'support' | 'newsletter'
 
-export function AdminTabs({ overviewContent, apiUsageContent, usersContent, supportContent }: AdminTabsProps) {
+export function AdminTabs({ overviewContent, apiUsageContent, usersContent, supportContent, newsletterContent }: AdminTabsProps) {
     const [activeTab, setActiveTab] = useState<TabId>('overview')
 
     const tabs = [
         { id: 'overview' as TabId, label: 'Overview', icon: BarChart3 },
-        { id: 'api-usage' as TabId, label: 'API Usage', icon: Database },
         { id: 'users' as TabId, label: 'Users', icon: Users },
+        { id: 'newsletter' as TabId, label: 'Newsletter', icon: Mail },
         { id: 'support' as TabId, label: 'Support', icon: MessageSquare },
+        { id: 'api-usage' as TabId, label: 'API Usage', icon: Database },
     ]
 
     return (
@@ -84,6 +86,12 @@ export function AdminTabs({ overviewContent, apiUsageContent, usersContent, supp
                 {activeTab === 'support' && (
                     <div className="animate-fadeIn">
                         {supportContent}
+                    </div>
+                )}
+
+                {activeTab === 'newsletter' && (
+                    <div className="animate-fadeIn">
+                        {newsletterContent}
                     </div>
                 )}
             </div>

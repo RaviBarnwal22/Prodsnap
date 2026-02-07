@@ -139,7 +139,7 @@ export async function evaluateAnswer(questionTitle: string, userAnswer: string, 
                 await logApiUsage(provider, modelName, 'success', responseTime, undefined, estimatedTokens);
             } else {
                 // Handle Gemini with automatic model fallbacks
-                const modelsToTry = ["gemini-1.5-flash", "gemini-1.5-pro", "gemini-pro"];
+                const modelsToTry = ["gemini-1.5-flash", "gemini-1.5-flash-latest", "gemini-2.0-flash-exp"];
                 let geminiSuccess = false;
                 let geminiLastException: any = null;
 

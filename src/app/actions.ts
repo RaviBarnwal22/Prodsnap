@@ -580,3 +580,221 @@ export async function checkUserExists(email: string) {
         return { exists: false, error: "Database error" }
     }
 }
+
+export async function subscribeToNewsletter(email: string) {
+    if (!email || !email.includes('@')) {
+        return { success: false, error: "Invalid email" }
+    }
+
+    try {
+        await (prisma as any).newsletterSubscriber.upsert({
+            where: { email: email.toLowerCase() },
+            update: { isActive: true },
+            create: { email: email.toLowerCase() }
+        })
+        return { success: true }
+    } catch (error) {
+        console.error("[subscribeToNewsletter] Error:", error)
+        return { success: false, error: "Failed to subscribe" }
+    }
+}
+
+// Get all unique emails for newsletter (Users + Direct Subscribers)
+export async function getNewsletterEmails() {
+    const adminUser = await getUser()
+    const isAdminEmail = adminUser?.email === 'ravibarnwal89@gmail.com'
+    if (!adminUser || (!isAdminEmail && adminUser.role !== 'ADMIN')) {
+        return { success: false, error: "Unauthorized" }
+    }
+
+    try {
+        const [users, subscribers] = await Promise.all([
+            prisma.user.findMany({ select: { email: true } }),
+            (prisma as any).newsletterSubscriber.findMany({
+                where: { isActive: true },
+                select: { email: true }
+            })
+        ])
+
+        const allEmails = new Set([
+            ...users.map((u: any) => u.email.toLowerCase()),
+            ...subscribers.map((s: any) => s.email.toLowerCase())
+        ])
+
+        return { success: true, emails: Array.from(allEmails) }
+    } catch (error) {
+        console.error("[getNewsletterEmails] Error:", error)
+        return { success: false, error: "Failed to fetch emails" }
+    }
+}
+
+export async function generateNewsletterDraft(prompt: string) {
+    const adminUser = await getUser()
+    const isAdminEmail = adminUser?.email === 'ravibarnwal89@gmail.com'
+    if (!adminUser || (!isAdminEmail && adminUser.role !== 'ADMIN')) {
+        return { success: false, error: "Unauthorized" }
+    }
+
+    const { getApiKeys } = await import("@/lib/ai/engine");
+    const allKeys = getApiKeys();
+    const perplexityKey = allKeys.find(k => k.startsWith("pplx-"));
+    const geminiKeys = allKeys.filter(k => !k.startsWith("pplx-"));
+
+    console.log(`[generateNewsletterDraft] Input context: ${prompt.substring(0, 50)}...`);
+
+    // Helper to clean up formatting (only removes the Subject prefix if it persists)
+    const cleanText = (text: string) => {
+        return text
+            .replace(/^Subject: /i, '')
+            .replace(/\n{3,}/g, '\n\n')
+            .trim();
+    };
+
+    // 1. Try Perplexity First (Most stable for this prompt right now)
+    if (perplexityKey) {
+        try {
+            console.log(`[generateNewsletterDraft] Attempting Perplexity...`);
+            const res = await fetch("https://api.perplexity.ai/chat/completions", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${perplexityKey}`
+                },
+                body: JSON.stringify({
+                    model: "sonar",
+                    messages: [
+                        {
+                            role: "system",
+                            content: `You are an expert Product Management newsletter writer for "Prodsnap Daily Digest". 
+                            Your tone is professional, insightful, and "PM-first". 
+                            STRICT RULES: 
+                            1. Be extremely CONCISE and precise. Use short BULLETED POINTS only.
+                            2. NO long text/paragraphs. 
+                            3. Use Markdown for bullets (-) and include 1-2 relevant images using Markdown ![]() or <img> tags.
+                            4. Start the response with "Subject: [Title]" on the first line.`
+                        },
+                        {
+                            role: "user",
+                            content: `Write a sharp, bulleted newsletter draft about: "${prompt}"`
+                        }
+                    ],
+                    temperature: 0.2
+                })
+            });
+
+            if (res.ok) {
+                const data = await res.json();
+                const text = data.choices[0].message.content;
+
+                const subjectMatch = text.match(/Subject: (.*)/);
+                const rawSubject = subjectMatch ? subjectMatch[1] : "Weekly Prodsnap Update";
+                const rawContent = text.replace(/Subject: .*/, '').trim();
+
+                const subject = cleanText(rawSubject);
+                const content = cleanText(rawContent);
+
+                console.log(`[generateNewsletterDraft] Perplexity success!`);
+                return { success: true, subject, content };
+            }
+            console.error(`[generateNewsletterDraft] Perplexity status: ${res.status}`);
+        } catch (err) {
+            console.error(`[generateNewsletterDraft] Perplexity error:`, err);
+        }
+    }
+
+    // 2. Fallback to Gemini if Perplexity is missing or fails
+    if (geminiKeys.length > 0) {
+        try {
+            const { GoogleGenerativeAI } = await import("@google/generative-ai");
+            const modelsToTry = ["gemini-1.5-flash", "gemini-1.5-flash-latest"];
+            let lastError: any = null;
+
+            for (const modelId of modelsToTry) {
+                try {
+                    console.log(`[generateNewsletterDraft] Falling back to Gemini: ${modelId}`);
+                    const genAI = new GoogleGenerativeAI(geminiKeys[0]);
+                    const model = genAI.getGenerativeModel({ model: modelId });
+
+                    const finalPrompt = `
+You are an expert Product Management newsletter writer for "Prodsnap Daily Digest".
+Your tone is professional, insightful, and "PM-first".
+Write an engaging news briefing or newsletter based on: "${prompt}"
+
+STRICT RULES:
+- First line: Subject: [Catchy Subject]
+- Body must be CONCISE bullet points. No long paragraphs.
+- Use Markdown bullets (-) and include 1-2 images where possible using Markdown ![]() or <img> tags.
+`;
+                    const result = await model.generateContent(finalPrompt);
+                    const response = await result.response;
+                    const text = response.text();
+
+                    if (!text) throw new Error("Empty AI response");
+
+                    const subjectMatch = text.match(/Subject: (.*)/);
+                    const rawSubject = subjectMatch ? subjectMatch[1] : "Weekly Update";
+                    const rawContent = text.replace(/Subject: .*/, '').trim();
+
+                    const subject = cleanText(rawSubject);
+                    const content = cleanText(rawContent);
+
+                    return { success: true, subject, content };
+                } catch (err: any) {
+                    lastError = err;
+                }
+            }
+            throw lastError || new Error("All AI models failed");
+        } catch (error: any) {
+            console.error("[generateNewsletterDraft] Final error:", error);
+            return { success: false, error: error?.message || "AI service error" };
+        }
+    }
+
+    return { success: false, error: "No AI keys configured" };
+}
+
+export async function broadcastNewsletter(data: { subject: string, content: string }) {
+    const adminUser = await getUser()
+    const isAdminEmail = adminUser?.email === 'ravibarnwal89@gmail.com'
+    if (!adminUser || (!isAdminEmail && adminUser.role !== 'ADMIN')) {
+        return { success: false, error: "Unauthorized" }
+    }
+
+    try {
+        const emailRes = await getNewsletterEmails();
+        if (!emailRes.success || !emailRes.emails) {
+            return { success: false, error: "Could not fetch mailing list" };
+        }
+
+        const { sendBulkEmail } = await import("@/lib/email");
+        const { marked } = await import('marked');
+
+        // Convert markdown to HTML for email
+        const htmlBody = `
+            <div style="font-family: sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+                ${await marked.parse(data.content)}
+                <hr style="border: 0; border-top: 1px solid #eee; margin: 30px 0;">
+                <p style="font-size: 12px; color: #999; text-align: center;">
+                    You are receiving this because you subscribed to Prodsnap or registered on our platform.
+                </p>
+            </div>
+        `;
+
+        const results = await sendBulkEmail({
+            recipients: emailRes.emails,
+            subject: data.subject,
+            html: htmlBody,
+            type: 'newsletter'
+        });
+
+        return {
+            success: true,
+            sentCount: results.success,
+            failedCount: results.failed,
+            errors: results.errors
+        };
+    } catch (error) {
+        console.error("[broadcastNewsletter] Error:", error);
+        return { success: false, error: "Failed to broadcast newsletter" };
+    }
+}

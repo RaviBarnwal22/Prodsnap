@@ -112,10 +112,15 @@ export default async function PracticePage({
 }) {
     const { category: selectedCategory } = await searchParams
 
-    // Fetch questions with proper ordering
-    const questions = await prisma.practiceQuestion.findMany({
-        orderBy: { createdAt: 'desc' }
-    })
+    // Fetch core data in parallel to reduce sequential blocking
+    const [questions, user, isSubscriptionActive, totalAttempts] = await Promise.all([
+        prisma.practiceQuestion.findMany({
+            orderBy: { createdAt: 'desc' }
+        }),
+        getUser(),
+        hasActiveSubscription(),
+        getTotalAttemptCount()
+    ]);
 
     // Difficulty order for sorting
     const difficultyOrder: Record<string, number> = {
@@ -148,10 +153,8 @@ export default async function PracticePage({
 
     const categoryOrder = ['CONSUMER_PRODUCT_DESIGN', 'METRICS', 'GROWTH_RETENTION', 'TECH_ACUMEN', 'GTM', 'BEHAVIORAL', 'RCA', 'GUESTIMATES']
 
-    const user = await getUser()
     const isAdmin = user?.email === 'ravibarnwal89@gmail.com' || (user as any)?.role === 'ADMIN'
-    const isPremium = (await hasActiveSubscription()) || isAdmin
-    const totalAttempts = await getTotalAttemptCount()
+    const isPremium = isSubscriptionActive || isAdmin
     const attemptsRemaining = Math.max(0, FREE_ATTEMPT_LIMIT - totalAttempts)
 
     // Fetch user's attempted question IDs

@@ -14,12 +14,18 @@ export function NewsletterForm() {
 
         setStatus('loading')
 
-        // Simulating an API call
         try {
-            await new Promise(resolve => setTimeout(resolve, 1500))
-            setStatus('success')
-            setMessage('Thanks for subscribing! Check your inbox soon.')
-            setEmail('')
+            const { subscribeToNewsletter } = await import('@/app/actions')
+            const result = await subscribeToNewsletter(email)
+
+            if (result.success) {
+                setStatus('success')
+                setMessage('Thanks for subscribing! Check your inbox soon.')
+                setEmail('')
+            } else {
+                setStatus('error')
+                setMessage(result.error || 'Something went wrong. Please try again.')
+            }
         } catch (err) {
             setStatus('error')
             setMessage('Something went wrong. Please try again.')
