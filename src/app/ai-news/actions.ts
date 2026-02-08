@@ -166,6 +166,8 @@ export async function refreshAINews() {
     });
     const dayIdentifier = istDate.toISOString().split('T')[0];
 
+    const isWeekend = istDate.getDay() === 0 || istDate.getDay() === 6;
+
     const prompt = `
 # 🔒 Hallucination-Resistant Daily AI Briefing Prompt
 
@@ -177,39 +179,32 @@ Accuracy, source fidelity, and verifiability are **higher priority than creativi
 
 ## ⏱️ **Time Window (Flexible)**
 * Priority: News published on ${todayStr}.
-* Fallback: If today is a slow news day (like a weekend), include significant news from the **last 48 hours**.
-* Minimum: Always try to find at least 4-6 high-quality stories.
+* Current Context: ${isWeekend ? "It is a WEEKEND. News may be sparse." : "It is a weekday."}
+* Fallback: If today is a slow news day, include significant news from the **last 48-72 hours**.
+* Minimum: Always return at least 4-6 high-quality, distinct stories. Do not return an empty list unless there is absolutely no tech news globally.
 
 ---
 
 ## 📰 **Source & Verification Rules (Critical)**
 Each story **must**:
-* Come from a **reputable, verifiable source** (e.g., Reuters, Bloomberg, Financial Times, WSJ, TechCrunch, The Verge, MIT Technology Review, official company blogs).
+* Come from a **reputable, verifiable source** (e.g., Reuters, Bloomberg, FT, TechCrunch, The Verge, MIT Tech Review, company blogs).
 * Have a **publicly accessible URL**.
-* Be independently verifiable via the source link.
+* Be independently verifiable.
 
 ❌ Do NOT:
-* Speculate, infer, or extrapolate beyond the article.
-* Combine multiple articles into one story.
-* Paraphrase rumors, leaks, or unconfirmed claims.
-If information is unclear or incomplete → **exclude the story**.
+* Speculate or fabricate.
+* Include academic-only papers without product impact.
+* Include incremental updates/minor bug fixes.
 
 ---
 
 ## 🎯 **PM-Relevance Filter (Mandatory)**
-Only include stories with **clear, practical implications for Product Managers**, such as:
-* AI product launches, feature updates, or platform changes.
-* Enterprise or consumer AI adoption at scale.
-* AI-related mergers, acquisitions, or strategic partnerships.
-* Regulatory, compliance, or policy decisions impacting AI products.
-* Infrastructure, model, or agent breakthroughs with near-term product impact.
-
-Exclude: Pure academic research, opinion/editorial content, incremental updates without product impact.
+Only include stories with **clear, practical implications for Product Managers** (launches, enterprise adoption, regulatory shifts).
 
 ---
 
 ## 🧠 **Output Requirements (Exact Schema)**
-Return a **JSON array** of up to 6 objects, each strictly following this schema:
+Return a **JSON array** of 4-6 objects strictly following this schema:
 \`\`\`json
 {
   "category": "string",
@@ -225,28 +220,9 @@ Return a **JSON array** of up to 6 objects, each strictly following this schema:
 
 ---
 
-## 🧾 **Field-Level Constraints**
-1. **category**: Short, factual classification (e.g., Enterprise AI, Agency AI, Regulation).
-2. **title**: Must accurately reflect article headline. No exaggeration.
-3. **source**: Exact publisher name (e.g., "Reuters").
-4. **url**: Direct link to the original article.
-5. **summary**: **Exactly 2 sentences**. Fact-based only.
-6. **pmPerspective**: 1-2 sentences answering: "What concrete product, roadmap, or strategy decision could a PM be influenced to rethink because of this?"
-7. **iconName**: Choose ONLY ONE from: [Rocket, Shield, Brain, Cpu, Globe, TrendingUp, Newspaper, Zap, MessageSquare, Bot, Box].
-8. **tags**: Exactly 3 short, factual tags.
-
----
-
-## 🚫 **Hard Failure Rules**
-* If a fact cannot be confirmed → exclude the story.
-* If the URL is invalid → exclude the story.
-* Never fabricate placeholders.
-
----
-
-## 📦 **Response Format (Strict Enforcement)**
+## 📦 **Response Format**
 * Output **ONLY** a valid JSON array.
-* No markdown explanations, no extra text.
+* No explanations.
     `;
 
     try {
