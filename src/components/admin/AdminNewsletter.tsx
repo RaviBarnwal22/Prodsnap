@@ -1,9 +1,10 @@
 'use client'
 
 import React, { useState } from 'react'
-import { Send, Wand2, Mail, Loader2, CheckCircle2, AlertCircle, Eye, Edit3 } from 'lucide-react'
-import { generateNewsletterDraft, broadcastNewsletter } from '@/app/actions'
+import { Send, Wand2, Mail, Loader2, CheckCircle2, AlertCircle, Eye, Edit3, Linkedin, RefreshCcw, Copy } from 'lucide-react'
+import { generateNewsletterDraft, broadcastNewsletter, getLatestViralPost, generateViralLinkedInPostManual } from '@/app/actions'
 import { marked } from 'marked'
+import { useEffect } from 'react'
 
 export function AdminNewsletter() {
     const [prompt, setPrompt] = useState('')
@@ -14,6 +15,37 @@ export function AdminNewsletter() {
     const [status, setStatus] = useState<'idle' | 'success' | 'error'>('idle')
     const [message, setMessage] = useState('')
     const [viewMode, setViewMode] = useState<'edit' | 'preview'>('edit')
+
+    const [viralPost, setViralPost] = useState<any>(null)
+    const [isGeneratingViral, setIsGeneratingViral] = useState(false)
+
+    useEffect(() => {
+        const fetchViral = async () => {
+            const result = await getLatestViralPost();
+            if (result.success && 'post' in result) {
+                setViralPost(result.post)
+            }
+        }
+        fetchViral()
+    }, [])
+
+    const handleGenerateViral = async () => {
+        setIsGeneratingViral(true)
+        try {
+            const result = await generateViralLinkedInPostManual();
+            if (result.success && 'post' in result) {
+                setViralPost(result.post)
+            } else {
+                setMessage((result as any).error || 'Failed to generate viral post')
+                setStatus('error')
+            }
+        } catch (err) {
+            setStatus('error')
+            setMessage('Something went wrong during viral generation')
+        } finally {
+            setIsGeneratingViral(false)
+        }
+    }
 
     const handleGenerate = async () => {
         if (!prompt) return
@@ -67,6 +99,77 @@ export function AdminNewsletter() {
 
     return (
         <div className="grid lg:grid-cols-2 gap-8">
+            {/* New Section: Daily Viral AI Post */}
+            <div className="col-span-full mb-2 bg-gradient-to-br from-indigo-900/40 to-cyan-900/40 rounded-3xl p-8 border border-white/10 shadow-2xl relative overflow-hidden group">
+                <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:opacity-20 transition-opacity">
+                    <Linkedin size={120} />
+                </div>
+
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 relative z-10">
+                    <div>
+                        <div className="flex items-center gap-3 mb-2">
+                            <div className="w-10 h-10 rounded-xl bg-blue-500/20 flex items-center justify-center text-blue-400">
+                                <Linkedin size={20} />
+                            </div>
+                            <span className="text-xs font-black uppercase tracking-[0.2em] text-blue-400">Daily Viral Content</span>
+                        </div>
+                        <h2 className="text-3xl font-black text-white leading-tight">LinkedIn AI Storyteller</h2>
+                        <p className="text-gray-400 font-medium max-w-xl">
+                            Automatically researched AI breakthroughs optimized for viral storytelling. Updates daily at 9:00 AM IST.
+                        </p>
+                    </div>
+
+                    <button
+                        onClick={handleGenerateViral}
+                        disabled={isGeneratingViral}
+                        className="flex items-center gap-2 px-6 py-3 bg-white text-gray-900 rounded-2xl font-black text-sm hover:bg-gray-100 transition-all disabled:opacity-50 shadow-xl"
+                    >
+                        {isGeneratingViral ? <Loader2 size={16} className="animate-spin" /> : <RefreshCcw size={16} />}
+                        Manual Refresh
+                    </button>
+                </div>
+
+                <div className="mt-10 grid gap-6 relative z-10">
+                    {viralPost ? (
+                        <div className="bg-gray-950/50 backdrop-blur-xl border border-white/5 rounded-2xl p-6">
+                            <div className="flex items-center justify-between mb-6">
+                                <div className="flex items-center gap-4">
+                                    <div className="w-12 h-12 rounded-full bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center font-black text-white shadow-lg">
+                                        PS
+                                    </div>
+                                    <div>
+                                        <div className="text-white font-bold flex items-center gap-2">
+                                            Prodsnap AI Digest <span className="text-[10px] bg-blue-500/20 text-blue-400 px-2 py-0.5 rounded-full uppercase tracking-widest leading-none">Author</span>
+                                        </div>
+                                        <div className="text-xs text-gray-500 font-medium">{viralPost.date} • Featured AI Research</div>
+                                    </div>
+                                </div>
+                                <button
+                                    onClick={() => {
+                                        navigator.clipboard.writeText(viralPost.content);
+                                        alert("Copied to clipboard!");
+                                    }}
+                                    className="p-3 bg-white/5 hover:bg-white/10 rounded-xl text-white transition-colors"
+                                >
+                                    <Copy size={18} />
+                                </button>
+                            </div>
+
+                            <div className="text-gray-200 text-sm leading-relaxed whitespace-pre-wrap font-sans max-h-[400px] overflow-auto scrollbar-hide">
+                                {viralPost.content}
+                            </div>
+                        </div>
+                    ) : (
+                        <div className="text-center py-20 border-2 border-dashed border-gray-700 rounded-3xl">
+                            <div className="w-16 h-16 rounded-full bg-gray-800 flex items-center justify-center mx-auto mb-4 text-gray-600">
+                                <Linkedin size={32} />
+                            </div>
+                            <p className="text-gray-500 font-bold uppercase tracking-widest text-xs">No LinkedIn post generated yet</p>
+                        </div>
+                    )}
+                </div>
+            </div>
+
             {/* Left Column: Creator/Editor */}
             <div className="space-y-6">
                 <div className="bg-gray-800 rounded-3xl p-8 border border-gray-700 shadow-xl">

@@ -324,3 +324,16 @@ model NewsletterSubscriber {
 
   @@index([email])
 }
+
+model ViralPost {
+  id               String   @id @default(cuid())
+  topic            String
+  content          String   @db.Text
+  date             String   // Display date
+  targetDate       DateTime @default(now())
+  periodIdentifier String?  @unique // e.g., "2026-02-09"
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@index([targetDate])
+}

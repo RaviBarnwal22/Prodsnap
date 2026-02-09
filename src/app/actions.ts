@@ -787,14 +787,104 @@ export async function broadcastNewsletter(data: { subject: string, content: stri
             type: 'newsletter'
         });
 
-        return {
-            success: true,
-            sentCount: results.success,
-            failedCount: results.failed,
-            errors: results.errors
-        };
+        return { success: true, sentCount: results.success, failedCount: results.failed, errors: results.errors };
     } catch (error) {
         console.error("[broadcastNewsletter] Error:", error);
         return { success: false, error: "Failed to broadcast newsletter" };
+    }
+}
+
+export async function getLatestViralPost() {
+    try {
+        const post = await (prisma as any).viralPost.findFirst({
+            orderBy: { targetDate: 'desc' }
+        });
+        return { success: true, post };
+    } catch (error) {
+        console.error("[getLatestViralPost] Error:", error);
+        return { success: false, error: "Failed to fetch post" };
+    }
+}
+
+export async function generateViralLinkedInPostManual() {
+    const user = await getUser();
+    if (!user || user.role !== 'ADMIN') {
+        return { success: false, error: "Unauthorized" };
+    }
+    return await generateViralLinkedInPost();
+}
+
+export async function generateViralLinkedInPost() {
+    try {
+        const { getApiKeys } = await import("@/lib/ai/engine");
+        const apiKeys = getApiKeys();
+        const perplexityKey = apiKeys.find(key => key.startsWith('pplx-'));
+
+        if (!perplexityKey) {
+            return { success: false, error: "Perplexity key missing" };
+        }
+
+        const now = new Date();
+        const istDate = new Date(now.getTime() + (5.5 * 60 * 60 * 1000));
+        const dayIdentifier = istDate.toISOString().split('T')[0];
+        const displayDate = istDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+
+        const prompt = `
+            Research a brand new (past 48 hours), extremely exciting AI development, breakthrough, or research paper. 
+            It could be related to agents, LLMs, robotics, or computer vision.
+            Write a viral LinkedIn post about it as a world-class storyteller.
+            
+            Structure:
+            1. Hook: Start with a mind-blowing fact or a "Wait, this actually happened?" style hook.
+            2. The Story: Explain the development in a way that creates hype but stays grounded in the technology/research.
+            3. Detailed Research: Mention the specific paper name, researchers, or company and what the core breakthrough is.
+            4. PM/Product Perspective: How does this change the product landscape?
+            5. Call to Action: Ask a thought-provoking question to drive comments.
+            6. Hashtags: Use a mix of broad and niche AI hashtags.
+            
+            Tone: Viral storyteller, high energy, formatting with line breaks for readability.
+            
+            Return ONLY the post content text. No conversational filler.
+        `;
+
+        const res = await fetch("https://api.perplexity.ai/chat/completions", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${perplexityKey}`
+            },
+            body: JSON.stringify({
+                model: "sonar",
+                messages: [
+                    { role: "system", content: "You are a world-class LinkedIn storyteller and AI researcher. You write posts that go viral by being informative yet highly engaging." },
+                    { role: "user", content: prompt }
+                ],
+                temperature: 0.7
+            })
+        });
+
+        if (!res.ok) throw new Error(`AI error: ${res.status}`);
+        const data = await res.json();
+        const content = data.choices[0].message.content;
+
+        // Extract a title/topic from the content (first line or summary)
+        const topic = content.split('\n')[0].replace(/[#*]/g, '').trim().substring(0, 100);
+
+        const post = await (prisma as any).viralPost.upsert({
+            where: { periodIdentifier: dayIdentifier },
+            update: { content, topic, date: displayDate },
+            create: {
+                content,
+                topic,
+                date: displayDate,
+                periodIdentifier: dayIdentifier,
+                targetDate: now
+            }
+        });
+
+        return { success: true, post };
+    } catch (error) {
+        console.error("[generateViralLinkedInPost] Error:", error);
+        return { success: false, error: error instanceof Error ? error.message : "Failed to generate post" };
     }
 }

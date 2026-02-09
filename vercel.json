@@ -8,6 +8,10 @@
         {
             "path": "/api/cron/refresh-news",
             "schedule": "30 23 * * *"
+        },
+        {
+            "path": "/api/cron/viral-post",
+            "schedule": "30 3 * * *"
         }
     ]
 }
