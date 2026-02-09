@@ -5,27 +5,35 @@ export const dynamic = 'force-dynamic';
 
 export async function GET(request: Request) {
     const authHeader = request.headers.get('authorization');
-    if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+    const isVercelCron = request.headers.get('x-vercel-cron') === '1';
+    const cronSecret = process.env.CRON_SECRET;
+
+    // Use CRON_SECRET if available, otherwise fallback to Vercel header for automatic triggers
+    if (cronSecret && authHeader !== `Bearer ${cronSecret}`) {
+        console.error("[Cron] Signature mismatch");
+        return new Response('Unauthorized', { status: 401 });
+    } else if (!cronSecret && !isVercelCron) {
+        console.warn("[Cron] Unauthorized manual attempt (No secret or Vercel header)");
         return new Response('Unauthorized', { status: 401 });
     }
 
-    console.log("[Cron] Starting Daily AI Digest Refresh...");
+    console.log("[Cron] Triggering Daily AI Digest Refresh (IST Schedule)...");
 
     try {
         const result = await refreshAINews();
 
         if (result.success) {
-            console.log(`[Cron] Successfully refreshed AI news. Count: ${result.count}`);
+            console.log(`[Cron] Success! New articles added: ${result.count}`);
             return NextResponse.json({ success: true, count: result.count });
         } else {
-            console.error(`[Cron] Failed to refresh AI news: ${result.error}`);
+            console.error(`[Cron] Process failed: ${result.error}`);
             return NextResponse.json({ success: false, error: result.error }, { status: 500 });
         }
     } catch (error) {
-        console.error("[Cron] Unhandled error during refresh:", error);
+        console.error("[Cron] Internal exception:", error);
         return NextResponse.json({
             success: false,
-            error: error instanceof Error ? error.message : "Unknown error"
+            error: error instanceof Error ? error.message : "Internal Cron Error"
         }, { status: 500 });
     }
 }
