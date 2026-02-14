@@ -19,7 +19,7 @@ async function main() {
     if (aiStats.length === 0) {
         console.log('- No AI activity recorded in the last 24h.')
     }
-    aiStats.forEach(stat => {
+    aiStats.forEach((stat: any) => {
         console.log(`- ${stat.provider} (${stat.status}): ${stat._count.id} requests, Avg Speed: ${Math.round(stat._avg.responseTime || 0)}ms`)
     })
 
@@ -36,7 +36,7 @@ async function main() {
 
     if (recentErrors.length > 0) {
         console.log('\nRecent API Errors:')
-        recentErrors.forEach(err => {
+        recentErrors.forEach((err: any) => {
             console.log(`- [${err.createdAt.toISOString()}] ${err.provider} (${err.model}): ${err.errorMessage?.substring(0, 100)}...`)
         })
     }

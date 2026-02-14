@@ -5,11 +5,11 @@ dotenv.config();
 
 async function check() {
     const logs = await (prisma as any).apiUsageLog.findMany({
-        where: { provider: 'perplexity' },
+        where: { provider: 'groq' },
         orderBy: { createdAt: 'desc' },
         take: 10
     });
-    logs.forEach(l => {
+    logs.forEach((l: any) => {
         console.log(`${l.createdAt} | ${l.status} | ${l.errorMessage?.substring(0, 50)}`);
     });
 }
