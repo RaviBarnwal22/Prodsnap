@@ -38,6 +38,7 @@ export function Navigation() {
             <NavLink href="/mentorship">Mentorship</NavLink>
             <NavLink href="/community">Community & Blogs</NavLink>
             <NavLink href="/ai-news">AI Daily</NavLink>
+            <NavLink href="/jobs">PM Job Openings</NavLink>
             <NavLink href="/contact">Contact Us</NavLink>
         </nav>
     )

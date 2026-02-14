@@ -29,26 +29,25 @@ export interface AIEvaluationResponse {
 }
 
 // Helper to get all API keys from environment
-export function getApiKeys(): string[] {
-    const keys: string[] = [];
+export function getApiKeys(): { gemini: string[], groq: string[] } {
+    const gemini: string[] = [];
+    const groq: string[] = [];
 
     // Prioritize Gemini first
     let i = 1;
     while (process.env[`GEMINI_API_KEY_${i}`]) {
-        keys.push(process.env[`GEMINI_API_KEY_${i}`] as string);
+        gemini.push(process.env[`GEMINI_API_KEY_${i}`] as string);
         i++;
     }
-    // Fallback to the legacy single key
-    if (keys.length === 0 && process.env.GEMINI_API_KEY) {
-        keys.push(process.env.GEMINI_API_KEY);
+    if (gemini.length === 0 && process.env.GEMINI_API_KEY) {
+        gemini.push(process.env.GEMINI_API_KEY);
     }
 
-    // Add Perplexity key as the final fallback
-    if (process.env.PERPLEXITY_API_KEY) {
-        keys.push(process.env.PERPLEXITY_API_KEY);
+    if (process.env.GROQ_API_KEY) {
+        groq.push(process.env.GROQ_API_KEY);
     }
 
-    return keys.filter(key => key.trim() !== "");
+    return { gemini: gemini.filter(k => k.trim() !== ""), groq: groq.filter(k => k.trim() !== "") };
 }
 
 // Helper to log API usage
@@ -78,10 +77,10 @@ async function logApiUsage(
 
 
 export async function evaluateAnswer(questionTitle: string, userAnswer: string, elapsedTimeSeconds?: number, chatContext?: string): Promise<AIEvaluationResponse> {
-    const apiKeys = getApiKeys();
-    console.log(`[AI Engine] Total keys found: ${apiKeys.length}`);
+    const { gemini: geminiKeys, groq: groqKeys } = getApiKeys();
+    console.log(`[AI Engine] Gemini keys: ${geminiKeys.length}, Groq keys: ${groqKeys.length}`);
 
-    if (apiKeys.length === 0) {
+    if (geminiKeys.length === 0 && groqKeys.length === 0) {
         console.warn("No API keys found. Using mock response.");
         return getMockResponse();
     }
@@ -89,160 +88,126 @@ export async function evaluateAnswer(questionTitle: string, userAnswer: string, 
     const prompt = PRODUCT_SENSE_PROMPT(questionTitle, userAnswer, elapsedTimeSeconds, chatContext);
     let lastErrorMessage = "Unknown error";
 
-    for (let i = 0; i < apiKeys.length; i++) {
-        const key = apiKeys[i];
-        const isPerplexity = key.startsWith("pplx-");
-        const provider = isPerplexity ? 'perplexity' : 'gemini';
-        const modelName = isPerplexity ? 'sonar' : 'gemini-1.5-flash';
+    // 1. Attempt Gemini first (Free Daily Refill)
+    for (const key of geminiKeys) {
         const startTime = Date.now();
-
-        console.log(`[AI Engine] Attempt ${i + 1}/${apiKeys.length} using ${isPerplexity ? 'Perplexity' : 'Gemini'}`);
+        console.log(`[AI Engine] Attempting Gemini fallback (Daily Free tier)`);
 
         try {
+            const modelsToTry = ["gemini-2.0-flash", "gemini-2.5-flash", "gemini-1.5-flash-latest"];
             let text = "";
+            let geminiSuccess = false;
+            let geminiLastException: any = null;
 
-            if (isPerplexity) {
-                // Handle Perplexity (OpenAI-compatible)
-                const res = await fetch("https://api.perplexity.ai/chat/completions", {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                        "Authorization": `Bearer ${key}`
-                    },
-                    body: JSON.stringify({
-                        model: "sonar", // Fixed model name
-                        messages: [
-                            { role: "system", content: "You are an expert PM interviewer. Respond strictly in JSON." },
-                            { role: "user", content: prompt }
-                        ],
-                        temperature: 0.2
-                    })
-                });
+            for (const modelId of modelsToTry) {
+                try {
+                    console.log(`[AI Engine] Trying Gemini model: ${modelId}`);
+                    const genAI = new GoogleGenerativeAI(key);
+                    const model = genAI.getGenerativeModel({ model: modelId });
 
-                if (!res.ok) {
-                    const errorText = await res.text();
+                    const result = await model.generateContent(prompt);
+                    text = result.response.text();
+
                     const responseTime = Date.now() - startTime;
+                    const estimatedTokens = Math.ceil((prompt.length + text.length) / 4);
+                    await logApiUsage('gemini', modelId, 'success', responseTime, undefined, estimatedTokens);
 
-                    // Check if it's a rate limit error
-                    const isRateLimit = res.status === 429 || errorText.toLowerCase().includes('rate limit');
-                    await logApiUsage(provider, modelName, isRateLimit ? 'rate_limit' : 'error', responseTime, `${res.status}: ${errorText}`);
-
-                    console.error(`[AI Engine] Perplexity Error detail: ${errorText}`);
-                    throw new Error(`Perplexity API Error: ${res.status}`);
-                }
-
-                const data = await res.json();
-                text = data.choices[0].message.content;
-
-                const responseTime = Date.now() - startTime;
-                const estimatedTokens = Math.ceil((prompt.length + text.length) / 4);
-                await logApiUsage(provider, modelName, 'success', responseTime, undefined, estimatedTokens);
-            } else {
-                // Handle Gemini with automatic model fallbacks
-                const modelsToTry = ["gemini-1.5-flash", "gemini-1.5-flash-latest", "gemini-2.0-flash-exp"];
-                let geminiSuccess = false;
-                let geminiLastException: any = null;
-
-                for (const modelId of modelsToTry) {
-                    try {
-                        console.log(`[AI Engine] Trying Gemini model: ${modelId}`);
-                        const genAI = new GoogleGenerativeAI(key);
-                        const model = genAI.getGenerativeModel({ model: modelId });
-
-                        const result = await model.generateContent(prompt);
-                        text = result.response.text();
-
-                        const responseTime = Date.now() - startTime;
-                        const estimatedTokens = Math.ceil((prompt.length + text.length) / 4);
-                        await logApiUsage(provider, modelId, 'success', responseTime, undefined, estimatedTokens);
-
-                        geminiSuccess = true;
-                        break; // Exit model loop on success
-                    } catch (geminiError: any) {
-                        geminiLastException = geminiError;
-                        const errorMessage = geminiError instanceof Error ? geminiError.message : 'Unknown error';
-
-                        // Log each model failure specifically
-                        console.warn(`[AI Engine] Gemini model ${modelId} failed: ${errorMessage}`);
-
-                        // If it's a rate limit, we might want to skip other models or try them if they have separate quotas?
-                        // For now, continue to next model.
-                        continue;
-                    }
-                }
-
-                if (!geminiSuccess) {
-                    const responseTime = Date.now() - startTime;
-                    const finalErrorMessage = geminiLastException instanceof Error ? geminiLastException.message : 'All Gemini models failed';
-
-                    const isRateLimit = finalErrorMessage.toLowerCase().includes('quota') ||
-                        finalErrorMessage.toLowerCase().includes('rate limit') ||
-                        finalErrorMessage.toLowerCase().includes('resource_exhausted');
-
-                    await logApiUsage(provider, 'gemini-all', isRateLimit ? 'rate_limit' : 'error', responseTime, finalErrorMessage);
-                    throw geminiLastException || new Error("All Gemini models failed");
+                    geminiSuccess = true;
+                    break;
+                } catch (geminiError: any) {
+                    geminiLastException = geminiError;
+                    console.warn(`[AI Engine] Gemini model ${modelId} failed: ${geminiError.message}`);
+                    continue;
                 }
             }
 
-            if (!text) throw new Error("Empty response received from AI");
-
-            // Extract JSON and Clean it
-            console.log(`[AI Engine] Raw response: ${text.substring(0, 100)}...`);
-            const jsonMatch = text.match(/\{[\s\S]*\}/);
-            let rawJson = jsonMatch ? jsonMatch[0] : text;
-
-            // PRE-CLEAN: Remove control characters and fix common AI JSON issues
-            // 1. Replace literal newlines inside string values (the most common cause of "Bad control character")
-            rawJson = rawJson.replace(/":\s*"([^"]*)"/g, (match, p1) => {
-                // Escape only the newlines and other control characters in the value
-                const cleanedValue = p1.replace(/\n/g, '\\n')
-                    .replace(/\r/g, '\\r')
-                    .replace(/\t/g, '\\t');
-                return `": "${cleanedValue}"`;
-            });
-
-            const jsonData = JSON.parse(rawJson);
-
-            console.log(`[AI Engine] SUCCESS on attempt ${i + 1}`);
-
-            // Recursive cleanup to strip bullets/dashes from all feedback strings
-            const cleanupResponse = (obj: any): any => {
-                if (typeof obj === 'string') {
-                    // Only remove symbols usually used for bullet points at start of lines
-                    // We KEEP ** for bolding as requested for the headers
-                    return obj.replace(/^\s*[-•*]\s+/gm, '')
-                        .trim();
-                }
-                if (Array.isArray(obj)) {
-                    return obj.map(cleanupResponse);
-                }
-                if (obj !== null && typeof obj === 'object') {
-                    const newObj: any = {};
-                    for (const key in obj) {
-                        newObj[key] = cleanupResponse(obj[key]);
-                    }
-                    return newObj;
-                }
-                return obj;
-            };
-
-            const finalizedData = cleanupResponse(jsonData);
-            return { ...finalizedData, isMock: false };
-
-        } catch (error: unknown) {
-            const errorMessage = error instanceof Error ? error.message : "Unknown error";
-            console.error(`[AI Engine] Attempt ${i + 1} FAILED:`, errorMessage);
-            lastErrorMessage = errorMessage;
-            // Continue loop...
+            if (geminiSuccess && text) {
+                return processAIResult(text);
+            }
+        } catch (error: any) {
+            lastErrorMessage = error.message;
+            console.error(`[AI Engine] Gemini attempt FAILED:`, lastErrorMessage);
         }
     }
 
-    console.error(`[AI Engine] ALL ${apiKeys.length} attempts failed. Returning mock data.`);
+    // 2. Attempt Groq as backup (High speed daily refill)
+    for (const key of groqKeys) {
+        const startTime = Date.now();
+        console.log(`[AI Engine] Attempting Groq backup (Llama-3.3)`);
+
+        try {
+            const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${key}`
+                },
+                body: JSON.stringify({
+                    model: "llama-3.3-70b-versatile",
+                    messages: [
+                        { role: "system", content: "You are an expert PM interviewer. Respond strictly in valid JSON." },
+                        { role: "user", content: prompt }
+                    ],
+                    temperature: 0.2
+                })
+            });
+
+            if (!res.ok) {
+                const errorText = await res.text();
+                throw new Error(`Groq API Error: ${res.status} - ${errorText.substring(0, 100)}`);
+            }
+
+            const data = await res.json();
+            const text = data.choices[0].message.content;
+
+            if (text) {
+                const responseTime = Date.now() - startTime;
+                await logApiUsage('groq', 'llama-3.3-70b', 'success', responseTime);
+                return processAIResult(text);
+            }
+        } catch (error: any) {
+            lastErrorMessage = error.message;
+            console.error(`[AI Engine] Groq attempt FAILED:`, lastErrorMessage);
+        }
+    }
+
+    console.error(`[AI Engine] ALL attempts failed. Returning mock data.`);
     return {
         ...getMockResponse(),
         feedback: `Note: Live evaluation failed. Error: ${lastErrorMessage}`,
         isMock: true
     };
+}
+
+function processAIResult(text: string): AIEvaluationResponse {
+    // Extract JSON and Clean it
+    console.log(`[AI Engine] Raw response: ${text.substring(0, 100)}...`);
+    const jsonMatch = text.match(/\{[\s\S]*\}/);
+    let rawJson = jsonMatch ? jsonMatch[0] : text;
+
+    // PRE-CLEAN
+    rawJson = rawJson.replace(/":\s*"([^"]*)"/g, (match, p1) => {
+        const cleanedValue = p1.replace(/\n/g, '\\n').replace(/\r/g, '\\r').replace(/\t/g, '\\t');
+        return `": "${cleanedValue}"`;
+    });
+
+    const jsonData = JSON.parse(rawJson);
+
+    // Recursive cleanup to strip bullets/dashes
+    const cleanupResponse = (obj: any): any => {
+        if (typeof obj === 'string') {
+            return obj.replace(/^\s*[-•*]\s+/gm, '').trim();
+        }
+        if (Array.isArray(obj)) return obj.map(cleanupResponse);
+        if (obj !== null && typeof obj === 'object') {
+            const newObj: any = {};
+            for (const key in obj) newObj[key] = cleanupResponse(obj[key]);
+            return newObj;
+        }
+        return obj;
+    };
+
+    return { ...cleanupResponse(jsonData), isMock: false };
 }
 
 function getMockResponse(): AIEvaluationResponse {

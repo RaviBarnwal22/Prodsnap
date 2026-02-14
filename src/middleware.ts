@@ -39,7 +39,7 @@ export async function middleware(request: NextRequest) {
     const isAuthRoute = authRoutes.some(route => pathname === route || pathname === route + '/')
 
     // List of routes that are explicitly PUBLIC (No login required)
-    const publicRoutes = ['/', '/about', '/practice', '/mentorship', '/community', '/contact', '/blog', '/prodsense', '/privacy', '/terms']
+    const publicRoutes = ['/', '/about', '/practice', '/mentorship', '/community', '/contact', '/blog', '/prodsense', '/privacy', '/terms', '/jobs']
     const isPublic = publicRoutes.some(route => pathname === route || pathname.startsWith(route + '/'))
 
     // A route is protected IF it's not public AND not an auth route

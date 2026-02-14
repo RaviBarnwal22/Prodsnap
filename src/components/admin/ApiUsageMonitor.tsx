@@ -15,10 +15,10 @@ interface ApiStats {
 interface UsageData {
     stats: {
         gemini: ApiStats;
-        perplexity: ApiStats;
+        groq: ApiStats;
         email: ApiStats;
     };
-    dailyBreakdown: Record<string, { gemini: number; perplexity: number; email: number }>;
+    dailyBreakdown: Record<string, { gemini: number; groq: number; email: number }>;
     responseTimeMap: Record<string, number>;
     recentErrors: Array<{
         provider: string;
@@ -28,7 +28,7 @@ interface UsageData {
     }>;
     limits: {
         gemini: { free: number; model: string };
-        perplexity: { free: number; model: string };
+        groq: { free: number; model: string };
         email: { free: number; model: string };
     };
 }
@@ -106,7 +106,7 @@ export function ApiUsageMonitor() {
 
     // Calculate usage percentages
     const geminiUsagePercent = (stats.gemini.total / stats.gemini.capacity) * 100;
-    const perplexityUsagePercent = (stats.perplexity.total / stats.perplexity.capacity) * 100;
+    const groqUsagePercent = (stats.groq.total / stats.groq.capacity) * 100;
     const emailUsagePercent = (stats.email.total / stats.email.capacity) * 100;
 
     // Prepare daily chart data (last 7 days)
@@ -115,7 +115,7 @@ export function ApiUsageMonitor() {
         .slice(-7);
 
     const maxDailyUsage = Math.max(
-        ...dailyData.map(([, counts]) => counts.gemini + counts.perplexity + counts.email),
+        ...dailyData.map(([, counts]) => counts.gemini + counts.groq + counts.email),
         1
     );
 
@@ -130,7 +130,7 @@ export function ApiUsageMonitor() {
                             API & Mail Monitor
                         </h2>
                         <p className="text-sm opacity-90">
-                            Real-time tracking of Gemini, Perplexity, and Brevo Email limits
+                            Real-time tracking of Gemini, Groq, and Brevo Email limits
                         </p>
                     </div>
                     <div className="flex flex-col md:flex-row items-center gap-4">
@@ -164,7 +164,7 @@ export function ApiUsageMonitor() {
                                 {startDate === endDate ? 'Selected Date' : 'Period'} Load
                             </p>
                             <p className="text-3xl font-black">
-                                {stats.gemini.total + stats.perplexity.total + stats.email.total}
+                                {stats.gemini.total + stats.groq.total + stats.email.total}
                             </p>
                             <p className="text-[10px] opacity-80">Total Requests + Mails</p>
                         </div>
@@ -214,7 +214,7 @@ export function ApiUsageMonitor() {
                     </div>
                 </div>
 
-                {/* Perplexity Card */}
+                {/* Groq Card */}
                 <div className="bg-gray-800 rounded-2xl p-6 border border-gray-700">
                     <div className="flex items-center justify-between mb-4">
                         <div className="flex items-center gap-3">
@@ -222,34 +222,34 @@ export function ApiUsageMonitor() {
                                 <Activity size={24} className="text-white" />
                             </div>
                             <div>
-                                <h3 className="text-lg font-black text-white">Perplexity</h3>
+                                <h3 className="text-lg font-black text-white">Groq</h3>
                                 <p className="text-[10px] text-gray-400 uppercase font-bold tracking-tighter">Fallback Engine</p>
                             </div>
                         </div>
-                        <div className={`px-2 py-1 rounded-full text-[10px] font-black ${perplexityUsagePercent > 90 ? 'bg-red-500/20 text-red-400' :
-                            perplexityUsagePercent > 70 ? 'bg-yellow-500/20 text-yellow-400' :
+                        <div className={`px-2 py-1 rounded-full text-[10px] font-black ${groqUsagePercent > 90 ? 'bg-red-500/20 text-red-400' :
+                            groqUsagePercent > 70 ? 'bg-yellow-500/20 text-yellow-400' :
                                 'bg-green-500/20 text-green-400'
                             }`}>
-                            {perplexityUsagePercent.toFixed(1)}%
+                            {groqUsagePercent.toFixed(1)}%
                         </div>
                     </div>
 
                     <div className="space-y-4">
                         <div>
                             <div className="flex justify-between text-[10px] text-gray-400 mb-2 font-bold uppercase">
-                                <span>Used: {stats.perplexity.total}</span>
-                                <span>Cap: {stats.perplexity.capacity}</span>
+                                <span>Used: {stats.groq.total}</span>
+                                <span>Cap: {stats.groq.capacity}</span>
                             </div>
                             <div className="h-2 bg-gray-700 rounded-full overflow-hidden">
                                 <div
                                     className={`h-full transition-all duration-1000 bg-cyan-500`}
-                                    style={{ width: `${Math.min(perplexityUsagePercent, 100)}%` }}
+                                    style={{ width: `${Math.min(groqUsagePercent, 100)}%` }}
                                 />
                             </div>
                         </div>
                         <div className="flex items-center justify-between text-xs">
                             <span className="text-gray-400">Response</span>
-                            <span className="text-cyan-400 font-black">{responseTimeMap.perplexity || '--'}ms</span>
+                            <span className="text-cyan-400 font-black">{responseTimeMap.groq || '--'}ms</span>
                         </div>
                     </div>
                 </div>
@@ -306,7 +306,7 @@ export function ApiUsageMonitor() {
                 </h3>
                 <div className="flex items-end gap-2 h-48 px-4 border-b border-gray-700 pb-2">
                     {dailyData.map(([date, counts], i) => {
-                        const totalHeight = ((counts.gemini + counts.perplexity + counts.email) / maxDailyUsage) * 100;
+                        const totalHeight = ((counts.gemini + counts.groq + counts.email) / maxDailyUsage) * 100;
                         const dateObj = new Date(date);
                         const dayLabel = dateObj.toLocaleDateString('en-US', { weekday: 'short' });
                         const dateLabel = dateObj.getDate();
@@ -316,7 +316,7 @@ export function ApiUsageMonitor() {
                                 {/* Tooltip */}
                                 <div className="absolute -top-14 invisible group-hover:visible bg-white text-gray-900 p-2 rounded-lg text-[10px] font-bold shadow-2xl z-10 w-24">
                                     <p className="text-purple-600">Gemini: {counts.gemini}</p>
-                                    <p className="text-cyan-600">Perplex: {counts.perplexity}</p>
+                                    <p className="text-cyan-600">Groq: {counts.groq}</p>
                                     <p className="text-orange-600">Mails: {counts.email}</p>
                                 </div>
 
@@ -327,7 +327,7 @@ export function ApiUsageMonitor() {
                                     />
                                     <div
                                         className="w-full bg-gradient-to-t from-cyan-500 to-blue-500 opacity-60 group-hover:opacity-100 transition-opacity"
-                                        style={{ height: `${(counts.perplexity / maxDailyUsage) * 100}%` }}
+                                        style={{ height: `${(counts.groq / maxDailyUsage) * 100}%` }}
                                     />
                                     <div
                                         className="w-full bg-gradient-to-t from-purple-500 to-pink-500 opacity-60 group-hover:opacity-100 transition-opacity"
@@ -351,7 +351,7 @@ export function ApiUsageMonitor() {
                     </div>
                     <div className="flex items-center gap-2">
                         <div className="w-3 h-3 rounded bg-cyan-500" />
-                        <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Perplexity API</span>
+                        <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Groq API</span>
                     </div>
                     <div className="flex items-center gap-2">
                         <div className="w-3 h-3 rounded bg-orange-500" />

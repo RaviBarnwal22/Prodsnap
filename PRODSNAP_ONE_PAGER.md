@@ -9,7 +9,7 @@ Welcome to **Prodsnap**. This document is designed to give you a 360-degree view
 *   **Language**: TypeScript
 *   **Database**: PostgreSQL (hosted on Supabase)
 *   **ORM**: Prisma
-*   **AI Engine**: Google Gemini Pro & Perplexity Sonar
+*   **AI Engine**: Google Gemini (Direct) & Groq (Backup)
 *   **Emails**: Brevo (via Nodemailer)
 *   **Styling**: TailwindCSS & Framer Motion (Animations)
 *   **Auth**: Supabase Auth (OTP & Social)
@@ -26,7 +26,7 @@ This contains the **UI Routes**.
 
 ### **/src/lib**
 The "Brain" of the application.
-*   `ai/engine.ts`: Handles all AI logic. Implements the **Gemini-First with Perplexity Fallback** pattern.
+*   `ai/engine.ts`: Handles all AI logic. Implements the **Gemini-First with Groq Fallback** pattern.
 *   `ai/prompts.ts`: Contains the system instructions for the AI (The "Interviewer persona").
 *   `email.ts`: Central hub for all outgoing emails with automatic DB logging.
 *   `prisma.ts`: Database client initialization.
@@ -44,7 +44,7 @@ Key models to understand:
 *   **User**: Profiles, roles (Admin/Student), and subscription linkage.
 *   **PracticeQuestion**: The case library (Categories: Product Sense, Metrics, etc.).
 *   **PracticeSubmission**: Stores user answers and the JSON feedback returned by the AI.
-*   **ApiUsageLog**: Tracks every AI call (Gemini/Perplexity) to monitor API health/costs.
+*   **ApiUsageLog**: Tracks every AI call (Gemini/Groq) to monitor API health/costs.
 *   **EmailLog**: Tracks every outgoing email to stay within Brevo's 300/day limit.
 *   **SubscriptionRequest**: Manual payment proof verification system.
 
@@ -54,22 +54,22 @@ Key models to understand:
 *   **Interviewer Hub**: A live chat mode inside cases. It uses a **"Firm Persona"**—it will never give the answer. It only asks clarifying questions to help the user frame their solution.
 *   **Evaluation Engine**: When a user submits, the engine scores them on 6 key PM dimensions (Goal, Users, Tradeoffs, etc.).
 *   **The Fail-Safe**:
-    *   Attempt 1: Try **Gemini Pro**.
-    *   Failure/Rate Limit: Automatically switch to **Perplexity Sonar**.
+    *   Attempt 1: Try **Gemini**.
+    *   Failure/Rate Limit: Automatically switch to **Groq (Llama-3.3)**.
     *   Formatting: A recursive regex filter strips out all "AI-isms" (Dashes, bullets, citations) to make feedback feel like it's from a human mentor.
 
 ---
 
 ## 🛠️ 5. Admin & Monitoring
 Access the admin panel at `/admin`.
-*   **API Usage Tab**: Monitor Gemini, Perplexity, and Brevo limits in real-time histograms.
+*   **API Usage Tab**: Monitor Gemini, Groq, and Brevo limits in real-time histograms.
 *   **Requests Tab**: Review payment screenshots and toggle **Premium Access** for users.
 *   **Questions Tab**: Add/Edit the case library.
 
 ---
 
 ## 🏁 6. Getting Started
-1.  Verify `.env` has: `DATABASE_URL`, `NEXT_PUBLIC_SUPABASE_URL`, `GEMINI_API_KEY`, `PERPLEXITY_API_KEY`, `SMTP_PASSWORD`.
+1.  Verify `.env` has: `DATABASE_URL`, `NEXT_PUBLIC_SUPABASE_URL`, `GEMINI_API_KEY`, `GROQ_API_KEY`, `SMTP_PASSWORD`.
 2.  `npm install`
 3.  `npx prisma db push` (Sync local schema with live DB).
 4.  `npm run dev`

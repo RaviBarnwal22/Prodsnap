@@ -8,12 +8,11 @@ export async function GET(request: Request) {
     const isVercelCron = request.headers.get('x-vercel-cron') === '1';
     const cronSecret = process.env.CRON_SECRET;
 
-    // Use CRON_SECRET if available, otherwise fallback to Vercel header for automatic triggers
-    if (cronSecret && authHeader !== `Bearer ${cronSecret}`) {
-        console.error("[Cron] Signature mismatch");
-        return new Response('Unauthorized', { status: 401 });
-    } else if (!cronSecret && !isVercelCron) {
-        console.warn("[Cron] Unauthorized manual attempt (No secret or Vercel header)");
+    // Allow if it is Vercel Cron OR if the secret matches
+    const isAuthorized = isVercelCron || (cronSecret && authHeader === `Bearer ${cronSecret}`);
+
+    if (!isAuthorized) {
+        console.error("[Cron] Unauthorized attempt - Secret/Vercel header mismatch");
         return new Response('Unauthorized', { status: 401 });
     }
 

@@ -9,11 +9,12 @@ interface AdminTabsProps {
     usersContent: React.ReactNode
     supportContent: React.ReactNode
     newsletterContent: React.ReactNode
+    maintenanceContent: React.ReactNode
 }
 
-type TabId = 'overview' | 'api-usage' | 'users' | 'support' | 'newsletter'
+type TabId = 'overview' | 'api-usage' | 'users' | 'support' | 'newsletter' | 'maintenance'
 
-export function AdminTabs({ overviewContent, apiUsageContent, usersContent, supportContent, newsletterContent }: AdminTabsProps) {
+export function AdminTabs({ overviewContent, apiUsageContent, usersContent, supportContent, newsletterContent, maintenanceContent }: AdminTabsProps) {
     const [activeTab, setActiveTab] = useState<TabId>('overview')
 
     const tabs = [
@@ -21,7 +22,8 @@ export function AdminTabs({ overviewContent, apiUsageContent, usersContent, supp
         { id: 'users' as TabId, label: 'Users', icon: Users },
         { id: 'newsletter' as TabId, label: 'Newsletter', icon: Mail },
         { id: 'support' as TabId, label: 'Support', icon: MessageSquare },
-        { id: 'api-usage' as TabId, label: 'API Usage', icon: Database },
+        { id: 'maintenance' as TabId, label: 'Maintenance', icon: Database },
+        { id: 'api-usage' as TabId, label: 'API Usage', icon: Activity },
     ]
 
     return (
@@ -92,6 +94,12 @@ export function AdminTabs({ overviewContent, apiUsageContent, usersContent, supp
                 {activeTab === 'newsletter' && (
                     <div className="animate-fadeIn">
                         {newsletterContent}
+                    </div>
+                )}
+
+                {activeTab === 'maintenance' && (
+                    <div className="animate-fadeIn">
+                        {maintenanceContent}
                     </div>
                 )}
             </div>

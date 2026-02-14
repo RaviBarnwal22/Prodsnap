@@ -13,6 +13,7 @@ import { ApiUsageMonitor } from "@/components/admin/ApiUsageMonitor"
 import { AdminFeedbackQueue } from "@/components/admin/AdminFeedbackQueue"
 import { AdminTabs } from "@/components/admin/AdminTabs"
 import { AdminNewsletter } from "@/components/admin/AdminNewsletter"
+import { AdminMaintenance } from "@/components/admin/AdminMaintenance"
 
 
 // Helper to format date
@@ -465,6 +466,9 @@ export default async function AdminPage() {
                     }
                     newsletterContent={
                         <AdminNewsletter />
+                    }
+                    maintenanceContent={
+                        <AdminMaintenance />
                     }
                 />
             </main>

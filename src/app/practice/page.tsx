@@ -3,7 +3,7 @@ import { Metadata } from 'next'
 
 export const metadata: Metadata = {
     title: "Practice PM Case Studies | Prodsnap Engine",
-    description: "Solve 100+ product management case studies with real-time AI feedback. Practice product design, metrics, growth, and GTM strategy questions.",
+    description: "Solve 200+ product management case studies with real-time AI feedback. Practice product design, metrics, growth, and GTM strategy questions.",
     keywords: ["PM Case Study Practice", "Product Sensing Questions", "Guesstimates Practice", "Product Design Interview", "Root Cause Analysis PM", "Product Management Mock Interview"],
 }
 
@@ -11,7 +11,7 @@ export const dynamic = "force-dynamic"
 import { prisma } from "@/lib/prisma"
 import Link from "next/link"
 import { Header } from "@/components/Header"
-import { Briefcase, BarChart3, TrendingUp, ArrowRight, Sparkles, ChevronLeft, Cpu, Rocket, Users, Search, Calculator, Lock, Unlock, CheckCircle } from "lucide-react"
+import { Briefcase, BarChart3, TrendingUp, ArrowRight, Sparkles, ChevronLeft, Cpu, Rocket, Users, Search, Calculator, Lock, Unlock, CheckCircle, Target } from "lucide-react"
 import { getUser } from "@/lib/auth"
 import { SkillRadarChart } from "@/components/SkillRadarChart"
 import { getTotalAttemptCount, hasActiveSubscription } from "@/lib/subscription"
@@ -102,6 +102,15 @@ const categoryConfig: Record<string, { label: string; icon: React.ReactNode; col
         bgDark: "dark:bg-emerald-900/10",
         description: "Market sizing & Fermi problems.",
         longDescription: "Sharpen your estimation skills with India-specific market sizing problems. Practice breaking down complex numbers into logical assumptions."
+    },
+    STRATEGY: {
+        label: "Product Strategy",
+        icon: <Target size={28} />,
+        color: "text-rose-600 dark:text-rose-400",
+        bgLight: "bg-rose-50/50",
+        bgDark: "dark:bg-rose-900/10",
+        description: "Big picture & ecosystem thinking.",
+        longDescription: "Master high-level strategic thinking. Learn to evaluate market entry, competitive threats, and ecosystem plays for global tech giants."
     }
 }
 
@@ -151,7 +160,7 @@ export default async function PracticePage({
         })
     })
 
-    const categoryOrder = ['CONSUMER_PRODUCT_DESIGN', 'METRICS', 'GROWTH_RETENTION', 'TECH_ACUMEN', 'GTM', 'BEHAVIORAL', 'RCA', 'GUESTIMATES']
+    const categoryOrder = ['CONSUMER_PRODUCT_DESIGN', 'STRATEGY', 'METRICS', 'GROWTH_RETENTION', 'TECH_ACUMEN', 'GTM', 'BEHAVIORAL', 'RCA', 'GUESTIMATES']
 
     const isAdmin = user?.email === 'ravibarnwal89@gmail.com' || (user as any)?.role === 'ADMIN'
     const isPremium = isSubscriptionActive || isAdmin

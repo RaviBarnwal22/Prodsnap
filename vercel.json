@@ -12,6 +12,10 @@
         {
             "path": "/api/cron/viral-post",
             "schedule": "30 3 * * *"
+        },
+        {
+            "path": "/api/cron/refresh-jobs",
+            "schedule": "0 */12 * * *"
         }
     ]
 }

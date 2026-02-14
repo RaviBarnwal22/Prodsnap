@@ -130,7 +130,17 @@ export function AdminNewsletter() {
                 </div>
 
                 <div className="mt-10 grid gap-6 relative z-10">
-                    {viralPost ? (
+                    {isGeneratingViral ? (
+                        <div className="bg-gray-950/30 backdrop-blur-xl border border-white/5 rounded-2xl p-12 flex flex-col items-center justify-center text-center space-y-4">
+                            <div className="w-16 h-16 rounded-full bg-blue-500/10 flex items-center justify-center">
+                                <RefreshCcw size={32} className="text-blue-400 animate-spin" />
+                            </div>
+                            <div>
+                                <h4 className="text-white font-bold text-lg">Researching AI Breakthroughs...</h4>
+                                <p className="text-gray-500 text-sm max-w-sm mx-auto">Our AI Storyteller is scanning for latest research and drafting a high-engagement post.</p>
+                            </div>
+                        </div>
+                    ) : viralPost ? (
                         <div className="bg-gray-950/50 backdrop-blur-xl border border-white/5 rounded-2xl p-6">
                             <div className="flex items-center justify-between mb-6">
                                 <div className="flex items-center gap-4">

@@ -337,3 +337,26 @@ model ViralPost {
 
   @@index([targetDate])
 }
+
+model Job {
+  id               String   @id @default(cuid())
+  title            String
+  company          String
+  location         String
+  source           String   // Naukri, LinkedIn, etc.
+  url              String   @unique
+  salary           String?
+  jobType          String?  // Full-time, Remote, etc.
+  category         String   // PM, APM, Product Design, etc.
+  postedAt         String?  // Display string from source
+  targetDate       DateTime @default(now()) // For sorting/archiving
+  description      String?  @db.Text
+  tags             String[]
+  isActive         Boolean  @default(true)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@index([targetDate])
+  @@index([category])
+  @@index([source])
+}

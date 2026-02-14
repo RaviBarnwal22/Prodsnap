@@ -6,11 +6,11 @@ import { getUser } from '@/lib/auth';
 const API_LIMITS = {
     gemini: {
         free: 500, // Conservative estimate for free tier
-        model: 'gemini-pro'
+        model: 'gemini-2.0-flash'
     },
-    perplexity: {
-        free: 720000, // 500 RPM * 60 * 24 (theoretical max for Tier 0)
-        model: 'sonar'
+    groq: {
+        free: 14400, // ~10 requests per minute ballpark
+        model: 'llama-3.3-70b'
     }
 };
 
@@ -131,13 +131,13 @@ export async function GET(request: Request) {
                 capacity: API_LIMITS.gemini.free,
                 model: API_LIMITS.gemini.model
             },
-            perplexity: {
+            groq: {
                 total: 0,
                 success: 0,
                 error: 0,
                 rate_limit: 0,
-                capacity: API_LIMITS.perplexity.free,
-                model: API_LIMITS.perplexity.model
+                capacity: API_LIMITS.groq.free,
+                model: API_LIMITS.groq.model
             },
             email: {
                 total: todayEmailUsage,
@@ -147,7 +147,7 @@ export async function GET(request: Request) {
         };
 
         todayUsage.forEach((item: any) => {
-            const provider = item.provider as 'gemini' | 'perplexity';
+            const provider = item.provider as string;
             const count = item._count.id;
             const status = item.status;
 
@@ -160,15 +160,16 @@ export async function GET(request: Request) {
         });
 
         // Calculate daily breakdown for last 7 days
-        const dailyBreakdown: Record<string, { gemini: number; perplexity: number; email: number }> = {};
+        const dailyBreakdown: Record<string, { gemini: number; groq: number; email: number }> = {};
 
         weekUsage.forEach((log: any) => {
             const dateKey = log.createdAt.toISOString().split('T')[0];
             if (!dailyBreakdown[dateKey]) {
-                dailyBreakdown[dateKey] = { gemini: 0, perplexity: 0, email: 0 };
+                dailyBreakdown[dateKey] = { gemini: 0, groq: 0, email: 0 };
             }
-            if (log.provider === 'gemini' || log.provider === 'perplexity') {
-                dailyBreakdown[dateKey][log.provider as 'gemini' | 'perplexity']++;
+            if (dailyBreakdown[dateKey][log.provider as keyof typeof dailyBreakdown[string]] !== undefined) {
+                // @ts-ignore
+                dailyBreakdown[dateKey][log.provider]++;
             }
         });
 
@@ -176,7 +177,7 @@ export async function GET(request: Request) {
         weekEmailUsage.forEach((log: any) => {
             const dateKey = log.createdAt.toISOString().split('T')[0];
             if (!dailyBreakdown[dateKey]) {
-                dailyBreakdown[dateKey] = { gemini: 0, perplexity: 0, email: 0 };
+                dailyBreakdown[dateKey] = { gemini: 0, groq: 0, email: 0 };
             }
             dailyBreakdown[dateKey].email++;
         });
