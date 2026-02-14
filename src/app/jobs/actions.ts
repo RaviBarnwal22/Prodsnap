@@ -248,9 +248,42 @@ export async function addJobByUrl(url: string) {
     }
 
     try {
-        const prompt = `You are a job extractor. Analyze this URL: ${url}
-Return EXACTLY a JSON object for this specific Product Management job: {"title": "...", "company": "...", "location": "...", "source": "...", "experience": "...", "category": "JOB", "jobType": "PM", "postedAt": "..."}.
-If it is a Senior PM role, set jobType to "Senior PM". If it is an internship, set category to "INTERNSHIP" and jobType to "PM Intern".
+        // Detect LinkedIn and apply guest URL transformation if possible
+        let processingUrl = url;
+        if (url.includes('linkedin.com/jobs/view/')) {
+            processingUrl = url.replace('linkedin.com/jobs/view/', 'linkedin.com/jobs-guest/jobs/view/');
+        }
+
+        // Try to fetch page title for additional context
+        let pageTitle = "";
+        try {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 5000);
+            const res = await fetch(processingUrl, {
+                headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36' },
+                signal: controller.signal
+            });
+            clearTimeout(timeoutId);
+            if (res.ok) {
+                const html = await res.text();
+                const titleMatch = html.match(/<title>(.*?)<\/title>/i);
+                if (titleMatch) pageTitle = titleMatch[1];
+            }
+        } catch (e) {
+            console.warn(`[addJobByUrl] Could not fetch page context: ${e instanceof Error ? e.message : 'Unknown'}`);
+        }
+
+        const prompt = `You are a high-fidelity job extractor. Analyze this URL: ${processingUrl}
+${pageTitle ? `The page title is: "${pageTitle}"` : ""}
+
+CRITICAL RULES:
+1. DO NOT HALLUCINATE "Microsoft" or "Redmond" just because it is a LinkedIn URL.
+2. The page title provided above is your most reliable primary source of information. 
+3. Look for the REAL hiring company and location (e.g., if the title says "OLX India", use OLX).
+4. If you are not 100% sure, set company/location to "Unknown".
+5. Return EXACTLY a JSON object: {"title": "...", "company": "...", "location": "...", "source": "...", "experience": "...", "category": "JOB", "jobType": "PM", "postedAt": "..."}.
+6. Source should be the platform (e.g., "LinkedIn", "Naukri", "Company Site").
+
 Return only the JSON object.`;
 
         let jobData: any = null;
