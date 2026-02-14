@@ -258,9 +258,15 @@ export async function addJobByUrl(url: string) {
         let pageContext = "";
         try {
             const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 8000);
+            const timeoutId = setTimeout(() => controller.abort(), 10000);
             const res = await fetch(processingUrl, {
-                headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36' },
+                headers: {
+                    'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
+                    'Accept-Language': 'en-US,en;q=0.9',
+                    'Cache-Control': 'no-cache',
+                    'Pragma': 'no-cache'
+                },
                 signal: controller.signal
             });
             clearTimeout(timeoutId);
@@ -269,40 +275,55 @@ export async function addJobByUrl(url: string) {
                 const titleMatch = html.match(/<title>(.*?)<\/title>/i);
                 const h1Match = html.match(/<h1[^>]*>(.*?)<\/h1>/i);
 
-                // Extract more body text to capture details deeper in the page
-                const bodyMatch = html.match(/<body[^>]*>([\s\S]*?)<\/body>/i);
-                let bodySnippet = "";
-                if (bodyMatch) {
-                    // Extract up to 10000 chars of visible text
-                    bodySnippet = bodyMatch[1]
-                        .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, ' ')
-                        .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, ' ')
-                        .replace(/<[^>]*>/g, ' ')
-                        .replace(/\s+/g, ' ')
-                        .substring(0, 10000);
+                // Extract JSON-LD for high-fidelity structured data
+                const jsonLdMatches = html.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/gi);
+                if (jsonLdMatches) {
+                    pageContext += "--- JSON-LD STRUCTURED DATA ---\n";
+                    jsonLdMatches.forEach((match, i) => {
+                        const content = match.replace(/<[^>]*>/g, '').trim();
+                        if (content.includes('"JobPosting"') || content.includes('"title"')) {
+                            pageContext += `JSON-LD [${i}]: ${content.substring(0, 3000)}\n`;
+                        }
+                    });
                 }
 
                 if (titleMatch) pageContext += `Page Title: "${titleMatch[1]}"\n`;
                 if (h1Match) pageContext += `Main Heading (H1): "${h1Match[1].replace(/<[^>]*>/g, '')}"\n`;
-                if (bodySnippet) pageContext += `Content Snippet: "${bodySnippet}"\n`;
+
+                // Extract and clean body text
+                const bodyMatch = html.match(/<body[^>]*>([\s\S]*?)<\/body>/i);
+                if (bodyMatch) {
+                    const cleanText = bodyMatch[1]
+                        .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, ' ')
+                        .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, ' ')
+                        .replace(/<[^>]*>/g, ' ')
+                        .replace(/&nbsp;/g, ' ')
+                        .replace(/&quot;/g, '"')
+                        .replace(/&amp;/g, '&')
+                        .replace(/&lt;/g, '<')
+                        .replace(/&gt;/g, '>')
+                        .replace(/\s+/g, ' ')
+                        .trim();
+                    pageContext += `Content Snippet: "${cleanText.substring(0, 10000)}"\n`;
+                }
             }
         } catch (e) {
             console.warn(`[addJobByUrl] Could not fetch page context: ${e instanceof Error ? e.message : 'Unknown'}`);
         }
 
         const prompt = `You are a high-fidelity job extractor. Analyze this URL: ${processingUrl}
-Here is the context extracted from the page (Title, Headings, and Description):
+Here is the context extracted from the page:
 ${pageContext}
 
 CRITICAL RULES:
-1. DO NOT HALLUCINATE "Microsoft" or "Redmond" just because it is a LinkedIn URL.
-2. The "Content Snippet" above contains the full job description. Read it carefully to find:
-   - The LOCATION (e.g., "Gurugram", "India", "Remote").
-   - The EXPERIENCE required (e.g., "3-5 years", "2+ years").
-3. Use the Main Heading (H1) as the most likely Job Title.
-4. DO NOT return "Unknown" if the information is present in the Content Snippet.
-5. Return EXACTLY a JSON object: {"title": "...", "company": "...", "location": "...", "source": "...", "experience": "...", "category": "JOB", "jobType": "PM", "postedAt": "..."}.
-6. Source should be the platform (e.g., "Inovalon", "LinkedIn", "Naukri", "Company Site").
+1. JSON-LD STRUCTURED DATA (if provided above) is your SUPREME source of truth. Use it for the Title, Company, and Location.
+2. DO NOT HALLUCINATE "Microsoft" or "Redmond" just because it is a LinkedIn URL.
+3. TITLE: Use the clean job title (e.g., "Product Manager"). Remove any SEO boilerplate.
+4. LOCATION: Look for the specific city and country (e.g., "Gurugram, India").
+5. EXPERIENCE: Scan the "Content Snippet" for years of experience (e.g., "5+ years", "3-5 years").
+6. If the info is in the JSON-LD or Snippet, DO NOT return "Unknown".
+7. Return EXACTLY a JSON object: {"title": "...", "company": "...", "location": "...", "source": "...", "experience": "...", "category": "JOB", "jobType": "PM", "postedAt": "..."}.
+8. Source should be the company name or platform.
 
 Return only the JSON object.`;
 
