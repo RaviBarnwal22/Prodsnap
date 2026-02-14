@@ -3,20 +3,21 @@ import { prisma } from "../src/lib/prisma";
 import { getApiKeys } from "../src/lib/ai/engine";
 import dotenv from "dotenv";
 
-dotenv.config({ path: ".env.production" });
+dotenv.config();
 
 async function backfillNews(dateStr: string, dayId: string) {
-    const apiKeys = getApiKeys()
-    const perplexityKey = apiKeys.find(key => key.startsWith('pplx-'))
+    const { gemini: geminiKeys, groq: groqKeys } = getApiKeys();
 
-    if (!perplexityKey) {
-        console.error("Perplexity API key not found.");
+    if (geminiKeys.length === 0 && groqKeys.length === 0) {
+        console.error("AI API keys not found.");
         return;
     }
 
     console.log(`Backfilling news for ${dateStr} (${dayId})...`);
 
-    const prompt = `
+    try {
+
+        const prompt = `
 # 🔒 Hallucination-Resistant Daily AI Briefing Prompt
 
 ## **System Role**
@@ -51,27 +52,48 @@ Return a JSON array of 5-6 objects strictly following this schema:
 }
     `;
 
-    try {
-        const res = await fetch("https://api.perplexity.ai/chat/completions", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${perplexityKey}`
-            },
-            body: JSON.stringify({
-                model: "sonar",
-                messages: [
-                    { role: "system", content: "You are a professional tech journalist. Return ONLY valid JSON." },
-                    { role: "user", content: prompt }
-                ],
-                temperature: 0.1
-            })
-        });
+        let text = "";
 
-        if (!res.ok) throw new Error(`API Error: ${res.status}`);
+        // Try Gemini
+        for (const key of geminiKeys) {
+            try {
+                const { GoogleGenerativeAI } = await import("@google/generative-ai");
+                const genAI = new GoogleGenerativeAI(key);
+                const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+                const result = await model.generateContent(prompt);
+                text = result.response.text();
+                if (text) break;
+            } catch (e) {
+                console.warn(`Gemini failed: ${e instanceof Error ? e.message : 'Unknown'}`);
+            }
+        }
 
-        const data: any = await res.json();
-        const text = data.choices[0].message.content;
+        // Try Groq backup
+        if (!text) {
+            for (const key of groqKeys) {
+                try {
+                    const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${key}` },
+                        body: JSON.stringify({
+                            model: "llama-3.3-70b-versatile",
+                            messages: [{ role: "user", content: prompt }],
+                            temperature: 0.1
+                        })
+                    });
+                    if (res.ok) {
+                        const data: any = await res.json();
+                        text = data.choices[0].message.content;
+                        if (text) break;
+                    }
+                } catch (e) {
+                    console.warn(`Groq failed`);
+                }
+            }
+        }
+
+        if (!text) throw new Error("All AI providers failed.");
+
         const jsonMatch = text.match(/\[[\s\S]*\]/);
         if (!jsonMatch) throw new Error("No JSON array");
         const items = JSON.parse(jsonMatch[0]);

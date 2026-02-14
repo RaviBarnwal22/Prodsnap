@@ -6,14 +6,6 @@
     "outputDirectory": ".next",
     "crons": [
         {
-            "path": "/api/cron/refresh-news",
-            "schedule": "30 23 * * *"
-        },
-        {
-            "path": "/api/cron/viral-post",
-            "schedule": "30 3 * * *"
-        },
-        {
             "path": "/api/cron/refresh-jobs",
             "schedule": "0 1 * * *"
         }
