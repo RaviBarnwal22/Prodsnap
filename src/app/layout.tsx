@@ -17,8 +17,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Prodsnap | Master PM Interviews Globally with AI Feedback",
-  description: "The premier global platform for Product Managers to practice case studies with real-time AI guided feedback. Master CIRCLES, HEART, and BUS frameworks for Google, Meta, Amazon, Microsoft, and Uber PM interviews.",
+  title: "Prodsnap | Master PM Interviews with AI-Powered Feedback",
+  description: "Stop practicing blindly. Get real-time AI feedback on your PM case solutions and master the frameworks used by the world's leading tech companies.",
   keywords: [
     "Product Management Interview Prep",
     "Global PM Case Study Practice",
@@ -39,22 +39,22 @@ export const metadata: Metadata = {
     type: "website",
     locale: "en_US",
     url: "https://prodsnap.in",
-    title: "Prodsnap | Elevate Your Global PM Career",
-    description: "Get real-time AI feedback on your PM case solutions. Master frameworks used by the world's leading tech companies with our expert-curated practice engine.",
+    title: "Prodsnap | Elevate Your PM Skills with AI. Are You Ready?",
+    description: "The 'secret weapon' for ambitious PMs. Get instant AI feedback on your case solutions and crack top tech interviews faster.",
     siteName: "Prodsnap",
     images: [
       {
         url: "/og-image.png",
         width: 1200,
         height: 630,
-        alt: "Prodsnap - Global PM Interview Prep",
+        alt: "Prodsnap - AI PM Interview Prep",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Prodsnap | Master PM Interviews with AI",
-    description: "Real-time AI guided feedback for aspiring Product Managers worldwide. Accelerate your product career.",
+    title: "Prodsnap | Crack Your Dream PM Role with AI",
+    description: "Real-time AI reality checks for your PM case practice. Stop guessing, start mastering.",
     images: ["/og-image.png"],
   },
   robots: {
