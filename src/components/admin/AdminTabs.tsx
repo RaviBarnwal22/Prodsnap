@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Users, Activity, BarChart3, MessageSquare, Database, Mail } from 'lucide-react'
+import { Users, Activity, BarChart3, MessageSquare, Database, Mail, Briefcase } from 'lucide-react'
 
 interface AdminTabsProps {
     overviewContent: React.ReactNode
@@ -10,11 +10,12 @@ interface AdminTabsProps {
     supportContent: React.ReactNode
     newsletterContent: React.ReactNode
     maintenanceContent: React.ReactNode
+    jobsContent: React.ReactNode
 }
 
-type TabId = 'overview' | 'api-usage' | 'users' | 'support' | 'newsletter' | 'maintenance'
+type TabId = 'overview' | 'api-usage' | 'users' | 'support' | 'newsletter' | 'maintenance' | 'jobs'
 
-export function AdminTabs({ overviewContent, apiUsageContent, usersContent, supportContent, newsletterContent, maintenanceContent }: AdminTabsProps) {
+export function AdminTabs({ overviewContent, apiUsageContent, usersContent, supportContent, newsletterContent, maintenanceContent, jobsContent }: AdminTabsProps) {
     const [activeTab, setActiveTab] = useState<TabId>('overview')
 
     const tabs = [
@@ -22,6 +23,7 @@ export function AdminTabs({ overviewContent, apiUsageContent, usersContent, supp
         { id: 'users' as TabId, label: 'Users', icon: Users },
         { id: 'newsletter' as TabId, label: 'Newsletter', icon: Mail },
         { id: 'support' as TabId, label: 'Support', icon: MessageSquare },
+        { id: 'jobs' as TabId, label: 'Jobs', icon: Briefcase },
         { id: 'maintenance' as TabId, label: 'Maintenance', icon: Database },
         { id: 'api-usage' as TabId, label: 'API Usage', icon: Activity },
     ]
@@ -100,6 +102,12 @@ export function AdminTabs({ overviewContent, apiUsageContent, usersContent, supp
                 {activeTab === 'maintenance' && (
                     <div className="animate-fadeIn">
                         {maintenanceContent}
+                    </div>
+                )}
+
+                {activeTab === 'jobs' && (
+                    <div className="animate-fadeIn">
+                        {jobsContent}
                     </div>
                 )}
             </div>

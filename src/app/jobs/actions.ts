@@ -237,3 +237,99 @@ export async function getJobs(category?: string) {
         return [];
     }
 }
+export async function addJobByUrl(url: string) {
+    const { gemini: geminiKeys, groq: groqKeys } = getApiKeys();
+    if (geminiKeys.length === 0 && groqKeys.length === 0) {
+        return { success: false, error: "AI API keys found." };
+    }
+
+    if (!url || !url.startsWith('http')) {
+        return { success: false, error: "Invalid URL provided." };
+    }
+
+    try {
+        const prompt = `You are a job extractor. Analyze this URL: ${url}
+Return EXACTLY a JSON object for this specific Product Management job: {"title": "...", "company": "...", "location": "...", "source": "...", "experience": "...", "category": "JOB", "jobType": "PM", "postedAt": "..."}.
+If it is a Senior PM role, set jobType to "Senior PM". If it is an internship, set category to "INTERNSHIP" and jobType to "PM Intern".
+Return only the JSON object.`;
+
+        let jobData: any = null;
+
+        // Try Gemini
+        for (const key of geminiKeys) {
+            try {
+                const genAI = new GoogleGenerativeAI(key);
+                const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+                const result = await model.generateContent(prompt);
+                const text = result.response.text();
+                const jsonMatch = text.match(/\{[\s\S]*\}/);
+                if (jsonMatch) {
+                    jobData = JSON.parse(jsonMatch[0]);
+                    break;
+                }
+            } catch (e) {
+                console.warn(`[addJobByUrl] Gemini failed: ${e instanceof Error ? e.message : 'Unknown'}`);
+            }
+        }
+
+        // Try Groq as fallback
+        if (!jobData) {
+            for (const key of groqKeys) {
+                try {
+                    const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${key}` },
+                        body: JSON.stringify({
+                            model: "llama-3.3-70b-versatile",
+                            messages: [{ role: "user", content: prompt }],
+                            temperature: 0.1
+                        })
+                    });
+                    if (res.ok) {
+                        const data = await res.json();
+                        const text = data.choices[0].message.content;
+                        const jsonMatch = text.match(/\{[\s\S]*\}/);
+                        if (jsonMatch) {
+                            jobData = JSON.parse(jsonMatch[0]);
+                            break;
+                        }
+                    }
+                } catch (e) {
+                    console.warn(`[addJobByUrl] Groq fallback failed`);
+                }
+            }
+        }
+
+        if (!jobData || !jobData.title) {
+            return { success: false, error: "AI could not extract job details. Please ensure the URL is a direct job posting." };
+        }
+
+        const now = new Date();
+        const todayStr = now.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+
+        const savedJob = await (prisma as any).job.upsert({
+            where: { url },
+            update: { isActive: true, updatedAt: new Date() },
+            create: {
+                title: jobData.title,
+                company: jobData.company || 'Confidential',
+                location: jobData.location || 'Remote',
+                source: jobData.source || 'Direct',
+                url: url,
+                salary: jobData.experience || null,
+                jobType: jobData.category || 'JOB',
+                category: jobData.jobType || 'PM',
+                postedAt: jobData.postedAt || todayStr,
+                tags: [jobData.experience || "", jobData.jobType, jobData.location || ""].filter(Boolean),
+                isActive: true
+            }
+        });
+
+        try { revalidatePath('/jobs'); revalidatePath('/admin'); } catch (e) { }
+        return { success: true, job: JSON.parse(JSON.stringify(savedJob)) };
+
+    } catch (error) {
+        console.error("[addJobByUrl] Error:", error);
+        return { success: false, error: "An error occurred while processing the job URL." };
+    }
+}

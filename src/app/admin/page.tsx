@@ -14,6 +14,8 @@ import { AdminFeedbackQueue } from "@/components/admin/AdminFeedbackQueue"
 import { AdminTabs } from "@/components/admin/AdminTabs"
 import { AdminNewsletter } from "@/components/admin/AdminNewsletter"
 import { AdminMaintenance } from "@/components/admin/AdminMaintenance"
+import AdminJobAdder from "@/components/admin/AdminJobAdder"
+import { Briefcase } from "lucide-react"
 
 
 // Helper to format date
@@ -469,6 +471,11 @@ export default async function AdminPage() {
                     }
                     maintenanceContent={
                         <AdminMaintenance />
+                    }
+                    jobsContent={
+                        <div className="max-w-2xl mx-auto py-12">
+                            <AdminJobAdder />
+                        </div>
                     }
                 />
             </main>
