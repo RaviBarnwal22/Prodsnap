@@ -366,3 +366,16 @@ Return only the JSON object.`;
         return { success: false, error: "An error occurred while processing the job URL." };
     }
 }
+export async function deleteJobs(ids: string[]) {
+    try {
+        await (prisma as any).job.deleteMany({
+            where: { id: { in: ids } }
+        });
+        revalidatePath('/jobs');
+        revalidatePath('/admin');
+        return { success: true };
+    } catch (error) {
+        console.error("[Job Action] Delete Error:", error);
+        return { success: false, error: "Failed to delete jobs" };
+    }
+}
