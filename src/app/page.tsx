@@ -148,7 +148,7 @@ export default async function Home() {
         </section>
 
         {/* Application Features Strip */}
-        <section className="py-8 bg-gradient-to-r from-violet-600 via-purple-600 to-indigo-600 overflow-hidden">
+        <section className="py-3 md:py-6 bg-gradient-to-r from-violet-600 via-purple-600 to-indigo-600 overflow-hidden">
           <div className="flex animate-marquee whitespace-nowrap">
             {[
               { icon: "🎯", text: "Custom Framework Evaluation" },
@@ -168,10 +168,10 @@ export default async function Home() {
               { icon: "🚀", text: "Unlimited Practice Sessions" },
               { icon: "📱", text: "Mobile-Friendly Interface" },
             ].map((feature, i) => (
-              <div key={i} className="flex items-center gap-3 mx-8 text-white">
-                <span className="text-2xl">{feature.icon}</span>
-                <p className="text-sm font-semibold tracking-wide">{feature.text}</p>
-                <span className="mx-4 text-white/30">•</span>
+              <div key={i} className="flex items-center gap-2 md:gap-3 mx-4 md:mx-8 text-white">
+                <span className="text-xl md:text-2xl">{feature.icon}</span>
+                <p className="text-[10px] md:text-sm font-semibold tracking-wide uppercase">{feature.text}</p>
+                <span className="mx-2 md:mx-4 text-white/30">•</span>
               </div>
             ))}
           </div>
