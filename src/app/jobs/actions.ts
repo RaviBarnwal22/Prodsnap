@@ -269,11 +269,17 @@ export async function addJobByUrl(url: string) {
                 const titleMatch = html.match(/<title>(.*?)<\/title>/i);
                 const h1Match = html.match(/<h1[^>]*>(.*?)<\/h1>/i);
 
-                // Extract some body text but keep it small
+                // Extract more body text to capture details deeper in the page
                 const bodyMatch = html.match(/<body[^>]*>([\s\S]*?)<\/body>/i);
                 let bodySnippet = "";
                 if (bodyMatch) {
-                    bodySnippet = bodyMatch[1].replace(/<[^>]*>/g, ' ').substring(0, 1000).replace(/\s+/g, ' ');
+                    // Extract up to 10000 chars of visible text
+                    bodySnippet = bodyMatch[1]
+                        .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, ' ')
+                        .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, ' ')
+                        .replace(/<[^>]*>/g, ' ')
+                        .replace(/\s+/g, ' ')
+                        .substring(0, 10000);
                 }
 
                 if (titleMatch) pageContext += `Page Title: "${titleMatch[1]}"\n`;
@@ -285,17 +291,18 @@ export async function addJobByUrl(url: string) {
         }
 
         const prompt = `You are a high-fidelity job extractor. Analyze this URL: ${processingUrl}
-Here is some context extracted from the page:
+Here is the context extracted from the page (Title, Headings, and Description):
 ${pageContext}
 
 CRITICAL RULES:
 1. DO NOT HALLUCINATE "Microsoft" or "Redmond" just because it is a LinkedIn URL.
-2. Use the provided Page Title, H1 heading, and Content Snippet as your primary sources of truth.
-3. Look for the REAL hiring company and location (the H1 or snippets usually contain the true job title).
-4. If you see "Careers Listing" but the H1 says "Product Manager", then "Product Manager" is the title.
-5. If you are not 100% sure about a field, set it to "Unknown" rather than guessing.
-6. Return EXACTLY a JSON object: {"title": "...", "company": "...", "location": "...", "source": "...", "experience": "...", "category": "JOB", "jobType": "PM", "postedAt": "..."}.
-6. Source should be the platform (e.g., "LinkedIn", "Naukri", "Company Site").
+2. The "Content Snippet" above contains the full job description. Read it carefully to find:
+   - The LOCATION (e.g., "Gurugram", "India", "Remote").
+   - The EXPERIENCE required (e.g., "3-5 years", "2+ years").
+3. Use the Main Heading (H1) as the most likely Job Title.
+4. DO NOT return "Unknown" if the information is present in the Content Snippet.
+5. Return EXACTLY a JSON object: {"title": "...", "company": "...", "location": "...", "source": "...", "experience": "...", "category": "JOB", "jobType": "PM", "postedAt": "..."}.
+6. Source should be the platform (e.g., "Inovalon", "LinkedIn", "Naukri", "Company Site").
 
 Return only the JSON object.`;
 
