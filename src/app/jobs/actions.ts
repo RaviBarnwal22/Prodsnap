@@ -254,11 +254,11 @@ export async function addJobByUrl(url: string) {
             processingUrl = url.replace('linkedin.com/jobs/view/', 'linkedin.com/jobs-guest/jobs/view/');
         }
 
-        // Try to fetch page title for additional context
-        let pageTitle = "";
+        // Try to fetch page title and H1 for additional context
+        let pageContext = "";
         try {
             const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 5000);
+            const timeoutId = setTimeout(() => controller.abort(), 8000);
             const res = await fetch(processingUrl, {
                 headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36' },
                 signal: controller.signal
@@ -267,21 +267,34 @@ export async function addJobByUrl(url: string) {
             if (res.ok) {
                 const html = await res.text();
                 const titleMatch = html.match(/<title>(.*?)<\/title>/i);
-                if (titleMatch) pageTitle = titleMatch[1];
+                const h1Match = html.match(/<h1[^>]*>(.*?)<\/h1>/i);
+
+                // Extract some body text but keep it small
+                const bodyMatch = html.match(/<body[^>]*>([\s\S]*?)<\/body>/i);
+                let bodySnippet = "";
+                if (bodyMatch) {
+                    bodySnippet = bodyMatch[1].replace(/<[^>]*>/g, ' ').substring(0, 1000).replace(/\s+/g, ' ');
+                }
+
+                if (titleMatch) pageContext += `Page Title: "${titleMatch[1]}"\n`;
+                if (h1Match) pageContext += `Main Heading (H1): "${h1Match[1].replace(/<[^>]*>/g, '')}"\n`;
+                if (bodySnippet) pageContext += `Content Snippet: "${bodySnippet}"\n`;
             }
         } catch (e) {
             console.warn(`[addJobByUrl] Could not fetch page context: ${e instanceof Error ? e.message : 'Unknown'}`);
         }
 
         const prompt = `You are a high-fidelity job extractor. Analyze this URL: ${processingUrl}
-${pageTitle ? `The page title is: "${pageTitle}"` : ""}
+Here is some context extracted from the page:
+${pageContext}
 
 CRITICAL RULES:
 1. DO NOT HALLUCINATE "Microsoft" or "Redmond" just because it is a LinkedIn URL.
-2. The page title provided above is your most reliable primary source of information. 
-3. Look for the REAL hiring company and location (e.g., if the title says "OLX India", use OLX).
-4. If you are not 100% sure, set company/location to "Unknown".
-5. Return EXACTLY a JSON object: {"title": "...", "company": "...", "location": "...", "source": "...", "experience": "...", "category": "JOB", "jobType": "PM", "postedAt": "..."}.
+2. Use the provided Page Title, H1 heading, and Content Snippet as your primary sources of truth.
+3. Look for the REAL hiring company and location (the H1 or snippets usually contain the true job title).
+4. If you see "Careers Listing" but the H1 says "Product Manager", then "Product Manager" is the title.
+5. If you are not 100% sure about a field, set it to "Unknown" rather than guessing.
+6. Return EXACTLY a JSON object: {"title": "...", "company": "...", "location": "...", "source": "...", "experience": "...", "category": "JOB", "jobType": "PM", "postedAt": "..."}.
 6. Source should be the platform (e.g., "LinkedIn", "Naukri", "Company Site").
 
 Return only the JSON object.`;
