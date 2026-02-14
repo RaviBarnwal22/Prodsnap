@@ -15,7 +15,7 @@
         },
         {
             "path": "/api/cron/refresh-jobs",
-            "schedule": "0 */12 * * *"
+            "schedule": "0 1 * * *"
         }
     ]
 }
