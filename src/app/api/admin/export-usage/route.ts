@@ -44,34 +44,34 @@ export async function GET(request: Request) {
         }
 
         // Group by Date and Provider
-        const dailySummary: Record<string, { gemini: number; perplexity: number; email: number }> = {};
+        const dailySummary: Record<string, { gemini: number; groq: number; email: number }> = {};
 
         apiLogs.forEach(log => {
             const date = log.createdAt.toISOString().split('T')[0];
             if (!dailySummary[date]) {
-                dailySummary[date] = { gemini: 0, perplexity: 0, email: 0 };
+                dailySummary[date] = { gemini: 0, groq: 0, email: 0 };
             }
             if (log.provider === 'gemini') dailySummary[date].gemini++;
-            if (log.provider === 'perplexity') dailySummary[date].perplexity++;
+            if (log.provider === 'perplexity' || log.provider === 'groq') dailySummary[date].groq++;
         });
 
         emailLogs.forEach(log => {
             const date = log.createdAt.toISOString().split('T')[0];
             if (!dailySummary[date]) {
-                dailySummary[date] = { gemini: 0, perplexity: 0, email: 0 };
+                dailySummary[date] = { gemini: 0, groq: 0, email: 0 };
             }
             dailySummary[date].email++;
         });
 
         // Create CSV Content
-        let csv = 'Date,Gemini Usage,Perplexity Usage,Brevo Email Usage,Total\n';
+        let csv = 'Date,Gemini Usage,Groq Usage,Brevo Email Usage,Total\n';
 
         const sortedDates = Object.keys(dailySummary).sort((a, b) => b.localeCompare(a));
 
         sortedDates.forEach(date => {
             const day = dailySummary[date];
-            const total = day.gemini + day.perplexity + day.email;
-            csv += `${date},${day.gemini},${day.perplexity},${day.email},${total}\n`;
+            const total = day.gemini + day.groq + day.email;
+            csv += `${date},${day.gemini},${day.groq},${day.email},${total}\n`;
         });
 
         // Return as CSV file

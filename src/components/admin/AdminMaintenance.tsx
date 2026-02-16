@@ -77,7 +77,7 @@ export function AdminMaintenance() {
                             <h3 className="text-lg font-bold text-white">Product Job Board</h3>
                         </div>
                         <p className="text-gray-400 text-sm mb-8 leading-relaxed">
-                            Scrape global ATS (Greenhouse, Lever, etc.) for new deep-linked PM roles using Perplexity AI. This process usually takes 2-3 minutes.
+                            Scrape global ATS (Greenhouse, Lever, etc.) for new deep-linked PM roles using our AI Engine. This process usually takes 2-3 minutes.
                         </p>
                         <button
                             onClick={handleRefreshJobs}
@@ -107,7 +107,7 @@ export function AdminMaintenance() {
                             <h3 className="text-lg font-bold text-white">AI Daily Digest</h3>
                         </div>
                         <p className="text-gray-400 text-sm mb-8 leading-relaxed">
-                            Gather the latest AI news and generate PM-specific perspectives. Scrapes verified sources and uses Perplexity for curation.
+                            Gather the latest AI news and generate PM-specific perspectives. Scrapes verified sources and uses AI for curation.
                         </p>
                         <button
                             onClick={handleRefreshNews}
@@ -136,7 +136,7 @@ export function AdminMaintenance() {
                     Pro Tip
                 </div>
                 <p className="text-gray-400 text-sm leading-relaxed">
-                    These operations utilize the <span className="text-gray-200 font-bold underline decoration-amber-500/40">Perplexity AI API</span>. Avoid spamming the refresh buttons as it may lead to rate limiting on your API key. One refresh per day is usually sufficient as the system also runs on an automated cron schedule at 5:30 AM IST.
+                    These operations utilize the Gemini & Groq AI APIs. Avoid spamming the refresh buttons as it may lead to rate limiting on your API keys. One refresh per day is usually sufficient as the system also runs on an automated cron schedule at 5:30 AM IST.
                 </p>
             </div>
         </div>
