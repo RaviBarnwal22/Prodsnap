@@ -1,8 +1,8 @@
 'use client'
 
 import { useState } from 'react'
-import { Trash2, ExternalLink, Search, CheckSquare, Square, Loader2, AlertCircle } from 'lucide-react'
-import { deleteJobs } from '@/app/jobs/actions'
+import { Trash2, ExternalLink, Search, CheckSquare, Square, Loader2, AlertCircle, RefreshCw, Zap } from 'lucide-react'
+import { deleteJobs, cleanupInactiveJobs } from '@/app/jobs/actions'
 import { useRouter } from 'next/navigation'
 
 interface AdminJobListProps {
@@ -12,8 +12,28 @@ interface AdminJobListProps {
 export default function AdminJobList({ jobs }: AdminJobListProps) {
     const [selectedIds, setSelectedIds] = useState<string[]>([])
     const [isDeleting, setIsDeleting] = useState(false)
+    const [isCleaning, setIsCleaning] = useState(false)
     const [searchQuery, setSearchQuery] = useState('')
     const router = useRouter()
+
+    const handleCleanup = async () => {
+        if (!confirm('This will crawl through all active job links and remove those that are closed. This may take a minute. Continue?')) return;
+
+        setIsCleaning(true)
+        try {
+            const res = await cleanupInactiveJobs()
+            if (res.success) {
+                alert(`Cleanup complete! Removed ${res.removedCount} inactive jobs.`);
+                router.refresh()
+            } else {
+                alert('Cleanup failed: ' + res.error)
+            }
+        } catch (error) {
+            alert('An error occurred during cleanup')
+        } finally {
+            setIsCleaning(false)
+        }
+    }
 
     const filteredJobs = jobs.filter(job =>
         job.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -72,6 +92,15 @@ export default function AdminJobList({ jobs }: AdminJobListProps) {
                 </div>
 
                 <div className="flex items-center gap-3">
+                    <button
+                        onClick={handleCleanup}
+                        disabled={isCleaning}
+                        className="flex items-center gap-2 px-4 py-2.5 bg-amber-500/10 border border-amber-500/20 text-amber-500 rounded-xl hover:bg-amber-500/20 transition-all font-bold text-sm disabled:opacity-50"
+                    >
+                        {isCleaning ? <RefreshCw className="animate-spin" size={16} /> : <Zap size={16} />}
+                        {isCleaning ? 'Cleaning...' : 'Clean Stale Jobs'}
+                    </button>
+
                     {selectedIds.length > 0 && (
                         <button
                             onClick={handleDelete}
@@ -86,10 +115,10 @@ export default function AdminJobList({ jobs }: AdminJobListProps) {
             </div>
 
             {/* Table */}
-            <div className="overflow-x-auto">
-                <table className="w-full text-left border-collapse">
+            <div className="overflow-x-auto no-scrollbar">
+                <table className="w-full text-left border-collapse min-w-[600px]">
                     <thead>
-                        <tr className="bg-gray-800/30 text-gray-400 text-[10px] uppercase tracking-widest font-black">
+                        <tr className="bg-gray-800/30 text-gray-400 text-[10px] uppercase tracking-widest font-black whitespace-nowrap">
                             <th className="px-6 py-4 w-12 text-center">
                                 <button onClick={toggleSelectAll} className="hover:text-white transition-colors">
                                     {selectedIds.length === filteredJobs.length && filteredJobs.length > 0 ? (
@@ -138,7 +167,7 @@ export default function AdminJobList({ jobs }: AdminJobListProps) {
                                         <p className="text-gray-500 text-xs">{job.location}</p>
                                     </td>
                                     <td className="px-6 py-4">
-                                        <p className="text-gray-400 text-xs font-medium">{job.postedAt}</p>
+                                        <p className="text-gray-400 text-xs font-medium">{(!job.postedAt || job.postedAt === 'Unknown') ? 'NA' : job.postedAt}</p>
                                     </td>
                                     <td className="px-6 py-4 text-right">
                                         <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">

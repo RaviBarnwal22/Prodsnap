@@ -188,9 +188,10 @@ CRITICAL:
                     jobType = 'Director';
                 }
 
+                const postedVal = (item.postedAt && item.postedAt !== 'Unknown') ? item.postedAt : todayStr;
                 await (prisma as any).job.upsert({
                     where: { url: item.url },
-                    update: { isActive: true, postedAt: item.postedAt || todayStr, updatedAt: new Date() },
+                    update: { isActive: true, postedAt: postedVal, updatedAt: new Date() },
                     create: {
                         title: item.title,
                         company: item.company || 'Confidential',
@@ -200,7 +201,7 @@ CRITICAL:
                         salary: item.experience || null,
                         jobType: category,
                         category: jobType,
-                        postedAt: item.postedAt || todayStr,
+                        postedAt: postedVal,
                         tags: [item.experience || "", jobType, item.location || ""].filter(Boolean),
                         isActive: true
                     }
@@ -288,7 +289,28 @@ export async function addJobByUrl(url: string) {
                 }
 
                 if (titleMatch) pageContext += `Page Title: "${titleMatch[1]}"\n`;
-                if (h1Match) pageContext += `Main Heading (H1): "${h1Match[1].replace(/<[^>]*>/g, '')}"\n`;
+                if (h1Match) pageContext += `Main Heading (H1): "${h1Match[1].replace(/<[^>]*>/g, '').trim()}"\n`;
+
+                // Extract common meta tags for additional context
+                const ogTitle = html.match(/<meta[^>]+(?:property|name)="og:title"[^>]+content="([^"]+)"/i) ||
+                    html.match(/<meta[^>]+content="([^"]+)"[^>]+(?:property|name)="og:title"/i);
+                const ogDesc = html.match(/<meta[^>]+(?:property|name)="og:description"[^>]+content="([^"]+)"/i) ||
+                    html.match(/<meta[^>]+content="([^"]+)"[^>]+(?:property|name)="og:description"/i);
+                if (ogTitle) pageContext += `OG Title: "${ogTitle[1]}"\n`;
+                if (ogDesc) pageContext += `OG Description: "${ogDesc[1]}"\n`;
+
+                // Extract framework-specific data scripts (e.g., Next.js, Nuxt)
+                const nextDataMatch = html.match(/<script id="__NEXT_DATA__"[^>]*>([\s\S]*?)<\/script>/i);
+                if (nextDataMatch) {
+                    pageContext += "--- FRAMEWORK DATA (JSON) ---\n";
+                    pageContext += nextDataMatch[1].substring(0, 20000) + "\n";
+                }
+
+                const initialPropsMatch = html.match(/window\.__INITIAL_PROPS__\s*=\s*(\{[\s\S]*?\});/i) ||
+                    html.match(/window\.__INITIAL_STATE__\s*=\s*(\{[\s\S]*?\});/i);
+                if (initialPropsMatch) {
+                    pageContext += `Initial State Data: ${initialPropsMatch[1].substring(0, 10000)}\n`;
+                }
 
                 // Extract and clean body text
                 const bodyMatch = html.match(/<body[^>]*>([\s\S]*?)<\/body>/i);
@@ -304,7 +326,7 @@ export async function addJobByUrl(url: string) {
                         .replace(/&gt;/g, '>')
                         .replace(/\s+/g, ' ')
                         .trim();
-                    pageContext += `Content Snippet: "${cleanText.substring(0, 10000)}"\n`;
+                    pageContext += `Content Snippet (Top): "${cleanText.substring(0, 8000)}"\n`;
                 }
             }
         } catch (e) {
@@ -393,7 +415,7 @@ Return only the JSON object.`;
                 salary: jobData.experience || null,
                 jobType: jobData.category || 'JOB',
                 category: jobData.jobType || 'PM',
-                postedAt: jobData.postedAt || todayStr,
+                postedAt: (jobData.postedAt && jobData.postedAt !== 'Unknown') ? jobData.postedAt : todayStr,
                 tags: [jobData.experience || "", jobData.jobType, jobData.location || ""].filter(Boolean),
                 isActive: true
             }
@@ -418,5 +440,60 @@ export async function deleteJobs(ids: string[]) {
     } catch (error) {
         console.error("[Job Action] Delete Error:", error);
         return { success: false, error: "Failed to delete jobs" };
+    }
+}
+
+export async function cleanupInactiveJobs() {
+    try {
+        const activeJobs = await (prisma as any).job.findMany({
+            where: { isActive: true },
+            select: { id: true, url: true, title: true }
+        });
+
+        console.log(`[Job Cleanup] Starting check for ${activeJobs.length} active jobs...`);
+        let removedCount = 0;
+
+        const CHUNK_SIZE = 10;
+        for (let i = 0; i < activeJobs.length; i += CHUNK_SIZE) {
+            const chunk = activeJobs.slice(i, i + CHUNK_SIZE);
+            const results = await Promise.all(chunk.map(async (job: any) => {
+                try {
+                    const res = await fetch(job.url, {
+                        method: 'HEAD',
+                        redirect: 'follow',
+                        headers: { 'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36' }
+                    });
+
+                    const finalUrl = res.url.toLowerCase();
+                    const isClosed =
+                        !res.ok ||
+                        res.status === 404 ||
+                        finalUrl.includes('error=true') ||
+                        finalUrl.includes('job-closed') ||
+                        finalUrl.includes('not-found') ||
+                        (job.url.includes('greenhouse.io') && finalUrl.split('/').length < 6) ||
+                        (job.url.includes('lever.co') && finalUrl.split('/').length < 5);
+
+                    if (isClosed) return job.id;
+                } catch (e) { }
+                return null;
+            }));
+
+            const idsToRemove = results.filter(id => id !== null) as string[];
+            if (idsToRemove.length > 0) {
+                await (prisma as any).job.deleteMany({
+                    where: { id: { in: idsToRemove } }
+                });
+                removedCount += idsToRemove.length;
+            }
+            console.log(`[Job Cleanup] Processed ${Math.min(i + CHUNK_SIZE, activeJobs.length)}/${activeJobs.length}...`);
+        }
+
+        revalidatePath('/jobs');
+        revalidatePath('/admin');
+        return { success: true, removedCount };
+    } catch (error) {
+        console.error("[Job Cleanup] Error:", error);
+        return { success: false, error: "Cleanup failed" };
     }
 }

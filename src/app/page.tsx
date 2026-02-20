@@ -1,31 +1,26 @@
 import Link from "next/link"
+import Image from "next/image"
 import { Header } from "@/components/Header"
 import { Footer } from "@/components/Footer"
-import { ArrowRight, Users, Sparkles, BookOpen, Star, Quote } from "lucide-react"
-import { createClient } from "@/lib/supabase/server"
-import { redirect } from "next/navigation"
+import { ArrowRight, Users, Sparkles, BookOpen } from "lucide-react"
+import { getUser } from "@/lib/auth"
 
 export default async function Home() {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const user = await getUser()
 
-  // Removed hard redirect - Everyone can see the landing page now
-
-
-  // Professional headshots from Unsplash (diverse, professional-looking people)
   // Professional headshots from Unsplash (diverse, professional-looking people)
   const testimonialPeople = [
     {
       img: "/shivam.jpg",
       name: "Shivam",
-      role: "",
+      role: "Product Lead",
       quote: "The diverse product sense cases are incredibly relevant and thought-provoking.",
       linkedin: "https://www.linkedin.com/in/barnwal3008/"
     },
     {
       img: "/shweta.jpg",
       name: "Shweta",
-      role: "",
+      role: "Management Trainee",
       quote: "The AI feedback is incredibly accurate!"
     }
   ]
@@ -58,8 +53,6 @@ export default async function Home() {
             <div className="grid lg:grid-cols-2 gap-12 items-center">
               {/* Left Side - Text Content */}
               <div className="text-center lg:text-left">
-
-
                 <h1 className="text-4xl md:text-6xl lg:text-7xl font-black tracking-tight mb-8 text-gray-900 dark:text-white leading-[1.1]">
                   Master Product Management <br className="hidden md:block" />
                   <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-600 via-blue-600 to-cyan-500">With AI-Guided Precision</span>
@@ -71,32 +64,30 @@ export default async function Home() {
                   <Link href="/practice" className="bg-gradient-to-r from-violet-600 to-blue-600 text-white px-12 py-5 rounded-full font-black text-xl hover:shadow-xl hover:shadow-violet-500/30 transition-all flex items-center justify-center gap-2 group">
                     Start Practice with AI Simulation <ArrowRight size={24} className="group-hover:translate-x-1 transition-transform" />
                   </Link>
-                  {/* <Link href="/prodsense" className="bg-white dark:bg-gray-800 text-gray-900 dark:text-white px-10 py-4 rounded-full font-black text-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition border border-gray-200 dark:border-gray-700 shadow-lg">
-                    Product Puzzles
-                  </Link> */}
                 </div>
               </div>
 
               {/* Right Side - Hero Image with People */}
               <div className="relative hidden lg:block">
-                {/* Main hero image - professional working */}
                 <div className="relative">
                   <div className="absolute inset-0 bg-gradient-to-r from-violet-500 to-blue-500 rounded-3xl blur-2xl opacity-20 scale-105"></div>
-                  <img
-                    src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=600&h=700&fit=crop"
-                    alt="Product Manager"
-                    className="relative rounded-3xl shadow-2xl w-full max-w-md mx-auto object-cover border-4 border-white"
-                  />
+                  <div className="relative w-full max-w-md mx-auto aspect-[4/5] overflow-hidden rounded-3xl shadow-2xl border-4 border-white">
+                    <Image
+                      src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=600&h=750&fit=crop"
+                      alt="Product Manager"
+                      fill
+                      className="object-cover"
+                      priority
+                    />
+                  </div>
 
                   {/* Floating testimonial cards */}
                   <div className="absolute -left-12 top-20 bg-white dark:bg-gray-800 p-4 rounded-2xl shadow-xl border border-gray-100 dark:border-gray-700 max-w-xs animate-float">
                     <div className="flex items-center gap-3 mb-2">
-                      <img src={testimonialPeople[0].img} alt="" className="w-10 h-10 rounded-full" />
+                      <Image src={testimonialPeople[0].img} alt="" width={40} height={40} className="rounded-full overflow-hidden" />
                       <div>
-                        {/* @ts-ignore */}
                         {testimonialPeople[0].linkedin ? (
                           <a
-                            /* @ts-ignore */
                             href={testimonialPeople[0].linkedin}
                             target="_blank"
                             rel="noopener noreferrer"
@@ -116,7 +107,7 @@ export default async function Home() {
 
                   <div className="absolute -right-8 bottom-32 bg-white dark:bg-gray-800 p-4 rounded-2xl shadow-xl border border-gray-100 dark:border-gray-700 max-w-xs animate-float" style={{ animationDelay: '1s' }}>
                     <div className="flex items-center gap-3 mb-2">
-                      <img src={testimonialPeople[1].img} alt="" className="w-10 h-10 rounded-full" />
+                      <Image src={testimonialPeople[1].img} alt="" width={40} height={40} className="rounded-full overflow-hidden" />
                       <div>
                         <p className="font-bold text-sm">{testimonialPeople[1].name}</p>
                         <p className="text-xs text-violet-600">{testimonialPeople[1].role}</p>
@@ -139,7 +130,7 @@ export default async function Home() {
                     className={`absolute ${i === 0 ? 'top-0 right-0' : i === 1 ? 'bottom-0 right-20' : 'top-40 -left-8'} ${avatar.size} rounded-full overflow-hidden border-2 border-white shadow-lg animate-float`}
                     style={{ animationDelay: avatar.delay }}
                   >
-                    <img src={avatar.img} alt="" className="w-full h-full object-cover" />
+                    <Image src={avatar.img} alt="" fill className="object-cover" />
                   </div>
                 ))}
               </div>
@@ -159,6 +150,7 @@ export default async function Home() {
               { icon: "💡", text: "Expert-Curated Solutions" },
               { icon: "🚀", text: "Unlimited Practice Sessions" },
               { icon: "📱", text: "Mobile-Friendly Interface" },
+            ].concat([
               { icon: "🎯", text: "Custom Framework Evaluation" },
               { icon: "🤖", text: "Gemini-Powered AI Feedback" },
               { icon: "📝", text: "100+ Product Sense Questions" },
@@ -167,7 +159,7 @@ export default async function Home() {
               { icon: "💡", text: "Expert-Curated Solutions" },
               { icon: "🚀", text: "Unlimited Practice Sessions" },
               { icon: "📱", text: "Mobile-Friendly Interface" },
-            ].map((feature, i) => (
+            ]).map((feature, i) => (
               <div key={i} className="flex items-center gap-2 md:gap-3 mx-4 md:mx-8 text-white">
                 <span className="text-xl md:text-2xl">{feature.icon}</span>
                 <p className="text-[10px] md:text-sm font-semibold tracking-wide uppercase">{feature.text}</p>
@@ -210,9 +202,6 @@ export default async function Home() {
             </div>
           </div>
         </section>
-
-
-
       </main>
 
       <Footer />

@@ -137,6 +137,68 @@ async function archiveOldNews() {
     `, sevenDaysAgo);
 }
 
+async function getLiveAIPulse() {
+    const feeds = [
+        "https://techcrunch.com/category/artificial-intelligence/feed/",
+        "https://www.theverge.com/ai-artificial-intelligence/rss/index.xml"
+    ];
+
+    const articles: { title: string, url: string }[] = [];
+    for (const url of feeds) {
+        try {
+            console.log(`[AI News Pulse] Fetching: ${url}`);
+            const res = await fetch(url, {
+                headers: { 'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36' },
+                next: { revalidate: 0 }
+            });
+            if (!res.ok) {
+                console.error(`[AI News Pulse] Fetch failed for ${url}: ${res.status}`);
+                continue;
+            }
+            const xml = await res.text();
+
+            // Detect if it's Atom or RSS
+            const isAtom = xml.includes('<entry>');
+            const itemTag = isAtom ? '<entry>' : '<item>';
+
+            const chunks = xml.split(itemTag).slice(1);
+            console.log(`[AI News Pulse] Found ${chunks.length} items in ${url} (Format: ${isAtom ? 'Atom' : 'RSS'})`);
+
+            for (const chunk of chunks.slice(0, 10)) {
+                let title = "";
+                let link = "";
+
+                // Extract Title
+                const titleMatch = chunk.match(/<title[^>]*>([\s\S]*?)<\/title>/);
+                if (titleMatch) {
+                    title = titleMatch[1].replace(/<!\[CDATA\[/g, '').replace(/\]\]>/g, '').trim();
+                }
+
+                // Extract Link
+                if (isAtom) {
+                    // Atom link: <link rel="alternate" type="text/html" href="https://www.theverge.com/..."/>
+                    const hrefMatch = chunk.match(/<link[^>]+href=["']([^"']+)["']/);
+                    if (hrefMatch) link = hrefMatch[1];
+                } else {
+                    // RSS link: <link>https://techcrunch.com/...</link>
+                    const linkMatch = chunk.match(/<link[^>]*>([\s\S]*?)<\/link>/);
+                    if (linkMatch) {
+                        link = linkMatch[1].replace(/<!\[CDATA\[/g, '').replace(/\]\]>/g, '').trim();
+                    }
+                }
+
+                if (title && link && link.startsWith('http')) {
+                    articles.push({ title, url: link });
+                }
+            }
+        } catch (e) {
+            console.error(`[AI News Pulse] Error processing ${url}:`, e);
+        }
+    }
+    console.log(`[AI News Pulse] Total unique articles fetched: ${articles.length}`);
+    return articles;
+}
+
 export async function refreshAINews() {
     const { gemini: geminiKeys, groq: groqKeys } = getApiKeys();
 
@@ -151,9 +213,26 @@ export async function refreshAINews() {
     const todayStr = istDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
     const dayIdentifier = istDate.toISOString().split('T')[0];
 
+    // Fetch real links to prevent 404 hallucinations
+    const livePulse = await getLiveAIPulse();
+    if (livePulse.length === 0) {
+        return { success: false, error: "Could not fetch any live news sources." };
+    }
+
     const prompt = `# Daily AI Briefing for Product Managers. Date: ${todayStr}.
+You are an expert PM curator. I will provide you with a list of REAL news articles fetched from trusted tech sources.
+Your job is to pick the 4-6 most significant items for Product Managers and summarize them.
+
+CRITICAL: You MUST use the EXACT 'url' provided in the list below. DO NOT truncate, modify, or hallucinate URLs.
+
+REAL ARTICLES TO CHOOSE FROM:
+${livePulse.map(a => `Source Title: ${a.title}\nURL: ${a.url}`).join('\n---\n')}
+
 Return exactly a JSON array of 4-6 objects: [{"category": "...", "title": "...", "source": "...", "url": "...", "summary": "...", "pmPerspective": "...", "iconName": "...", "tags": [...]}]
-Focus on verifiable AI launches, enterprise news, and PM-relevant shifts from the last 24-48 hours. Output ONLY valid JSON.`;
+- Title should be punchy (e.g., "OpenAI Launches Search").
+- pmPerspective should explain why a PM should care (impact on product strategy, UX, or competition).
+- iconName should be a valid text name from this list: Rocket, Shield, Brain, Cpu, Globe, TrendingUp, Newspaper, Zap, MessageSquare, Bot, Box.
+- Output ONLY valid JSON.`;
 
     let newsItems: any[] = [];
 
@@ -201,7 +280,15 @@ Focus on verifiable AI launches, enterprise news, and PM-relevant shifts from th
     }
 
     for (const item of newsItems) {
+        // Validation: Ensure the AI didn't hallucinate a URL not in our list
+        const existsInPulse = livePulse.some(p => p.url === item.url);
+        if (!existsInPulse || !item.url.startsWith('http')) {
+            console.warn(`[AI News] Skipping hallucinated or invalid URL: ${item.url}`);
+            continue;
+        }
+
         const id = `art_${Math.random().toString(36).substr(2, 9)}`;
+        console.log(`[AI News] Inserting: ${item.title} -> ${item.url}`);
         await (prisma as any).$executeRawUnsafe(`
             INSERT INTO "Article" ("id", "articleType", "category", "title", "source", "url", "date", "targetDate", "periodIdentifier", "iconName", "summary", "pmPerspective", "tags", "publishedAt", "createdAt", "updatedAt")
             VALUES ($1, 'DAILY', $2, $3, $4, $5, $6, NOW(), $7, $8, $9, $10, $11::text[], NOW(), NOW(), NOW())

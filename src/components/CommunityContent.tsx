@@ -33,26 +33,26 @@ export function CommunityContent({ benefits, blogPosts }: CommunityContentProps)
             {/* Tab Switcher */}
             <div className="bg-white dark:bg-gray-950 sticky top-16 z-40 border-b border-gray-100 dark:border-gray-800">
                 <div className="container mx-auto max-w-7xl px-4">
-                    <div className="flex justify-center -mb-px">
+                    <div className="flex -mb-px w-full">
                         <button
                             onClick={() => setActiveTab('community')}
-                            className={`flex items-center gap-2 px-8 py-5 text-sm font-black uppercase tracking-widest transition-all border-b-2 ${activeTab === 'community'
+                            className={`flex-1 flex items-center justify-center gap-2 px-4 md:px-8 py-5 text-[10px] md:text-sm font-black uppercase tracking-widest transition-all border-b-2 ${activeTab === 'community'
                                 ? 'border-green-600 text-green-600'
                                 : 'border-transparent text-gray-500 hover:text-gray-900 dark:hover:text-white'
                                 }`}
                         >
-                            <LayoutGrid size={18} />
-                            WhatsApp Community
+                            <LayoutGrid size={16} />
+                            <span className="truncate">Community</span>
                         </button>
                         <button
                             onClick={() => setActiveTab('blog')}
-                            className={`flex items-center gap-2 px-8 py-5 text-sm font-black uppercase tracking-widest transition-all border-b-2 ${activeTab === 'blog'
+                            className={`flex-1 flex items-center justify-center gap-2 px-4 md:px-8 py-5 text-[10px] md:text-sm font-black uppercase tracking-widest transition-all border-b-2 ${activeTab === 'blog'
                                 ? 'border-blue-600 text-blue-600'
                                 : 'border-transparent text-gray-500 hover:text-gray-900 dark:hover:text-white'
                                 }`}
                         >
-                            <Newspaper size={18} />
-                            Knowledge Hub & Blogs
+                            <Newspaper size={16} />
+                            <span className="truncate">Blogs</span>
                         </button>
                     </div>
                 </div>

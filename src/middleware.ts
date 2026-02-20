@@ -31,32 +31,29 @@ export async function middleware(request: NextRequest) {
         }
     )
 
-    // 3. Get User (This is the heavy part, kept only for protection logic)
-    const { data: { user } } = await supabase.auth.getUser()
-
-    // 4. Protection Logic
+    // 3. Define Protection Logic
     const authRoutes = ['/login', '/signup', '/admin/login']
     const isAuthRoute = authRoutes.some(route => pathname === route || pathname === route + '/')
 
-    // List of routes that are explicitly PUBLIC (No login required)
-    const publicRoutes = ['/', '/about', '/practice', '/mentorship', '/community', '/contact', '/blog', '/prodsense', '/privacy', '/terms', '/jobs']
-    const isPublic = publicRoutes.some(route => pathname === route || pathname.startsWith(route + '/'))
+    // Explicitly check for protected prefixes
+    const isProtected = (pathname.startsWith('/admin') || pathname.startsWith('/feedback') || pathname.startsWith('/dashboard')) && !isAuthRoute
 
-    // A route is protected IF it's not public AND not an auth route
-    // OR if it's explicitly an admin/feedback route
-    const isProtected = (pathname.startsWith('/admin') || pathname.startsWith('/feedback')) && !isAuthRoute
+    // 4. Handle Protection (Only call getUser if needed)
+    if (isProtected || isAuthRoute) {
+        const { data: { user } } = await supabase.auth.getUser()
 
-    // Case A: Unauthenticated User trying to access Protected Route
-    if (!user && isProtected) {
-        const redirectPath = pathname.startsWith('/admin') ? '/admin/login' : '/login'
-        const loginUrl = new URL(redirectPath, request.url)
-        loginUrl.searchParams.set('redirectedFrom', pathname)
-        return NextResponse.redirect(loginUrl)
-    }
+        // Case A: Unauthenticated User trying to access Protected Route
+        if (!user && isProtected) {
+            const redirectPath = pathname.startsWith('/admin') ? '/admin/login' : '/login'
+            const loginUrl = new URL(redirectPath, request.url)
+            loginUrl.searchParams.set('redirectedFrom', pathname)
+            return NextResponse.redirect(loginUrl)
+        }
 
-    // Case B: Authenticated User trying to access Auth Pages (Login/Signup)
-    if (user && isAuthRoute) {
-        return NextResponse.redirect(new URL('/', request.url))
+        // Case B: Authenticated User trying to access Auth Pages (Login/Signup)
+        if (user && isAuthRoute) {
+            return NextResponse.redirect(new URL('/', request.url))
+        }
     }
 
     // Otherwise, allow

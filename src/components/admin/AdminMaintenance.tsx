@@ -1,12 +1,13 @@
 'use client'
 
 import { useState } from 'react'
-import { Zap, Newspaper, Briefcase, RefreshCw, CheckCircle2, AlertCircle, Sparkles } from 'lucide-react'
-import { refreshJobs } from '@/app/jobs/actions'
+import { Zap, Newspaper, Briefcase, RefreshCw, CheckCircle2, AlertCircle, Sparkles, FilterX } from 'lucide-react'
+import { refreshJobs, cleanupInactiveJobs } from '@/app/jobs/actions'
 import { refreshAINews } from '@/app/ai-news/actions'
 
 export function AdminMaintenance() {
     const [isRefreshingJobs, setIsRefreshingJobs] = useState(false)
+    const [isCleaningJobs, setIsCleaningJobs] = useState(false)
     const [isRefreshingNews, setIsRefreshingNews] = useState(false)
     const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null)
 
@@ -24,6 +25,23 @@ export function AdminMaintenance() {
             setMessage({ type: 'error', text: 'An unexpected error occurred while refreshing jobs.' })
         } finally {
             setIsRefreshingJobs(false)
+        }
+    }
+
+    const handleCleanupJobs = async () => {
+        setIsCleaningJobs(true)
+        setMessage(null)
+        try {
+            const result = await cleanupInactiveJobs()
+            if (result.success) {
+                setMessage({ type: 'success', text: `Successfully cleaned up jobs! Removed ${result.removedCount} inactive listings.` })
+            } else {
+                setMessage({ type: 'error', text: result.error || 'Failed to clean up jobs.' })
+            }
+        } catch (error) {
+            setMessage({ type: 'error', text: 'An unexpected error occurred while cleaning up jobs.' })
+        } finally {
+            setIsCleaningJobs(false)
         }
     }
 
@@ -67,17 +85,17 @@ export function AdminMaintenance() {
                     </div>
                 )}
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     {/* Refresh Jobs Card */}
                     <div className="p-6 bg-gray-900/50 rounded-2xl border border-gray-700 hover:border-blue-500/50 transition-all group">
                         <div className="flex items-center gap-4 mb-6">
                             <div className="w-10 h-10 rounded-xl bg-blue-500/20 flex items-center justify-center text-blue-400 group-hover:scale-110 transition-transform">
                                 <Briefcase size={20} />
                             </div>
-                            <h3 className="text-lg font-bold text-white">Product Job Board</h3>
+                            <h3 className="text-lg font-bold text-white">Scrape Jobs</h3>
                         </div>
                         <p className="text-gray-400 text-sm mb-8 leading-relaxed">
-                            Scrape global ATS (Greenhouse, Lever, etc.) for new deep-linked PM roles using our AI Engine. This process usually takes 2-3 minutes.
+                            Search for new PM roles across global portals. Adds new opportunities to the platform.
                         </p>
                         <button
                             onClick={handleRefreshJobs}
@@ -87,12 +105,42 @@ export function AdminMaintenance() {
                             {isRefreshingJobs ? (
                                 <>
                                     <RefreshCw className="animate-spin" size={20} />
-                                    Scraping Roles...
+                                    Scraping...
                                 </>
                             ) : (
                                 <>
                                     <RefreshCw size={20} />
-                                    Refresh Job Board
+                                    Sync Board
+                                </>
+                            )}
+                        </button>
+                    </div>
+
+                    {/* Cleanup Jobs Card */}
+                    <div className="p-6 bg-gray-900/50 rounded-2xl border border-gray-700 hover:border-red-500/50 transition-all group">
+                        <div className="flex items-center gap-4 mb-6">
+                            <div className="w-10 h-10 rounded-xl bg-red-500/20 flex items-center justify-center text-red-400 group-hover:scale-110 transition-transform">
+                                <FilterX size={20} />
+                            </div>
+                            <h3 className="text-lg font-bold text-white">Clean Stale Jobs</h3>
+                        </div>
+                        <p className="text-gray-400 text-sm mb-8 leading-relaxed">
+                            Crawl existing jobs and remove those that are no longer active or have broken links.
+                        </p>
+                        <button
+                            onClick={handleCleanupJobs}
+                            disabled={isCleaningJobs}
+                            className="w-full h-14 bg-red-600 hover:bg-red-500 disabled:opacity-50 disabled:hover:bg-red-600 text-white rounded-xl font-black flex items-center justify-center gap-3 transition-all shadow-lg shadow-red-500/20 active:scale-95"
+                        >
+                            {isCleaningJobs ? (
+                                <>
+                                    <RefreshCw className="animate-spin" size={20} />
+                                    Cleaning...
+                                </>
+                            ) : (
+                                <>
+                                    <Zap size={20} />
+                                    Start Cleanup
                                 </>
                             )}
                         </button>

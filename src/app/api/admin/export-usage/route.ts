@@ -52,7 +52,7 @@ export async function GET(request: Request) {
                 dailySummary[date] = { gemini: 0, groq: 0, email: 0 };
             }
             if (log.provider === 'gemini') dailySummary[date].gemini++;
-            if (log.provider === 'perplexity' || log.provider === 'groq') dailySummary[date].groq++;
+            if (log.provider === 'groq') dailySummary[date].groq++;
         });
 
         emailLogs.forEach(log => {

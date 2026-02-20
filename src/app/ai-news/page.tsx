@@ -80,8 +80,8 @@ export default async function AINewsPage(props: {
 
                 {/* Navigation Tabs */}
                 <div className="sticky top-0 z-30 bg-white/80 dark:bg-gray-950/80 backdrop-blur-md border-b border-gray-100 dark:border-gray-800">
-                    <div className="container mx-auto px-4">
-                        <div className="flex items-center gap-8 h-16">
+                    <div className="container mx-auto px-4 overflow-x-auto no-scrollbar">
+                        <div className="flex items-center gap-6 md:gap-8 h-16 min-w-max">
                             {[
                                 { id: 'DAILY', label: 'Daily Feed' },
                                 { id: 'WEEKLY_TOP', label: 'Weekly Top 10' },
@@ -90,7 +90,7 @@ export default async function AINewsPage(props: {
                                 <Link
                                     key={tab.id}
                                     href={`/ai-news?view=${tab.id.toLowerCase()}`}
-                                    className={`relative h-full flex items-center text-sm font-black uppercase tracking-widest transition-colors ${view === tab.id
+                                    className={`relative h-full flex items-center text-[10px] md:text-sm font-black uppercase tracking-widest transition-colors ${view === tab.id
                                         ? 'text-violet-600'
                                         : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-200'
                                         }`}
@@ -105,21 +105,21 @@ export default async function AINewsPage(props: {
                     </div>
                 </div>
 
-                <div className="container mx-auto px-4 mt-12">
-                    <div className="grid lg:grid-cols-4 gap-12">
+                <div className="container mx-auto px-4 mt-8 md:mt-12">
+                    <div className="grid lg:grid-cols-4 gap-8 md:gap-12">
                         {/* Period Sidebar */}
                         <div className="space-y-8">
-                            <div className="p-6 bg-gray-50 dark:bg-gray-900/50 rounded-[2rem] border border-gray-100 dark:border-gray-800">
-                                <h3 className="text-xs font-black uppercase tracking-widest text-gray-400 mb-6 flex items-center gap-2">
+                            <div className="p-5 md:p-6 bg-gray-50 dark:bg-gray-900/50 rounded-[2rem] border border-gray-100 dark:border-gray-800">
+                                <h3 className="text-[10px] md:text-xs font-black uppercase tracking-widest text-gray-400 mb-4 md:mb-6 flex items-center gap-2">
                                     <History size={14} />
                                     Archive
                                 </h3>
-                                <div className="space-y-1">
+                                <div className="flex flex-row lg:flex-col gap-2 overflow-x-auto lg:overflow-visible no-scrollbar pb-2 lg:pb-0">
                                     {(availablePeriods as any[]).map((p: any, i: number) => (
                                         <Link
                                             key={i}
                                             href={`/ai-news?view=${view.toLowerCase()}&period=${p.periodIdentifier}`}
-                                            className={`block px-4 py-2.5 rounded-xl text-sm font-bold transition-all ${period === p.periodIdentifier
+                                            className={`whitespace-nowrap px-4 py-2.5 rounded-xl text-xs md:text-sm font-bold transition-all ${period === p.periodIdentifier
                                                 ? 'bg-violet-600 text-white shadow-lg shadow-violet-500/20'
                                                 : (!period && i === 0)
                                                     ? 'bg-violet-50 dark:bg-violet-900/20 text-violet-600'
