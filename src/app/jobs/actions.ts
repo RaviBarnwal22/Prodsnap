@@ -27,16 +27,16 @@ export async function refreshJobs() {
         });
 
         const queries = [
-            "Actual deep links for Product Manager roles at companies like Glean, Razorpay, and Swiggy India boards.greenhouse.io",
-            "Lever job links for Product Manager roles at startups like Atlan, FamPay, or Jupiter India",
-            "Walmart Global Tech India Product Management deep links myworkdayjobs.com",
-            "JPMC and Goldman Sachs India Product Manager jobs on myworkdayjobs.com",
-            "Direct job links for Senior Product Manager at Amazon.jobs India",
-            "Microsoft India careers deep links for Product Manager",
-            "Zomato and Blinkit PM deep links on Greenhouse or personal boards",
-            "Zepto and Meesho PM roles India 2026 boards.greenhouse.io",
+            "High confidence Greenhouse job links for Product Manager roles at Zepto, Swiggy, and Razorpay India",
+            "Latest Lever job postings for Product Manager at Atlan, FamPay, and Jupiter India",
+            "Walmart Global Tech India Product Management active jobs myworkdayjobs.com",
+            "JPMC India and Goldman Sachs India Product Manager current openings on myworkdayjobs.com",
+            "Direct job links for Senior Product Manager at Amazon.jobs India 2026",
+            "Microsoft India careers current Product Manager roles",
+            "Zomato PM job deep links on Greenhouse boards",
+            "Meesho PM roles India greenhouse.io/meesho",
             "SaaS PM roles at BrowserStack, Freshworks, and Zoho direct links",
-            "DEBUG: Find one real PM job at Postman or Razorpay on Greenhouse"
+            "Postman India Product Manager Greenhouse links"
         ];
 
         let allJobItems: any[] = [];
