@@ -9,10 +9,11 @@ import { SignInButton } from './SignInButton'
 
 interface MobileMenuProps {
     isLoggedIn: boolean
+    isAdmin?: boolean
     userName?: string
 }
 
-export function MobileMenu({ isLoggedIn, userName }: MobileMenuProps) {
+export function MobileMenu({ isLoggedIn, isAdmin, userName }: MobileMenuProps) {
     const [isOpen, setIsOpen] = useState(false)
     const pathname = usePathname()
 
@@ -94,6 +95,16 @@ export function MobileMenu({ isLoggedIn, userName }: MobileMenuProps) {
                                             <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Signed in as</p>
                                             <p className="font-bold text-gray-900 dark:text-white truncate">{userName}</p>
                                         </div>
+                                        {isAdmin && (
+                                            <Link
+                                                href="/admin"
+                                                onClick={toggleMenu}
+                                                className="block w-full text-center py-4 bg-amber-500/10 border border-amber-500/20 text-amber-600 dark:text-amber-400 rounded-2xl font-bold hover:bg-amber-500/20 transition-all flex items-center justify-center gap-3"
+                                            >
+                                                <div className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
+                                                Admin Dashboard
+                                            </Link>
+                                        )}
                                         <a
                                             href="/auth/signout"
                                             className="block w-full text-center py-4 bg-gray-100 dark:bg-gray-800 rounded-2xl font-bold text-red-500 hover:bg-red-500 hover:text-white transition-all shadow-sm"
@@ -102,10 +113,19 @@ export function MobileMenu({ isLoggedIn, userName }: MobileMenuProps) {
                                         </a>
                                     </div>
                                 ) : (
-                                    <SignInButton
-                                        onClick={toggleMenu}
-                                        className="block w-full text-center py-4 bg-gradient-to-r from-violet-600 to-indigo-600 text-white rounded-2xl font-bold hover:shadow-lg hover:shadow-violet-500/30 transition-all"
-                                    />
+                                    <div className="space-y-3">
+                                        <SignInButton
+                                            onClick={toggleMenu}
+                                            className="block w-full text-center py-4 bg-gradient-to-r from-violet-600 to-indigo-600 text-white rounded-2xl font-bold hover:shadow-lg hover:shadow-violet-500/30 transition-all"
+                                        />
+                                        <Link
+                                            href="/admin/login"
+                                            onClick={toggleMenu}
+                                            className="block w-full text-center py-3 text-sm font-medium text-gray-500 dark:text-gray-400 hover:text-violet-600 transition-colors"
+                                        >
+                                            Staff/Admin Login
+                                        </Link>
+                                    </div>
                                 )}
                             </div>
                         </motion.div>

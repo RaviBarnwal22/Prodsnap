@@ -2,7 +2,7 @@ import Link from "next/link"
 import Image from "next/image"
 import { Header } from "@/components/Header"
 import { Footer } from "@/components/Footer"
-import { ArrowRight, Users, Sparkles, BookOpen } from "lucide-react"
+import { ArrowRight, Users, Sparkles, BookOpen, Briefcase } from "lucide-react"
 import { getUser } from "@/lib/auth"
 
 export default async function Home() {
@@ -175,7 +175,7 @@ export default async function Home() {
             <h2 className="text-xs uppercase tracking-[0.3em] font-black text-violet-600 mb-4">The Ecosystem</h2>
             <h3 className="text-4xl font-black tracking-tight">Everything you need to <span className="italic text-transparent bg-clip-text bg-gradient-to-r from-violet-600 to-blue-600">scale</span>.</h3>
           </div>
-          <div className="grid md:grid-cols-3 gap-12 max-w-6xl mx-auto">
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 max-w-7xl mx-auto">
             <div className="group bg-gradient-to-br from-violet-50 to-white dark:from-gray-900 dark:to-gray-900 p-8 rounded-3xl border border-violet-100 dark:border-gray-800 hover:shadow-xl hover:shadow-violet-500/10 transition-all">
               <div className="bg-gradient-to-br from-violet-500 to-purple-600 text-white w-16 h-16 flex items-center justify-center rounded-2xl mb-6 group-hover:scale-110 transition-transform shadow-lg">
                 <Sparkles size={32} />
@@ -184,6 +184,16 @@ export default async function Home() {
               <p className="text-gray-500 dark:text-gray-400 leading-relaxed font-medium mb-4">Real-time feedback on your verbal and written answers using industry-standard frameworks.</p>
               <Link href="/practice" className="inline-flex items-center gap-2 text-violet-600 font-bold hover:underline group-hover:gap-3 transition-all">Launch engine <ArrowRight size={16} /></Link>
             </div>
+
+            <div className="group bg-gradient-to-br from-amber-50 to-white dark:from-gray-900 dark:to-gray-900 p-8 rounded-3xl border border-amber-100 dark:border-gray-800 hover:shadow-xl hover:shadow-amber-500/10 transition-all">
+              <div className="bg-gradient-to-br from-amber-500 to-orange-600 text-white w-16 h-16 flex items-center justify-center rounded-2xl mb-6 group-hover:scale-110 transition-transform shadow-lg">
+                <Briefcase size={32} />
+              </div>
+              <h3 className="text-2xl font-bold mb-4">PM Job Openings</h3>
+              <p className="text-gray-500 dark:text-gray-400 leading-relaxed font-medium mb-4">Hand-picked Product Management roles from top tech companies and startups globally.</p>
+              <Link href="/jobs" className="inline-flex items-center gap-2 text-amber-600 font-bold hover:underline group-hover:gap-3 transition-all">Explore jobs <ArrowRight size={16} /></Link>
+            </div>
+
             <div className="group bg-gradient-to-br from-blue-50 to-white dark:from-gray-900 dark:to-gray-900 p-8 rounded-3xl border border-blue-100 dark:border-gray-800 hover:shadow-xl hover:shadow-blue-500/10 transition-all">
               <div className="bg-gradient-to-br from-blue-500 to-cyan-600 text-white w-16 h-16 flex items-center justify-center rounded-2xl mb-6 group-hover:scale-110 transition-transform shadow-lg">
                 <BookOpen size={32} />

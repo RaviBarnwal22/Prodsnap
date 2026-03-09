@@ -42,6 +42,7 @@ export async function Header() {
                     </div>
                     <MobileMenu
                         isLoggedIn={!!user}
+                        isAdmin={user?.email === 'ravibarnwal89@gmail.com'}
                         userName={user?.firstName || user?.name || user?.email}
                     />
                 </div>

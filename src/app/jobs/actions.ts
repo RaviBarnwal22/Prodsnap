@@ -27,32 +27,36 @@ export async function refreshJobs() {
         });
 
         const queries = [
-            "Product Manager roles at Walmart Global Tech India Feb 2026",
-            "JPMC and Goldman Sachs India Product deep links",
-            "Target India and Shell India PM roles",
-            "Amazon India PM Senior PM deep links Feb 2026",
-            "Google India Product Management career links",
-            "Microsoft India PM job links 2026",
-            "Adobe and Oracle India PM deep links",
-            "Razorpay, PhonePe, CRED PM deep links India",
-            "Swiggy, Zomato, Meesho PM roles 2026",
-            "Flipkart and Blinkit PM deep links",
-            "Zepto PM roles India 2026",
-            "SaaS PM roles at Freshworks, Zoho, BrowserStack",
-            "TPM and Lead PM roles at Intuit, Uber, Atlassian India"
+            "Actual deep links for Product Manager roles at companies like Glean, Razorpay, and Swiggy India boards.greenhouse.io",
+            "Lever job links for Product Manager roles at startups like Atlan, FamPay, or Jupiter India",
+            "Walmart Global Tech India Product Management deep links myworkdayjobs.com",
+            "JPMC and Goldman Sachs India Product Manager jobs on myworkdayjobs.com",
+            "Direct job links for Senior Product Manager at Amazon.jobs India",
+            "Microsoft India careers deep links for Product Manager",
+            "Zomato and Blinkit PM deep links on Greenhouse or personal boards",
+            "Zepto and Meesho PM roles India 2026 boards.greenhouse.io",
+            "SaaS PM roles at BrowserStack, Freshworks, and Zoho direct links",
+            "DEBUG: Find one real PM job at Postman or Razorpay on Greenhouse"
         ];
 
         let allJobItems: any[] = [];
 
         // Helper to call AI
         const callAI = async (query: string): Promise<any[]> => {
-            const prompt = `You are a job search assistant. Search for: ${query}. 
-Return exactly a JSON array of 5-8 UNIQUE, AUTHENTIC job objects for Product Management roles in INDIA: [{"title": "...", "company": "...", "location": "...", "source": "...", "url": "...", "experience": "...", "category": "JOB", "jobType": "PM", "postedAt": "..."}].
+            const prompt = `You are a high-precision job discovery agent. Search for: ${query}. 
+Return exactly a JSON array of 3-5 AUTHENTIC, RECENT Product Management job objects in INDIA.
 
-CRITICAL: 
-1. URLs MUST be deep links to Greenhouse, Lever, Workday (e.g. https://job-boards.greenhouse.io/company/jobs/123).
-2. ONLY include roles hiring in INDIA (Bengaluru, Hyderabad, Gurgaon, Remote-India).
-3. If you cannot find a valid direct link, return an empty array [].`;
+CRITICAL URL RULES: 
+1. Greenhouse: https://boards.greenhouse.io/{company}/jobs/{id} or https://job-boards.greenhouse.io/{company}/jobs/{id}
+2. Lever: https://jobs.lever.co/{company}/{id}
+3. Workday: https://{company}.wd1.myworkdayjobs.com/en-US/{Board}/job/{Location}/{Title}_{id}
+4. DO NOT INVENT URLs. If you are not 100% sure of the exact deep link, do not return it.
+5. NO GENERIC LINKS: Do not return "https://google.com/careers". Only return links to SPECIFIC job posts.
+6. DOMAIN CHECK: Company specific subdomains like "targetindia.greenhouse.io" are often fake. Use "boards.greenhouse.io/target".
+
+JSON Format: [{"title": "...", "company": "...", "location": "...", "source": "...", "url": "...", "experience": "...", "category": "JOB", "jobType": "PM", "postedAt": "..."}]
+
+Return as many as you find (up to 5). If no high-confidence links are found, return [].`;
 
             // Try Gemini first
             for (const key of geminiKeys) {
@@ -104,62 +108,95 @@ CRITICAL:
             }
             await new Promise(r => setTimeout(r, 1000)); // Rate limiting gap
         }
+        console.log(`[Job Action] AI returned ${allJobItems.length} total raw items.`);
+
+        if (allJobItems.length > 0) {
+            console.log(`[Job Action] First few items:`, JSON.stringify(allJobItems.slice(0, 2), null, 2));
+        }
         let count = 0;
         const verifiedJobs: any[] = [];
 
-        // 1. Pre-validation & Sanitization
+        // 2. Link Health Verification & Hallucination Filter
+        console.log(`[Job Action] Verifying health of ${allJobItems.length} candidate links...`);
+        const blocklistedPatterns = [
+            'targetindia.greenhouse.io',
+            'shellindia.greenhouse.io',
+            'walmartindia.greenhouse.io',
+            'jpmcindia.greenhouse.io',
+            'example.com',
+            'test.com',
+            'myworkday.com', // Too generic, usually wd1.myworkdayjobs.com
+            'linkedin.com/jobs/view/12345',
+            'greenhouse.io/company/jobs/id'
+        ];
+
         const sanitizedItems = allJobItems.filter(item => {
-            if (!item.title || !item.url) return false;
+            if (!item.url || !item.url.startsWith('http')) return false;
+            const urlLow = item.url.toLowerCase();
 
-            const urlLower = item.url.toLowerCase();
-            const urlPath = item.url.replace(/^https?:\/\/[^\/]+/, '').toLowerCase();
-            const companyLower = (item.company || '').toLowerCase();
+            // Filter out obvious hallucinations
+            if (blocklistedPatterns.some(pattern => urlLow.includes(pattern))) {
+                console.warn(`[Job Action] Hallucination detected and blocked: ${item.url}`);
+                return false;
+            }
 
-            // A. Block obvious sequential/hallucinated IDs 
-            const sequentialPatterns = ['123456', '654321', '987654', 'abc123', '012345'];
-            if (sequentialPatterns.some(p => item.url.includes(p))) return false;
+            // ENSURE AUTHENTIC DOMAINS
+            const isGreenhouse = urlLow.includes('greenhouse.io');
+            const isLever = urlLow.includes('lever.co');
+            const isWorkday = urlLow.includes('myworkdayjobs.com');
+            const isIndeed = urlLow.includes('indeed.com');
 
-            // B. Company Domain Enforcement
-            if (companyLower.includes('google') && !urlLower.includes('google.com')) return false;
-            if (companyLower.includes('amazon') && !urlLower.includes('amazon.jobs')) return false;
-            if (companyLower.includes('microsoft') && !urlLower.includes('microsoft.com')) return false;
-            if (companyLower.includes('meta') && !urlLower.includes('metacareers.com')) return false;
+            if (!isGreenhouse && !isLever && !isWorkday && !isIndeed && !urlLow.includes(item.company?.toLowerCase().replace(/\s/g, ''))) {
+                console.warn(`[Job Action] Blocking suspicious domain: ${item.url}`);
+                return false;
+            }
 
-            // C. Generic URL check
-            const genericTerms = ['/careers', '/jobs', '/career', '/job-search', '/openings', '/all-jobs', '/work-with-us'];
-            const isGenericPath = genericTerms.some(term =>
-                urlPath === term || urlPath === term + '/' || urlPath.endsWith(term) || urlPath.endsWith(term + '/')
-            );
-            if (isGenericPath && item.url.length < 50) return false;
+            // Workday deep link check (must have /job/ or /details/)
+            if (isWorkday && !urlLow.includes('/job/') && !urlLow.includes('/details/')) {
+                console.warn(`[Job Action] Blocking invalid Workday link: ${item.url}`);
+                return false;
+            }
 
-            // D. Identifier Check (Must have a long numeric or mixed ID)
-            const hasDeepLinkIdentifier = /[\/\-]([0-9]{6,}|[a-f0-9\-]{24,}|[0-9a-z]{10,})$/i.test(item.url);
-            if (!hasDeepLinkIdentifier && !urlLower.includes('indeed.com')) return false;
+            // Ensure no generic "example" IDs
+            if (urlLow.includes('123456') || urlLow.includes('000000')) return false;
+
+            // Ensure it's a deep link (at least a few slashes deep)
+            if (urlLow.split('/').length < 4) return false;
 
             return true;
         });
 
-        // 2. Link Health Verification (Checking for redirects to "Closed" or "Error" pages)
-        console.log(`[Job Action] Verifying health of ${sanitizedItems.length} candidate links...`);
         for (const item of sanitizedItems) {
             try {
-                // For Greenhouse/Lever, check if the link actually exists
-                if (item.url.includes('greenhouse.io') || item.url.includes('lever.co')) {
-                    const checkRes = await fetch(item.url, { method: 'HEAD', redirect: 'follow' });
-                    const finalUrl = checkRes.url;
-
-                    // Greenhouse redirects to board home or error=true if closed
-                    if (finalUrl.includes('error=true') ||
-                        (finalUrl.includes('greenhouse.io') && finalUrl.split('/').length < 6) ||
-                        (finalUrl.includes('lever.co') && finalUrl.split('/').length < 5)) {
-                        console.warn(`[Job Action] Discarding stale/closed link: ${item.url}`);
-                        continue;
+                const res = await fetch(item.url, {
+                    method: 'GET',
+                    redirect: 'follow',
+                    headers: {
+                        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36',
+                        'Accept': 'text/html,application/xhtml+xml,application/xml'
                     }
+                });
+
+                const finalUrl = res.url.toLowerCase();
+                const isGenericRedirect =
+                    (item.url.includes('greenhouse.io') && finalUrl.split('/').length < 6) ||
+                    (item.url.includes('lever.co') && finalUrl.split('/').length < 5);
+
+                if (!res.ok || res.status === 404 || isGenericRedirect || finalUrl.includes('error=true') || finalUrl.includes('job-closed')) {
+                    console.warn(`[Job Action] Discarded link: ${item.url} (Status: ${res.status}, Generic: ${isGenericRedirect}, Final: ${finalUrl})`);
+                    continue;
                 }
+
+                const text = await res.text();
+                const textLow = text.toLowerCase();
+                if (textLow.includes('job no longer available') || textLow.includes('this job has been closed') || textLow.includes('page not found')) {
+                    console.warn(`[Job Action] Discarded closed job (content check): ${item.url}`);
+                    continue;
+                }
+
                 verifiedJobs.push(item);
-            } catch (e) {
-                // Keep if check fails (might be a network blip), but prioritize clean ones
-                verifiedJobs.push(item);
+            } catch (e: any) {
+                console.warn(`[Job Action] Verification failed for: ${item.url}`, e.message);
             }
         }
 

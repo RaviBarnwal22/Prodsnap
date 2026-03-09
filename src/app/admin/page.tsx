@@ -45,9 +45,9 @@ function getLastNDays(n: number) {
 export default async function AdminPage() {
     const user = await getUser()
 
-    // Check if user is admin OR specifically ravibarnwal89@gmail.com
+    // STRICT ADMIN CHECK: Only ravibarnwal89@gmail.com is allowed
     const isAdminEmail = user?.email === 'ravibarnwal89@gmail.com'
-    if (!user || (!isAdminEmail && user.role !== 'ADMIN')) {
+    if (!user || !isAdminEmail) {
         redirect('/admin/login')
     }
 
