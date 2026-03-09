@@ -44,15 +44,15 @@ export async function refreshJobs() {
         // Helper to call AI
         const callAI = async (query: string): Promise<any[]> => {
             const prompt = `You are a high-precision job discovery agent. Search for: ${query}. 
-Return exactly a JSON array of 3-5 AUTHENTIC, RECENT Product Management job objects in INDIA.
+Return exactly a JSON array of 3-5 AUTHENTIC, RECENT Product Management job objects in INDIA (posted late 2025 or 2026).
 
 CRITICAL URL RULES: 
-1. Greenhouse: https://boards.greenhouse.io/{company}/jobs/{id} or https://job-boards.greenhouse.io/{company}/jobs/{id}
+1. Greenhouse: https://job-boards.greenhouse.io/{company}/jobs/{id} (Newer format) or https://boards.greenhouse.io/{company}/jobs/{id}
 2. Lever: https://jobs.lever.co/{company}/{id}
 3. Workday: https://{company}.wd1.myworkdayjobs.com/en-US/{Board}/job/{Location}/{Title}_{id}
 4. DO NOT INVENT URLs. If you are not 100% sure of the exact deep link, do not return it.
 5. NO GENERIC LINKS: Do not return "https://google.com/careers". Only return links to SPECIFIC job posts.
-6. DOMAIN CHECK: Company specific subdomains like "targetindia.greenhouse.io" are often fake. Use "boards.greenhouse.io/target".
+6. DOMAIN CHECK: Company specific subdomains like "targetindia.greenhouse.io" are often fake. Use "job-boards.greenhouse.io/target".
 
 JSON Format: [{"title": "...", "company": "...", "location": "...", "source": "...", "url": "...", "experience": "...", "category": "JOB", "jobType": "PM", "postedAt": "..."}]
 
