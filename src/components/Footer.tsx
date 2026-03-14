@@ -19,8 +19,6 @@ export function Footer() {
                         <h4 className="font-bold text-sm uppercase tracking-widest mb-4">Platform</h4>
                         <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
                             <li><Link href="/practice" className="hover:text-blue-600 transition">Practice Engine</Link></li>
-                            <li><Link href="/ai-news" className="hover:text-blue-600 transition">AI Daily</Link></li>
-                            {/* <li><Link href="/prodsense" className="hover:text-blue-600 transition">Prodsense</Link></li> */}
                         </ul>
                     </div>
                     <div>

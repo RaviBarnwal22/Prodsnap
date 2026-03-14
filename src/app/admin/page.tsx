@@ -14,9 +14,6 @@ import { AdminFeedbackQueue } from "@/components/admin/AdminFeedbackQueue"
 import { AdminTabs } from "@/components/admin/AdminTabs"
 import { AdminNewsletter } from "@/components/admin/AdminNewsletter"
 import { AdminMaintenance } from "@/components/admin/AdminMaintenance"
-import AdminJobAdder from "@/components/admin/AdminJobAdder"
-import AdminJobList from "@/components/admin/AdminJobList"
-import { Briefcase } from "lucide-react"
 
 
 // Helper to format date
@@ -175,10 +172,6 @@ export default async function AdminPage() {
     `
     const todayVisitors = Number(todayVisitorsRaw[0]?.count || 0)
 
-    // Fetch jobs for the jobs tab
-    const allJobs = await (prisma as any).job.findMany({
-        orderBy: { updatedAt: 'desc' }
-    })
 
     return (
         <div className="min-h-screen bg-gray-900">
@@ -477,12 +470,6 @@ export default async function AdminPage() {
                     }
                     maintenanceContent={
                         <AdminMaintenance />
-                    }
-                    jobsContent={
-                        <div className="max-w-5xl mx-auto py-12 space-y-12">
-                            <AdminJobAdder />
-                            <AdminJobList jobs={allJobs} />
-                        </div>
                     }
                 />
             </main>

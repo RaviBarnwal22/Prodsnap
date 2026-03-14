@@ -24,8 +24,6 @@ export function MobileMenu({ isLoggedIn, isAdmin, userName }: MobileMenuProps) {
         { name: 'Case Simulator', href: '/practice' },
         { name: 'Mentorship', href: '/mentorship' },
         { name: 'Community & Blogs', href: '/community' },
-        { name: 'AI Daily', href: '/ai-news' },
-        { name: 'PM Job Openings', href: '/jobs' },
         { name: 'Contact Us', href: '/contact' },
     ]
 

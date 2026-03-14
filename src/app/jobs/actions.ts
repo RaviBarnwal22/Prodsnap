@@ -109,6 +109,9 @@ Return as many as you find (up to 5). If no high-confidence links are found, ret
             await new Promise(r => setTimeout(r, 1000)); // Rate limiting gap
         }
         console.log(`[Job Action] AI returned ${allJobItems.length} total raw items.`);
+        try {
+            require('fs').writeFileSync('raw_ai_jobs.json', JSON.stringify(allJobItems, null, 2));
+        } catch (e) { }
 
         if (allJobItems.length > 0) {
             console.log(`[Job Action] First few items:`, JSON.stringify(allJobItems.slice(0, 2), null, 2));
@@ -166,6 +169,7 @@ Return as many as you find (up to 5). If no high-confidence links are found, ret
             return true;
         });
 
+        const verificationLogs: string[] = [];
         for (const item of sanitizedItems) {
             try {
                 const res = await fetch(item.url, {
@@ -183,22 +187,24 @@ Return as many as you find (up to 5). If no high-confidence links are found, ret
                     (item.url.includes('lever.co') && finalUrl.split('/').length < 5);
 
                 if (!res.ok || res.status === 404 || isGenericRedirect || finalUrl.includes('error=true') || finalUrl.includes('job-closed')) {
-                    console.warn(`[Job Action] Discarded link: ${item.url} (Status: ${res.status}, Generic: ${isGenericRedirect}, Final: ${finalUrl})`);
+                    verificationLogs.push(`DISCARDED: ${item.url} | Status: ${res.status} | FinalURL: ${finalUrl} | Generic: ${isGenericRedirect}`);
                     continue;
                 }
 
                 const text = await res.text();
                 const textLow = text.toLowerCase();
                 if (textLow.includes('job no longer available') || textLow.includes('this job has been closed') || textLow.includes('page not found')) {
-                    console.warn(`[Job Action] Discarded closed job (content check): ${item.url}`);
+                    verificationLogs.push(`CLOSED_CONTENT: ${item.url}`);
                     continue;
                 }
 
+                verificationLogs.push(`VERIFIED: ${item.url}`);
                 verifiedJobs.push(item);
             } catch (e: any) {
-                console.warn(`[Job Action] Verification failed for: ${item.url}`, e.message);
+                verificationLogs.push(`FAILED_FETCH: ${item.url} | Error: ${e.message}`);
             }
         }
+        try { require('fs').writeFileSync('verification_debug.log', verificationLogs.join('\n')); } catch (e) { }
 
         for (const item of verifiedJobs) {
             try {
