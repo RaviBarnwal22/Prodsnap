@@ -1,28 +1,24 @@
 'use client'
 
 import { useState } from 'react'
-import { Users, Activity, BarChart3, MessageSquare, Database, Mail } from 'lucide-react'
+import { Users, Activity, BarChart3, MessageSquare } from 'lucide-react'
 
 interface AdminTabsProps {
     overviewContent: React.ReactNode
     apiUsageContent: React.ReactNode
     usersContent: React.ReactNode
     supportContent: React.ReactNode
-    newsletterContent: React.ReactNode
-    maintenanceContent: React.ReactNode
 }
 
-type TabId = 'overview' | 'api-usage' | 'users' | 'support' | 'newsletter' | 'maintenance'
+type TabId = 'overview' | 'api-usage' | 'users' | 'support'
 
-export function AdminTabs({ overviewContent, apiUsageContent, usersContent, supportContent, newsletterContent, maintenanceContent }: AdminTabsProps) {
+export function AdminTabs({ overviewContent, apiUsageContent, usersContent, supportContent }: AdminTabsProps) {
     const [activeTab, setActiveTab] = useState<TabId>('overview')
 
     const tabs = [
         { id: 'overview' as TabId, label: 'Overview', icon: BarChart3 },
         { id: 'users' as TabId, label: 'Users', icon: Users },
-        { id: 'newsletter' as TabId, label: 'Newsletter', icon: Mail },
         { id: 'support' as TabId, label: 'Support', icon: MessageSquare },
-        { id: 'maintenance' as TabId, label: 'Maintenance', icon: Database },
         { id: 'api-usage' as TabId, label: 'API Usage', icon: Activity },
     ]
 
@@ -88,18 +84,6 @@ export function AdminTabs({ overviewContent, apiUsageContent, usersContent, supp
                 {activeTab === 'support' && (
                     <div className="animate-fadeIn">
                         {supportContent}
-                    </div>
-                )}
-
-                {activeTab === 'newsletter' && (
-                    <div className="animate-fadeIn">
-                        {newsletterContent}
-                    </div>
-                )}
-
-                {activeTab === 'maintenance' && (
-                    <div className="animate-fadeIn">
-                        {maintenanceContent}
                     </div>
                 )}
             </div>

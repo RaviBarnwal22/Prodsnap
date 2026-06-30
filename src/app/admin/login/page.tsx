@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { Mail, Lock, Loader2, Eye, EyeOff, ShieldCheck } from 'lucide-react'
+import { Mail, Lock, Loader2, Eye, EyeOff, ShieldCheck, Brain } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
@@ -155,9 +155,13 @@ export default function AdminLoginPage() {
                     </form>
                 </div>
 
-                {/* Back to main site */}
-                <div className="text-center mt-6">
-                    <Link href="/login" className="text-gray-400 hover:text-white text-sm transition">
+                {/* Additional Links */}
+                <div className="text-center mt-6 flex flex-col items-center gap-3">
+                    <Link href="/admin/ai-coach" className="inline-flex items-center gap-2 px-6 py-2.5 bg-gradient-to-r from-indigo-900 to-purple-900 border border-indigo-500/30 text-indigo-200 rounded-full text-sm font-bold hover:text-white hover:border-indigo-400 transition-all shadow-lg shadow-indigo-500/10">
+                        <Brain size={16} />
+                        Open AI Coach
+                    </Link>
+                    <Link href="/login" className="text-gray-500 hover:text-gray-300 text-sm transition">
                         ← Back to Sign In
                     </Link>
                 </div>

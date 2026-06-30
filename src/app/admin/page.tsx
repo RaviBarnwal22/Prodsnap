@@ -3,7 +3,7 @@ import { getUser } from "@/lib/auth"
 import { redirect } from "next/navigation"
 import Link from "next/link"
 import Image from "next/image"
-import { Users, Activity, FileText, Calendar, MessageSquare, BarChart3, ShieldCheck, LogOut, Home } from "lucide-react"
+import { Users, Activity, FileText, Calendar, MessageSquare, BarChart3, ShieldCheck, LogOut, Home, Brain } from "lucide-react"
 import { AdminUserList } from "@/components/admin/AdminUserList"
 import { UserFeedbackList } from "@/components/admin/UserFeedbackList"
 import { AdminPaymentRequests } from "@/components/admin/AdminPaymentRequests"
@@ -12,8 +12,7 @@ import { AdminSupportQueue } from "@/components/admin/AdminSupportQueue"
 import { ApiUsageMonitor } from "@/components/admin/ApiUsageMonitor"
 import { AdminFeedbackQueue } from "@/components/admin/AdminFeedbackQueue"
 import { AdminTabs } from "@/components/admin/AdminTabs"
-import { AdminNewsletter } from "@/components/admin/AdminNewsletter"
-import { AdminMaintenance } from "@/components/admin/AdminMaintenance"
+
 
 
 // Helper to format date
@@ -190,6 +189,10 @@ export default async function AdminPage() {
                         </div>
                     </div>
                     <div className="flex items-center gap-4">
+                        <Link href="/admin/ai-coach" className="flex items-center gap-2 text-indigo-400 hover:text-indigo-300 text-sm font-bold transition bg-indigo-500/10 px-3 py-1.5 rounded-lg border border-indigo-500/20 mr-2">
+                            <Brain size={16} />
+                            AI Coach
+                        </Link>
                         <Link href="/" className="flex items-center gap-2 text-gray-400 hover:text-white text-sm transition">
                             <Home size={16} />
                             View Site
@@ -465,12 +468,7 @@ export default async function AdminPage() {
                             <AdminSupportQueue submissions={contactSubmissions as any} />
                         </div>
                     }
-                    newsletterContent={
-                        <AdminNewsletter />
-                    }
-                    maintenanceContent={
-                        <AdminMaintenance />
-                    }
+
                 />
             </main>
         </div>
