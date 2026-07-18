@@ -1,142 +1,230 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
-import { getProfile, getLearningState, getMessages, getRecentSessions, saveMessages, saveLearningState, saveRecentSessions } from './memory';
+import { getProfile, getLearningState, getMessages, getRecentSessions, saveMessages, saveLearningState } from './memory';
 import { CoachMessage, LearningState, SessionSummary } from './types';
 import { v4 as uuidv4 } from 'uuid';
 
-// Helper to get Gemini API keys from environment
+// ─── Constants ────────────────────────────────────────────────────────────────
+const RAW_HISTORY_WINDOW = 6;   // Recent messages passed verbatim
+const SUMMARY_WINDOW = 20;       // Older messages get compressed into a summary
+
+// ─── Token Helpers ────────────────────────────────────────────────────────────
+
 function getGeminiKeys(): string[] {
-    const gemini: string[] = [];
+    const keys: string[] = [];
     let i = 1;
     while (process.env[`GEMINI_API_KEY_${i}`]) {
-        gemini.push(process.env[`GEMINI_API_KEY_${i}`] as string);
+        keys.push(process.env[`GEMINI_API_KEY_${i}`] as string);
         i++;
     }
-    if (gemini.length === 0 && process.env.GEMINI_API_KEY) {
-        gemini.push(process.env.GEMINI_API_KEY);
+    if (keys.length === 0 && process.env.GEMINI_API_KEY) keys.push(process.env.GEMINI_API_KEY);
+    return keys.filter(k => k.trim() !== "");
+}
+
+/** Strip markdown to reduce token count on historical messages */
+function stripMarkdown(text: string): string {
+    return text
+        .replace(/#{1,6}\s+/g, '')
+        .replace(/\*\*(.+?)\*\*/g, '$1')
+        .replace(/\*(.+?)\*/g, '$1')
+        .replace(/`{1,3}[^`]*`{1,3}/g, '')
+        .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
+        .replace(/^\s*[-*>]\s+/gm, '')
+        .replace(/\n{3,}/g, '\n\n')
+        .trim();
+}
+
+function truncate(text: string, max = 300): string {
+    return text.length <= max ? text : text.substring(0, max) + '…';
+}
+
+/** Compress older messages into a compact summary block to save tokens */
+function buildConversationSummary(olderMessages: CoachMessage[]): string {
+    if (olderMessages.length === 0) return '';
+    const lines = olderMessages.map(msg => {
+        const role = msg.role === 'user' ? 'L' : 'C'; // L=Learner, C=Coach
+        return `${role}: ${truncate(stripMarkdown(msg.content), 150)}`;
+    });
+    return `[Prior context]\n${lines.join('\n')}\n[End prior context]`;
+}
+
+// ─── Compact System Prompt (30% fewer tokens) ─────────────────────────────────
+
+function buildSystemPrompt(
+    profile: any,
+    state: LearningState,
+    recentSession: SessionSummary | null,
+    conversationSummary: string
+): string {
+    // Compact bio: only the most essential facts
+    const bio = [
+        `${profile.name} | ${profile.currentRole}`,
+        `Exp: ${profile.experience} | Edu: ${profile.education}`,
+        `Certs: ${profile.certifications?.slice(0, 2).join(', ') || 'None'}`,
+        `Skills: ${profile.background.slice(0, 8).join(', ')}`,
+        `Targets: ${profile.targetCompanies.slice(0, 6).join(', ')}`,
+        `Goal: ${profile.goal}`,
+        `Project: ${profile.sideProject}`,
+    ].join('\n');
+
+    // Compact learning state
+    const learningCtx = [
+        `Topic: ${state.currentTopic} | Mastery: ${state.masteryScore}%`,
+        `Weak: ${state.weakConcepts.slice(0, 3).join(', ') || 'none'}`,
+        `Strong: ${state.strongConcepts.slice(0, 3).join(', ') || 'none'}`,
+        `Today: ${state.todayObjective}`,
+        recentSession ? `Last session: ${truncate(recentSession.summary, 150)}` : '',
+    ].filter(Boolean).join('\n');
+
+    return `You are an elite AI PM mentor — Former Google L7 PM, Microsoft Principal PM, OpenAI PM. You are NOT a chatbot. You are a personal mentor.
+Rules: Never flatter. Challenge assumptions. Ask ONE probing question at a time. Encourage first-principles thinking. Do not reveal answers upfront. Connect learning to the learner's real experience.
+When interviewing: score answers after each response.
+Format: Markdown. Be concise.
+
+LEARNER:
+${bio}
+
+LEARNING STATE:
+${learningCtx}
+${conversationSummary ? `\n${conversationSummary}` : ''}
+SESSION FLOW: Welcome → Review → New Learning → Practice/Mock Interview → Homework → Summary.
+Tie examples to IBM ELM, Enterprise SaaS, GTM. Ask: "How would Google approach this?" or "What would OpenAI trade off?"`;
+}
+
+// ─── OpenAI-Compatible Caller (Groq, Cerebras, SambaNova all use same format) ─
+
+async function callOpenAICompatible(
+    apiUrl: string,
+    apiKey: string,
+    model: string,
+    systemPrompt: string,
+    historyMessages: CoachMessage[],
+    userContent: string,
+    providerName: string
+): Promise<string | null> {
+    try {
+        console.log(`[AI Coach] Trying ${providerName} (${model})...`);
+        const messages = [
+            { role: 'system', content: systemPrompt },
+            ...historyMessages.map(msg => ({
+                role: msg.role === 'assistant' ? 'assistant' : 'user',
+                content: truncate(stripMarkdown(msg.content), 300)
+            })),
+            { role: 'user', content: userContent }
+        ];
+
+        const res = await fetch(apiUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
+            body: JSON.stringify({ model, messages, temperature: 0.7, max_tokens: 1024 })
+        });
+
+        if (!res.ok) {
+            const err = await res.text();
+            throw new Error(`${providerName} ${res.status}: ${err.substring(0, 100)}`);
+        }
+
+        const data = await res.json();
+        const text = data.choices?.[0]?.message?.content || '';
+        if (text) {
+            console.log(`[AI Coach] ✓ ${providerName} responded.`);
+            return text;
+        }
+        return null;
+    } catch (err) {
+        console.error(`[AI Coach] ${providerName} failed:`, err);
+        return null;
     }
-    return gemini.filter(k => k.trim() !== "");
 }
 
-function buildSystemPrompt(profile: any, state: LearningState, recentSession: SessionSummary | null): string {
-    return `You are an elite AI Product Management mentor, coaching a user to become interview-ready for Senior AI Product Manager roles at top tech companies.
-Your persona: Former Google L7 PM, Microsoft Principal PM, OpenAI Product Manager, and Executive Product Coach.
-Do NOT behave like a chatbot. Behave like a personal mentor. Never flatter. Never blindly agree. Challenge assumptions. Ask probing questions. Encourage first-principles thinking. Ask ONE question at a time. Do not reveal answers immediately.
-
-ABOUT THE LEARNER:
-Name: ${profile.name}
-Role: ${profile.currentRole}
-Experience: ${profile.experience}
-Education: ${profile.education}
-Certifications: ${profile.certifications?.join(', ') || 'None'}
-Background & Skills: ${profile.background.join(', ')}
-Target Companies: ${profile.targetCompanies.join(', ')}
-Goal: ${profile.goal}
-Side Project: ${profile.sideProject}
-LinkedIn: ${profile.linkedin || 'Not provided'}
-
-CURRENT LEARNING STATE:
-Current Topic: ${state.currentTopic}
-Mastery Score: ${state.masteryScore}%
-Weak Concepts: ${state.weakConcepts.join(', ') || 'None identified yet'}
-Strong Concepts: ${state.strongConcepts.join(', ') || 'None identified yet'}
-Today's Objective: ${state.todayObjective}
-Recent Session Summary: ${recentSession ? recentSession.summary : 'No recent sessions.'}
-
-SESSION FLOW RULES:
-1. Every session starts with Welcome Back + Review Previous Progress + Revision (if due).
-2. Move to New Learning.
-3. Ask Practice Questions / Interview Simulation.
-4. Provide Homework.
-5. Provide Session Summary.
-
-When asked to conduct an interview, provide detailed scoring after completion.
-Frequently connect concepts back to IBM ELM, Enterprise SaaS, Product Strategy, GTM, and the learner's past experience.
-Examples: "How would this apply to IBM ELM?", "Would Google solve this differently?", "What trade-offs would OpenAI consider?"
-
-Respond in Markdown format. Keep responses concise and focused.`;
-}
+// ─── Main Function ────────────────────────────────────────────────────────────
 
 export async function processUserMessage(content: string): Promise<CoachMessage> {
-    const keys = getGeminiKeys();
-    if (keys.length === 0) {
-        throw new Error("No Gemini API keys found.");
-    }
-
     const profile = await getProfile();
     const learningState = await getLearningState();
     const sessions = await getRecentSessions();
     const recentSession = sessions.length > 0 ? sessions[sessions.length - 1] : null;
-    
     let messages = await getMessages();
 
-    // 1. Add user message
-    const userMessage: CoachMessage = {
-        id: uuidv4(),
-        role: 'user',
-        content,
-        timestamp: new Date().toISOString()
-    };
+    // 1. Save user message
+    const userMessage: CoachMessage = { id: uuidv4(), role: 'user', content, timestamp: new Date().toISOString() };
     messages.push(userMessage);
 
-    // 2. Build context
-    const systemPrompt = buildSystemPrompt(profile, learningState, recentSession);
-    
-    // Convert previous messages to Gemini format (limit to last 10 messages for context window)
-    const recentMessages = messages.slice(-10);
-    const geminiHistory = recentMessages.map(msg => ({
-        role: msg.role === 'assistant' ? 'model' : 'user',
-        parts: [{ text: msg.content }]
-    }));
+    // 2. Smart context compression
+    const previousMessages = messages.slice(0, -1);
+    const recentRaw = previousMessages.slice(-RAW_HISTORY_WINDOW);
+    const olderMessages = previousMessages.slice(-SUMMARY_WINDOW, -RAW_HISTORY_WINDOW);
+    const conversationSummary = buildConversationSummary(olderMessages);
 
-    // 3. Call Gemini
+    const systemPrompt = buildSystemPrompt(profile, learningState, recentSession, conversationSummary);
+
+    // Ensure history starts with user role (Gemini requirement)
+    let historyMessages = [...recentRaw];
+    while (historyMessages.length > 0 && historyMessages[0].role === 'assistant') historyMessages.shift();
+
+    // 3. Try Gemini first
     let aiResponseText = "";
-    let success = false;
-    
-    // Try keys sequentially
-    for (const key of keys) {
-        try {
-            const genAI = new GoogleGenerativeAI(key);
-            // Use flash for speed, or pro if we want deeper reasoning. Using flash here for conversational speed.
-            const model = genAI.getGenerativeModel({ 
-                model: "gemini-2.5-flash",
-                systemInstruction: systemPrompt 
-            });
+    const geminiKeys = getGeminiKeys();
 
-            // Remove the last message from history, as we will send it as the prompt
-            const historyWithoutLast = geminiHistory.slice(0, -1);
-            const chat = model.startChat({
-                history: historyWithoutLast,
-                generationConfig: {
-                    temperature: 0.7,
-                }
-            });
-
-            const result = await chat.sendMessage(content);
-            aiResponseText = result.response.text();
-            success = true;
-            break;
-        } catch (error) {
-            console.error("[AI Coach] Gemini API error with key:", error);
-            continue;
+    if (geminiKeys.length > 0) {
+        for (const key of geminiKeys) {
+            try {
+                const genAI = new GoogleGenerativeAI(key);
+                const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash', systemInstruction: systemPrompt });
+                const geminiHistory = historyMessages.map(msg => ({
+                    role: msg.role === 'assistant' ? 'model' : 'user',
+                    parts: [{ text: msg.content }]
+                }));
+                const chat = model.startChat({ history: geminiHistory, generationConfig: { temperature: 0.7 } });
+                const result = await chat.sendMessage(content);
+                aiResponseText = result.response.text();
+                if (aiResponseText) { console.log('[AI Coach] ✓ Gemini responded.'); break; }
+            } catch (err) {
+                console.error('[AI Coach] Gemini failed:', err);
+            }
         }
     }
 
-    if (!success) {
+    // 4. Fallback chain: Groq → Cerebras → SambaNova
+    if (!aiResponseText && process.env.GROQ_API_KEY) {
+        const result = await callOpenAICompatible(
+            'https://api.groq.com/openai/v1/chat/completions',
+            process.env.GROQ_API_KEY,
+            'llama-3.3-70b-versatile',
+            systemPrompt, historyMessages, content, 'Groq'
+        );
+        if (result) aiResponseText = result;
+    }
+
+    if (!aiResponseText && process.env.CEREBRAS_API_KEY) {
+        const result = await callOpenAICompatible(
+            'https://api.cerebras.ai/v1/chat/completions',
+            process.env.CEREBRAS_API_KEY,
+            'gpt-oss-120b',
+            systemPrompt, historyMessages, content, 'Cerebras'
+        );
+        if (result) aiResponseText = result;
+    }
+
+    if (!aiResponseText && process.env.SAMBANOVA_API_KEY) {
+        const result = await callOpenAICompatible(
+            'https://api.sambanova.ai/v1/chat/completions',
+            process.env.SAMBANOVA_API_KEY,
+            'Meta-Llama-3.3-70B-Instruct',
+            systemPrompt, historyMessages, content, 'SambaNova'
+        );
+        if (result) aiResponseText = result;
+    }
+
+    if (!aiResponseText) {
         aiResponseText = "I'm currently experiencing technical difficulties connecting to my cognitive engine. Let's pause and try again in a moment.";
     }
 
-    // 4. Save assistant message
-    const assistantMessage: CoachMessage = {
-        id: uuidv4(),
-        role: 'assistant',
-        content: aiResponseText,
-        timestamp: new Date().toISOString()
-    };
+    // 5. Save assistant message
+    const assistantMessage: CoachMessage = { id: uuidv4(), role: 'assistant', content: aiResponseText, timestamp: new Date().toISOString() };
     messages.push(assistantMessage);
     await saveMessages(messages);
 
-    // 5. Update Learning State implicitly (In a real scenario, we might use a secondary LLM call to extract state updates. 
-    // For now, we will just update streak/lastSessionDate)
+    // 6. Update streak
     const todayStr = new Date().toISOString().split('T')[0];
     if (learningState.lastSessionDate !== todayStr) {
         learningState.streak += 1;

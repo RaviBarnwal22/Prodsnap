@@ -51,9 +51,18 @@ export interface CoachProfile {
   linkedin?: string;
 }
 
+export interface RevisionCard {
+  id: string;
+  date: string;          // YYYY-MM-DD
+  concept: string;       // Short title
+  context: string;       // Why it matters / what was discussed
+  topicTag: string;      // e.g. "AI Strategy"
+}
+
 export interface CoachState {
   messages: CoachMessage[];
   learningState: LearningState;
   recentSession: SessionSummary | null;
   profile: CoachProfile;
+  revisionDeck: RevisionCard[];
 }
