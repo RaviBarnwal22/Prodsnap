@@ -704,6 +704,42 @@ export default function MentorshipClient() {
                 </div>
             </section>
 
+            {/* Workshop Spotlight Section */}
+            <section className="py-16 px-4 bg-violet-50 dark:bg-slate-900/30 border-y border-gray-100 dark:border-gray-900">
+                <div className="container mx-auto max-w-5xl">
+                    <div className="grid lg:grid-cols-12 gap-8 items-center bg-white dark:bg-gray-900 p-8 md:p-12 rounded-[2.5rem] border border-violet-100 dark:border-gray-800 shadow-xl">
+                        <div className="lg:col-span-7 space-y-6">
+                            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-violet-100 dark:bg-violet-900/30 text-violet-700 dark:text-violet-300 uppercase tracking-wider">
+                                <Sparkles size={12} className="animate-pulse" />
+                                Workshop Highlight
+                            </span>
+                            <h2 className="text-3xl md:text-4xl font-black text-gray-900 dark:text-white leading-tight">
+                                Think Like a Product Manager, Build Products That Win
+                            </h2>
+                            <p className="text-gray-600 dark:text-gray-400 leading-relaxed text-sm md:text-base">
+                                A highlight from Ravi's interactive Product Management Workshop at **IIM Bodh Gaya** (DigiBiz). Ravi teaches practical frameworks, core product sense methodologies, and real-world case simulations to help aspiring leaders crack top-tier product roles.
+                            </p>
+                            <div className="flex flex-wrap gap-3">
+                                <div className="px-4 py-2 bg-slate-50 dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 text-xs font-bold text-gray-500 dark:text-gray-400">
+                                    IIM Bodh Gaya Guest Lecture
+                                </div>
+                                <div className="px-4 py-2 bg-slate-50 dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 text-xs font-bold text-gray-500 dark:text-gray-400">
+                                    Case Study Method
+                                </div>
+                            </div>
+                        </div>
+                        <div className="lg:col-span-5 relative w-full">
+                            <div className="absolute inset-0 bg-violet-600/10 rounded-2xl blur-lg"></div>
+                            <img
+                                src="/ravi-iim-workshop.png"
+                                alt="Ravi Barnwal PM Workshop at IIM Bodh Gaya"
+                                className="w-full rounded-2xl shadow-lg border border-gray-250 dark:border-gray-800 relative z-10"
+                            />
+                        </div>
+                    </div>
+                </div>
+            </section>
+
             {/* Companies Worked For */}
             <section className="py-24 px-4 bg-gray-50/50 dark:bg-gray-900/20 border-y border-gray-100 dark:border-gray-800/50">
                 <div className="container mx-auto max-w-6xl">
