@@ -6,7 +6,7 @@ import { getUser } from '@/lib/auth';
 const API_LIMITS = {
     gemini: {
         free: 500, // Conservative estimate for free tier
-        model: 'gemini-2.0-flash'
+        model: 'gemini-2.5-flash'
     },
     groq: {
         free: 14400, // ~10 requests per minute ballpark

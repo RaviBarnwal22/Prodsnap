@@ -56,7 +56,7 @@ ${articles.map(a => `ID: ${a.id} | Title: ${a.title}`).join('\n')}`;
     for (const key of geminiKeys) {
         try {
             const genAI = new GoogleGenerativeAI(key);
-            const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+            const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
             const result = await model.generateContent(prompt);
             const text = result.response.text();
             const match = text.match(/\[[\s\S]*\]/);
@@ -240,7 +240,7 @@ Return exactly a JSON array of 4-6 objects: [{"category": "...", "title": "...",
     for (const key of geminiKeys) {
         try {
             const genAI = new GoogleGenerativeAI(key);
-            const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+            const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
             const result = await model.generateContent(prompt);
             const text = result.response.text();
             const jsonMatch = text.match(/\[[\s\S]*\]/);

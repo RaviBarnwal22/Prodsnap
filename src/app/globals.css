@@ -104,3 +104,13 @@ body {
 .animate-fadeIn {
   animation: fadeIn 0.3s ease-out;
 }
+
+/* Respect user's motion preference — critical for mobile perf */
+@media (prefers-reduced-motion: reduce) {
+  .animate-float,
+  .animate-float-slow,
+  .animate-marquee,
+  .animate-pulse {
+    animation: none !important;
+  }
+}

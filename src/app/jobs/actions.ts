@@ -63,7 +63,7 @@ Return as many as you find (up to 5). If no high-confidence links are found, ret
                 try {
                     const genAI = new GoogleGenerativeAI(key);
                     const model = genAI.getGenerativeModel({
-                        model: "gemini-2.0-flash",
+                        model: "gemini-2.5-flash",
                     });
 
                     const result = await model.generateContent(prompt);
@@ -398,7 +398,7 @@ Return only the JSON object.`;
         for (const key of geminiKeys) {
             try {
                 const genAI = new GoogleGenerativeAI(key);
-                const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+                const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
                 const result = await model.generateContent(prompt);
                 const text = result.response.text();
                 const jsonMatch = text.match(/\{[\s\S]*\}/);

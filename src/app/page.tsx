@@ -1,14 +1,15 @@
+export const dynamic = 'force-dynamic'
 import Link from "next/link"
 import Image from "next/image"
 import { Header } from "@/components/Header"
 import { Footer } from "@/components/Footer"
-import { ArrowRight, Users, Sparkles, BookOpen, Briefcase } from "lucide-react"
+import { ArrowRight, Users, Sparkles, BookOpen } from "lucide-react"
 import { getUser } from "@/lib/auth"
 
 export default async function Home() {
+  // Single getUser call — result passed to Header to avoid a second Supabase+DB round trip
   const user = await getUser()
 
-  // Professional headshots from Unsplash (diverse, professional-looking people)
   const testimonialPeople = [
     {
       img: "/shivam.jpg",
@@ -25,28 +26,17 @@ export default async function Home() {
     }
   ]
 
-  // Floating avatars for background decoration
-  const floatingAvatars = [
-    { img: "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=80&h=80&fit=crop&crop=face", pos: "top-20 left-[10%]", delay: "0s", size: "w-14 h-14" },
-    { img: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=80&h=80&fit=crop&crop=face", pos: "top-32 right-[15%]", delay: "1s", size: "w-12 h-12" },
-    { img: "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=80&h=80&fit=crop&crop=face", pos: "top-48 left-[5%]", delay: "2s", size: "w-10 h-10" },
-    { img: "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=80&h=80&fit=crop&crop=face", pos: "top-16 right-[8%]", delay: "0.5s", size: "w-11 h-11" },
-    { img: "https://images.unsplash.com/photo-1607746882042-944635dfe10e?w=80&h=80&fit=crop&crop=face", pos: "top-60 right-[5%]", delay: "1.5s", size: "w-9 h-9" },
-    { img: "https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=80&h=80&fit=crop&crop=face", pos: "top-72 left-[12%]", delay: "2.5s", size: "w-10 h-10" },
-  ]
-
   return (
     <div className="min-h-screen flex flex-col bg-white dark:bg-gray-950">
-      <Header />
+      <Header user={user} />
 
       <main className="flex-grow">
-        {/* Hero Section with Real Person Image */}
+        {/* Hero Section */}
         <section className="bg-gradient-to-b from-violet-50 via-blue-50 to-white dark:from-gray-900 dark:via-gray-900 dark:to-gray-950 py-16 md:py-24 px-4 relative overflow-hidden">
-          {/* Animated gradient orbs */}
-          <div className="absolute inset-0 overflow-hidden pointer-events-none">
-            <div className="absolute -top-40 -left-40 w-96 h-96 bg-purple-300/30 dark:bg-purple-900/20 rounded-full blur-3xl animate-pulse"></div>
-            <div className="absolute -top-20 -right-40 w-80 h-80 bg-blue-300/30 dark:bg-blue-900/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>
-            <div className="absolute bottom-0 left-1/4 w-72 h-72 bg-pink-300/20 dark:bg-pink-900/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }}></div>
+          {/* Static gradient orbs — no animate-pulse on first paint (deferred via CSS animation-delay) */}
+          <div className="absolute inset-0 overflow-hidden pointer-events-none" aria-hidden="true">
+            <div className="absolute -top-40 -left-40 w-96 h-96 bg-purple-300/30 dark:bg-purple-900/20 rounded-full blur-3xl" style={{ animation: 'pulse 4s ease-in-out 1s infinite' }}></div>
+            <div className="absolute -top-20 -right-40 w-80 h-80 bg-blue-300/30 dark:bg-blue-900/20 rounded-full blur-3xl" style={{ animation: 'pulse 4s ease-in-out 2s infinite' }}></div>
           </div>
 
           <div className="container mx-auto max-w-7xl relative z-10">
@@ -67,24 +57,26 @@ export default async function Home() {
                 </div>
               </div>
 
-              {/* Right Side - Hero Image with People */}
+              {/* Right Side - Hero Image */}
               <div className="relative hidden lg:block">
                 <div className="relative">
-                  <div className="absolute inset-0 bg-gradient-to-r from-violet-500 to-blue-500 rounded-3xl blur-2xl opacity-20 scale-105"></div>
+                  <div className="absolute inset-0 bg-gradient-to-r from-violet-500 to-blue-500 rounded-3xl blur-2xl opacity-20 scale-105" aria-hidden="true"></div>
                   <div className="relative w-full max-w-md mx-auto aspect-[4/5] overflow-hidden rounded-3xl shadow-2xl border-4 border-white">
+                    {/* LCP image — priority:true, fetchpriority high, explicit dimensions for zero CLS */}
                     <Image
                       src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=600&h=750&fit=crop"
-                      alt="Product Manager"
+                      alt="Product Manager practicing with Prodsnap"
                       fill
                       className="object-cover"
                       priority
+                      sizes="(max-width: 1024px) 0px, 448px"
                     />
                   </div>
 
-                  {/* Floating testimonial cards */}
+                  {/* Testimonial cards — deferred animation start */}
                   <div className="absolute -left-12 top-20 bg-white dark:bg-gray-800 p-4 rounded-2xl shadow-xl border border-gray-100 dark:border-gray-700 max-w-xs animate-float">
                     <div className="flex items-center gap-3 mb-2">
-                      <Image src={testimonialPeople[0].img} alt="" width={40} height={40} className="rounded-full overflow-hidden" />
+                      <Image src={testimonialPeople[0].img} alt="" width={40} height={40} className="rounded-full" loading="lazy" />
                       <div>
                         {testimonialPeople[0].linkedin ? (
                           <a
@@ -107,7 +99,7 @@ export default async function Home() {
 
                   <div className="absolute -right-8 bottom-32 bg-white dark:bg-gray-800 p-4 rounded-2xl shadow-xl border border-gray-100 dark:border-gray-700 max-w-xs animate-float" style={{ animationDelay: '1s' }}>
                     <div className="flex items-center gap-3 mb-2">
-                      <Image src={testimonialPeople[1].img} alt="" width={40} height={40} className="rounded-full overflow-hidden" />
+                      <Image src={testimonialPeople[1].img} alt="" width={40} height={40} className="rounded-full" loading="lazy" />
                       <div>
                         <p className="font-bold text-sm">{testimonialPeople[1].name}</p>
                         <p className="text-xs text-violet-600">{testimonialPeople[1].role}</p>
@@ -116,31 +108,20 @@ export default async function Home() {
                     <p className="text-sm text-gray-600 dark:text-gray-300">&ldquo;{testimonialPeople[1].quote}&rdquo;</p>
                   </div>
 
-                  {/* Stats floating card */}
+                  {/* Stats card */}
                   <div className="absolute -left-4 bottom-8 bg-gradient-to-r from-violet-600 to-blue-600 text-white p-4 rounded-2xl shadow-xl animate-float" style={{ animationDelay: '2s' }}>
                     <p className="text-3xl font-black">95%</p>
                     <p className="text-sm opacity-80">Success Rate</p>
                   </div>
                 </div>
-
-                {/* Small floating avatars */}
-                {floatingAvatars.slice(0, 3).map((avatar, i) => (
-                  <div
-                    key={i}
-                    className={`absolute ${i === 0 ? 'top-0 right-0' : i === 1 ? 'bottom-0 right-20' : 'top-40 -left-8'} ${avatar.size} rounded-full overflow-hidden border-2 border-white shadow-lg animate-float`}
-                    style={{ animationDelay: avatar.delay }}
-                  >
-                    <Image src={avatar.img} alt="" fill className="object-cover" />
-                  </div>
-                ))}
               </div>
             </div>
           </div>
         </section>
 
-        {/* Application Features Strip */}
-        <section className="py-3 md:py-6 bg-gradient-to-r from-violet-600 via-purple-600 to-indigo-600 overflow-hidden">
-          <div className="flex animate-marquee whitespace-nowrap">
+        {/* Features Marquee Strip */}
+        <section className="py-3 md:py-6 bg-gradient-to-r from-violet-600 via-purple-600 to-indigo-600 overflow-hidden" aria-label="Platform features">
+          <div className="flex animate-marquee whitespace-nowrap" aria-hidden="true">
             {[
               { icon: "🎯", text: "Custom Framework Evaluation" },
               { icon: "🤖", text: "Gemini-Powered AI Feedback" },
@@ -193,6 +174,7 @@ export default async function Home() {
               <p className="text-gray-500 dark:text-gray-400 leading-relaxed font-medium mb-4">Explore insightful articles, PM frameworks, and interview guides curated by industry experts.</p>
               <Link href="/blog" className="inline-flex items-center gap-2 text-blue-600 font-bold hover:underline group-hover:gap-3 transition-all">Read blogs <ArrowRight size={16} /></Link>
             </div>
+
             <div className="group bg-gradient-to-br from-emerald-50 to-white dark:from-gray-900 dark:to-gray-900 p-8 rounded-3xl border border-emerald-100 dark:border-gray-800 hover:shadow-xl hover:shadow-emerald-500/10 transition-all">
               <div className="bg-gradient-to-br from-emerald-500 to-green-600 text-white w-16 h-16 flex items-center justify-center rounded-2xl mb-6 group-hover:scale-110 transition-transform shadow-lg">
                 <Users size={32} />

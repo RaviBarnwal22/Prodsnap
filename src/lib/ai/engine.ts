@@ -94,7 +94,7 @@ export async function evaluateAnswer(questionTitle: string, userAnswer: string, 
         console.log(`[AI Engine] Attempting Gemini fallback (Daily Free tier)`);
 
         try {
-            const modelsToTry = ["gemini-2.0-flash", "gemini-2.5-flash", "gemini-1.5-flash-latest"];
+            const modelsToTry = ["gemini-2.5-flash", "gemini-1.5-flash-latest", "gemini-1.5-flash"];
             let text = "";
             let geminiSuccess = false;
             let geminiLastException: any = null;

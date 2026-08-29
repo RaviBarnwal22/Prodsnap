@@ -1,10 +1,9 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { Menu, X, ArrowRight } from 'lucide-react'
-import { motion, AnimatePresence } from 'framer-motion'
 import { SignInButton } from './SignInButton'
 
 interface MobileMenuProps {
@@ -18,6 +17,21 @@ export function MobileMenu({ isLoggedIn, isAdmin, userName }: MobileMenuProps) {
     const pathname = usePathname()
 
     const toggleMenu = () => setIsOpen(!isOpen)
+
+    // Close menu on route change
+    useEffect(() => {
+        setIsOpen(false)
+    }, [pathname])
+
+    // Prevent body scroll when open
+    useEffect(() => {
+        if (isOpen) {
+            document.body.style.overflow = 'hidden'
+        } else {
+            document.body.style.overflow = ''
+        }
+        return () => { document.body.style.overflow = '' }
+    }, [isOpen])
 
     const navLinks = [
         { name: 'About Us', href: '/about' },
@@ -33,103 +47,97 @@ export function MobileMenu({ isLoggedIn, isAdmin, userName }: MobileMenuProps) {
                 onClick={toggleMenu}
                 className="p-2 text-gray-600 dark:text-gray-300 hover:text-violet-600 transition"
                 aria-label="Toggle Menu"
+                aria-expanded={isOpen}
             >
                 {isOpen ? <X size={28} /> : <Menu size={28} />}
             </button>
 
-            <AnimatePresence>
-                {isOpen && (
-                    <>
-                        {/* Backdrop */}
-                        <motion.div
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            exit={{ opacity: 0 }}
-                            onClick={toggleMenu}
-                            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40"
-                        />
+            {/* Backdrop — pure CSS transition, no framer-motion */}
+            <div
+                onClick={toggleMenu}
+                className={`fixed inset-0 bg-black/50 backdrop-blur-sm z-40 transition-opacity duration-200 ${
+                    isOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
+                }`}
+                aria-hidden="true"
+            />
 
-                        {/* Menu Panel */}
-                        <motion.div
-                            initial={{ x: '100%' }}
-                            animate={{ x: 0 }}
-                            exit={{ x: '100%' }}
-                            transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-                            className="fixed right-0 top-0 h-full w-[280px] bg-white dark:bg-gray-950 z-50 shadow-2xl p-6 flex flex-col"
-                        >
-                            <div className="flex justify-between items-center mb-10">
-                                <span className="font-black text-xl tracking-tight">
-                                    Prod<span className="text-violet-600">snap</span>
-                                </span>
-                                <button onClick={toggleMenu} className="p-2 text-gray-500 hover:text-red-500 transition">
-                                    <X size={24} />
-                                </button>
+            {/* Menu Panel — CSS translate transition */}
+            <div
+                className={`fixed right-0 top-0 h-full w-[280px] bg-white dark:bg-gray-950 z-50 shadow-2xl p-6 flex flex-col transition-transform duration-200 ease-out ${
+                    isOpen ? 'translate-x-0' : 'translate-x-full'
+                }`}
+                aria-hidden={!isOpen}
+            >
+                <div className="flex justify-between items-center mb-10">
+                    <span className="font-black text-xl tracking-tight">
+                        Prod<span className="text-violet-600">snap</span>
+                    </span>
+                    <button onClick={toggleMenu} className="p-2 text-gray-500 hover:text-red-500 transition" aria-label="Close menu">
+                        <X size={24} />
+                    </button>
+                </div>
+
+                <nav className="flex flex-col gap-1 mb-8">
+                    {navLinks.map((link) => {
+                        const isActive = pathname === link.href || pathname.startsWith(link.href + '/')
+                        return (
+                            <Link
+                                key={link.name}
+                                href={link.href}
+                                onClick={toggleMenu}
+                                className={`py-4 px-4 rounded-xl text-lg font-bold transition-all flex items-center justify-between group ${isActive
+                                    ? 'bg-violet-100 dark:bg-violet-900/30 text-violet-600'
+                                    : 'text-gray-700 dark:text-gray-200 hover:bg-violet-50 dark:hover:bg-violet-900/10 hover:text-violet-600'
+                                    }`}
+                            >
+                                {link.name}
+                                <ArrowRight size={18} className={`${isActive ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0'} transition-all`} />
+                            </Link>
+                        )
+                    })}
+                </nav>
+
+                <div className="mt-auto border-t pt-8">
+                    {isLoggedIn ? (
+                        <div className="space-y-4">
+                            <div className="px-4">
+                                <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Signed in as</p>
+                                <p className="font-bold text-gray-900 dark:text-white truncate">{userName}</p>
                             </div>
-
-                            <nav className="flex flex-col gap-1 mb-8">
-                                {navLinks.map((link) => {
-                                    const isActive = pathname === link.href || pathname.startsWith(link.href + '/')
-                                    return (
-                                        <Link
-                                            key={link.name}
-                                            href={link.href}
-                                            onClick={toggleMenu}
-                                            className={`py-4 px-4 rounded-xl text-lg font-bold transition-all flex items-center justify-between group ${isActive
-                                                ? 'bg-violet-100 dark:bg-violet-900/30 text-violet-600'
-                                                : 'text-gray-700 dark:text-gray-200 hover:bg-violet-50 dark:hover:bg-violet-900/10 hover:text-violet-600'
-                                                }`}
-                                        >
-                                            {link.name}
-                                            <ArrowRight size={18} className={`${isActive ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0'} transition-all`} />
-                                        </Link>
-                                    )
-                                })}
-                            </nav>
-
-                            <div className="mt-auto border-t pt-8">
-                                {isLoggedIn ? (
-                                    <div className="space-y-4">
-                                        <div className="px-4">
-                                            <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Signed in as</p>
-                                            <p className="font-bold text-gray-900 dark:text-white truncate">{userName}</p>
-                                        </div>
-                                        {isAdmin && (
-                                            <Link
-                                                href="/admin"
-                                                onClick={toggleMenu}
-                                                className="block w-full text-center py-4 bg-amber-500/10 border border-amber-500/20 text-amber-600 dark:text-amber-400 rounded-2xl font-bold hover:bg-amber-500/20 transition-all flex items-center justify-center gap-3"
-                                            >
-                                                <div className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
-                                                Admin Dashboard
-                                            </Link>
-                                        )}
-                                        <a
-                                            href="/auth/signout"
-                                            className="block w-full text-center py-4 bg-gray-100 dark:bg-gray-800 rounded-2xl font-bold text-red-500 hover:bg-red-500 hover:text-white transition-all shadow-sm"
-                                        >
-                                            Sign Out
-                                        </a>
-                                    </div>
-                                ) : (
-                                    <div className="space-y-3">
-                                        <SignInButton
-                                            onClick={toggleMenu}
-                                            className="block w-full text-center py-4 bg-gradient-to-r from-violet-600 to-indigo-600 text-white rounded-2xl font-bold hover:shadow-lg hover:shadow-violet-500/30 transition-all"
-                                        />
-                                        <Link
-                                            href="/admin/login"
-                                            onClick={toggleMenu}
-                                            className="block w-full text-center py-3 text-sm font-medium text-gray-500 dark:text-gray-400 hover:text-violet-600 transition-colors"
-                                        >
-                                            Staff/Admin Login
-                                        </Link>
-                                    </div>
-                                )}
-                            </div>
-                        </motion.div>
-                    </>
-                )}
-            </AnimatePresence>
+                            {isAdmin && (
+                                <Link
+                                    href="/admin"
+                                    onClick={toggleMenu}
+                                    className="block w-full text-center py-4 bg-amber-500/10 border border-amber-500/20 text-amber-600 dark:text-amber-400 rounded-2xl font-bold hover:bg-amber-500/20 transition-all flex items-center justify-center gap-3"
+                                >
+                                    <div className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
+                                    Admin Dashboard
+                                </Link>
+                            )}
+                            <a
+                                href="/auth/signout"
+                                className="block w-full text-center py-4 bg-gray-100 dark:bg-gray-800 rounded-2xl font-bold text-red-500 hover:bg-red-500 hover:text-white transition-all shadow-sm"
+                            >
+                                Sign Out
+                            </a>
+                        </div>
+                    ) : (
+                        <div className="space-y-3">
+                            <SignInButton
+                                onClick={toggleMenu}
+                                className="block w-full text-center py-4 bg-gradient-to-r from-violet-600 to-indigo-600 text-white rounded-2xl font-bold hover:shadow-lg hover:shadow-violet-500/30 transition-all"
+                            />
+                            <Link
+                                href="/admin/login"
+                                onClick={toggleMenu}
+                                className="block w-full text-center py-3 text-sm font-medium text-gray-500 dark:text-gray-400 hover:text-violet-600 transition-colors"
+                            >
+                                Staff/Admin Login
+                            </Link>
+                        </div>
+                    )}
+                </div>
+            </div>
         </div>
     )
 }

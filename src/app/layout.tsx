@@ -1,22 +1,16 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist } from "next/font/google";
 import "./globals.css";
-import SessionTimeout from "@/components/SessionTimeout";
-import PageTracker from "@/components/PageTracker";
-import NextTopLoader from 'nextjs-toploader';
-import { AuthProvider } from "@/components/AuthContext";
+import ClientProviders from "@/components/ClientProviders";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
+  display: "swap",
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://prodsnap.in"),
   title: "Prodsnap | Master PM Interviews with AI-Powered Feedback",
   description: "Stop practicing blindly. Get real-time AI feedback on your PM case solutions and master the frameworks used by the world's leading tech companies.",
   keywords: [
@@ -77,23 +71,16 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
-        <NextTopLoader
-          color="#7c3aed"
-          height={4}
-          showSpinner={false}
-          zIndex={99999}
-          initialPosition={0.08}
-          crawlSpeed={200}
-          speed={200}
-        />
-        <SessionTimeout />
-        <PageTracker />
-        <AuthProvider>
+      <head>
+        {/* Preconnect to Unsplash CDN so LCP hero image connection is established early */}
+        <link rel="preconnect" href="https://images.unsplash.com" />
+        <link rel="dns-prefetch" href="https://images.unsplash.com" />
+      </head>
+      <body className={`${geistSans.variable} antialiased`}>
+        {/* ClientProviders holds all ssr:false dynamic imports — keeps this Server Component clean */}
+        <ClientProviders>
           {children}
-        </AuthProvider>
+        </ClientProviders>
       </body>
     </html>
   );

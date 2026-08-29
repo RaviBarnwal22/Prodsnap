@@ -354,17 +354,24 @@ export async function askClarifyingQuestion(data: {
 
     // Try Gemini First
     for (const key of geminiKeys) {
-        try {
-            const { GoogleGenerativeAI } = await import("@google/generative-ai");
-            const genAI = new GoogleGenerativeAI(key);
-            const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
-            const chat = model.startChat({
-                history: data.history.map(h => ({ role: h.role, parts: h.parts })),
-            });
-            const result = await chat.sendMessage(data.userMessage);
-            return { success: true, text: result.response.text() };
-        } catch (e) {
-            console.warn(`[askClarifyingQuestion] Gemini failed, trying next...`);
+        const modelsToTry = ["gemini-2.5-flash", "gemini-1.5-flash-latest", "gemini-1.5-flash"];
+        for (const modelId of modelsToTry) {
+            try {
+                const { GoogleGenerativeAI } = await import("@google/generative-ai");
+                const genAI = new GoogleGenerativeAI(key);
+                const model = genAI.getGenerativeModel({ 
+                    model: modelId,
+                    systemInstruction: systemPrompt
+                });
+                const chat = model.startChat({
+                    history: data.history.map(h => ({ role: h.role, parts: h.parts })),
+                });
+                const result = await chat.sendMessage(data.userMessage);
+                return { success: true, text: result.response.text() };
+            } catch (e: any) {
+                console.warn(`[askClarifyingQuestion] ${modelId} failed: ${e?.message}`);
+                continue;
+            }
         }
     }
 
@@ -415,7 +422,7 @@ export async function getInterviewerHint(data: {
         try {
             const { GoogleGenerativeAI } = await import("@google/generative-ai");
             const genAI = new GoogleGenerativeAI(key);
-            const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+            const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
             const result = await model.generateContent(systemPrompt);
             return { success: true, text: result.response.text() };
         } catch (e) { }
@@ -465,7 +472,7 @@ STRICT RULES:
         try {
             const { GoogleGenerativeAI } = await import("@google/generative-ai");
             const genAI = new GoogleGenerativeAI(key);
-            const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+            const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
             const result = await model.generateContent(finalPrompt);
             const text = result.response.text();
 
@@ -668,7 +675,7 @@ Tone: Storyteller. Line breaks for readability. Output ONLY the post content.`;
             try {
                 const { GoogleGenerativeAI } = await import("@google/generative-ai");
                 const genAI = new GoogleGenerativeAI(key);
-                const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+                const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
                 const result = await model.generateContent(prompt);
                 content = result.response.text();
                 if (content) break;

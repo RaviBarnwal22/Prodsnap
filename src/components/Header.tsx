@@ -5,14 +5,22 @@ import { MobileMenu } from './MobileMenu'
 import { Navigation } from './Navigation'
 import { SignInButton } from './SignInButton'
 
-export async function Header() {
-    const user = await getUser()
+type User = Awaited<ReturnType<typeof getUser>>
+
+interface HeaderProps {
+    // Accept pre-fetched user to avoid duplicate DB calls on pages that already have it
+    user?: User
+}
+
+export async function Header({ user: userProp }: HeaderProps = {}) {
+    // Only fetch if not already provided — avoids duplicate Supabase+Prisma round trips
+    const user = userProp !== undefined ? userProp : await getUser()
 
     return (
         <header className="border-b bg-white dark:bg-gray-900 sticky top-0 z-50">
             <div className="container mx-auto px-4 h-16 flex items-center justify-between">
                 <Link href="/" className="flex items-center gap-2 font-bold text-2xl tracking-tight">
-                    <Image src="/logo.png" alt="Prodsnap" width={36} height={36} className="rounded-lg" />
+                    <Image src="/logo.png" alt="Prodsnap" width={36} height={36} className="rounded-lg" priority />
                     <span>Prod<span className="text-violet-600">snap</span></span>
                 </Link>
 

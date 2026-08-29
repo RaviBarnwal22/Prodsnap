@@ -8,8 +8,11 @@ export default function PageTracker() {
     const pathname = usePathname()
 
     useEffect(() => {
-        // Track the page view on mount and whenever pathname changes
-        trackActivity(pathname, 'view')
+        // Defer tracking by 2s so it never competes with critical page interactions
+        const timer = setTimeout(() => {
+            trackActivity(pathname, 'view')
+        }, 2000)
+        return () => clearTimeout(timer)
     }, [pathname])
 
     return null
