@@ -24,7 +24,17 @@ import {
     AlertCircle,
     Mic,
     Sparkles,
-    Lock
+    Lock,
+    ChevronDown,
+    ChevronUp,
+    Target,
+    BarChart3,
+    Rocket,
+    Cpu,
+    Search,
+    Briefcase,
+    Users,
+    TrendingUp
 } from "lucide-react"
 
 export default function MentorshipClient() {
@@ -51,6 +61,7 @@ export default function MentorshipClient() {
 
     // User authentication state
     const [userId, setUserId] = useState<string | null>(null)
+    const [showAllTestimonials, setShowAllTestimonials] = useState(false)
 
     // Auto-fill email from logged-in user and listen for changes
     useEffect(() => {
@@ -109,7 +120,7 @@ export default function MentorshipClient() {
             { icon: <GraduationCap size={20} />, title: "IIM Gold Medalist", description: "Graduated with distinction from a premier B-school" },
             { icon: <Award size={20} />, title: "Building ProdSnap", description: "Built India's leading PM interview prep platform" },
             { icon: <Trophy size={20} />, title: "Top Mentor on Unstop", description: "Recognized as a top-rated mentor helping aspiring PMs" },
-            { icon: <Mic size={20} />, title: "Guest Speaker", description: "Speaker at multiple product and tech events" },
+            { icon: <Mic size={20} />, title: "Guest Speaker & Panelist", description: "Speaker at ISB (Indian School of Business) Hyderabad & Mohali, IIMs & top tech forums" },
         ],
         testimonials: [
             {
@@ -563,38 +574,151 @@ export default function MentorshipClient() {
                 </div>
             )}
 
+            {/* Quick Sticky Sub-Navigation Pills */}
+            <div className="sticky top-16 z-30 bg-white/80 dark:bg-gray-950/80 backdrop-blur-md border-b border-gray-100 dark:border-gray-800 py-3 px-4 shadow-sm">
+                <div className="container mx-auto max-w-6xl flex items-center justify-center gap-2 md:gap-4 overflow-x-auto text-xs md:text-sm font-bold no-scrollbar">
+                    <a href="#book" className="px-4 py-1.5 rounded-full bg-violet-100 dark:bg-violet-900/30 text-violet-700 dark:text-violet-300 hover:bg-violet-200 dark:hover:bg-violet-900/50 transition-colors whitespace-nowrap flex items-center gap-1.5">
+                        <Calendar size={14} />
+                        Packages & Booking
+                    </a>
+                    <a href="#highlights" className="px-4 py-1.5 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors whitespace-nowrap flex items-center gap-1.5">
+                        <Sparkles size={14} />
+                        ISB (Indian School of Business) & Events
+                    </a>
+                    <a href="#about" className="px-4 py-1.5 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors whitespace-nowrap flex items-center gap-1.5">
+                        <GraduationCap size={14} />
+                        About Mentor
+                    </a>
+                    <a href="#reviews" className="px-4 py-1.5 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors whitespace-nowrap flex items-center gap-1.5">
+                        <Star size={14} />
+                        Mentee Reviews
+                    </a>
+                </div>
+            </div>
+
             {/* Hero Profile Section */}
-            <section className="relative overflow-hidden bg-white dark:bg-gray-950 py-12 md:py-20 px-4">
+            <section className="relative overflow-hidden bg-white dark:bg-gray-950 py-10 md:py-16 px-4">
                 <div className="container mx-auto max-w-6xl grid md:grid-cols-2 gap-12 items-center">
                     <div className="order-2 md:order-1 relative">
                         <div className="relative z-10">
-                            <h1 className="text-5xl md:text-6xl font-black mb-4 leading-tight">
+                            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-violet-100 dark:bg-violet-900/30 text-violet-700 dark:text-violet-300 text-xs font-bold uppercase tracking-wider mb-4">
+                                <Sparkles size={14} />
+                                Product Leader & Career Coach
+                            </div>
+                            <h1 className="text-4xl md:text-6xl font-black mb-3 leading-tight">
                                 {mentor.name}
                             </h1>
-                            <p className="text-xl md:text-2xl text-violet-600 font-bold mb-6">{mentor.title}</p>
-                            <p className="text-lg text-gray-600 dark:text-gray-300 mb-8 leading-relaxed max-w-lg">
+                            <p className="text-xl md:text-2xl text-violet-600 font-bold mb-4">{mentor.title}</p>
+                            <p className="text-base md:text-lg text-gray-600 dark:text-gray-300 mb-6 leading-relaxed max-w-lg">
                                 {mentor.bio}
                             </p>
 
-                            <div className="flex flex-wrap gap-3 mb-8">
-                                {mentor.skills.map((skill, i) => (
-                                    <span key={i} className="px-4 py-2 bg-gray-100 dark:bg-gray-800 rounded-full text-sm font-medium text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700">
-                                        {skill}
+                            {/* Product Management Leadership & Preparation Tiles */}
+                            <div className="space-y-5 mb-8">
+                                <div>
+                                    <span className="text-[11px] font-black uppercase tracking-widest text-violet-600 dark:text-violet-400 block mb-2.5">
+                                        Product Management Leadership & Core Competencies
                                     </span>
-                                ))}
+                                    <div className="flex flex-wrap gap-2">
+                                        <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-violet-50 dark:bg-violet-900/20 rounded-xl text-xs font-bold text-violet-700 dark:text-violet-300 border border-violet-200/60 dark:border-violet-800/50 shadow-2xs">
+                                            <Target size={14} className="text-violet-600 dark:text-violet-400" />
+                                            0-to-1 Product Building
+                                        </span>
+                                        <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-violet-50 dark:bg-violet-900/20 rounded-xl text-xs font-bold text-violet-700 dark:text-violet-300 border border-violet-200/60 dark:border-violet-800/50 shadow-2xs">
+                                            <Rocket size={14} className="text-violet-600 dark:text-violet-400" />
+                                            Product Strategy & GTM
+                                        </span>
+                                        <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-violet-50 dark:bg-violet-900/20 rounded-xl text-xs font-bold text-violet-700 dark:text-violet-300 border border-violet-200/60 dark:border-violet-800/50 shadow-2xs">
+                                            <BarChart3 size={14} className="text-violet-600 dark:text-violet-400" />
+                                            Data-Driven & Metrics
+                                        </span>
+                                        <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-violet-50 dark:bg-violet-900/20 rounded-xl text-xs font-bold text-violet-700 dark:text-violet-300 border border-violet-200/60 dark:border-violet-800/50 shadow-2xs">
+                                            <Cpu size={14} className="text-violet-600 dark:text-violet-400" />
+                                            Tech Acumen & System Architecture
+                                        </span>
+                                        <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-violet-50 dark:bg-violet-900/20 rounded-xl text-xs font-bold text-violet-700 dark:text-violet-300 border border-violet-200/60 dark:border-violet-800/50 shadow-2xs">
+                                            <TrendingUp size={14} className="text-violet-600 dark:text-violet-400" />
+                                            Growth & Retention Scaling
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <span className="text-[11px] font-black uppercase tracking-widest text-gray-400 dark:text-gray-500 block mb-2.5">
+                                        PM Interview Preparation & Mentorship Focus Areas
+                                    </span>
+                                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
+                                        <div className="p-2.5 bg-gray-50 dark:bg-gray-900 rounded-xl border border-gray-100 dark:border-gray-800 flex items-center gap-2.5 hover:border-violet-300 dark:hover:border-violet-700 transition-colors">
+                                            <div className="w-8 h-8 rounded-lg bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0">
+                                                <Briefcase size={15} />
+                                            </div>
+                                            <div className="min-w-0">
+                                                <p className="text-xs font-bold text-gray-900 dark:text-white leading-tight truncate">Product Design</p>
+                                                <p className="text-[10px] text-gray-500 dark:text-gray-400 truncate">CIRCLES Framework</p>
+                                            </div>
+                                        </div>
+
+                                        <div className="p-2.5 bg-gray-50 dark:bg-gray-900 rounded-xl border border-gray-100 dark:border-gray-800 flex items-center gap-2.5 hover:border-violet-300 dark:hover:border-violet-700 transition-colors">
+                                            <div className="w-8 h-8 rounded-lg bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 flex items-center justify-center shrink-0">
+                                                <BarChart3 size={15} />
+                                            </div>
+                                            <div className="min-w-0">
+                                                <p className="text-xs font-bold text-gray-900 dark:text-white leading-tight truncate">Metrics & RCA</p>
+                                                <p className="text-[10px] text-gray-500 dark:text-gray-400 truncate">North Star & Trade-offs</p>
+                                            </div>
+                                        </div>
+
+                                        <div className="p-2.5 bg-gray-50 dark:bg-gray-900 rounded-xl border border-gray-100 dark:border-gray-800 flex items-center gap-2.5 hover:border-violet-300 dark:hover:border-violet-700 transition-colors">
+                                            <div className="w-8 h-8 rounded-lg bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400 flex items-center justify-center shrink-0">
+                                                <Rocket size={15} />
+                                            </div>
+                                            <div className="min-w-0">
+                                                <p className="text-xs font-bold text-gray-900 dark:text-white leading-tight truncate">GTM & Launch</p>
+                                                <p className="text-[10px] text-gray-500 dark:text-gray-400 truncate">Positioning & Strategy</p>
+                                            </div>
+                                        </div>
+
+                                        <div className="p-2.5 bg-gray-50 dark:bg-gray-900 rounded-xl border border-gray-100 dark:border-gray-800 flex items-center gap-2.5 hover:border-violet-300 dark:hover:border-violet-700 transition-colors">
+                                            <div className="w-8 h-8 rounded-lg bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
+                                                <Search size={15} />
+                                            </div>
+                                            <div className="min-w-0">
+                                                <p className="text-xs font-bold text-gray-900 dark:text-white leading-tight truncate">Guesstimates</p>
+                                                <p className="text-[10px] text-gray-500 dark:text-gray-400 truncate">Market Sizing</p>
+                                            </div>
+                                        </div>
+
+                                        <div className="p-2.5 bg-gray-50 dark:bg-gray-900 rounded-xl border border-gray-100 dark:border-gray-800 flex items-center gap-2.5 hover:border-violet-300 dark:hover:border-violet-700 transition-colors">
+                                            <div className="w-8 h-8 rounded-lg bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 flex items-center justify-center shrink-0">
+                                                <Users size={15} />
+                                            </div>
+                                            <div className="min-w-0">
+                                                <p className="text-xs font-bold text-gray-900 dark:text-white leading-tight truncate">Behavioral</p>
+                                                <p className="text-[10px] text-gray-500 dark:text-gray-400 truncate">STAR Method</p>
+                                            </div>
+                                        </div>
+
+                                        <div className="p-2.5 bg-gray-50 dark:bg-gray-900 rounded-xl border border-gray-100 dark:border-gray-800 flex items-center gap-2.5 hover:border-violet-300 dark:hover:border-violet-700 transition-colors">
+                                            <div className="w-8 h-8 rounded-lg bg-pink-100 dark:bg-pink-900/30 text-pink-600 dark:text-pink-400 flex items-center justify-center shrink-0">
+                                                <GraduationCap size={15} />
+                                            </div>
+                                            <div className="min-w-0">
+                                                <p className="text-xs font-bold text-gray-900 dark:text-white leading-tight truncate">1:1 Mocks</p>
+                                                <p className="text-[10px] text-gray-500 dark:text-gray-400 truncate">Live Simulation</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
 
-                            <div className="flex gap-4">
-                                <a href="#book" className="px-8 py-3 bg-violet-600 text-white rounded-full font-bold hover:bg-violet-700 transition shadow-lg shadow-violet-500/25">
-                                    View Packages
+                            <div className="flex flex-wrap gap-4">
+                                <a href="#book" className="px-8 py-3.5 bg-gradient-to-r from-violet-600 to-purple-600 text-white rounded-full font-bold hover:shadow-lg hover:shadow-violet-500/25 transition-all flex items-center gap-2">
+                                    <Calendar size={18} />
+                                    Book 1:1 Session
                                 </a>
-                                <a
-                                    href={mentor.linkedIn}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="px-8 py-3 bg-white dark:bg-gray-800 text-gray-900 dark:text-white border border-gray-200 dark:border-gray-700 rounded-full font-bold hover:bg-gray-50 dark:hover:bg-gray-700 transition"
-                                >
-                                    LinkedIn Profile
+                                <a href="#highlights" className="px-6 py-3.5 bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white rounded-full font-bold hover:bg-gray-200 dark:hover:bg-gray-700 transition flex items-center gap-2">
+                                    <Sparkles size={18} />
+                                    View Speaker Highlights
                                 </a>
                             </div>
                         </div>
@@ -611,12 +735,12 @@ export default function MentorshipClient() {
                                 />
 
                                 {/* Stats Cards */}
-                                <div className="absolute -left-6 top-10 bg-white dark:bg-gray-800 p-4 rounded-xl shadow-xl border border-gray-100 dark:border-gray-700 animate-float z-10">
+                                <div className="absolute -left-4 top-8 bg-white dark:bg-gray-800 p-3.5 rounded-2xl shadow-xl border border-gray-100 dark:border-gray-700 z-10">
                                     <p className="text-2xl font-black text-violet-600">{mentor.stats.mentees}</p>
                                     <p className="text-xs text-gray-500 font-bold">Mentees Guided</p>
                                 </div>
 
-                                <div className="absolute -right-6 bottom-20 bg-white dark:bg-gray-800 p-4 rounded-xl shadow-xl border border-gray-100 dark:border-gray-700 animate-float z-10" style={{ animationDelay: '1.5s' }}>
+                                <div className="absolute -right-4 bottom-16 bg-white dark:bg-gray-800 p-3.5 rounded-2xl shadow-xl border border-gray-100 dark:border-gray-700 z-10">
                                     <p className="text-2xl font-black text-green-500">{mentor.stats.successRate}</p>
                                     <p className="text-xs text-gray-500 font-bold">Success Rate</p>
                                 </div>
@@ -626,83 +750,204 @@ export default function MentorshipClient() {
                 </div>
             </section>
 
-            {/* Accolades Section */}
-            <section className="bg-gray-50 dark:bg-gray-900/50 py-16 px-4">
+            {/* Corporate & B-School Credibility Banner */}
+            <section className="py-8 px-4 bg-gray-50/80 dark:bg-gray-900/40 border-y border-gray-100 dark:border-gray-800/60">
+                <div className="container mx-auto max-w-6xl">
+                    <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+                        <div className="text-center md:text-left">
+                            <span className="text-[11px] font-black text-gray-400 uppercase tracking-widest block mb-1">Track Record & Leadership</span>
+                            <p className="text-sm font-bold text-gray-700 dark:text-gray-300">Worked at top global tech firms & guest speaker at premier B-schools</p>
+                        </div>
+                        <div className="flex flex-wrap items-center justify-center gap-8 md:gap-12 opacity-85 hover:opacity-100 transition-opacity">
+                            <img src="/companies/infosys.png" alt="Infosys" className="h-8 md:h-10 w-auto object-contain dark:brightness-110" />
+                            <img src="/companies/maruti-suzuki.png" alt="Maruti Suzuki" className="h-10 md:h-14 w-auto object-contain dark:brightness-110" />
+                            <img src="/companies/kpmg.png" alt="KPMG" className="h-8 md:h-10 w-auto object-contain dark:brightness-110" />
+                            <img src="/companies/ibm.png" alt="IBM" className="h-8 md:h-10 w-auto object-contain dark:brightness-110" />
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            {/* Services / Booking Section (Pushed Up for High Conversion!) */}
+            <section id="book" className="py-16 md:py-20 px-4 scroll-mt-24 bg-white dark:bg-gray-950">
                 <div className="container mx-auto max-w-6xl">
                     <div className="text-center mb-12">
-                        <h2 className="text-3xl font-black mb-4">About Ravi</h2>
+                        <span className="text-xs font-bold text-violet-600 dark:text-violet-400 uppercase tracking-widest bg-violet-100 dark:bg-violet-900/30 px-3 py-1 rounded-full inline-block mb-3">1:1 Guidance</span>
+                        <h2 className="text-3xl md:text-4xl font-black mb-4">Select a Mentorship Package</h2>
                         <p className="text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
-                            Credentials and achievements that make a difference
+                            Actionable feedback, tailored career strategy, and hands-on PM mock interviews.
                         </p>
                     </div>
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-                        {mentor.accolades.map((accolade, i) => (
-                            <div key={i} className="bg-white dark:bg-gray-800 p-6 rounded-2xl border border-gray-100 dark:border-gray-700 flex flex-col items-center text-center hover:-translate-y-1 transition-transform">
-                                <div className="w-12 h-12 bg-violet-100 dark:bg-violet-900/30 text-violet-600 rounded-full flex items-center justify-center mb-4">
-                                    {accolade.icon}
-                                </div>
-                                <h3 className="font-bold mb-1">{accolade.title}</h3>
-                                <p className="text-xs text-gray-500 dark:text-gray-400">{accolade.description}</p>
+
+                    {!userId ? (
+                        <div className="bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800 p-10 md:p-12 rounded-3xl border border-gray-200 dark:border-gray-700 text-center max-w-xl mx-auto shadow-xl">
+                            <div className="w-16 h-16 bg-violet-100 dark:bg-violet-900/30 rounded-2xl flex items-center justify-center mb-5 mx-auto text-violet-600">
+                                <Lock size={28} />
                             </div>
-                        ))}
-                    </div>
+                            <h3 className="text-2xl font-black mb-2">Sign In to Book & View Packages</h3>
+                            <p className="text-gray-500 dark:text-gray-400 mb-6 text-sm leading-relaxed">
+                                Sign in to explore available 1:1 session slots, resume reviews, and career strategy packages.
+                            </p>
+                            <button
+                                onClick={() => openAuthModal()}
+                                className="inline-flex items-center gap-2 bg-gradient-to-r from-violet-600 to-purple-600 text-white px-8 py-3.5 rounded-xl font-bold hover:shadow-lg hover:shadow-violet-500/20 transition-all cursor-pointer"
+                            >
+                                <ArrowRight size={20} />
+                                Sign In to Continue
+                            </button>
+                        </div>
+                    ) : (
+                        <div className="grid md:grid-cols-3 gap-8">
+                            {mentor.services.map((service, i) => (
+                                <div
+                                    key={i}
+                                    className={`relative bg-white dark:bg-gray-800 p-8 rounded-3xl border-2 ${service.popular
+                                        ? 'border-violet-500 shadow-xl shadow-violet-500/10'
+                                        : 'border-gray-200 dark:border-gray-700'
+                                        }`}
+                                >
+                                    {service.popular && (
+                                        <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-gradient-to-r from-violet-600 to-purple-600 text-white px-4 py-1 rounded-full text-xs font-bold shadow-md">
+                                            Most Popular
+                                        </div>
+                                    )}
+
+                                    <h3 className="text-xl font-bold mb-2">{service.title}</h3>
+                                    <div className="flex items-center gap-2 text-gray-500 dark:text-gray-400 mb-4 text-sm">
+                                        <Clock size={16} />
+                                        <span>{service.duration}</span>
+                                    </div>
+
+                                    <div className="text-3xl font-black text-violet-600 mb-6">{service.price}</div>
+
+                                    <p className="text-gray-600 dark:text-gray-300 text-sm mb-6 leading-relaxed">{service.description}</p>
+
+                                    <ul className="space-y-3 mb-8">
+                                        {service.features.map((feature, j) => (
+                                            <li key={j} className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
+                                                <CheckCircle size={16} className="text-green-500 shrink-0" />
+                                                {feature}
+                                            </li>
+                                        ))}
+                                    </ul>
+
+                                    <button
+                                        onClick={() => handleBookNow(service)}
+                                        className={`w-full py-3.5 rounded-xl font-bold flex items-center justify-center gap-2 transition-all ${service.popular
+                                            ? 'bg-gradient-to-r from-violet-600 to-purple-600 text-white hover:shadow-lg'
+                                            : 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white hover:bg-gray-200 dark:hover:bg-gray-600'
+                                            }`}
+                                    >
+                                        <Calendar size={18} />
+                                        Book Now
+                                    </button>
+                                </div>
+                            ))}
+                        </div>
+                    )}
                 </div>
             </section>
 
             {/* Mentorship in Action Gallery */}
-            <section className="py-20 px-4 bg-white dark:bg-gray-950">
+            <section id="highlights" className="py-16 md:py-20 px-4 scroll-mt-24 bg-gray-50/50 dark:bg-gray-900/30 border-y border-gray-100 dark:border-gray-800">
                 <div className="container mx-auto max-w-6xl">
                     <div className="text-center mb-12">
-                        <h2 className="text-3xl font-black mb-4 flex items-center justify-center gap-3">
-                            <Sparkles className="text-violet-600" />
+                        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-violet-100 dark:bg-violet-900/30 text-violet-700 dark:text-violet-300 text-xs font-bold uppercase tracking-wider mb-3">
+                            <Sparkles size={14} />
+                            Keynotes & Panel Discussions
+                        </div>
+                        <h2 className="text-3xl md:text-4xl font-black mb-3">
                             Mentorship in Action
                         </h2>
-                        <p className="text-gray-600 dark:text-gray-400">
-                            Real sessions, real impact. Building the next generation of Product Leaders.
+                        <p className="text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
+                            Guiding students at premier B-schools like ISB (Indian School of Business) & IIMs into high-growth Product Management careers.
                         </p>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        <div className="lg:col-span-2 group relative overflow-hidden rounded-3xl h-[400px]">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {/* Highlight 1: ISB Panel Discussion (Featured Large Card) */}
+                        <div className="lg:col-span-2 group relative overflow-hidden rounded-3xl h-[380px] shadow-lg border border-gray-100 dark:border-gray-800">
+                            <img
+                                src="/isb-panel-discussion.jpg"
+                                alt="Panel Discussion for ISB (Indian School of Business) Hyderabad & Mohali Students"
+                                className="w-full h-full object-cover object-center transition-transform duration-700 group-hover:scale-105"
+                            />
+                            <div className="absolute top-4 left-4 z-10">
+                                <span className="bg-violet-600/90 backdrop-blur-md text-white text-xs px-3.5 py-1.5 rounded-full font-bold shadow-md flex items-center gap-1.5">
+                                    <Sparkles size={12} />
+                                    ISB (Indian School of Business) Hyderabad & Mohali
+                                </span>
+                            </div>
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent transition-opacity duration-300 flex flex-col justify-end p-6 md:p-8">
+                                <h3 className="text-white font-black text-xl md:text-2xl mb-1.5 group-hover:text-violet-200 transition-colors">
+                                    Panel Discussion on Product Management
+                                </h3>
+                                <p className="text-gray-200 text-sm leading-relaxed max-w-xl">
+                                    Sharing product strategy frameworks, career roadmaps, and real-world PM execution insights for ISB (Indian School of Business) Hyderabad & Mohali students.
+                                </p>
+                            </div>
+                        </div>
+
+                        {/* Highlight 2: ISB Students Audience / Classroom */}
+                        <div className="group relative overflow-hidden rounded-3xl h-[380px] shadow-lg border border-gray-100 dark:border-gray-800">
+                            <img
+                                src="/isb-students-session.jpg"
+                                alt="Interactive Session with ISB (Indian School of Business) Students"
+                                className="w-full h-full object-cover object-center transition-transform duration-700 group-hover:scale-105"
+                            />
+                            <div className="absolute top-4 left-4 z-10">
+                                <span className="bg-black/60 backdrop-blur-md text-white text-xs px-3.5 py-1.5 rounded-full font-bold shadow-md">
+                                    ISB (Indian School of Business) Cohort
+                                </span>
+                            </div>
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent transition-opacity duration-300 flex flex-col justify-end p-6">
+                                <h3 className="text-white font-bold text-lg mb-1 group-hover:text-violet-200 transition-colors">
+                                    Interactive Session with ISB (Indian School of Business) PM Students
+                                </h3>
+                                <p className="text-gray-300 text-xs md:text-sm leading-relaxed">
+                                    Engaging Q&A masterclass with aspiring product leaders.
+                                </p>
+                            </div>
+                        </div>
+
+                        {/* Highlight 3: IBM Intern Session */}
+                        <div className="group relative overflow-hidden rounded-3xl h-[300px] shadow-lg border border-gray-100 dark:border-gray-800">
                             <img
                                 src="/mentor-1.jpg"
-                                alt="Mentorship Session"
+                                alt="IBM Mentorship Session"
                                 className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                             />
-                            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-8">
-                                <p className="text-white font-bold text-lg">Interactive Product Management session at IBM for interns</p>
+                            <div className="absolute top-4 left-4 z-10">
+                                <span className="bg-black/60 backdrop-blur-md text-white text-xs px-3 py-1 rounded-full font-bold">
+                                    IBM
+                                </span>
+                            </div>
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent transition-opacity duration-300 flex flex-col justify-end p-6">
+                                <p className="text-white font-bold text-base">Interactive Product Management session for IBM interns</p>
                             </div>
                         </div>
-                        <div className="group relative overflow-hidden rounded-3xl h-[400px]">
-                            <img
-                                src="/mentor-2.jpg"
-                                alt="Speaking Event"
-                                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                            />
-                            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-8">
-                                <p className="text-white font-bold">Solving the right problem</p>
-                            </div>
-                        </div>
-                        <div className="group relative overflow-hidden rounded-3xl h-[300px]">
-                            <img
-                                src="/mentor-3.jpg"
-                                alt="Panel Discussion"
-                                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                            />
-                        </div>
-                        <div className="lg:col-span-2 group relative overflow-hidden rounded-3xl h-[300px]">
+
+                        {/* Highlight 4: IIM Bodh Gaya */}
+                        <div className="lg:col-span-2 group relative overflow-hidden rounded-3xl h-[300px] shadow-lg border border-gray-100 dark:border-gray-800">
                             <img
                                 src="/mentor-4.jpg"
-                                alt="Large Group Session"
+                                alt="IIM Bodh Gaya Career Session"
                                 className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                             />
-                            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-8">
-                                <p className="text-white font-bold text-lg">Interactive career session at IIM Bodh Gaya</p>
+                            <div className="absolute top-4 left-4 z-10">
+                                <span className="bg-black/60 backdrop-blur-md text-white text-xs px-3 py-1 rounded-full font-bold">
+                                    IIM Bodh Gaya
+                                </span>
+                            </div>
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent transition-opacity duration-300 flex flex-col justify-end p-6 md:p-8">
+                                <p className="text-white font-bold text-lg">Interactive career session & masterclass at IIM Bodh Gaya</p>
                             </div>
                         </div>
                     </div>
                 </div>
             </section>
+
+
 
             {/* Workshop Spotlight Section */}
             <section className="py-16 px-4 bg-violet-50 dark:bg-slate-900/30 border-y border-gray-100 dark:border-gray-900">
@@ -740,192 +985,118 @@ export default function MentorshipClient() {
                 </div>
             </section>
 
-            {/* Companies Worked For */}
-            <section className="py-24 px-4 bg-gray-50/50 dark:bg-gray-900/20 border-y border-gray-100 dark:border-gray-800/50">
-                <div className="container mx-auto max-w-6xl">
-                    <h2 className="text-center text-[10px] md:text-xs font-black text-gray-400 dark:text-gray-500 mb-20 uppercase tracking-[0.5em]">Professional Experience</h2>
-                    <div className="flex flex-wrap items-center justify-center gap-16 md:gap-28 opacity-90 hover:opacity-100 transition-opacity duration-500">
-                        {/* Infosys */}
-                        <div className="h-12 md:h-16 w-auto group transition-all duration-300 hover:scale-110">
-                            <img
-                                src="/companies/infosys.png"
-                                alt="Infosys"
-                                className="h-full w-auto object-contain dark:brightness-110 dark:contrast-125 drop-shadow-sm group-hover:drop-shadow-md"
-                            />
-                        </div>
-                        {/* Maruti Suzuki */}
-                        <div className="h-16 md:h-24 w-auto group transition-all duration-300 hover:scale-110">
-                            <img
-                                src="/companies/maruti-suzuki.png"
-                                alt="Maruti Suzuki"
-                                className="h-full w-auto object-contain dark:brightness-110 dark:contrast-125 drop-shadow-sm group-hover:drop-shadow-md"
-                            />
-                        </div>
-                        {/* KPMG */}
-                        <div className="h-12 md:h-16 w-auto group transition-all duration-300 hover:scale-110">
-                            <img
-                                src="/companies/kpmg.png"
-                                alt="KPMG"
-                                className="h-full w-auto object-contain dark:brightness-110 dark:contrast-125 drop-shadow-sm group-hover:drop-shadow-md"
-                            />
-                        </div>
-                        {/* IBM */}
-                        <div className="h-12 md:h-16 w-auto group transition-all duration-300 hover:scale-110">
-                            <img
-                                src="/companies/ibm.png"
-                                alt="IBM"
-                                className="h-full w-auto object-contain dark:brightness-110 dark:contrast-125 drop-shadow-sm group-hover:drop-shadow-md"
-                            />
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            {/* Testimonials */}
-            <section className="py-20 px-4 bg-white dark:bg-gray-950">
+            {/* Accolades Section */}
+            <section id="about" className="py-16 px-4 scroll-mt-24 bg-white dark:bg-gray-950">
                 <div className="container mx-auto max-w-6xl">
                     <div className="text-center mb-12">
-                        <h2 className="text-3xl font-black mb-4">What Mentees Say</h2>
-                        <p className="text-gray-600 dark:text-gray-400">
-                            Feedback from IIMs, IITs and top companies
+                        <h2 className="text-3xl font-black mb-3">About Ravi</h2>
+                        <p className="text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
+                            Credentials and achievements driving real mentee success
                         </p>
                     </div>
-
-                    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {mentor.testimonials.map((testimonial, i) => (
-                            <div key={i} className="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-lg border border-gray-100 dark:border-gray-700 hover:shadow-xl transition-shadow">
-                                <div className="flex items-center gap-4 mb-4">
-                                    {/* AI Avatar using UI Avatars API */}
-                                    <img
-                                        src={`https://ui-avatars.com/api/?name=${encodeURIComponent(testimonial.name)}&background=7c3aed&color=fff&size=96&bold=true&format=svg`}
-                                        alt={testimonial.name}
-                                        className="w-12 h-12 rounded-full shrink-0"
-                                    />
-                                    <div className="min-w-0">
-                                        {'linkedin' in testimonial ? (
-                                            <a
-                                                href={testimonial.linkedin as string}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                className="font-bold text-gray-900 dark:text-white hover:text-violet-600 transition-colors flex items-center gap-1 truncate"
-                                            >
-                                                {testimonial.name}
-                                                <svg className="w-4 h-4 text-blue-500 shrink-0" fill="currentColor" viewBox="0 0 24 24">
-                                                    <path d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.32 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 0 1 1.4 1.4v4.93h2.79M6.88 8.56a1.68 1.68 0 0 0 1.68-1.68c0-.93-.75-1.69-1.68-1.69a1.69 1.69 0 0 0-1.69 1.69c0 .93.76 1.68 1.69 1.68m1.39 9.94v-8.37H5.5v8.37h2.77z" />
-                                                </svg>
-                                            </a>
-                                        ) : (
-                                            <p className="font-bold text-gray-900 dark:text-white truncate">{testimonial.name}</p>
-                                        )}
-                                        <p className="text-sm text-violet-600 truncate">{testimonial.role}</p>
-                                    </div>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                        {mentor.accolades.map((accolade, i) => (
+                            <div key={i} className="bg-gray-50 dark:bg-gray-900 p-6 rounded-2xl border border-gray-100 dark:border-gray-800 flex flex-col items-center text-center hover:-translate-y-1 transition-transform">
+                                <div className="w-12 h-12 bg-violet-100 dark:bg-violet-900/30 text-violet-600 rounded-full flex items-center justify-center mb-4">
+                                    {accolade.icon}
                                 </div>
-                                <div className="flex text-yellow-400 mb-3">
-                                    {[...Array(testimonial.stars || 5)].map((_, j) => <Star key={j} size={14} fill="currentColor" />)}
-                                    {[...Array(5 - (testimonial.stars || 5))].map((_, j) => <Star key={j} size={14} className="text-gray-300" />)}
-                                </div>
-                                <p className="text-gray-600 dark:text-gray-300 italic text-sm leading-relaxed">&ldquo;{testimonial.quote}&rdquo;</p>
+                                <h3 className="font-bold mb-1 text-sm md:text-base">{accolade.title}</h3>
+                                <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">{accolade.description}</p>
                             </div>
                         ))}
                     </div>
                 </div>
             </section>
 
-            {/* Services / Booking Section */}
-            <section id="book" className="py-20 px-4 scroll-mt-20 bg-gray-50 dark:bg-gray-900/50">
+            {/* Testimonials */}
+            <section id="reviews" className="py-16 md:py-20 px-4 scroll-mt-24 bg-gray-50/50 dark:bg-gray-900/30 border-t border-gray-100 dark:border-gray-800">
                 <div className="container mx-auto max-w-6xl">
                     <div className="text-center mb-12">
-                        <h2 className="text-3xl font-black mb-4">Book a Session</h2>
-                        <p className="text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
-                            Choose a mentorship package that fits your needs. All sessions include personalized feedback and actionable insights.
+                        <span className="text-xs font-bold text-violet-600 dark:text-violet-400 uppercase tracking-widest bg-violet-100 dark:bg-violet-900/30 px-3 py-1 rounded-full inline-block mb-3">Mentee Stories</span>
+                        <h2 className="text-3xl font-black mb-3">What Mentees Say</h2>
+                        <p className="text-gray-600 dark:text-gray-400">
+                            Verified feedback from students across IIMs, IITs and tech companies
                         </p>
                     </div>
 
-                    {/* Show sign-in prompt for guests */}
-                    {!userId ? (
-                        <div className="bg-white dark:bg-gray-800 p-12 rounded-3xl border border-gray-200 dark:border-gray-700 text-center max-w-xl mx-auto shadow-lg">
-                            <div className="w-20 h-20 bg-violet-100 dark:bg-violet-900/30 rounded-3xl flex items-center justify-center mb-6 mx-auto text-violet-600">
-                                <Lock size={32} />
-                            </div>
-                            <h3 className="text-2xl font-black mb-3">Sign In to View Packages</h3>
-                            <p className="text-gray-500 dark:text-gray-400 mb-8 leading-relaxed">
-                                Create an account or sign in to explore our mentorship packages and book a personalized session with our expert mentor.
-                            </p>
-                            <button
-                                onClick={() => openAuthModal()}
-                                className="inline-flex items-center gap-2 bg-gradient-to-r from-violet-600 to-purple-600 text-white px-8 py-4 rounded-xl font-bold hover:shadow-lg hover:shadow-violet-500/20 transition-all cursor-pointer"
-                            >
-                                <ArrowRight size={20} />
-                                Sign In to Continue
-                            </button>
-                        </div>
-                    ) : (
-                        <div className="grid md:grid-cols-3 gap-8">
-                            {mentor.services.map((service, i) => (
-                                <div
-                                    key={i}
-                                    className={`relative bg-white dark:bg-gray-800 p-8 rounded-3xl border-2 ${service.popular
-                                        ? 'border-violet-500 shadow-xl shadow-violet-500/10'
-                                        : 'border-gray-200 dark:border-gray-700'
-                                        }`}
-                                >
-                                    {service.popular && (
-                                        <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-gradient-to-r from-violet-600 to-purple-600 text-white px-4 py-1 rounded-full text-sm font-bold">
-                                            Most Popular
+                    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {mentor.testimonials
+                            .slice(0, showAllTestimonials ? mentor.testimonials.length : 6)
+                            .map((testimonial, i) => (
+                                <div key={i} className="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 hover:shadow-md transition-shadow">
+                                    <div className="flex items-center gap-4 mb-4">
+                                        <img
+                                            src={`https://ui-avatars.com/api/?name=${encodeURIComponent(testimonial.name)}&background=7c3aed&color=fff&size=96&bold=true&format=svg`}
+                                            alt={testimonial.name}
+                                            className="w-12 h-12 rounded-full shrink-0"
+                                        />
+                                        <div className="min-w-0">
+                                            {'linkedin' in testimonial ? (
+                                                <a
+                                                    href={testimonial.linkedin as string}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="font-bold text-gray-900 dark:text-white hover:text-violet-600 transition-colors flex items-center gap-1 truncate"
+                                                >
+                                                    {testimonial.name}
+                                                    <svg className="w-4 h-4 text-blue-500 shrink-0" fill="currentColor" viewBox="0 0 24 24">
+                                                        <path d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.32 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 0 1 1.4 1.4v4.93h2.79M6.88 8.56a1.68 1.68 0 0 0 1.68-1.68c0-.93-.75-1.69-1.68-1.69a1.69 1.69 0 0 0-1.69 1.69c0 .93.76 1.68 1.69 1.68m1.39 9.94v-8.37H5.5v8.37h2.77z" />
+                                                    </svg>
+                                                </a>
+                                            ) : (
+                                                <p className="font-bold text-gray-900 dark:text-white truncate">{testimonial.name}</p>
+                                            )}
+                                            <p className="text-sm text-violet-600 truncate">{testimonial.role}</p>
                                         </div>
-                                    )}
-
-                                    <h3 className="text-xl font-bold mb-2">{service.title}</h3>
-                                    <div className="flex items-center gap-2 text-gray-500 dark:text-gray-400 mb-4">
-                                        <Clock size={16} />
-                                        <span>{service.duration}</span>
                                     </div>
-
-                                    <div className="text-3xl font-black text-violet-600 mb-6">{service.price}</div>
-
-                                    <p className="text-gray-600 dark:text-gray-300 mb-6">{service.description}</p>
-
-                                    <ul className="space-y-3 mb-8">
-                                        {service.features.map((feature, j) => (
-                                            <li key={j} className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
-                                                <CheckCircle size={16} className="text-green-500" />
-                                                {feature}
-                                            </li>
-                                        ))}
-                                    </ul>
-
-                                    <button
-                                        onClick={() => handleBookNow(service)}
-                                        className={`w-full py-3 rounded-xl font-bold flex items-center justify-center gap-2 transition-all ${service.popular
-                                            ? 'bg-gradient-to-r from-violet-600 to-purple-600 text-white hover:shadow-lg'
-                                            : 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white hover:bg-gray-200 dark:hover:bg-gray-600'
-                                            }`}
-                                    >
-                                        <Calendar size={18} />
-                                        Book Now
-                                    </button>
+                                    <div className="flex text-yellow-400 mb-3">
+                                        {[...Array(testimonial.stars || 5)].map((_, j) => <Star key={j} size={14} fill="currentColor" />)}
+                                        {[...Array(5 - (testimonial.stars || 5))].map((_, j) => <Star key={j} size={14} className="text-gray-300" />)}
+                                    </div>
+                                    <p className="text-gray-600 dark:text-gray-300 italic text-sm leading-relaxed">&ldquo;{testimonial.quote}&rdquo;</p>
                                 </div>
                             ))}
-                        </div>
-                    )}
+                    </div>
 
-                    {/* Direct Contact CTA */}
-                    <div className="mt-16 text-center">
-                        <div className="bg-gradient-to-r from-violet-600 via-purple-600 to-indigo-600 rounded-3xl p-8 md:p-12 text-white max-w-3xl mx-auto">
-                            <h3 className="text-2xl md:text-3xl font-black mb-4">Have Questions?</h3>
-                            <p className="text-white/80 mb-8">
-                                Reach out directly on LinkedIn to discuss your goals and how I can help.
-                            </p>
-                            <a
-                                href={mentor.linkedIn}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="inline-flex items-center gap-2 bg-white text-violet-600 px-8 py-4 rounded-full font-bold hover:bg-white/90 transition shadow-lg"
-                            >
-                                <MessageSquare size={20} />
-                                Message on LinkedIn
-                            </a>
-                        </div>
+                    {/* Toggle Button for Testimonials */}
+                    <div className="mt-10 text-center">
+                        <button
+                            onClick={() => setShowAllTestimonials(!showAllTestimonials)}
+                            className="inline-flex items-center gap-2 px-6 py-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-full font-bold text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 transition shadow-sm"
+                        >
+                            {showAllTestimonials ? (
+                                <>
+                                    Show Fewer Reviews
+                                    <ChevronUp size={18} />
+                                </>
+                            ) : (
+                                <>
+                                    Show All 12 Reviews ({mentor.testimonials.length - 6} More)
+                                    <ChevronDown size={18} />
+                                </>
+                            )}
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            {/* Direct Contact CTA */}
+            <section className="py-16 px-4 bg-white dark:bg-gray-950">
+                <div className="container mx-auto max-w-4xl">
+                    <div className="bg-gradient-to-r from-violet-600 via-purple-600 to-indigo-600 rounded-3xl p-8 md:p-12 text-white text-center shadow-xl">
+                        <h3 className="text-2xl md:text-3xl font-black mb-3">Have Questions Before Booking?</h3>
+                        <p className="text-white/80 mb-8 max-w-xl mx-auto text-sm md:text-base">
+                            Reach out directly on LinkedIn to discuss your specific goals and how we can tailor your mentorship.
+                        </p>
+                        <a
+                            href={mentor.linkedIn}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-2 bg-white text-violet-600 px-8 py-4 rounded-full font-bold hover:bg-white/90 transition shadow-lg text-sm md:text-base"
+                        >
+                            <MessageSquare size={20} />
+                            Message on LinkedIn
+                        </a>
                     </div>
                 </div>
             </section>

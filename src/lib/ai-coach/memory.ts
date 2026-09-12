@@ -1,6 +1,6 @@
 import fs from 'fs/promises';
 import path from 'path';
-import { CoachProfile, LearningState, SessionSummary, CoachMessage, CoachState } from './types';
+import { CoachProfile, LearningState, SessionSummary, CoachMessage, CoachState, RevisionCard } from './types';
 
 const DATA_DIR = path.join(process.cwd(), '.data', 'ai-coach');
 
@@ -129,18 +129,36 @@ export async function saveRecentSessions(sessions: SessionSummary[]): Promise<vo
     await writeJsonFile('sessions.json', trimmedSessions);
 }
 
+export async function getRevisionDeck(): Promise<RevisionCard[]> {
+    return readJsonFile('revision-deck.json', []);
+}
+
+export async function saveRevisionDeck(cards: RevisionCard[]): Promise<void> {
+    await writeJsonFile('revision-deck.json', cards);
+}
+
+export async function addRevisionCard(card: RevisionCard): Promise<void> {
+    const deck = await getRevisionDeck();
+    // Avoid exact duplicates by concept name
+    const filtered = deck.filter(c => c.concept.toLowerCase() !== card.concept.toLowerCase());
+    filtered.push(card);
+    await saveRevisionDeck(filtered);
+}
+
 export async function getFullState(): Promise<CoachState> {
-    const [profile, learningState, messages, sessions] = await Promise.all([
+    const [profile, learningState, messages, sessions, revisionDeck] = await Promise.all([
         getProfile(),
         getLearningState(),
         getMessages(),
-        getRecentSessions()
+        getRecentSessions(),
+        getRevisionDeck()
     ]);
 
     return {
         profile,
         learningState,
         messages,
-        recentSession: sessions.length > 0 ? sessions[sessions.length - 1] : null
+        recentSession: sessions.length > 0 ? sessions[sessions.length - 1] : null,
+        revisionDeck
     };
 }
