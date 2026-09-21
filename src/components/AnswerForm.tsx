@@ -449,7 +449,7 @@ export function AnswerForm({
                             <h3 className="text-2xl font-black text-gray-900 dark:text-white flex items-center gap-2">
                                 AI Evaluation
                             </h3>
-                            <p className="text-sm text-gray-500 font-medium">Powered by Gemini AI Engine</p>
+                            <p className="text-sm text-gray-500 font-medium">AI-Powered Evaluation Engine</p>
                         </div>
                         <div className="flex items-center gap-3 flex-wrap">
                             {elapsedTime > 0 && (

@@ -1,7 +1,6 @@
-export const dynamic = 'force-dynamic'
 import { Header } from "@/components/Header"
 import { Footer } from "@/components/Footer"
-import { CommunityContent } from "@/components/CommunityContent"
+import { CommunityContent, FeaturedGuide } from "@/components/CommunityContent"
 import { Briefcase, BookOpen, Users, MessageCircle } from "lucide-react"
 
 export default function CommunityPage() {
@@ -25,6 +24,81 @@ export default function CommunityPage() {
             icon: <MessageCircle size={24} />,
             title: "Expert Guidance",
             description: "Get your doubts answered by mentors and community experts in real-time discussions."
+        }
+    ]
+
+    const featuredGuides: FeaturedGuide[] = [
+        {
+            href: "/product-management-interview/design-uber-for-kids",
+            title: "Design Uber for Kids: Complete Product Sense Framework & Solution",
+            excerpt: "Learn how to clarify constraints, balance multi-sided user incentives across parents, kids, and drivers, and design safety-critical features.",
+            category: "Product Sense",
+            readTime: "7 min read",
+            difficulty: "Medium",
+            companies: ["Uber", "Google", "Meta"]
+        },
+        {
+            href: "/product-management-interview/swiggy-delivery-time-rca",
+            title: "Average Delivery Time Spiked by 15% on Swiggy: Step-by-Step RCA Case",
+            excerpt: "How to diagnose metric anomalies. Deconstruct the delivery funnel, isolate merchant bottlenecks, and design algorithmic fixes.",
+            category: "Root Cause Analysis",
+            readTime: "6 min read",
+            difficulty: "Hard",
+            companies: ["Swiggy", "Zomato", "DoorDash"]
+        },
+        {
+            href: "/product-management-interview/improve-whatsapp-groups",
+            title: "How Would You Improve WhatsApp Groups? Meta PM Case Breakdown",
+            excerpt: "Solve signal loss and notification fatigue in high-volume community chats without compromising WhatsApp's hallmark simplicity.",
+            category: "Product Design",
+            readTime: "8 min read",
+            difficulty: "Medium",
+            companies: ["Meta", "WhatsApp", "Slack"]
+        },
+        {
+            href: "/product-management-interview/google-maps-smart-parking",
+            title: "Design a Smart Parking Finder for Google Maps: PM Case Guide",
+            excerpt: "User journey mapping for urban drivers, multi-layered telemetry ingestion (sensor APIs vs Bluetooth disconnects), and in-route reservation flows.",
+            category: "Product Sense",
+            readTime: "7 min read",
+            difficulty: "Medium",
+            companies: ["Google", "Apple", "Uber"]
+        },
+        {
+            href: "/frameworks/rice",
+            title: "RICE Prioritization Framework: Formula & Real Roadmap Examples",
+            excerpt: "Master Reach, Impact, Confidence, and Effort scoring to make objective, defensible roadmap decisions under resource constraints.",
+            category: "Frameworks",
+            readTime: "5 min read",
+            difficulty: "Core",
+            companies: ["Intercom", "Atlassian"]
+        },
+        {
+            href: "/frameworks/kano-model",
+            title: "The Kano Model: Prioritizing Features for Customer Delight",
+            excerpt: "Classify must-haves, performance features, and delighters to prevent customer dissatisfaction and discover winning differentiators.",
+            category: "Frameworks",
+            readTime: "5 min read",
+            difficulty: "Core",
+            companies: ["Amazon", "Spotify"]
+        },
+        {
+            href: "/frameworks/circles-method",
+            title: "The CIRCLES Method: The Gold Standard for Product Design Rounds",
+            excerpt: "Master the 7-step sequence to clarify constraints, segment users, cut through pain points, brainstorm bold ideas, and define metrics.",
+            category: "Frameworks",
+            readTime: "7 min read",
+            difficulty: "Core",
+            companies: ["Google", "Meta", "Amazon", "Uber"]
+        },
+        {
+            href: "/frameworks/heart-framework",
+            title: "Google's HEART Framework: Measuring UX & Product Quality",
+            excerpt: "How to define and track Happiness, Engagement, Adoption, Retention, and Task Success using the Goals-Signals-Metrics model.",
+            category: "Frameworks",
+            readTime: "6 min read",
+            difficulty: "Core",
+            companies: ["Google", "YouTube", "Microsoft"]
         }
     ]
 
@@ -95,7 +169,7 @@ export default function CommunityPage() {
         <div className="min-h-screen bg-white dark:bg-gray-950 flex flex-col font-sans">
             <Header />
             <main className="flex-grow pt-16">
-                <CommunityContent benefits={benefits} blogPosts={blogPosts} />
+                <CommunityContent benefits={benefits} blogPosts={blogPosts} featuredGuides={featuredGuides} />
             </main>
             <Footer />
         </div>

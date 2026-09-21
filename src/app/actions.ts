@@ -736,3 +736,16 @@ Tone: Storyteller. Line breaks for readability. Output ONLY the post content.`;
         return { success: false, error: error instanceof Error ? error.message : "Failed to generate post" };
     }
 }
+
+export async function evaluateMicroCase(questionTitle: string, answerText: string) {
+    if (!answerText || answerText.trim().length < 10) {
+        return { success: false, error: "Please provide an answer with at least 10 characters." };
+    }
+    try {
+        const aiResponse = await evaluateAnswer(questionTitle, answerText, 30);
+        return { success: true, aiResponse };
+    } catch (e: any) {
+        console.error("[evaluateMicroCase] Error:", e);
+        return { success: false, error: e.message || "Evaluation failed" };
+    }
+}

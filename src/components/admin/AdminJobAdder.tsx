@@ -43,7 +43,7 @@ export default function AdminJobAdder() {
                 </div>
                 <div>
                     <h2 className="text-2xl font-black text-white tracking-tight">AI Job Extractor</h2>
-                    <p className="text-gray-400 text-sm font-medium">Paste a job URL and let Gemini do the heavy lifting</p>
+                    <p className="text-gray-400 text-sm font-medium">Paste a job URL and let AI do the heavy lifting</p>
                 </div>
             </div>
 

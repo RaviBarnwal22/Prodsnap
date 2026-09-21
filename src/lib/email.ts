@@ -30,8 +30,8 @@ interface EmailOptions {
 
 export async function sendEmail({ to, subject, html, type = "general", bookingId }: EmailOptions) {
     try {
-        const senderName = "Prodsnap Support"
-        const senderEmail = process.env.SMTP_SENDER || 'support@prodsnap.in'
+        const senderName = "Prodsnap Team"
+        const senderEmail = process.env.SMTP_SENDER || 'info.prodsnap@gmail.com'
 
         console.log(`[Email] Attempting to send email to: ${to} | Subject: ${subject}`)
 
@@ -128,7 +128,7 @@ export async function sendPaymentNotification(data: {
     phone: string
     amount: number
 }) {
-    const adminEmail = process.env.SMTP_SENDER || 'support@prodsnap.in'
+    const adminEmail = process.env.SMTP_SENDER || 'info.prodsnap@gmail.com'
 
     const html = `
         <!DOCTYPE html>
@@ -172,10 +172,10 @@ export async function sendPaymentNotification(data: {
                     </div>
                     
                     <p style="margin-top: 30px; color: #666;">
-                        Please log in to the admin panel to review the payment screenshot and approve/reject this request.
+                        Please log in to the admin panel to review the payment details.
                     </p>
                     
-                    <a href="${process.env.NEXT_PUBLIC_APP_URL || 'https://prodsnap-gamma.vercel.app'}/admin" class="cta">
+                    <a href="${process.env.NEXT_PUBLIC_APP_URL || 'https://prodsnap.in'}/admin" class="cta">
                         Open Admin Panel →
                     </a>
                 </div>
@@ -210,7 +210,7 @@ export async function sendPaymentConfirmationToUser(data: {
                 .container { max-width: 600px; margin: 0 auto; padding: 20px; }
                 .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; border-radius: 12px 12px 0 0; text-align: center; }
                 .content { background: #f8f9fa; padding: 30px; border-radius: 0 0 12px 12px; }
-                .status-box { background: #fff3cd; border: 1px solid #ffc107; padding: 20px; border-radius: 8px; margin: 20px 0; text-align: center; }
+                .status-box { background: #d1fae5; border: 1px solid #10b981; padding: 20px; border-radius: 8px; margin: 20px 0; text-align: center; }
                 .status-icon { font-size: 40px; margin-bottom: 10px; }
                 .info-box { background: white; padding: 15px; border-radius: 8px; margin: 15px 0; border-left: 4px solid #667eea; }
                 .footer { text-align: center; margin-top: 30px; color: #999; font-size: 12px; }
@@ -219,24 +219,19 @@ export async function sendPaymentConfirmationToUser(data: {
         <body>
             <div class="container">
                 <div class="header">
-                    <h1 style="margin: 0;">📧 Payment Received!</h1>
+                    <h1 style="margin: 0;">📧 Payment Confirmed!</h1>
                     <p style="margin: 10px 0 0 0; opacity: 0.9;">Thank you for your subscription, ${data.name}!</p>
                 </div>
                 <div class="content">
                     <div class="status-box">
-                        <div class="status-icon">⏳</div>
-                        <h2 style="margin: 0; color: #856404;">Awaiting Approval</h2>
-                        <p style="margin: 10px 0 0 0; color: #856404;">Your payment of ₹${data.amount} is being verified by our team.</p>
-                    </div>
-                    
-                    <div class="info-box">
-                        <strong>What's next?</strong>
-                        <p style="margin: 5px 0 0 0;">Our admin will review your payment screenshot and activate your premium access within 24 hours.</p>
+                        <div class="status-icon">🎉</div>
+                        <h2 style="margin: 0; color: #065f46;">Payment Successful</h2>
+                        <p style="margin: 10px 0 0 0; color: #065f46;">Your payment of ₹${data.amount} has been verified.</p>
                     </div>
                     
                     <div class="info-box">
                         <strong>Need help?</strong>
-                        <p style="margin: 5px 0 0 0;">Contact us at support@prodsnap.in if you have any questions.</p>
+                        <p style="margin: 5px 0 0 0;">Contact us at info.prodsnap@gmail.com if you have any questions.</p>
                     </div>
                 </div>
                 <div class="footer">
@@ -250,7 +245,7 @@ export async function sendPaymentConfirmationToUser(data: {
 
     return sendEmail({
         to: data.email,
-        subject: `⏳ Payment Received - Awaiting Approval | Prodsnap`,
+        subject: `🎉 Payment Confirmed - Prodsnap`,
         html,
         type: 'payment_confirmation'
     })
@@ -314,14 +309,14 @@ export async function sendApprovalNotification(data: {
                     </div>
                     
                     <div style="text-align: center;">
-                        <a href="${process.env.NEXT_PUBLIC_APP_URL || 'https://prodsnap-gamma.vercel.app'}/practice" class="cta">
+                        <a href="${process.env.NEXT_PUBLIC_APP_URL || 'https://prodsnap.in'}/practice" class="cta">
                             Start Practicing Now →
                         </a>
                     </div>
                 </div>
                 <div class="footer">
                     <p>Thank you for trusting Prodsnap!</p>
-                    <p>Questions? Contact us at support@prodsnap.in</p>
+                    <p>Questions? Contact us at info.prodsnap@gmail.com</p>
                     <p>© Prodsnap - Master PM Interviews with AI Feedback</p>
                 </div>
             </div>
@@ -344,6 +339,7 @@ export async function sendMentorshipBookingConfirmation(data: {
     serviceType: string
     amount: number
 }) {
+    const bookingUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'https://prodsnap.in'}/payment/status?type=mentorship`
     const html = `
         <!DOCTYPE html>
         <html>
@@ -351,41 +347,42 @@ export async function sendMentorshipBookingConfirmation(data: {
             <style>
                 body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: #333; }
                 .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-                .header { background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: white; padding: 40px; border-radius: 12px 12px 0 0; text-align: center; }
+                .header { background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%); color: white; padding: 40px; border-radius: 12px 12px 0 0; text-align: center; }
                 .content { background: #f8f9fa; padding: 30px; border-radius: 0 0 12px 12px; }
-                .pending-box { background: #fff3cd; border: 1px solid #ffc107; padding: 20px; border-radius: 8px; margin: 20px 0; text-align: center; }
-                .info-box { background: white; padding: 15px; border-radius: 8px; margin: 15px 0; border-left: 4px solid #f59e0b; }
+                .success-box { background: #ecfdf5; border: 1px solid #10b981; padding: 20px; border-radius: 8px; margin: 20px 0; text-align: center; }
+                .info-box { background: white; padding: 15px; border-radius: 8px; margin: 15px 0; border-left: 4px solid #8b5cf6; }
+                .cta-btn { display: inline-block; background: #8b5cf6; color: #ffffff !important; font-weight: bold; padding: 14px 28px; border-radius: 8px; text-decoration: none; margin-top: 15px; text-align: center; }
                 .footer { text-align: center; margin-top: 30px; color: #999; font-size: 12px; }
             </style>
         </head>
         <body>
             <div class="container">
                 <div class="header">
-                    <h1 style="margin: 0;">📧 Payment Received!</h1>
-                    <p style="margin: 10px 0 0 0; opacity: 0.9;">Thank you ${data.name}!</p>
+                    <h1 style="margin: 0;">🎉 Session Payment Confirmed!</h1>
+                    <p style="margin: 10px 0 0 0; opacity: 0.9;">Thank you for booking with Prodsnap, ${data.name}!</p>
                 </div>
                 <div class="content">
-                    <div class="pending-box">
-                        <h2 style="margin: 0; color: #856404;">⏳ Payment Under Review</h2>
-                        <p style="margin: 10px 0 0 0; color: #856404;">Your payment is being verified by our team</p>
+                    <div class="success-box">
+                        <h2 style="margin: 0; color: #065f46;">✅ Payment Received</h2>
+                        <p style="margin: 10px 0 0 0; color: #047857;">Your payment of ₹${data.amount} for <strong>${data.serviceType}</strong> has been successfully verified.</p>
                     </div>
                     
                     <div class="info-box">
-                        <strong>📋 Session Type:</strong> ${data.serviceType}
-                    </div>
-                    
-                    <div class="info-box">
+                        <strong>📋 Session Type:</strong> ${data.serviceType}<br/>
                         <strong>💰 Amount Paid:</strong> ₹${data.amount}
                     </div>
                     
                     <div class="info-box">
-                        <strong>📞 What's Next?</strong>
-                        <p style="margin: 5px 0 0 0;">Our team will verify your payment screenshot within 2-24 hours. Once approved, our mentor will reach out to you on your registered phone number to schedule the session.</p>
+                        <strong>📅 Next Step: Book Your Time Slot</strong>
+                        <p style="margin: 5px 0 10px 0;">Please select your preferred date & time for the 1:1 mentorship call on Calendly:</p>
+                        <div style="text-align: center;">
+                            <a href="${bookingUrl}" class="cta-btn">Book Your Slot Now →</a>
+                        </div>
                     </div>
 
                     <div class="info-box" style="background: #e0f2fe; border-left-color: #3b82f6;">
-                        <strong style="color: #1e40af;">Need Help?</strong>
-                        <p style="margin: 5px 0 0 0; color: #1e40af;">Contact us at support@prodsnap.in if you have any questions.</p>
+                        <strong style="color: #1e40af;">Need Assistance?</strong>
+                        <p style="margin: 5px 0 0 0; color: #1e40af;">Feel free to reply directly to this email or reach out to us at info.prodsnap@gmail.com.</p>
                     </div>
                 </div>
                 <div class="footer">
@@ -399,7 +396,7 @@ export async function sendMentorshipBookingConfirmation(data: {
 
     return sendEmail({
         to: data.email,
-        subject: `⏳ Payment Received - Under Review | ${data.serviceType} | Prodsnap`,
+        subject: `🎉 Session Booking Confirmed: ${data.serviceType} | Prodsnap`,
         html,
         type: 'mentorship'
     })

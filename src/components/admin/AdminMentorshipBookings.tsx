@@ -553,11 +553,21 @@ export function AdminMentorshipBookings() {
                                 <X size={20} />
                                 Close
                             </button>
-                            <img
-                                src={viewingProof}
-                                alt="Payment Proof"
-                                className="rounded-xl max-w-full max-h-[80vh] object-contain"
-                            />
+                            {viewingProof.startsWith('data:') || viewingProof.startsWith('http') || viewingProof.startsWith('/') ? (
+                                <img
+                                    src={viewingProof}
+                                    alt="Payment Proof"
+                                    className="rounded-xl max-w-full max-h-[80vh] object-contain"
+                                />
+                            ) : (
+                                <div className="bg-gray-800 p-8 rounded-2xl border border-gray-700 text-center max-w-md">
+                                    <h4 className="text-lg font-bold text-white mb-2">Cashfree Verified Order</h4>
+                                    <p className="text-gray-400 text-xs mb-3">Direct Cashfree Order ID:</p>
+                                    <code className="bg-gray-900 px-3 py-2 rounded-lg text-amber-400 font-mono text-sm block select-all break-all">
+                                        {viewingProof}
+                                    </code>
+                                </div>
+                            )}
                         </div>
                         <p className="absolute bottom-6 left-1/2 -translate-x-1/2 text-white/60 text-sm">
                             Click anywhere outside to dismiss

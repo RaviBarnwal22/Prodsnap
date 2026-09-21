@@ -3,8 +3,9 @@ import Link from "next/link"
 import Image from "next/image"
 import { Header } from "@/components/Header"
 import { Footer } from "@/components/Footer"
-import { ArrowRight, Users, Sparkles, BookOpen } from "lucide-react"
+import { ArrowRight, Users, Sparkles, BookOpen, Zap } from "lucide-react"
 import { getUser } from "@/lib/auth"
+import { InteractiveMicroCase } from "@/components/InteractiveMicroCase"
 
 export default async function Home() {
   // Single getUser call — result passed to Header to avoid a second Supabase+DB round trip
@@ -48,11 +49,15 @@ export default async function Home() {
                   <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-600 via-blue-600 to-cyan-500">With AI-Guided Precision</span>
                 </h1>
                 <p className="text-lg md:text-xl text-gray-600 dark:text-gray-300 max-w-xl mb-10 leading-relaxed font-medium lg:mx-0 mx-auto">
-                  The only platform that evaluates your product sensing questions using adaptive case frameworks and instant Gemini-powered feedback.
+                  The only platform that evaluates your product sensing questions using adaptive case frameworks and instant AI-powered feedback.
                 </p>
                 <div className="flex flex-col sm:flex-row justify-center lg:justify-start gap-4">
-                  <Link href="/practice" className="bg-gradient-to-r from-violet-600 to-blue-600 text-white px-12 py-5 rounded-full font-black text-xl hover:shadow-xl hover:shadow-violet-500/30 transition-all flex items-center justify-center gap-2 group">
-                    Start Practice with AI Simulation <ArrowRight size={24} className="group-hover:translate-x-1 transition-transform" />
+                  <a href="#playground" className="bg-gradient-to-r from-violet-600 to-blue-600 text-white px-8 py-4 rounded-full font-black text-lg hover:shadow-xl hover:shadow-violet-500/30 transition-all flex items-center justify-center gap-2 group cursor-pointer">
+                    <Zap size={20} className="fill-white" />
+                    Try Live Case Demo (Instant)
+                  </a>
+                  <Link href="/practice" className="bg-white dark:bg-gray-900 text-gray-900 dark:text-white border-2 border-gray-200 dark:border-gray-800 px-8 py-4 rounded-full font-bold text-lg hover:border-violet-400 dark:hover:border-violet-600 transition-all flex items-center justify-center gap-2">
+                    Browse 200+ Cases <ArrowRight size={20} />
                   </Link>
                 </div>
               </div>
@@ -119,12 +124,15 @@ export default async function Home() {
           </div>
         </section>
 
+        {/* Interactive Micro-Case Playground (Instant 0-Click Evaluation) */}
+        <InteractiveMicroCase />
+
         {/* Features Marquee Strip */}
         <section className="py-3 md:py-6 bg-gradient-to-r from-violet-600 via-purple-600 to-indigo-600 overflow-hidden" aria-label="Platform features">
           <div className="flex animate-marquee whitespace-nowrap" aria-hidden="true">
             {[
               { icon: "🎯", text: "Custom Framework Evaluation" },
-              { icon: "🤖", text: "Gemini-Powered AI Feedback" },
+              { icon: "🤖", text: "AI-Powered Real-Time Feedback" },
               { icon: "📝", text: "100+ Product Sense Questions" },
               { icon: "🎤", text: "Voice & Text Submissions" },
               { icon: "📊", text: "Detailed Scoring & Analysis" },
@@ -133,7 +141,7 @@ export default async function Home() {
               { icon: "📱", text: "Mobile-Friendly Interface" },
             ].concat([
               { icon: "🎯", text: "Custom Framework Evaluation" },
-              { icon: "🤖", text: "Gemini-Powered AI Feedback" },
+              { icon: "🤖", text: "AI-Powered Real-Time Feedback" },
               { icon: "📝", text: "100+ Product Sense Questions" },
               { icon: "🎤", text: "Voice & Text Submissions" },
               { icon: "📊", text: "Detailed Scoring & Analysis" },

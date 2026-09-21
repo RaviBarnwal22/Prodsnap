@@ -63,7 +63,7 @@ export default function PrivacyPolicy() {
                         </p>
                         <ul className="list-disc pl-6 space-y-2 text-gray-700 dark:text-gray-300">
                             <li><strong>Supabase:</strong> For authentication and database services</li>
-                            <li><strong>Google Gemini AI:</strong> For generating feedback on your practice responses</li>
+                            <li><strong>AI-Powered Providers:</strong> For generating feedback on your practice responses</li>
                             <li><strong>Groq AI:</strong> For high-speed AI processing and extraction</li>
                             <li><strong>Brevo:</strong> For sending transactional emails</li>
                         </ul>

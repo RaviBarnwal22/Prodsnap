@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { X, Upload, CheckCircle, Loader2, Phone, User, PartyPopper, Sparkles } from 'lucide-react'
+import { X, Upload, CheckCircle, Loader2, Phone, User, PartyPopper, Sparkles, Zap } from 'lucide-react'
 
 interface SubscribeModalProps {
     isOpen: boolean
@@ -90,6 +90,69 @@ export function SubscribeModal({ isOpen, onClose, userEmail, userName }: Subscri
         }
     }
 
+    const handleCashfreePayment = async () => {
+        setIsLoading(true)
+        setError('')
+        try {
+            const res = await fetch('/api/payment/cashfree-order', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    type: 'subscription',
+                    name: name || userName || 'Learner',
+                    email: userEmail,
+                    phone: phone || '9999999999',
+                    amount: 199,
+                    planType: 'monthly'
+                })
+            })
+
+            const data = await res.json()
+            if (!res.ok || !data.paymentSessionId) {
+                throw new Error(data.error || 'Failed to initialize payment session')
+            }
+
+            if (typeof (window as any).Cashfree === 'undefined') {
+                await new Promise<void>((resolve, reject) => {
+                    const script = document.createElement('script')
+                    script.src = 'https://sdk.cashfree.com/js/v3/cashfree.js'
+                    script.onload = () => resolve()
+                    script.onerror = () => reject(new Error('Failed to load Cashfree payment SDK'))
+                    document.body.appendChild(script)
+                })
+            }
+
+            const cashfree = (window as any).Cashfree({
+                mode: data.environment || 'production'
+            })
+
+            await cashfree.checkout({
+                paymentSessionId: data.paymentSessionId,
+                redirectTarget: '_modal'
+            })
+
+            const verifyRes = await fetch('/api/payment/cashfree-verify', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ orderId: data.orderId })
+            })
+
+            const verifyData = await verifyRes.json()
+            if (verifyData.success && verifyData.status === 'PAID') {
+                setStep('success')
+            } else if (verifyData.status === 'ACTIVE') {
+                setError('Payment was not completed. You can try again.')
+            } else {
+                setError(verifyData.message || 'Payment could not be verified.')
+            }
+        } catch (err: any) {
+            console.error('[Cashfree] Subscription checkout error:', err)
+            setError(err.message || 'Something went wrong during payment.')
+        } finally {
+            setIsLoading(false)
+        }
+    }
+
     const handleClose = () => {
         setStep('payment')
         setName(userName || '')
@@ -124,34 +187,61 @@ export function SubscribeModal({ isOpen, onClose, userEmail, userName }: Subscri
                 </div>
 
                 <div className="p-6">
-                    {/* Step 1: Payment QR */}
+                    {/* Step 1: Payment Options */}
                     {step === 'payment' && (
-                        <div className="text-center">
-                            <div className="bg-white p-4 rounded-2xl inline-block shadow-lg mb-6">
+                        <div className="space-y-4 text-center">
+                            {/* Cashfree Instant Payment Option */}
+                            <div className="bg-violet-50 dark:bg-violet-900/20 p-5 rounded-2xl border border-violet-200 dark:border-violet-800">
+                                <div className="flex justify-between items-center mb-3">
+                                    <div className="text-left">
+                                        <p className="font-bold text-gray-900 dark:text-white">Instant Online Activation</p>
+                                        <p className="text-xs text-gray-500">Google Pay, PhonePe, Paytm, Cards & UPI</p>
+                                    </div>
+                                    <span className="font-black text-xl text-violet-600 dark:text-violet-400">₹199</span>
+                                </div>
+                                <button
+                                    onClick={handleCashfreePayment}
+                                    disabled={isLoading}
+                                    className="w-full bg-gradient-to-r from-violet-600 to-indigo-600 text-white py-3.5 rounded-xl font-bold hover:opacity-90 transition flex items-center justify-center gap-2 shadow-lg shadow-violet-500/25 disabled:opacity-50"
+                                >
+                                    {isLoading ? (
+                                        <>
+                                            <Loader2 size={18} className="animate-spin" />
+                                            Opening Cashfree...
+                                        </>
+                                    ) : (
+                                        <>
+                                            <Zap size={18} />
+                                            Pay ₹199 via Cashfree (Instant)
+                                        </>
+                                    )}
+                                </button>
+                            </div>
+
+                            <div className="flex items-center my-3">
+                                <div className="flex-grow border-t border-gray-200 dark:border-gray-700"></div>
+                                <span className="px-3 text-xs text-gray-400 uppercase font-medium">Or pay via QR code</span>
+                                <div className="flex-grow border-t border-gray-200 dark:border-gray-700"></div>
+                            </div>
+
+                            <div className="bg-white p-3 rounded-2xl inline-block shadow-sm border border-gray-100">
                                 <img
                                     src="/upi-qr.jpg"
                                     alt="UPI QR Code"
-                                    className="w-56 h-56 object-contain"
+                                    className="w-36 h-36 object-contain"
                                 />
                             </div>
-                            <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
-                                UPI ID: <span className="font-mono font-bold">ravibarnwal22@okhdfcbank</span>
+                            <p className="text-xs text-gray-500">
+                                UPI ID: <span className="font-mono font-bold text-gray-800 dark:text-gray-200">ravibarnwal22@okhdfcbank</span>
                             </p>
-                            <div className="bg-violet-50 dark:bg-violet-900/20 p-4 rounded-xl mb-6">
-                                <p className="font-bold text-violet-700 dark:text-violet-300 text-xl">₹199/month</p>
-                                <p className="text-sm text-violet-600 dark:text-violet-400">Unlimited access to all practice cases</p>
-                            </div>
                             <button
                                 onClick={() => setStep('form')}
-                                className="w-full bg-gradient-to-r from-violet-600 to-indigo-600 text-white py-3 rounded-xl font-bold hover:opacity-90 transition flex items-center justify-center gap-2"
+                                className="w-full border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 py-2.5 rounded-xl font-medium hover:bg-gray-50 dark:hover:bg-gray-800 transition text-xs flex items-center justify-center gap-2"
                             >
-                                I've Made the Payment
-                                <CheckCircle size={18} />
+                                <Upload size={14} />
+                                I Paid via QR (Upload Screenshot)
                             </button>
-                            <p className="text-xs text-gray-500 mt-4">
-                                After payment, you'll submit the screenshot for verification
-                            </p>
-                            <div className="mt-4 pt-4 border-t border-gray-100 dark:border-gray-800">
+                            <div className="mt-3 pt-3 border-t border-gray-100 dark:border-gray-800">
                                 <p className="text-xs text-center text-gray-500 italic">
                                     If you are from outside India, kindly drop a line to <a href="mailto:support@prodsnap.in" className="text-violet-600 hover:underline">support@prodsnap.in</a> and we will assist you.
                                 </p>

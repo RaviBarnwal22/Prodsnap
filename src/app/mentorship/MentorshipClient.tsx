@@ -12,6 +12,7 @@ import {
     Calendar,
     Clock,
     CheckCircle,
+    CheckCircle2,
     MessageSquare,
     Trophy,
     Building2,
@@ -25,6 +26,7 @@ import {
     Mic,
     Sparkles,
     Lock,
+    ShieldCheck,
     ChevronDown,
     ChevronUp,
     Target,
@@ -43,7 +45,7 @@ export default function MentorshipClient() {
 
     const [selectedService, setSelectedService] = useState<any>(null)
     const [isPaymentProcessing, setIsPaymentProcessing] = useState(false)
-    const [paymentStatus, setPaymentStatus] = useState<'idle' | 'qrcode' | 'uploading' | 'success' | 'error'>('idle')
+    const [paymentStatus, setPaymentStatus] = useState<'idle' | 'checkout' | 'success'>('idle')
     const [errorMessage, setErrorMessage] = useState('')
 
     // Form state
@@ -53,11 +55,6 @@ export default function MentorshipClient() {
     const [linkedin, setLinkedin] = useState('')
     const [message, setMessage] = useState('')
     const [errors, setErrors] = useState<{ fullName?: string; email?: string; phone?: string }>({})
-
-    // Payment proof state
-    const [paymentProof, setPaymentProof] = useState<string | null>(null)
-    const [isUploading, setIsUploading] = useState(false)
-    const fileInputRef = useRef<HTMLInputElement>(null)
 
     // User authentication state
     const [userId, setUserId] = useState<string | null>(null)
@@ -99,9 +96,9 @@ export default function MentorshipClient() {
         name: "Ravi Barnwal",
         title: "Product Leader & Mentor",
         tagline: "Helping aspiring PMs crack their dream roles",
-        image: "/ravi-speaker.jpg",
+        image: "/ravi-headshot.jpg",
         linkedIn: "https://www.linkedin.com/in/barnwalravi/",
-        bio: "Ravi is a Product Leader with extensive experience in building and scaling products at top-tier tech companies. His mentorship style is practical, focusing on first-principles thinking and real-world case studies.",
+        bio: "Ravi is a Product Leader with extensive experience in building and scaling products at top-tier tech companies. His mentorship style is practical, focusing on first-principles thinking, real-world case studies, and AI-powered learning, leveraging tools like AI mock interviews, intelligent resume feedback, and data-driven career coaching to accelerate your PM journey.",
         stats: {
             mentees: "100+",
             successRate: "90%",
@@ -233,11 +230,9 @@ export default function MentorshipClient() {
         setPaymentStatus('idle')
         // Reset form
         setFullName('')
-
         setPhone('')
         setLinkedin('')
         setMessage('')
-        setPaymentProof(null)
         setErrors({})
         setErrorMessage('')
     }
@@ -253,7 +248,12 @@ export default function MentorshipClient() {
         }
 
         // Email validation
-
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+        if (!email.trim()) {
+            newErrors.email = 'Email address is required'
+        } else if (!emailRegex.test(email.trim())) {
+            newErrors.email = 'Please enter a valid email address'
+        }
 
         // Phone validation (Indian phone numbers)
         const phoneRegex = /^[+]?[0-9\s-]{10,15}$/
@@ -267,81 +267,91 @@ export default function MentorshipClient() {
         return Object.keys(newErrors).length === 0
     }
 
-    const handleProceedToPay = () => {
+    const handleProceedToPayment = () => {
         if (validateForm()) {
-            setPaymentStatus('qrcode')
+            setPaymentStatus('checkout')
+            setErrorMessage('')
         }
-    }
-
-    const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0]
-        if (!file) return
-
-        // Validate file size (max 5MB)
-        if (file.size > 5 * 1024 * 1024) {
-            setErrorMessage('File size must be less than 5MB')
-            return
-        }
-
-        // Validate file type
-        if (!file.type.startsWith('image/')) {
-            setErrorMessage('Please upload an image file')
-            return
-        }
-
-        setIsUploading(true)
-        const reader = new FileReader()
-        reader.onload = (event) => {
-            setPaymentProof(event.target?.result as string)
-            setIsUploading(false)
-        }
-        reader.onerror = () => {
-            setErrorMessage('Failed to read file')
-            setIsUploading(false)
-        }
-        reader.readAsDataURL(file)
     }
 
     const getServicePrice = (priceStr: string) => {
         return parseInt(priceStr.replace(/[^0-9]/g, ''))
     }
 
-    const handleSubmitBooking = async () => {
-        if (!paymentProof) {
-            setErrorMessage('Please upload payment screenshot')
+    const handlePayWithCashfree = async () => {
+        if (!validateForm()) {
+            setPaymentStatus('idle')
             return
         }
 
-        setPaymentStatus('uploading')
         setIsPaymentProcessing(true)
+        setErrorMessage('')
 
         try {
-            const response = await fetch('/api/mentorship-booking', {
+            const numericPrice = getServicePrice(selectedService.price)
+
+            // 1. Create order on server
+            const res = await fetch('/api/payment/cashfree-order', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
+                    type: 'mentorship',
                     name: fullName,
                     email,
                     phone,
-                    linkedinProfile: linkedin,
-                    messageToMentor: message,
                     serviceType: selectedService.title,
-                    paymentProof,
-                    amount: getServicePrice(selectedService.price)
+                    amount: numericPrice,
+                    linkedinProfile: linkedin,
+                    messageToMentor: message
                 })
             })
 
-            const data = await response.json()
+            const data = await res.json()
 
-            if (response.ok) {
-                setPaymentStatus('success')
-            } else {
-                setPaymentStatus('error')
-                setErrorMessage(data.error || 'Failed to submit booking')
+            if (!res.ok || !data.paymentSessionId) {
+                throw new Error(data.error || 'Failed to initiate payment session')
             }
-        } catch (error) {
-            setPaymentStatus('error')
-            setErrorMessage('Network error. Please try again.')
+
+            // 2. Ensure Cashfree SDK is loaded in window
+            if (typeof (window as any).Cashfree === 'undefined') {
+                await new Promise<void>((resolve, reject) => {
+                    const script = document.createElement('script')
+                    script.src = 'https://sdk.cashfree.com/js/v3/cashfree.js'
+                    script.onload = () => resolve()
+                    script.onerror = () => reject(new Error('Failed to load Cashfree payment SDK'))
+                    document.body.appendChild(script)
+                })
+            }
+
+            const cashfree = (window as any).Cashfree({
+                mode: data.environment || 'production'
+            })
+
+            // 3. Open Cashfree modal checkout
+            await cashfree.checkout({
+                paymentSessionId: data.paymentSessionId,
+                redirectTarget: '_modal'
+            })
+
+            // 4. Verify payment status with backend
+            const verifyRes = await fetch('/api/payment/cashfree-verify', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ orderId: data.orderId })
+            })
+
+            const verifyData = await verifyRes.json()
+
+            if (verifyData.success && verifyData.status === 'PAID') {
+                setPaymentStatus('success')
+            } else if (verifyData.status === 'ACTIVE') {
+                setErrorMessage('Payment was not completed. You can try again whenever you are ready.')
+            } else {
+                setErrorMessage(verifyData.message || 'Payment could not be verified.')
+            }
+        } catch (err: any) {
+            console.error('[Cashfree Checkout Error]:', err)
+            setErrorMessage(err.message || 'Failed to complete payment. Please try again.')
         } finally {
             setIsPaymentProcessing(false)
         }
@@ -357,7 +367,7 @@ export default function MentorshipClient() {
                     <div className="bg-white dark:bg-gray-800 rounded-t-3xl md:rounded-3xl shadow-2xl max-w-md w-full overflow-hidden animate-in slide-in-from-bottom-10 md:fade-in md:zoom-in duration-200 backdrop-blur-md">
                         <div className="p-6 border-b border-gray-100 dark:border-gray-700 flex justify-between items-center">
                             <h3 className="text-xl font-bold">
-                                {paymentStatus === 'qrcode' ? 'Scan to Pay' : 'Booking Details'}
+                                {paymentStatus === 'success' ? 'Booking Confirmed' : paymentStatus === 'checkout' ? 'Complete Payment' : 'Booking Details'}
                             </h3>
                             <button
                                 onClick={() => setSelectedService(null)}
@@ -369,119 +379,150 @@ export default function MentorshipClient() {
 
                         <div className="p-6">
                             {paymentStatus === 'success' ? (
-                                <div className="text-center py-8">
-                                    <div className="w-20 h-20 bg-amber-100 dark:bg-amber-900/30 text-amber-600 rounded-full flex items-center justify-center mx-auto mb-6 animate-in zoom-in spin-in-12 duration-500">
-                                        <Clock size={40} />
+                                <div className="text-center py-6 animate-in zoom-in-95 duration-300">
+                                    <div className="w-20 h-20 bg-green-100 dark:bg-green-900/30 text-green-600 rounded-full flex items-center justify-center mx-auto mb-4 shadow-inner">
+                                        <CheckCircle2 size={40} />
                                     </div>
-                                    <h4 className="text-2xl font-bold mb-2">Payment Under Review</h4>
-                                    <p className="text-gray-600 dark:text-gray-400 mb-8 max-w-xs mx-auto">
-                                        <span className="block mb-2">Thank you for submitting your booking request for:</span>
-                                        <strong className="text-violet-600">{selectedService.title}</strong>
+                                    <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300 text-xs font-semibold mb-3">
+                                        <ShieldCheck size={14} />
+                                        Verified via Cashfree
+                                    </div>
+                                    <h4 className="text-2xl font-black mb-1 text-gray-900 dark:text-white">Booking Confirmed!</h4>
+                                    <p className="text-gray-600 dark:text-gray-400 text-sm mb-6">
+                                        Thank you <strong className="text-gray-900 dark:text-white">{fullName}</strong>! Your 1:1 session for <strong className="text-violet-600 dark:text-violet-400">{selectedService.title}</strong> has been booked.
                                     </p>
-                                    <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 p-4 rounded-xl mb-6 text-left">
-                                        <p className="text-sm text-amber-900 dark:text-amber-100 font-medium mb-2">
-                                            <strong>What happens next?</strong>
+
+                                    <div className="bg-gray-50 dark:bg-gray-900/50 border border-gray-100 dark:border-gray-800 rounded-2xl p-4 mb-5 text-left space-y-2 text-xs">
+                                        <div className="flex justify-between items-center py-1 border-b border-gray-200 dark:border-gray-700">
+                                            <span className="text-gray-500">Amount Paid</span>
+                                            <span className="font-bold text-gray-900 dark:text-white">{selectedService.price}</span>
+                                        </div>
+                                        <div className="flex justify-between items-center py-1 border-b border-gray-200 dark:border-gray-700">
+                                            <span className="text-gray-500">Confirmation Sent To</span>
+                                            <span className="font-medium text-gray-900 dark:text-white truncate max-w-[180px]">{email}</span>
+                                        </div>
+                                        <div className="flex justify-between items-center py-1">
+                                            <span className="text-gray-500">Phone / WhatsApp</span>
+                                            <span className="font-medium text-gray-900 dark:text-white">{phone}</span>
+                                        </div>
+                                    </div>
+
+                                    <div className="bg-violet-50 dark:bg-violet-900/20 border border-violet-100 dark:border-violet-900/40 p-4 rounded-xl mb-6 text-left">
+                                        <p className="text-xs text-violet-900 dark:text-violet-200 font-bold mb-1.5 flex items-center gap-1.5">
+                                            <Calendar size={14} /> What happens next?
                                         </p>
-                                        <ul className="text-sm text-amber-800 dark:text-amber-200 space-y-1">
-                                            <li>• Our team will verify your payment screenshot</li>
-                                            <li>• You'll receive a confirmation email at <strong>{email}</strong></li>
-                                            <li>• Verification typically takes 2-24 hours</li>
+                                        <ul className="text-xs text-violet-800 dark:text-violet-300 space-y-1">
+                                            <li>• You'll receive a confirmation receipt at <strong>{email}</strong></li>
+                                            <li>• Mentor Ravi Barnwal will connect directly via WhatsApp / phone to schedule your session date & time</li>
+                                            <li>• Detailed preparation instructions will be shared before the call</li>
                                         </ul>
                                     </div>
+
                                     <button
                                         onClick={() => setSelectedService(null)}
-                                        className="w-full py-3 bg-violet-600 hover:bg-violet-700 text-white rounded-xl font-bold transition-all"
+                                        className="w-full py-3.5 bg-violet-600 hover:bg-violet-700 text-white rounded-xl font-bold transition-all shadow-lg shadow-violet-500/20"
                                     >
                                         Back to Mentorship
                                     </button>
                                 </div>
-                            ) : paymentStatus === 'qrcode' || paymentStatus === 'uploading' || paymentStatus === 'error' ? (
-                                <div className="space-y-6 animate-in slide-in-from-right-10 duration-300">
-                                    <div className="text-center">
-                                        <p className="text-sm text-gray-500 mb-4">Scan QR code using any UPI app</p>
-                                        <div className="bg-white p-4 rounded-2xl border-2 border-dashed border-gray-200 dark:border-gray-700 inline-block mb-4 shadow-sm">
-                                            <img
-                                                src="/upi-qr.jpg"
-                                                alt="Payment QR Code"
-                                                className="w-56 h-56 object-contain mix-blend-multiply dark:mix-blend-normal"
-                                            />
+                            ) : paymentStatus === 'checkout' ? (
+                                <div className="space-y-5 animate-in slide-in-from-right-8 duration-300">
+                                    {/* Service & Price Summary Card */}
+                                    <div className="bg-gradient-to-br from-violet-500/10 via-purple-500/5 to-indigo-500/10 dark:from-violet-950/40 dark:to-gray-900 p-4 rounded-2xl border border-violet-200 dark:border-violet-800/50">
+                                        <div className="flex justify-between items-start mb-2">
+                                            <div>
+                                                <span className="text-[11px] font-bold uppercase tracking-wider text-violet-600 dark:text-violet-400">Selected Service</span>
+                                                <h4 className="font-bold text-lg text-gray-900 dark:text-white">{selectedService.title}</h4>
+                                            </div>
+                                            <div className="text-right">
+                                                <span className="text-[11px] font-medium text-gray-500 block">Total Payable</span>
+                                                <span className="font-black text-2xl text-violet-600 dark:text-violet-400">{selectedService.price}</span>
+                                            </div>
                                         </div>
-                                        <p className="text-sm font-mono font-bold text-gray-600 dark:text-gray-400 mb-2 select-all break-all px-4">{UPI_ID}</p>
-                                        <p className="font-bold text-xl text-violet-600">{selectedService.price}</p>
-                                        <div className="mt-4 pt-4 border-t border-gray-100 dark:border-gray-700 w-full max-w-xs mx-auto">
-                                            <p className="text-xs text-center text-gray-500 italic">
-                                                If you are from outside India, kindly drop a line to <a href="mailto:support@prodsnap.in" className="text-violet-600 hover:underline">support@prodsnap.in</a> and we will assist you.
-                                            </p>
+                                        <div className="flex items-center gap-3 text-xs text-gray-600 dark:text-gray-400 pt-2 border-t border-violet-100 dark:border-violet-900/30">
+                                            <span className="flex items-center gap-1"><Clock size={13} /> {selectedService.duration} Session</span>
+                                            <span>•</span>
+                                            <span>Mentor: Ravi Barnwal</span>
                                         </div>
                                     </div>
 
-                                    <div className="bg-gray-50 dark:bg-gray-900/50 p-4 rounded-xl space-y-4">
-                                        <h4 className="font-bold text-sm uppercase tracking-wider text-gray-500 flex items-center gap-2">
-                                            <Upload size={16} />
-                                            Upload Payment Screenshot
-                                        </h4>
-
-                                        <div
-                                            onClick={() => fileInputRef.current?.click()}
-                                            className={`border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-all ${paymentProof
-                                                ? 'border-green-500 bg-green-50 dark:bg-green-900/20'
-                                                : 'border-gray-300 dark:border-gray-600 hover:border-violet-500 hover:bg-white dark:hover:bg-gray-800'
-                                                }`}
-                                        >
-                                            <input
-                                                type="file"
-                                                ref={fileInputRef}
-                                                className="hidden"
-                                                accept="image/*"
-                                                onChange={handleFileUpload}
-                                                disabled={isUploading}
-                                            />
-
-                                            {isUploading ? (
-                                                <div className="flex flex-col items-center">
-                                                    <Loader2 size={24} className="animate-spin text-violet-600 mb-2" />
-                                                    <p className="text-sm font-medium">Processing image...</p>
-                                                </div>
-                                            ) : paymentProof ? (
-                                                <div className="flex flex-col items-center text-green-600">
-                                                    <CheckCircle size={32} className="mb-2" />
-                                                    <p className="font-bold">Screenshot Uploaded</p>
-                                                    <p className="text-xs mt-1">Click to change</p>
-                                                </div>
-                                            ) : (
-                                                <div className="flex flex-col items-center text-gray-500">
-                                                    <Camera size={32} className="mb-2" />
-                                                    <p className="font-bold text-gray-900 dark:text-white">Tap to Upload</p>
-                                                    <p className="text-xs mt-1">Support: JPG, PNG</p>
-                                                </div>
-                                            )}
+                                    {/* Candidate Details Summary */}
+                                    <div className="bg-gray-50 dark:bg-gray-900/50 rounded-xl p-3.5 text-xs space-y-1.5 border border-gray-100 dark:border-gray-800">
+                                        <div className="flex justify-between">
+                                            <span className="text-gray-500">Name</span>
+                                            <span className="font-semibold text-gray-900 dark:text-white">{fullName}</span>
                                         </div>
+                                        <div className="flex justify-between">
+                                            <span className="text-gray-500">Email</span>
+                                            <span className="font-semibold text-gray-900 dark:text-white truncate max-w-[200px]">{email}</span>
+                                        </div>
+                                        <div className="flex justify-between">
+                                            <span className="text-gray-500">Phone</span>
+                                            <span className="font-semibold text-gray-900 dark:text-white">{phone}</span>
+                                        </div>
+                                    </div>
+
+                                    {/* Cashfree Gateway Trust Banner */}
+                                    <div className="bg-white dark:bg-gray-800/80 border border-gray-200 dark:border-gray-700 rounded-2xl p-4 text-center space-y-2.5 shadow-sm">
+                                        <div className="flex items-center justify-center gap-1.5 text-xs font-semibold text-gray-700 dark:text-gray-300">
+                                            <Lock size={13} className="text-emerald-500" />
+                                            <span>Secured by Cashfree Payments</span>
+                                        </div>
+                                        <div className="flex flex-wrap items-center justify-center gap-2 text-[11px] font-medium">
+                                            <span className="px-2.5 py-1 rounded-md bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 font-bold">Google Pay</span>
+                                            <span className="px-2.5 py-1 rounded-md bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 font-bold">PhonePe</span>
+                                            <span className="px-2.5 py-1 rounded-md bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 font-bold">Paytm</span>
+                                            <span className="px-2.5 py-1 rounded-md bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 font-bold">Cards & UPI</span>
+                                        </div>
+                                        <p className="text-[11px] text-gray-400">
+                                            Supports UPI QR, NetBanking, Credit/Debit Cards with instant confirmation.
+                                        </p>
                                     </div>
 
                                     {errorMessage && (
-                                        <div className="bg-red-50 dark:bg-red-900/20 text-red-600 text-sm p-3 rounded-lg flex items-center gap-2 animate-in slide-in-from-top-2">
-                                            <AlertCircle size={16} />
-                                            {errorMessage}
+                                        <div className="bg-red-50 dark:bg-red-900/20 text-red-600 text-xs p-3 rounded-xl flex items-center gap-2 animate-in slide-in-from-top-2 border border-red-200 dark:border-red-900/30">
+                                            <AlertCircle size={16} className="shrink-0" />
+                                            <span>{errorMessage}</span>
                                         </div>
                                     )}
 
-                                    <button
-                                        onClick={handleSubmitBooking}
-                                        disabled={!paymentProof || isPaymentProcessing}
-                                        className="w-full py-4 bg-gray-900 dark:bg-white text-white dark:text-black rounded-xl font-bold hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2 shadow-lg shadow-gray-200 dark:shadow-none"
-                                    >
-                                        {isPaymentProcessing ? (
-                                            <>
-                                                <Loader2 size={20} className="animate-spin" />
-                                                Verifying Payment...
-                                            </>
-                                        ) : (
-                                            <>
-                                                Confirm Booking
-                                                <ArrowRight size={20} />
-                                            </>
-                                        )}
-                                    </button>
+                                    <div className="space-y-2 pt-1">
+                                        <button
+                                            onClick={handlePayWithCashfree}
+                                            disabled={isPaymentProcessing}
+                                            className="w-full py-4 bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 text-white rounded-xl font-bold shadow-lg shadow-violet-500/25 hover:shadow-violet-500/40 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2 text-base"
+                                        >
+                                            {isPaymentProcessing ? (
+                                                <>
+                                                    <Loader2 size={18} className="animate-spin" />
+                                                    Opening Cashfree Checkout...
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <CreditCard size={18} />
+                                                    Pay {selectedService.price} via Cashfree
+                                                </>
+                                            )}
+                                        </button>
+
+                                        <button
+                                            type="button"
+                                            onClick={() => {
+                                                setPaymentStatus('idle')
+                                                setErrorMessage('')
+                                            }}
+                                            disabled={isPaymentProcessing}
+                                            className="w-full py-2.5 text-xs text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 transition-colors font-medium text-center"
+                                        >
+                                            ← Edit Booking Details
+                                        </button>
+                                    </div>
+
+                                    <div className="pt-2 border-t border-gray-100 dark:border-gray-800">
+                                        <p className="text-[11px] text-center text-gray-400">
+                                            If you are from outside India, drop a line to <a href="mailto:support@prodsnap.in" className="text-violet-600 hover:underline">support@prodsnap.in</a>.
+                                        </p>
+                                    </div>
                                 </div>
                             ) : (
                                 <div className="animate-in slide-in-from-left-10 duration-300">
@@ -510,6 +551,21 @@ export default function MentorshipClient() {
                                                 placeholder="Enter your full name"
                                             />
                                             {errors.fullName && <p className="text-red-500 text-xs mt-1 font-medium">{errors.fullName}</p>}
+                                        </div>
+
+                                        <div>
+                                            <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Email Address <span className="text-red-500">*</span></label>
+                                            <input
+                                                type="email"
+                                                value={email}
+                                                onChange={(e) => {
+                                                    setEmail(e.target.value)
+                                                    if (errors.email) setErrors(prev => ({ ...prev, email: undefined }))
+                                                }}
+                                                className={`w-full px-4 py-3 rounded-xl border ${errors.email ? 'border-red-500 bg-red-50 dark:bg-red-900/10' : 'border-gray-200 dark:border-gray-700'} bg-gray-50 dark:bg-gray-900 transition-all focus:border-violet-500 focus:ring-2 focus:ring-violet-500/20 outline-none`}
+                                                placeholder="you@example.com"
+                                            />
+                                            {errors.email && <p className="text-red-500 text-xs mt-1 font-medium">{errors.email}</p>}
                                         </div>
 
                                         <div>
@@ -561,10 +617,10 @@ export default function MentorshipClient() {
                                     </div>
 
                                     <button
-                                        onClick={handleProceedToPay}
+                                        onClick={handleProceedToPayment}
                                         className="w-full py-4 bg-gray-900 dark:bg-white text-white dark:text-black rounded-xl font-bold hover:opacity-90 transition-all flex items-center justify-center gap-2 shadow-lg shadow-gray-200 dark:shadow-none"
                                     >
-                                        Proceed to Pay
+                                        Proceed to Payment
                                         <ArrowRight size={20} />
                                     </button>
                                 </div>
@@ -598,118 +654,22 @@ export default function MentorshipClient() {
 
             {/* Hero Profile Section */}
             <section className="relative overflow-hidden bg-white dark:bg-gray-950 py-10 md:py-16 px-4">
-                <div className="container mx-auto max-w-6xl grid md:grid-cols-2 gap-12 items-center">
+                <div className="container mx-auto max-w-6xl grid md:grid-cols-2 gap-10 md:gap-12 items-center">
                     <div className="order-2 md:order-1 relative">
                         <div className="relative z-10">
                             <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-violet-100 dark:bg-violet-900/30 text-violet-700 dark:text-violet-300 text-xs font-bold uppercase tracking-wider mb-4">
                                 <Sparkles size={14} />
-                                Product Leader & Career Coach
+                                Product Leader &amp; Career Coach
                             </div>
-                            <h1 className="text-4xl md:text-6xl font-black mb-3 leading-tight">
+                            <h1 className="text-4xl md:text-5xl lg:text-6xl font-black mb-3 leading-tight">
                                 {mentor.name}
                             </h1>
                             <p className="text-xl md:text-2xl text-violet-600 font-bold mb-4">{mentor.title}</p>
-                            <p className="text-base md:text-lg text-gray-600 dark:text-gray-300 mb-6 leading-relaxed max-w-lg">
+                            <p className="text-base md:text-lg text-gray-600 dark:text-gray-300 mb-6 leading-relaxed max-w-xl">
                                 {mentor.bio}
                             </p>
 
-                            {/* Product Management Leadership & Preparation Tiles */}
-                            <div className="space-y-5 mb-8">
-                                <div>
-                                    <span className="text-[11px] font-black uppercase tracking-widest text-violet-600 dark:text-violet-400 block mb-2.5">
-                                        Product Management Leadership & Core Competencies
-                                    </span>
-                                    <div className="flex flex-wrap gap-2">
-                                        <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-violet-50 dark:bg-violet-900/20 rounded-xl text-xs font-bold text-violet-700 dark:text-violet-300 border border-violet-200/60 dark:border-violet-800/50 shadow-2xs">
-                                            <Target size={14} className="text-violet-600 dark:text-violet-400" />
-                                            0-to-1 Product Building
-                                        </span>
-                                        <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-violet-50 dark:bg-violet-900/20 rounded-xl text-xs font-bold text-violet-700 dark:text-violet-300 border border-violet-200/60 dark:border-violet-800/50 shadow-2xs">
-                                            <Rocket size={14} className="text-violet-600 dark:text-violet-400" />
-                                            Product Strategy & GTM
-                                        </span>
-                                        <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-violet-50 dark:bg-violet-900/20 rounded-xl text-xs font-bold text-violet-700 dark:text-violet-300 border border-violet-200/60 dark:border-violet-800/50 shadow-2xs">
-                                            <BarChart3 size={14} className="text-violet-600 dark:text-violet-400" />
-                                            Data-Driven & Metrics
-                                        </span>
-                                        <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-violet-50 dark:bg-violet-900/20 rounded-xl text-xs font-bold text-violet-700 dark:text-violet-300 border border-violet-200/60 dark:border-violet-800/50 shadow-2xs">
-                                            <Cpu size={14} className="text-violet-600 dark:text-violet-400" />
-                                            Tech Acumen & System Architecture
-                                        </span>
-                                        <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-violet-50 dark:bg-violet-900/20 rounded-xl text-xs font-bold text-violet-700 dark:text-violet-300 border border-violet-200/60 dark:border-violet-800/50 shadow-2xs">
-                                            <TrendingUp size={14} className="text-violet-600 dark:text-violet-400" />
-                                            Growth & Retention Scaling
-                                        </span>
-                                    </div>
-                                </div>
 
-                                <div>
-                                    <span className="text-[11px] font-black uppercase tracking-widest text-gray-400 dark:text-gray-500 block mb-2.5">
-                                        PM Interview Preparation & Mentorship Focus Areas
-                                    </span>
-                                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
-                                        <div className="p-2.5 bg-gray-50 dark:bg-gray-900 rounded-xl border border-gray-100 dark:border-gray-800 flex items-center gap-2.5 hover:border-violet-300 dark:hover:border-violet-700 transition-colors">
-                                            <div className="w-8 h-8 rounded-lg bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0">
-                                                <Briefcase size={15} />
-                                            </div>
-                                            <div className="min-w-0">
-                                                <p className="text-xs font-bold text-gray-900 dark:text-white leading-tight truncate">Product Design</p>
-                                                <p className="text-[10px] text-gray-500 dark:text-gray-400 truncate">CIRCLES Framework</p>
-                                            </div>
-                                        </div>
-
-                                        <div className="p-2.5 bg-gray-50 dark:bg-gray-900 rounded-xl border border-gray-100 dark:border-gray-800 flex items-center gap-2.5 hover:border-violet-300 dark:hover:border-violet-700 transition-colors">
-                                            <div className="w-8 h-8 rounded-lg bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 flex items-center justify-center shrink-0">
-                                                <BarChart3 size={15} />
-                                            </div>
-                                            <div className="min-w-0">
-                                                <p className="text-xs font-bold text-gray-900 dark:text-white leading-tight truncate">Metrics & RCA</p>
-                                                <p className="text-[10px] text-gray-500 dark:text-gray-400 truncate">North Star & Trade-offs</p>
-                                            </div>
-                                        </div>
-
-                                        <div className="p-2.5 bg-gray-50 dark:bg-gray-900 rounded-xl border border-gray-100 dark:border-gray-800 flex items-center gap-2.5 hover:border-violet-300 dark:hover:border-violet-700 transition-colors">
-                                            <div className="w-8 h-8 rounded-lg bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400 flex items-center justify-center shrink-0">
-                                                <Rocket size={15} />
-                                            </div>
-                                            <div className="min-w-0">
-                                                <p className="text-xs font-bold text-gray-900 dark:text-white leading-tight truncate">GTM & Launch</p>
-                                                <p className="text-[10px] text-gray-500 dark:text-gray-400 truncate">Positioning & Strategy</p>
-                                            </div>
-                                        </div>
-
-                                        <div className="p-2.5 bg-gray-50 dark:bg-gray-900 rounded-xl border border-gray-100 dark:border-gray-800 flex items-center gap-2.5 hover:border-violet-300 dark:hover:border-violet-700 transition-colors">
-                                            <div className="w-8 h-8 rounded-lg bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
-                                                <Search size={15} />
-                                            </div>
-                                            <div className="min-w-0">
-                                                <p className="text-xs font-bold text-gray-900 dark:text-white leading-tight truncate">Guesstimates</p>
-                                                <p className="text-[10px] text-gray-500 dark:text-gray-400 truncate">Market Sizing</p>
-                                            </div>
-                                        </div>
-
-                                        <div className="p-2.5 bg-gray-50 dark:bg-gray-900 rounded-xl border border-gray-100 dark:border-gray-800 flex items-center gap-2.5 hover:border-violet-300 dark:hover:border-violet-700 transition-colors">
-                                            <div className="w-8 h-8 rounded-lg bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 flex items-center justify-center shrink-0">
-                                                <Users size={15} />
-                                            </div>
-                                            <div className="min-w-0">
-                                                <p className="text-xs font-bold text-gray-900 dark:text-white leading-tight truncate">Behavioral</p>
-                                                <p className="text-[10px] text-gray-500 dark:text-gray-400 truncate">STAR Method</p>
-                                            </div>
-                                        </div>
-
-                                        <div className="p-2.5 bg-gray-50 dark:bg-gray-900 rounded-xl border border-gray-100 dark:border-gray-800 flex items-center gap-2.5 hover:border-violet-300 dark:hover:border-violet-700 transition-colors">
-                                            <div className="w-8 h-8 rounded-lg bg-pink-100 dark:bg-pink-900/30 text-pink-600 dark:text-pink-400 flex items-center justify-center shrink-0">
-                                                <GraduationCap size={15} />
-                                            </div>
-                                            <div className="min-w-0">
-                                                <p className="text-xs font-bold text-gray-900 dark:text-white leading-tight truncate">1:1 Mocks</p>
-                                                <p className="text-[10px] text-gray-500 dark:text-gray-400 truncate">Live Simulation</p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
 
                             <div className="flex flex-wrap gap-4">
                                 <a href="#book" className="px-8 py-3.5 bg-gradient-to-r from-violet-600 to-purple-600 text-white rounded-full font-bold hover:shadow-lg hover:shadow-violet-500/25 transition-all flex items-center gap-2">
@@ -724,25 +684,26 @@ export default function MentorshipClient() {
                         </div>
                     </div>
 
-                    <div className="order-1 md:order-2 relative flex justify-center">
-                        <div className="relative w-full max-w-md">
-                            <div className="absolute inset-0 bg-gradient-to-tr from-violet-600 to-purple-400 rounded-[2rem] rotate-3 opacity-20 blur-xl"></div>
+                    {/* Image Column - Exactly Half in length and breadth (max-w-[210px] vs original max-w-md 448px) */}
+                    <div className="order-1 md:order-2 relative flex justify-center items-center">
+                        <div className="relative w-full max-w-[210px] sm:max-w-[224px]">
+                            <div className="absolute inset-0 bg-gradient-to-tr from-violet-600 to-purple-400 rounded-3xl rotate-3 opacity-25 blur-xl"></div>
                             <div className="relative">
                                 <img
-                                    src="/mentor-5.jpg"
+                                    src="/ravi-headshot.jpg?v=5"
                                     alt={mentor.name}
-                                    className="w-full rounded-3xl object-cover aspect-[4/5] shadow-2xl"
+                                    className="w-full rounded-2xl object-cover aspect-[4/5] shadow-2xl border-2 border-white/80 dark:border-gray-800/80"
                                 />
 
-                                {/* Stats Cards */}
-                                <div className="absolute -left-4 top-8 bg-white dark:bg-gray-800 p-3.5 rounded-2xl shadow-xl border border-gray-100 dark:border-gray-700 z-10">
-                                    <p className="text-2xl font-black text-violet-600">{mentor.stats.mentees}</p>
-                                    <p className="text-xs text-gray-500 font-bold">Mentees Guided</p>
-                                </div>
-
-                                <div className="absolute -right-4 bottom-16 bg-white dark:bg-gray-800 p-3.5 rounded-2xl shadow-xl border border-gray-100 dark:border-gray-700 z-10">
-                                    <p className="text-2xl font-black text-green-500">{mentor.stats.successRate}</p>
-                                    <p className="text-xs text-gray-500 font-bold">Success Rate</p>
+                                {/* 100+ Mentees Guided Floating Badge */}
+                                <div className="absolute -bottom-3 -left-3 sm:-bottom-4 sm:-left-4 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md px-3 py-2 rounded-2xl shadow-xl border border-gray-100 dark:border-gray-800 flex items-center gap-2 z-10 whitespace-nowrap">
+                                    <div className="w-7 h-7 rounded-lg bg-violet-100 dark:bg-violet-900/40 flex items-center justify-center text-violet-600 dark:text-violet-400 shrink-0">
+                                        <Users size={14} />
+                                    </div>
+                                    <div>
+                                        <p className="text-base font-black text-violet-600 dark:text-violet-400 leading-none">100+</p>
+                                        <p className="text-[10px] font-bold text-gray-600 dark:text-gray-400 leading-tight">Mentees Guided</p>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -930,7 +891,7 @@ export default function MentorshipClient() {
                         {/* Highlight 4: IIM Bodh Gaya */}
                         <div className="lg:col-span-2 group relative overflow-hidden rounded-3xl h-[300px] shadow-lg border border-gray-100 dark:border-gray-800">
                             <img
-                                src="/mentor-4.jpg"
+                                src="/iim-bodh-gaya-session.jpg?v=2"
                                 alt="IIM Bodh Gaya Career Session"
                                 className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                             />

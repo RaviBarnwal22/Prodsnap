@@ -88,10 +88,32 @@ export function SEODetailPage({ pageData, pillarId, categorySlug }: SEODetailPag
 
           {/* Heading */}
           <div className="mb-8">
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-violet-50 dark:bg-violet-900/30 text-violet-600 dark:text-violet-400 mb-4 border border-violet-100 dark:border-violet-800">
-              <Sparkles size={12} />
-              {pillar.title}
-            </span>
+            <div className="flex flex-wrap items-center gap-2 mb-4">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-violet-50 dark:bg-violet-900/30 text-violet-600 dark:text-violet-400 border border-violet-100 dark:border-violet-800">
+                <Sparkles size={12} />
+                {pageData.category || pillar.title}
+              </span>
+              {pageData.readTime && (
+                <span className="text-xs text-gray-500 dark:text-gray-400 font-medium">
+                  • {pageData.readTime}
+                </span>
+              )}
+              {pageData.difficulty && (
+                <span className="px-2.5 py-0.5 rounded-md text-[11px] font-semibold bg-amber-50 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 border border-amber-200 dark:border-amber-800">
+                  {pageData.difficulty}
+                </span>
+              )}
+              {pageData.companyTags && pageData.companyTags.length > 0 && (
+                <div className="flex flex-wrap items-center gap-1.5 sm:ml-auto">
+                  <span className="text-[11px] text-gray-400 font-medium">Asked at:</span>
+                  {pageData.companyTags.map((company, i) => (
+                    <span key={i} className="text-[11px] font-semibold px-2 py-0.5 rounded-md bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200/60 dark:border-gray-700">
+                      {company}
+                    </span>
+                  ))}
+                </div>
+              )}
+            </div>
             <h1 className="text-3xl md:text-5xl font-black tracking-tight text-gray-900 dark:text-white leading-[1.1] mb-6">
               {pageData.h1}
             </h1>
@@ -115,6 +137,40 @@ export function SEODetailPage({ pageData, pillarId, categorySlug }: SEODetailPag
                   </div>
                 </section>
               ))}
+
+              {/* In-article Interactive Practice CTA Banner */}
+              {(() => {
+                const isFramework = pillarId === "frameworks" || pageData.category?.toLowerCase().includes("framework") || pillarId === "product-analytics" || pillarId === "glossary" || pillarId === "templates";
+
+                return (
+                  <div className="p-6 md:p-8 rounded-3xl bg-gradient-to-br from-violet-900 via-indigo-900 to-gray-950 text-white border border-violet-500/20 shadow-xl">
+                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+                      <div className="space-y-2">
+                        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold bg-violet-500/20 text-violet-300 border border-violet-400/30">
+                          <Sparkles size={13} />
+                          {isFramework ? "Framework Practice Drills" : "Interactive AI Case Coach"}
+                        </div>
+                        <h3 className="text-xl md:text-2xl font-black">
+                          {isFramework
+                            ? "Want to practice applying these frameworks to real cases?"
+                            : "Want to practice this case with real-time feedback?"}
+                        </h3>
+                        <p className="text-sm text-violet-200/80 max-w-xl leading-relaxed">
+                          {isFramework
+                            ? "Frameworks only create value when applied to ambiguous, real-world product dilemmas. Put this methodology to work across realistic case studies with instant AI rubric evaluation."
+                            : "Stop just reading solutions. Submit your clarifying questions, user persona breakdown, and metrics directly to our AI coach to receive instant rubric scoring and personalized critique."}
+                        </p>
+                      </div>
+                      <Link
+                        href={pageData.practiceUrl || (isFramework ? "/practice?category=GROWTH_RETENTION" : "/practice")}
+                        className="shrink-0 px-6 py-3.5 bg-white text-violet-900 hover:bg-violet-50 font-black rounded-xl text-sm transition-all shadow-lg hover:shadow-violet-500/20 flex items-center justify-center gap-2"
+                      >
+                        {isFramework ? "Practice Case Drills" : "Practice Live Now"} <ArrowRight size={16} />
+                      </Link>
+                    </div>
+                  </div>
+                );
+              })()}
 
               {/* FAQs */}
               {pageData.faqs.length > 0 && (
@@ -148,10 +204,10 @@ export function SEODetailPage({ pageData, pillarId, categorySlug }: SEODetailPag
                   Simulate PM Interviews
                 </h3>
                 <p className="text-xs opacity-90 leading-relaxed mb-6">
-                  Stop reading static guides. Practice product sense, execution, and strategy frameworks interactively with our Gemini-powered AI coach.
+                  Stop reading static guides. Practice product sense, execution, and strategy frameworks interactively with our AI-powered coach.
                 </p>
                 <Link
-                  href="/practice"
+                  href={pageData.practiceUrl || "/practice"}
                   className="w-full text-center py-3 bg-white text-violet-600 font-black rounded-xl text-sm hover:bg-gray-50 transition-all flex items-center justify-center gap-2"
                 >
                   Start Practice Free <ArrowRight size={16} />

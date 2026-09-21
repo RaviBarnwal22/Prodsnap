@@ -4,8 +4,8 @@ export const PRODUCT_SENSE_PROMPT = (questionTitle: string, userAnswer: string, 
     : 'Not measured';
 
   const clarificationInfo = chatContext
-    ? `\n**Clarification Hub History (Interviewer Chat)**:\n${chatContext}`
-    : '\n**Clarification Hub History**: No clarifying questions were asked by the candidate.';
+    ? `\n**Clarification Hub History (Interviewer Chat)**:\n${chatContext}\nAnalyze whether the candidate asked insightful clarifying questions and incorporated the interviewer's answers into their final solution.`
+    : '\n**Clarification Hub**: Not used or not applicable for this standalone case evaluation. Do NOT penalize the candidate for missing clarifying questions; evaluate the written submission directly on its own merits.';
 
   return `
 **Role**: You are a Senior Product Leader and Interview Bar Raiser at a top global tech company. You evaluate PM candidates with extreme rigor, looking for strategic depth, user-centricity, and structural excellence.
@@ -18,11 +18,8 @@ ${clarificationInfo}
 
 **Task**:
 1. **Framework Analysis**: Identify the most effective framework for this specific case (e.g., CIRCLES for design, BUS for strategy, HEART for metrics). 
-2. **Clarification Evaluation (CRITICAL)**: Analyze the "Clarification Hub History" provided above. 
-   - Did the candidate ask insightful clarifying questions? 
-   - Did they incorporate the interviewer's answers into their final solution?
-   - If they didn't ask any questions, heavily penalize the "comprehend_goal" score as it shows a lack of empathy and discovery.
-3. **Comprehensive Scoring**: Rate the candidate on a scale of 0-5 across the 6 core dimensions.
+2. **Quality & Depth Evaluation**: Analyze the structure, user empathy, strategic clarity, and solution rigor in the candidate's answer. If the candidate submitted an empty, gibberish, or irrelevant answer, award 0-1 points across all dimensions.
+3. **Comprehensive Scoring**: Rate the candidate on a scale of 0-5 across the 6 core dimensions (0 = completely missing/empty, 5 = world-class).
 4. **Gold Standard Solution**: Provide a detailed, industry-standard "Perfect Answer" that would get a "Strong Hire" rating.
 
 **Dimensions for Scoring**:
