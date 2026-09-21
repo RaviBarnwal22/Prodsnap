@@ -3,6 +3,31 @@
  * API Version: 2023-08-01
  */
 
+export interface CreateOrderParams {
+    orderId: string
+    orderAmount: number
+    orderCurrency?: string
+    orderNote?: string
+    customerDetails: {
+        customerId: string
+        customerName?: string
+        customerEmail: string
+        customerPhone: string
+    }
+    orderMeta?: {
+        returnUrl?: string
+    }
+}
+
+export interface CashfreeOrderResponse {
+    cf_order_id: string
+    order_id: string
+    order_status: string
+    order_amount: number
+    order_currency: string
+    payment_session_id: string
+}
+
 function getCashfreeConfig() {
     const appId = process.env.CASHFREE_APP_ID || ''
     const secretKey = process.env.CASHFREE_SECRET_KEY || ''

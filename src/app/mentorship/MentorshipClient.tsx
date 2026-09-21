@@ -1,10 +1,11 @@
 'use client'
 
 import { useState, useRef, useEffect } from "react"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import Link from "next/link"
 import { createClient } from '@/lib/supabase/client'
 import { useAuth } from "@/components/AuthContext"
+import { MENTORSHIP_SERVICES, formatPriceINR, DEMO_SERVICE_TITLE } from "@/lib/constants"
 import {
     Star,
     GraduationCap,
@@ -41,6 +42,9 @@ import {
 
 export default function MentorshipClient() {
     const router = useRouter()
+    // TEMPORARY — the ₹1 demo package is only offered on /mentorship?demo=1 so real
+    // customers never see it. Remove with the demo entry in lib/constants.ts.
+    const showDemoPackage = useSearchParams().get('demo') === '1'
     const { openAuthModal } = useAuth()
 
     const [selectedService, setSelectedService] = useState<any>(null)
@@ -90,8 +94,6 @@ export default function MentorshipClient() {
         }
     }, [])
 
-    // UPI Details
-    const UPI_ID = "ravibarnwal22@okhdfcbank"
     const mentor = {
         name: "Ravi Barnwal",
         title: "Product Leader & Mentor",
@@ -202,26 +204,34 @@ export default function MentorshipClient() {
         services: [
             {
                 title: "1:1 Mock Interview",
-                duration: "60 min",
-                price: "₹1,299",
+                duration: MENTORSHIP_SERVICES["1:1 Mock Interview"].duration,
+                price: formatPriceINR(MENTORSHIP_SERVICES["1:1 Mock Interview"].priceINR),
                 description: "Full mock PM interview with detailed feedback on product sense, execution, and behavioral questions.",
                 features: ["Real PM interview simulation", "Detailed written feedback", "Recording shared", "Follow-up tips"],
                 popular: true
             },
             {
                 title: "Resume Review",
-                duration: "30 min",
-                price: "₹499",
+                duration: MENTORSHIP_SERVICES["Resume Review"].duration,
+                price: formatPriceINR(MENTORSHIP_SERVICES["Resume Review"].priceINR),
                 description: "Deep dive into your resume to make it ATS-friendly and impactful for top-tier PM roles.",
                 features: ["Line-by-line review", "ATS optimization", "Action verb enhancement", "Storytelling tips"]
             },
             {
                 title: "Career Strategy",
-                duration: "45 min",
-                price: "₹999",
+                duration: MENTORSHIP_SERVICES["Career Strategy"].duration,
+                price: formatPriceINR(MENTORSHIP_SERVICES["Career Strategy"].priceINR),
                 description: "Personalized roadmap to transition into PM or grow in your current PM role.",
                 features: ["Skill gap analysis", "Company targeting strategy", "Networking plan", "Resource toolkit"]
-            }
+            },
+            // TEMPORARY — remove with the demo entry in lib/constants.ts
+            ...(showDemoPackage ? [{
+                title: DEMO_SERVICE_TITLE,
+                duration: MENTORSHIP_SERVICES[DEMO_SERVICE_TITLE].duration,
+                price: formatPriceINR(MENTORSHIP_SERVICES[DEMO_SERVICE_TITLE].priceINR),
+                description: "Internal test package used to verify the live payment flow. Not a real session.",
+                features: ["Payment flow verification only"]
+            }] : [])
         ]
     }
 
@@ -274,10 +284,6 @@ export default function MentorshipClient() {
         }
     }
 
-    const getServicePrice = (priceStr: string) => {
-        return parseInt(priceStr.replace(/[^0-9]/g, ''))
-    }
-
     const handlePayWithCashfree = async () => {
         if (!validateForm()) {
             setPaymentStatus('idle')
@@ -288,9 +294,7 @@ export default function MentorshipClient() {
         setErrorMessage('')
 
         try {
-            const numericPrice = getServicePrice(selectedService.price)
-
-            // 1. Create order on server
+            // 1. Create order on server — the server resolves the price from its own catalog
             const res = await fetch('/api/payment/cashfree-order', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -300,7 +304,6 @@ export default function MentorshipClient() {
                     email,
                     phone,
                     serviceType: selectedService.title,
-                    amount: numericPrice,
                     linkedinProfile: linkedin,
                     messageToMentor: message
                 })
@@ -364,8 +367,8 @@ export default function MentorshipClient() {
             {/* Payment Modal */}
             {selectedService && (
                 <div className="fixed inset-0 z-50 flex items-end md:items-center justify-center p-0 md:p-4 bg-black/60 backdrop-blur-sm z-[100]">
-                    <div className="bg-white dark:bg-gray-800 rounded-t-3xl md:rounded-3xl shadow-2xl max-w-md w-full overflow-hidden animate-in slide-in-from-bottom-10 md:fade-in md:zoom-in duration-200 backdrop-blur-md">
-                        <div className="p-6 border-b border-gray-100 dark:border-gray-700 flex justify-between items-center">
+                    <div className="bg-white dark:bg-gray-800 rounded-t-3xl md:rounded-3xl shadow-2xl max-w-md w-full max-h-[92vh] flex flex-col overflow-hidden animate-in slide-in-from-bottom-10 md:fade-in md:zoom-in duration-200 backdrop-blur-md">
+                        <div className="shrink-0 px-6 py-4 border-b border-gray-100 dark:border-gray-700 flex justify-between items-center">
                             <h3 className="text-xl font-bold">
                                 {paymentStatus === 'success' ? 'Booking Confirmed' : paymentStatus === 'checkout' ? 'Complete Payment' : 'Booking Details'}
                             </h3>
@@ -377,7 +380,7 @@ export default function MentorshipClient() {
                             </button>
                         </div>
 
-                        <div className="p-6">
+                        <div className="p-6 overflow-y-auto">
                             {paymentStatus === 'success' ? (
                                 <div className="text-center py-6 animate-in zoom-in-95 duration-300">
                                     <div className="w-20 h-20 bg-green-100 dark:bg-green-900/30 text-green-600 rounded-full flex items-center justify-center mx-auto mb-4 shadow-inner">
@@ -413,14 +416,25 @@ export default function MentorshipClient() {
                                         </p>
                                         <ul className="text-xs text-violet-800 dark:text-violet-300 space-y-1">
                                             <li>• You'll receive a confirmation receipt at <strong>{email}</strong></li>
-                                            <li>• Mentor Ravi Barnwal will connect directly via WhatsApp / phone to schedule your session date & time</li>
+                                            <li>• Pick a date & time that suits you using the scheduler below</li>
                                             <li>• Detailed preparation instructions will be shared before the call</li>
                                         </ul>
                                     </div>
 
+                                    {process.env.NEXT_PUBLIC_CALENDLY_URL && (
+                                        <a
+                                            href={`${process.env.NEXT_PUBLIC_CALENDLY_URL}${process.env.NEXT_PUBLIC_CALENDLY_URL.includes('?') ? '&' : '?'}name=${encodeURIComponent(fullName)}&email=${encodeURIComponent(email)}`}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="block w-full py-3.5 mb-3 bg-violet-600 hover:bg-violet-700 text-white rounded-xl font-bold text-center transition-all shadow-lg shadow-violet-500/20"
+                                        >
+                                            Schedule Your Session
+                                        </a>
+                                    )}
+
                                     <button
                                         onClick={() => setSelectedService(null)}
-                                        className="w-full py-3.5 bg-violet-600 hover:bg-violet-700 text-white rounded-xl font-bold transition-all shadow-lg shadow-violet-500/20"
+                                        className="w-full py-3.5 border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-xl font-bold transition-all"
                                     >
                                         Back to Mentorship
                                     </button>
@@ -526,18 +540,20 @@ export default function MentorshipClient() {
                                 </div>
                             ) : (
                                 <div className="animate-in slide-in-from-left-10 duration-300">
-                                    <div className="bg-violet-50 dark:bg-violet-900/20 p-4 rounded-xl mb-6">
-                                        <div className="flex justify-between items-start mb-1">
-                                            <h4 className="font-bold text-lg text-violet-900 dark:text-violet-100">{selectedService.title}</h4>
-                                            <span className="font-bold text-lg text-violet-600 dark:text-violet-400">{selectedService.price}</span>
-                                        </div>
-                                        <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
-                                            <Clock size={14} />
-                                            <span>{selectedService.duration} Session</span>
+                                    <div className="bg-violet-50 dark:bg-violet-900/20 px-4 py-3 rounded-xl mb-4">
+                                        <div className="flex justify-between items-center gap-3">
+                                            <div className="min-w-0">
+                                                <h4 className="font-bold text-base text-violet-900 dark:text-violet-100 truncate">{selectedService.title}</h4>
+                                                <span className="flex items-center gap-1.5 text-xs text-gray-600 dark:text-gray-400">
+                                                    <Clock size={12} />
+                                                    {selectedService.duration} Session
+                                                </span>
+                                            </div>
+                                            <span className="font-bold text-lg text-violet-600 dark:text-violet-400 shrink-0">{selectedService.price}</span>
                                         </div>
                                     </div>
 
-                                    <div className="space-y-4 mb-6">
+                                    <div className="space-y-3 mb-4">
                                         <div>
                                             <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Full Name <span className="text-red-500">*</span></label>
                                             <input
@@ -547,7 +563,7 @@ export default function MentorshipClient() {
                                                     setFullName(e.target.value)
                                                     if (errors.fullName) setErrors(prev => ({ ...prev, fullName: undefined }))
                                                 }}
-                                                className={`w-full px-4 py-3 rounded-xl border ${errors.fullName ? 'border-red-500 bg-red-50 dark:bg-red-900/10' : 'border-gray-200 dark:border-gray-700'} bg-gray-50 dark:bg-gray-900 transition-all focus:border-violet-500 focus:ring-2 focus:ring-violet-500/20 outline-none`}
+                                                className={`w-full px-4 py-2.5 rounded-xl border ${errors.fullName ? 'border-red-500 bg-red-50 dark:bg-red-900/10' : 'border-gray-200 dark:border-gray-700'} bg-gray-50 dark:bg-gray-900 transition-all focus:border-violet-500 focus:ring-2 focus:ring-violet-500/20 outline-none`}
                                                 placeholder="Enter your full name"
                                             />
                                             {errors.fullName && <p className="text-red-500 text-xs mt-1 font-medium">{errors.fullName}</p>}
@@ -562,7 +578,7 @@ export default function MentorshipClient() {
                                                     setEmail(e.target.value)
                                                     if (errors.email) setErrors(prev => ({ ...prev, email: undefined }))
                                                 }}
-                                                className={`w-full px-4 py-3 rounded-xl border ${errors.email ? 'border-red-500 bg-red-50 dark:bg-red-900/10' : 'border-gray-200 dark:border-gray-700'} bg-gray-50 dark:bg-gray-900 transition-all focus:border-violet-500 focus:ring-2 focus:ring-violet-500/20 outline-none`}
+                                                className={`w-full px-4 py-2.5 rounded-xl border ${errors.email ? 'border-red-500 bg-red-50 dark:bg-red-900/10' : 'border-gray-200 dark:border-gray-700'} bg-gray-50 dark:bg-gray-900 transition-all focus:border-violet-500 focus:ring-2 focus:ring-violet-500/20 outline-none`}
                                                 placeholder="you@example.com"
                                             />
                                             {errors.email && <p className="text-red-500 text-xs mt-1 font-medium">{errors.email}</p>}
@@ -577,7 +593,7 @@ export default function MentorshipClient() {
                                                     setPhone(e.target.value)
                                                     if (errors.phone) setErrors(prev => ({ ...prev, phone: undefined }))
                                                 }}
-                                                className={`w-full px-4 py-3 rounded-xl border ${errors.phone ? 'border-red-500 bg-red-50 dark:bg-red-900/10' : 'border-gray-200 dark:border-gray-700'} bg-gray-50 dark:bg-gray-900 transition-all focus:border-violet-500 focus:ring-2 focus:ring-violet-500/20 outline-none`}
+                                                className={`w-full px-4 py-2.5 rounded-xl border ${errors.phone ? 'border-red-500 bg-red-50 dark:bg-red-900/10' : 'border-gray-200 dark:border-gray-700'} bg-gray-50 dark:bg-gray-900 transition-all focus:border-violet-500 focus:ring-2 focus:ring-violet-500/20 outline-none`}
                                                 placeholder="+91 98765 43210"
                                             />
                                             {errors.phone && <p className="text-red-500 text-xs mt-1 font-medium">{errors.phone}</p>}
@@ -591,12 +607,9 @@ export default function MentorshipClient() {
                                                 type="url"
                                                 value={linkedin}
                                                 onChange={(e) => setLinkedin(e.target.value)}
-                                                className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 transition-all focus:border-violet-500 focus:ring-2 focus:ring-violet-500/20 outline-none"
+                                                className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 transition-all focus:border-violet-500 focus:ring-2 focus:ring-violet-500/20 outline-none"
                                                 placeholder="https://linkedin.com/in/your-profile"
                                             />
-                                            <p className="text-xs text-gray-500 mt-1">
-                                                Helping the mentor understand your background.
-                                            </p>
                                         </div>
 
                                         <div>
@@ -606,19 +619,16 @@ export default function MentorshipClient() {
                                             <textarea
                                                 value={message}
                                                 onChange={(e) => setMessage(e.target.value)}
-                                                rows={3}
-                                                className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 transition-all focus:border-violet-500 focus:ring-2 focus:ring-violet-500/20 outline-none resize-none"
-                                                placeholder="Any specific goals, topics, or context you'd like to share..."
+                                                rows={2}
+                                                className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 transition-all focus:border-violet-500 focus:ring-2 focus:ring-violet-500/20 outline-none resize-none"
+                                                placeholder="Any goals or context you'd like to share..."
                                             />
-                                            <p className="text-xs text-gray-500 mt-1">
-                                                Share your goals so the mentor can be better prepared.
-                                            </p>
                                         </div>
                                     </div>
 
                                     <button
                                         onClick={handleProceedToPayment}
-                                        className="w-full py-4 bg-gray-900 dark:bg-white text-white dark:text-black rounded-xl font-bold hover:opacity-90 transition-all flex items-center justify-center gap-2 shadow-lg shadow-gray-200 dark:shadow-none"
+                                        className="w-full py-3.5 bg-gray-900 dark:bg-white text-white dark:text-black rounded-xl font-bold hover:opacity-90 transition-all flex items-center justify-center gap-2 shadow-lg shadow-gray-200 dark:shadow-none"
                                     >
                                         Proceed to Payment
                                         <ArrowRight size={20} />

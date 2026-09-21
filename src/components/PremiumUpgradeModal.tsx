@@ -2,7 +2,8 @@
 
 import { FREE_ATTEMPT_LIMIT } from '@/lib/constants'
 import { useState } from 'react'
-import { X, Crown, Check, Zap, BookOpen, Trophy, Sparkles, Upload, CheckCircle, Loader2, Phone, User, PartyPopper } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import { X, Crown, Check, Zap, BookOpen, Trophy, Sparkles, Loader2, PartyPopper } from 'lucide-react'
 
 interface PremiumUpgradeModalProps {
     isOpen: boolean
@@ -23,84 +24,13 @@ const features = [
 import { createPortal } from 'react-dom'
 
 export function PremiumUpgradeModal({ isOpen, onClose, category, attemptsUsed = FREE_ATTEMPT_LIMIT, userEmail = '', userName = '' }: PremiumUpgradeModalProps) {
-    const [step, setStep] = useState<'info' | 'payment' | 'form' | 'success'>('info')
+    const router = useRouter()
+    const [step, setStep] = useState<'info' | 'payment' | 'success'>('info')
     const [isLoading, setIsLoading] = useState(false)
     const [error, setError] = useState<string | null>(null)
 
-    // Form fields
     const [name, setName] = useState(userName)
     const [phone, setPhone] = useState('')
-    const [paymentProof, setPaymentProof] = useState<string | null>(null)
-    const [fileName, setFileName] = useState('')
-
-    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0]
-        if (!file) return
-
-        // Check file size (max 5MB)
-        if (file.size > 5 * 1024 * 1024) {
-            setError('File size must be less than 5MB')
-            return
-        }
-
-        // Check file type
-        if (!file.type.startsWith('image/')) {
-            setError('Please upload an image file')
-            return
-        }
-
-        setFileName(file.name)
-        setError(null)
-
-        // Convert to base64
-        const reader = new FileReader()
-        reader.onload = () => {
-            setPaymentProof(reader.result as string)
-        }
-        reader.readAsDataURL(file)
-    }
-
-    const handleSubmit = async () => {
-        if (!name.trim()) {
-            setError('Please enter your name')
-            return
-        }
-        if (!phone.trim() || phone.length < 10) {
-            setError('Please enter a valid phone number')
-            return
-        }
-        if (!paymentProof) {
-            setError('Please upload payment screenshot')
-            return
-        }
-
-        setIsLoading(true)
-        setError(null)
-
-        try {
-            const response = await fetch('/api/subscription-request', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    name: name.trim(),
-                    phone: phone.trim(),
-                    paymentProof
-                })
-            })
-
-            const data = await response.json()
-
-            if (!response.ok) {
-                throw new Error(data.error || 'Failed to submit request')
-            }
-
-            setStep('success')
-        } catch (err: any) {
-            setError(err.message)
-        } finally {
-            setIsLoading(false)
-        }
-    }
 
     const handleCashfreePayment = async () => {
         setIsLoading(true)
@@ -114,7 +44,6 @@ export function PremiumUpgradeModal({ isOpen, onClose, category, attemptsUsed = 
                     name: name || userName || 'Learner',
                     email: userEmail,
                     phone: phone || '9999999999',
-                    amount: 199,
                     planType: 'monthly'
                 })
             })
@@ -166,13 +95,15 @@ export function PremiumUpgradeModal({ isOpen, onClose, category, attemptsUsed = 
     }
 
     const handleClose = () => {
+        const wasActivated = step === 'success'
         setStep('info')
         setName(userName)
         setPhone('')
-        setPaymentProof(null)
-        setFileName('')
         setError(null)
         onClose()
+        // Premium is already active server-side; re-fetch so the badge and unlocked
+        // content appear without the user having to reload manually.
+        if (wasActivated) router.refresh()
     }
 
     if (!isOpen || typeof document === 'undefined') return null
@@ -293,29 +224,6 @@ export function PremiumUpgradeModal({ isOpen, onClose, category, attemptsUsed = 
                                     </button>
                                 </div>
 
-                                <div className="flex items-center my-3">
-                                    <div className="flex-grow border-t border-gray-200 dark:border-gray-700"></div>
-                                    <span className="px-3 text-xs text-gray-400 uppercase font-medium">Or pay via QR code</span>
-                                    <div className="flex-grow border-t border-gray-200 dark:border-gray-700"></div>
-                                </div>
-
-                                <div className="bg-white p-3 rounded-2xl inline-block shadow-sm border border-gray-100">
-                                    <img
-                                        src="/upi-qr.jpg"
-                                        alt="UPI QR Code"
-                                        className="w-36 h-36 object-contain"
-                                    />
-                                </div>
-                                <p className="text-xs text-gray-500">
-                                    UPI ID: <span className="font-mono font-bold text-gray-800 dark:text-gray-200">ravibarnwal22@okhdfcbank</span>
-                                </p>
-                                <button
-                                    onClick={() => setStep('form')}
-                                    className="w-full border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 py-2.5 rounded-xl font-medium hover:bg-gray-50 dark:hover:bg-gray-800 transition text-xs flex items-center justify-center gap-2"
-                                >
-                                    <Upload size={14} />
-                                    I Paid via QR (Upload Screenshot)
-                                </button>
                                 <button
                                     onClick={() => setStep('info')}
                                     className="w-full text-gray-500 hover:text-gray-700 text-xs mt-2"
@@ -332,110 +240,6 @@ export function PremiumUpgradeModal({ isOpen, onClose, category, attemptsUsed = 
                     </>
                 )}
 
-                {/* Step 3: Details Form */}
-                {step === 'form' && (
-                    <>
-                        <div className="bg-gradient-to-r from-violet-600 to-indigo-600 p-6 text-white">
-                            <h2 className="text-xl font-bold">Step 2: Submit Details</h2>
-                            <p className="text-white/80 text-sm">Upload payment screenshot for verification</p>
-                        </div>
-
-                        <div className="p-6 space-y-5">
-                            {error && (
-                                <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 p-3 rounded-xl text-sm">
-                                    {error}
-                                </div>
-                            )}
-
-                            <div>
-                                <label className="block text-sm font-medium mb-2">Full Name *</label>
-                                <div className="relative">
-                                    <User className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-                                    <input
-                                        type="text"
-                                        value={name}
-                                        onChange={(e) => setName(e.target.value)}
-                                        className="w-full pl-10 pr-4 py-3 border border-gray-200 dark:border-gray-700 rounded-xl bg-transparent focus:border-violet-500 outline-none transition"
-                                        placeholder="Enter your full name"
-                                    />
-                                </div>
-                            </div>
-
-                            <div>
-                                <label className="block text-sm font-medium mb-2">Email Address</label>
-                                <input
-                                    type="email"
-                                    value={userEmail}
-                                    disabled
-                                    className="w-full px-4 py-3 border border-gray-200 dark:border-gray-700 rounded-xl bg-gray-50 dark:bg-gray-800 text-gray-500 cursor-not-allowed"
-                                />
-                            </div>
-
-                            <div>
-                                <label className="block text-sm font-medium mb-2">Phone Number *</label>
-                                <div className="relative">
-                                    <Phone className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-                                    <input
-                                        type="tel"
-                                        value={phone}
-                                        onChange={(e) => setPhone(e.target.value)}
-                                        className="w-full pl-10 pr-4 py-3 border border-gray-200 dark:border-gray-700 rounded-xl bg-transparent focus:border-violet-500 outline-none transition"
-                                        placeholder="Enter 10-digit phone number"
-                                    />
-                                </div>
-                            </div>
-
-                            <div>
-                                <label className="block text-sm font-medium mb-2">Payment Screenshot *</label>
-                                <label className="flex flex-col items-center justify-center w-full h-28 border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-xl cursor-pointer hover:border-violet-500 transition bg-gray-50 dark:bg-gray-800/50">
-                                    {paymentProof ? (
-                                        <div className="flex items-center gap-3">
-                                            <CheckCircle className="text-green-500" size={24} />
-                                            <span className="text-sm font-medium text-green-600">{fileName}</span>
-                                        </div>
-                                    ) : (
-                                        <>
-                                            <Upload className="text-gray-400 mb-2" size={24} />
-                                            <span className="text-sm text-gray-500">Click to upload screenshot</span>
-                                        </>
-                                    )}
-                                    <input
-                                        type="file"
-                                        accept="image/*"
-                                        onChange={handleFileChange}
-                                        className="hidden"
-                                    />
-                                </label>
-                            </div>
-
-                            <button
-                                onClick={handleSubmit}
-                                disabled={isLoading}
-                                className="w-full bg-gradient-to-r from-violet-600 to-indigo-600 text-white py-3 rounded-xl font-bold hover:opacity-90 transition flex items-center justify-center gap-2 disabled:opacity-50"
-                            >
-                                {isLoading ? (
-                                    <>
-                                        <Loader2 className="animate-spin" size={18} />
-                                        Submitting...
-                                    </>
-                                ) : (
-                                    <>
-                                        Submit for Verification
-                                        <Sparkles size={18} />
-                                    </>
-                                )}
-                            </button>
-
-                            <button
-                                onClick={() => setStep('payment')}
-                                className="w-full text-gray-500 hover:text-gray-700 text-sm"
-                            >
-                                ← Back to payment
-                            </button>
-                        </div>
-                    </>
-                )}
-
                 {/* Step 4: Success */}
                 {step === 'success' && (
                     <div className="p-8 text-center">
@@ -443,27 +247,26 @@ export function PremiumUpgradeModal({ isOpen, onClose, category, attemptsUsed = 
                             <PartyPopper className="text-white" size={40} />
                         </div>
                         <h3 className="text-2xl font-bold mb-3">
-                            Request Submitted! 🎉
+                            Premium Activated! 🎉
                         </h3>
                         <p className="text-gray-600 dark:text-gray-400 mb-6 leading-relaxed">
-                            Thank you for your interest in upgrading to Premium!
-                            Our team is reviewing your payment screenshot.
+                            Your payment was successful and Premium is now active on your account. Enjoy unlimited access!
                         </p>
                         <div className="bg-amber-50 dark:bg-amber-900/20 p-4 rounded-xl mb-6 text-left">
                             <p className="text-sm text-amber-900 dark:text-amber-100 font-medium mb-2">
                                 <strong>What's next?</strong>
                             </p>
                             <ul className="text-sm text-amber-800 dark:text-amber-200 space-y-1">
-                                <li>• Our admin will verify your payment within 24 hours</li>
-                                <li>• You'll receive an email confirmation once approved</li>
-                                <li>• Your premium badge will appear automatically</li>
+                                <li>• Your Premium access is live right now — no waiting</li>
+                                <li>• A receipt has been emailed to {userEmail}</li>
+                                <li>• All premium questions and features are unlocked</li>
                             </ul>
                         </div>
                         <button
                             onClick={handleClose}
                             className="w-full bg-gradient-to-r from-violet-600 to-indigo-600 text-white py-3 rounded-xl font-bold hover:opacity-90 transition"
                         >
-                            Got it, Thanks!
+                            Start Practicing
                         </button>
                     </div>
                 )}

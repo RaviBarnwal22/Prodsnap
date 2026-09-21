@@ -109,24 +109,26 @@ function PaymentStatusContent() {
                         </div>
 
                         {/* Embedded Calendly Scheduling Widget */}
-                        <div className="mt-6 text-left">
-                            <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2 flex items-center gap-2">
-                                <Calendar className="text-violet-600" size={20} />
-                                Schedule Your 1:1 Call Now
-                            </h3>
-                            <p className="text-xs text-gray-500 dark:text-gray-400 mb-4">
-                                Choose your preferred date and time slot from the calendar below.
-                            </p>
-                            <div className="w-full bg-white rounded-2xl border border-gray-200 overflow-hidden shadow-sm" style={{ height: "650px" }}>
-                                <iframe
-                                    src={`${process.env.NEXT_PUBLIC_CALENDLY_URL || 'https://calendly.com'}?embed_domain=${encodeURIComponent(typeof window !== 'undefined' ? window.location.hostname : '')}&embed_type=Inline`}
-                                    width="100%"
-                                    height="100%"
-                                    frameBorder="0"
-                                    title="Schedule Session"
-                                ></iframe>
+                        {process.env.NEXT_PUBLIC_CALENDLY_URL && (
+                            <div className="mt-6 text-left">
+                                <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2 flex items-center gap-2">
+                                    <Calendar className="text-violet-600" size={20} />
+                                    Schedule Your 1:1 Call Now
+                                </h3>
+                                <p className="text-xs text-gray-500 dark:text-gray-400 mb-4">
+                                    Choose your preferred date and time slot from the calendar below.
+                                </p>
+                                <div className="w-full bg-white rounded-2xl border border-gray-200 overflow-hidden shadow-sm" style={{ height: "650px" }}>
+                                    <iframe
+                                        src={`${process.env.NEXT_PUBLIC_CALENDLY_URL}?embed_domain=${encodeURIComponent(typeof window !== 'undefined' ? window.location.hostname : '')}&embed_type=Inline`}
+                                        width="100%"
+                                        height="100%"
+                                        frameBorder="0"
+                                        title="Schedule Session"
+                                    ></iframe>
+                                </div>
                             </div>
-                        </div>
+                        )}
 
                         <div className="pt-2">
                             <Link

@@ -9,10 +9,5 @@ async function check() {
         orderBy: { updatedAt: 'desc' }
     });
     console.log("Last Article:", lastArticle?.title, lastArticle?.updatedAt);
-
-    const lastJob = await (prisma as any).job.findFirst({
-        orderBy: { updatedAt: 'desc' }
-    });
-    console.log("Last Job:", lastJob?.title, lastJob?.updatedAt);
 }
 check().finally(() => prisma.$disconnect());

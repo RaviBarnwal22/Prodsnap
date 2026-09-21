@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { getUser } from "@/lib/auth"
 import { createCashfreeOrder } from "@/lib/cashfree"
+import { getMentorshipPrice, SUBSCRIPTION_PRICE } from "@/lib/constants"
 
 export async function POST(request: NextRequest) {
     try {
@@ -13,7 +14,6 @@ export async function POST(request: NextRequest) {
             email,
             phone,
             serviceType,
-            amount,
             linkedinProfile,
             messageToMentor,
             planType = 'monthly'
@@ -38,19 +38,20 @@ export async function POST(request: NextRequest) {
             )
         }
 
-        // Determine request origin for callback - Cashfree strictly requires https:// for return_url
+        // Cashfree requires https:// for return_url in production; sandbox accepts a local http origin.
         const envUrl = process.env.NEXT_PUBLIC_APP_URL
-        let origin = envUrl && envUrl.startsWith('https://') ? envUrl : 'https://prodsnap.in'
+        const isSandbox = (process.env.CASHFREE_ENV || 'production') !== 'production'
+        const originAllowed = envUrl && (envUrl.startsWith('https://') || (isSandbox && envUrl.startsWith('http://')))
+        const origin = originAllowed ? envUrl : 'https://prodsnap.in'
 
         if (type === 'mentorship') {
-            if (!serviceType || !amount || Number(amount) <= 0) {
+            const numericAmount = serviceType ? getMentorshipPrice(serviceType) : null
+            if (numericAmount === null) {
                 return NextResponse.json(
-                    { error: "Valid mentorship service and amount are required" },
+                    { error: "Unknown mentorship service" },
                     { status: 400 }
                 )
             }
-
-            const numericAmount = Math.round(Number(amount))
             // Cashfree order ID must be alphanumeric and underscore, max 45 chars
             const orderId = `mentor_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`
 
@@ -94,7 +95,7 @@ export async function POST(request: NextRequest) {
                 environment: process.env.CASHFREE_ENV || 'production'
             })
         } else if (type === 'subscription') {
-            const numericAmount = Math.round(Number(amount || 199))
+            const numericAmount = SUBSCRIPTION_PRICE
             const orderId = `sub_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`
 
             // Log pending subscription request

@@ -1,9 +1,15 @@
 import { prisma } from "@/lib/prisma"
+import { getUser } from "@/lib/auth"
 import { NextRequest, NextResponse } from "next/server"
 
 // Submit feedback for a mentorship session
 export async function POST(request: NextRequest) {
     try {
+        const user = await getUser()
+        if (!user) {
+            return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+        }
+
         const body = await request.json()
         const { bookingId, name, email, rating, feedback, wouldRecommend } = body
 
@@ -72,6 +78,11 @@ export async function POST(request: NextRequest) {
 // Get feedback by booking ID
 export async function GET(request: NextRequest) {
     try {
+        const user = await getUser()
+        if (!user) {
+            return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+        }
+
         const url = new URL(request.url)
         const bookingId = url.searchParams.get('bookingId')
 

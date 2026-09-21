@@ -85,7 +85,7 @@ export function CommunityContent({ benefits, blogPosts, featuredGuides = [] }: C
                                 </h1>
 
                                 <p className="text-lg md:text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto lg:mx-0 mb-10 leading-relaxed uppercase font-bold text-xs tracking-widest">
-                                    Connect with fellow PM aspirants, get exclusive job updates, access premium resources, and accelerate your career.
+                                    Connect with fellow PM aspirants, access premium resources, and accelerate your career.
                                 </p>
 
                                 <div className="flex flex-col sm:flex-row items-center gap-4 justify-center lg:justify-start">
@@ -108,7 +108,7 @@ export function CommunityContent({ benefits, blogPosts, featuredGuides = [] }: C
                             {/* Right Column: Benefits Grid */}
                             <div className="grid grid-cols-2 gap-4">
                                 {benefits.map((benefit, i) => (
-                                    <div key={i} className={`p-6 rounded-[2rem] border border-white/50 dark:border-gray-800/50 backdrop-blur-md shadow-xl transition-all hover:scale-[1.02] ${i % 2 === 0 ? 'bg-white/60 dark:bg-gray-900/60 translate-y-4' : 'bg-white/40 dark:bg-gray-800/40'}`}>
+                                    <div key={i} className={`p-6 rounded-[2rem] border border-white/50 dark:border-gray-800/50 backdrop-blur-md shadow-xl transition-all hover:scale-[1.02] ${i % 2 === 0 ? 'bg-white/60 dark:bg-gray-900/60 translate-y-4' : 'bg-white/40 dark:bg-gray-800/40'} ${benefits.length % 2 === 1 && i === benefits.length - 1 ? 'col-span-2' : ''}`}>
                                         <div className="w-10 h-10 bg-green-600 text-white rounded-2xl flex items-center justify-center mb-4 shadow-lg shadow-green-500/20">
                                             {benefit.icon}
                                         </div>

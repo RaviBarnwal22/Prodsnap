@@ -55,13 +55,13 @@ async function verifyOrder(orderId: string) {
             }).catch(err => console.error('[Email] Mentorship payment admin notification failed:', err))
         }
 
+        // Deliberately omits customer name / booking id: this endpoint is reachable
+        // by anyone holding an order id, so it returns only receipt details.
         return {
             success: true,
             status: 'PAID',
             type: 'mentorship',
-            bookingId: booking.id,
             serviceType: booking.serviceType,
-            name: booking.name,
             amount: booking.amount
         }
     }
@@ -121,7 +121,6 @@ async function verifyOrder(orderId: string) {
             success: true,
             status: 'PAID',
             type: 'subscription',
-            name: subRequest.name,
             amount: subRequest.amount
         }
     }

@@ -2,6 +2,19 @@ import { createClient } from './supabase/server'
 import { prisma } from './prisma'
 import { cache } from 'react'
 
+// Falls back to the historical literal because ADMIN_EMAIL is not set in every environment
+const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'ravibarnwal89@gmail.com'
+
+export function isAdmin(user: { email?: string | null; role?: string | null } | null | undefined) {
+    if (!user) return false
+    return user.email === ADMIN_EMAIL || user.role === 'ADMIN'
+}
+
+export async function requireAdmin() {
+    const user = await getUser()
+    return isAdmin(user) ? user : null
+}
+
 // Cache getUser per-request to avoid redundant DB hits and Supabase calls
 export const getUser = cache(async function getUser() {
     let authUser;

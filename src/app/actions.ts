@@ -626,14 +626,7 @@ export async function broadcastNewsletter(data: { subject: string, content: stri
 
 export async function getLatestViralPost() {
     try {
-        let db = (prisma as any);
-        if (!db.viralPost) {
-            const { PrismaClient } = await import('@prisma/client');
-            db = new PrismaClient();
-        }
-        if (!db.viralPost) return { success: true, post: null };
-
-        const post = await db.viralPost.findFirst({
+        const post = await prisma.viralPost.findFirst({
             orderBy: { targetDate: 'desc' }
         });
         return { success: true, post };
@@ -707,13 +700,7 @@ Tone: Storyteller. Line breaks for readability. Output ONLY the post content.`;
         content = content.replace(/^```[a-z]*\n/i, '').replace(/\n```$/m, '').trim();
         const topic = content.split('\n')[0].replace(/[#*]/g, '').trim().substring(0, 100);
 
-        let db = (prisma as any);
-        if (!db.viralPost) {
-            const { PrismaClient } = await import('@prisma/client');
-            db = new PrismaClient();
-        }
-
-        const post = await db.viralPost.upsert({
+        const post = await prisma.viralPost.upsert({
             where: { periodIdentifier: dayIdentifier },
             update: { content, topic, date: displayDate },
             create: {

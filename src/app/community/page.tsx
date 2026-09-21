@@ -1,15 +1,10 @@
 import { Header } from "@/components/Header"
 import { Footer } from "@/components/Footer"
 import { CommunityContent, FeaturedGuide } from "@/components/CommunityContent"
-import { Briefcase, BookOpen, Users, MessageCircle } from "lucide-react"
+import { BookOpen, Users, MessageCircle } from "lucide-react"
 
 export default function CommunityPage() {
     const benefits = [
-        {
-            icon: <Briefcase size={24} />,
-            title: "PM Job Openings",
-            description: "Get notified about the latest Product Management openings at top companies before anyone else."
-        },
         {
             icon: <BookOpen size={24} />,
             title: "Exclusive Materials",

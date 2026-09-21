@@ -26,6 +26,7 @@ export function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps) {
     const [error, setError] = useState('')
     const [message, setMessage] = useState('')
     const [resendCountdown, setResendCountdown] = useState(0)
+    const [resetCountdown, setResetCountdown] = useState(0)
 
     const supabase = createClient()
     const router = useRouter()
@@ -51,6 +52,55 @@ export function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps) {
         }
         return () => clearTimeout(timer)
     }, [resendCountdown])
+
+    useEffect(() => {
+        let timer: NodeJS.Timeout
+        if (resetCountdown > 0) {
+            timer = setTimeout(() => setResetCountdown(resetCountdown - 1), 1000)
+        }
+        return () => clearTimeout(timer)
+    }, [resetCountdown])
+
+    const handleForgotPassword = async () => {
+        if (!email) return
+        if (resetCountdown > 0) {
+            setError(`Please wait ${resetCountdown} seconds before requesting another reset link.`)
+            return
+        }
+
+        setIsLoading(true)
+        setError('')
+        setMessage('')
+
+        // Shares the cooldown key with the login page so one rate limit covers both entry points
+        const lastResetKey = `last_reset_${email}`
+        const lastResetTime = localStorage.getItem(lastResetKey)
+        if (lastResetTime) {
+            const elapsed = Date.now() - parseInt(lastResetTime)
+            if (elapsed < 60000) {
+                const remaining = Math.ceil((60000 - elapsed) / 1000)
+                setResetCountdown(remaining)
+                setError(`Please wait ${remaining} seconds before requesting another reset link.`)
+                setIsLoading(false)
+                return
+            }
+        }
+
+        const { error } = await supabase.auth.resetPasswordForEmail(email, {
+            redirectTo: `${window.location.origin}/auth/reset-password`,
+        })
+
+        setIsLoading(false)
+
+        if (error) {
+            setError(error.message)
+            return
+        }
+
+        localStorage.setItem(lastResetKey, Date.now().toString())
+        setResetCountdown(60)
+        setMessage(`Password reset link sent to ${email}. Check your inbox.`)
+    }
 
     const handleCheckEmail = async (e: React.FormEvent) => {
         e.preventDefault()
@@ -221,7 +271,13 @@ export function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps) {
                                         <input type="password" required value={password} onChange={e => setPassword(e.target.value)} placeholder="••••••••" className="w-full bg-gray-50 dark:bg-gray-800 border-2 border-transparent focus:border-blue-500 rounded-2xl pl-12 pr-6 py-4 outline-none transition-all font-medium" />
                                     </div>
                                 </div>
+                                <div className="flex justify-end -mt-1">
+                                    <button type="button" onClick={handleForgotPassword} disabled={isLoading || resetCountdown > 0} className="text-xs font-bold text-blue-600 hover:text-blue-700 dark:text-blue-400 disabled:opacity-50 disabled:cursor-not-allowed">
+                                        {resetCountdown > 0 ? `Resend link in ${resetCountdown}s` : 'Forgot password?'}
+                                    </button>
+                                </div>
                                 {error && <div className="p-4 rounded-xl bg-red-50 dark:bg-red-900/20 text-red-600 text-sm font-bold border border-red-100">{error}</div>}
+                                {message && <div className="p-4 rounded-xl bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 text-sm font-bold border border-green-100 dark:border-green-900/40">{message}</div>}
                                 <button type="submit" disabled={isLoading} className="w-full bg-blue-600 hover:bg-blue-700 text-white py-5 rounded-2xl font-black text-lg shadow-xl shadow-blue-500/20 flex items-center justify-center gap-2 disabled:opacity-50">
                                     {isLoading ? <Loader2 className="animate-spin" size={24} /> : 'Sign In'}
                                 </button>
