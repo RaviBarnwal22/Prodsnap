@@ -1,3 +1,16 @@
+import type { Metadata } from "next"
+
+export const metadata: Metadata = {
+    title: "Terms of Service | Prodsnap",
+    description: "The terms governing your use of Prodsnap, including accounts, subscriptions, mentorship bookings and payments.",
+    alternates: { canonical: "/terms" },
+    openGraph: {
+        url: "https://prodsnap.in/terms",
+        title: "Terms of Service | Prodsnap",
+        description: "The terms governing your use of Prodsnap, including accounts, subscriptions, mentorship bookings and payments.",
+    },
+}
+
 export default function TermsOfService() {
     return (
         <main className="flex-grow pt-20 pb-16 px-4">

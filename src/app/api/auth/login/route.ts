@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
+import { prisma } from '@/lib/prisma'
 
 export async function POST(request: Request) {
     console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━')
@@ -52,6 +53,26 @@ export async function POST(request: Request) {
 
     if (error) {
         console.log('[API LOGIN] ❌ ERROR:', error.message)
+
+        // Supabase returns the same "Invalid login credentials" whether the account
+        // does not exist or the password is wrong. Tell the user which it is.
+        if (error.message.toLowerCase().includes('invalid login credentials')) {
+            const existing = await prisma.user.findUnique({ where: { email } })
+            if (!existing) {
+                return NextResponse.json(
+                    {
+                        error: "No account found with this email. Please sign up to get started.",
+                        code: 'ACCOUNT_NOT_FOUND'
+                    },
+                    { status: 401 }
+                )
+            }
+            return NextResponse.json(
+                { error: "Incorrect password. Please try again or reset your password.", code: 'WRONG_PASSWORD' },
+                { status: 401 }
+            )
+        }
+
         return NextResponse.json({ error: error.message }, { status: 401 })
     }
 

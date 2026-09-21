@@ -1,4 +1,18 @@
 export const dynamic = 'force-dynamic'
+import type { Metadata } from "next"
+
+export const metadata: Metadata = {
+    title: "About Prodsnap | AI-Powered PM Interview Preparation",
+    description: "Prodsnap turns PM interview prep from a guessing game into a feedback loop. Learn how our AI evaluates your product sense, metrics and RCA answers against the frameworks top tech companies actually use.",
+    keywords: ["about Prodsnap","PM interview preparation platform","AI PM interview practice","product management training India"],
+    alternates: { canonical: "/about" },
+    openGraph: {
+        url: "https://prodsnap.in/about",
+        title: "About Prodsnap | AI-Powered PM Interview Preparation",
+        description: "Prodsnap turns PM interview prep from a guessing game into a feedback loop. Learn how our AI evaluates your product sense, metrics and RCA answers against the frameworks top tech companies actually use.",
+    },
+}
+
 import React from 'react';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';

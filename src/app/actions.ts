@@ -5,12 +5,22 @@ import { evaluateAnswer } from "@/lib/ai/engine"
 import { revalidatePath } from "next/cache"
 import { getUser } from "@/lib/auth"
 import { sendContactFormNotification, sendSupportReply, sendAdminManualReply } from "@/lib/email"
+import { MAX_ANSWER_CHARS, MAX_MESSAGE_CHARS, MAX_NAME_CHARS, MAX_EMAIL_CHARS } from "@/lib/constants"
+import { canAttemptCategory, incrementCategoryAttempt } from "@/lib/subscription"
 
 export async function submitAnswer(questionId: string, answer: string, elapsedTimeSeconds?: number, chatContext?: string) {
     const user = await getUser()
 
     if (!user) {
         return { success: false, error: "Please sign in to submit" }
+    }
+
+    // Bound before it reaches the AI engine — prompt size is billed.
+    if (answer && answer.length > MAX_ANSWER_CHARS) {
+        return { success: false, error: "Answer is too long." }
+    }
+    if (chatContext && chatContext.length > MAX_ANSWER_CHARS) {
+        return { success: false, error: "Conversation context is too long." }
     }
 
     const userId = user.id
@@ -27,7 +37,18 @@ export async function submitAnswer(questionId: string, answer: string, elapsedTi
     }
     console.log(`[submitAnswer] Question found: ${question.title}`);
 
-    // 2. Call AI Engine
+    // 2. Enforce the free-tier quota BEFORE spending an AI call. The UI pre-flight in
+    // /api/start-attempt is advisory only — this action is directly invokable.
+    const quota = await canAttemptCategory(question.category)
+    if (!quota.canAttempt) {
+        return {
+            success: false,
+            error: "You've used all your free attempts. Upgrade to Premium for unlimited practice.",
+            limitReached: true
+        }
+    }
+
+    // 3. Call AI Engine
     let aiResponse;
     try {
         console.log(`[submitAnswer] Calling AI Engine...`);
@@ -52,6 +73,11 @@ export async function submitAnswer(questionId: string, answer: string, elapsedTi
         })
         console.log(`[submitAnswer] Submission created: ${submission.id}`);
 
+        // Count the attempt only once it has actually succeeded
+        if (!quota.isPremium) {
+            await incrementCategoryAttempt(question.category)
+        }
+
         revalidatePath(`/practice/${questionId}`)
         return { success: true, submissionId: submission.id, aiResponse }
     } catch (dbError: unknown) {
@@ -72,27 +98,27 @@ export async function submitAnswer(questionId: string, answer: string, elapsedTi
 }
 
 export async function submitContactForm(data: { name: string, email: string, message: string }) {
-    console.log(`[submitContactForm] Received submission from: ${data.name} <${data.email}>`);
-    console.log(`[submitContactForm] Message: ${data.message}`);
+    // Public endpoint: bound every field before it reaches the DB or an email body.
+    const name = String(data?.name ?? '').trim().slice(0, MAX_NAME_CHARS)
+    const email = String(data?.email ?? '').trim().slice(0, MAX_EMAIL_CHARS)
+    const message = String(data?.message ?? '').trim().slice(0, MAX_MESSAGE_CHARS)
+
+    if (!name || !message || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        return { success: false, error: "Please provide a valid name, email and message." }
+    }
+
+    console.log(`[submitContactForm] Received submission from: <redacted>`);
 
     try {
         // Save to database
         await prisma.contactSubmission.create({
-            data: {
-                name: data.name,
-                email: data.email,
-                message: data.message
-            }
+            data: { name, email, message }
         })
         console.log(`[submitContactForm] Saved to database`)
 
         // Send email notification to admin
         try {
-            await sendContactFormNotification({
-                name: data.name,
-                email: data.email,
-                message: data.message
-            })
+            await sendContactFormNotification({ name, email, message })
             console.log(`[submitContactForm] Email notification sent to admin`)
         } catch (emailError) {
             console.error("[submitContactForm] Email send error:", emailError);
@@ -344,6 +370,11 @@ export async function askClarifyingQuestion(data: {
     userMessage: string,
     history: { role: 'user' | 'model', parts: { text: string }[] }[]
 }) {
+    // Server actions are directly invokable endpoints; without this an anonymous
+    // caller gets an unmetered proxy to our paid Gemini/Groq keys.
+    const user = await getUser();
+    if (!user) return { success: false, error: "Unauthorized" }
+
     const { getApiKeys } = await import("@/lib/ai/engine");
     const { gemini: geminiKeys, groq: groqKeys } = getApiKeys();
 
@@ -725,8 +756,14 @@ Tone: Storyteller. Line breaks for readability. Output ONLY the post content.`;
 }
 
 export async function evaluateMicroCase(questionTitle: string, answerText: string) {
+    const user = await getUser();
+    if (!user) return { success: false, error: "Unauthorized" };
+
     if (!answerText || answerText.trim().length < 10) {
         return { success: false, error: "Please provide an answer with at least 10 characters." };
+    }
+    if (answerText.length > MAX_ANSWER_CHARS) {
+        return { success: false, error: "Answer is too long." };
     }
     try {
         const aiResponse = await evaluateAnswer(questionTitle, answerText, 30);

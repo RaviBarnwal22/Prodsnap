@@ -20,6 +20,17 @@ console.log('[Email] Transporter initialized with:', {
     sender: process.env.SMTP_SENDER || 'support@prodsnap.in'
 })
 
+// User-supplied values are interpolated into these HTML templates, and several of
+// these mails are delivered to the admin. Without escaping, a contact-form message
+// can inject arbitrary markup or a phishing link into our own trusted notification.
+const esc = (value: unknown): string =>
+    String(value ?? '').replace(/[&<>"']/g, c =>
+        ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c] as string))
+
+// Mail headers must not contain CR/LF — that allows header injection.
+const hdr = (value: unknown): string =>
+    String(value ?? '').replace(/[\r\n]+/g, ' ').slice(0, 200)
+
 interface EmailOptions {
     to: string
     subject: string
@@ -156,15 +167,15 @@ export async function sendPaymentNotification(data: {
                 <div class="content">
                     <div class="info-box">
                         <div class="label">Customer Name</div>
-                        <div class="value">${data.name}</div>
+                        <div class="value">${esc(data.name)}</div>
                     </div>
                     <div class="info-box">
                         <div class="label">Email Address</div>
-                        <div class="value">${data.email}</div>
+                        <div class="value">${esc(data.email)}</div>
                     </div>
                     <div class="info-box">
                         <div class="label">Phone Number</div>
-                        <div class="value">${data.phone}</div>
+                        <div class="value">${esc(data.phone)}</div>
                     </div>
                     <div class="info-box">
                         <div class="label">Amount Paid</div>
@@ -189,7 +200,7 @@ export async function sendPaymentNotification(data: {
 
     return sendEmail({
         to: adminEmail,
-        subject: `💰 New Payment Request from ${data.name} - ₹${data.amount}`,
+        subject: `💰 New Payment Request from ${hdr(data.name)} - ₹${hdr(data.amount)}`,
         html,
         type: 'payment'
     })
@@ -220,7 +231,7 @@ export async function sendPaymentConfirmationToUser(data: {
             <div class="container">
                 <div class="header">
                     <h1 style="margin: 0;">📧 Payment Confirmed!</h1>
-                    <p style="margin: 10px 0 0 0; opacity: 0.9;">Thank you for your subscription, ${data.name}!</p>
+                    <p style="margin: 10px 0 0 0; opacity: 0.9;">Thank you for your subscription, ${esc(data.name)}!</p>
                 </div>
                 <div class="content">
                     <div class="status-box">
@@ -293,7 +304,7 @@ export async function sendApprovalNotification(data: {
                     <div class="success-box">
                         <div class="success-icon">🚀</div>
                         <h2 style="margin: 0; color: #155724;">Premium Access Activated!</h2>
-                        <p style="margin: 10px 0 0 0; color: #155724;">Welcome to the Prodsnap Premium family, ${data.name}!</p>
+                        <p style="margin: 10px 0 0 0; color: #155724;">Welcome to the Prodsnap Premium family, ${esc(data.name)}!</p>
                     </div>
                     
                     <div class="validity">
@@ -359,16 +370,16 @@ export async function sendMentorshipBookingConfirmation(data: {
             <div class="container">
                 <div class="header">
                     <h1 style="margin: 0;">🎉 Session Payment Confirmed!</h1>
-                    <p style="margin: 10px 0 0 0; opacity: 0.9;">Thank you for booking with Prodsnap, ${data.name}!</p>
+                    <p style="margin: 10px 0 0 0; opacity: 0.9;">Thank you for booking with Prodsnap, ${esc(data.name)}!</p>
                 </div>
                 <div class="content">
                     <div class="success-box">
                         <h2 style="margin: 0; color: #065f46;">✅ Payment Received</h2>
-                        <p style="margin: 10px 0 0 0; color: #047857;">Your payment of ₹${data.amount} for <strong>${data.serviceType}</strong> has been successfully verified.</p>
+                        <p style="margin: 10px 0 0 0; color: #047857;">Your payment of ₹${data.amount} for <strong>${esc(data.serviceType)}</strong> has been successfully verified.</p>
                     </div>
                     
                     <div class="info-box">
-                        <strong>📋 Session Type:</strong> ${data.serviceType}<br/>
+                        <strong>📋 Session Type:</strong> ${esc(data.serviceType)}<br/>
                         <strong>💰 Amount Paid:</strong> ₹${data.amount}
                     </div>
                     
@@ -396,7 +407,7 @@ export async function sendMentorshipBookingConfirmation(data: {
 
     return sendEmail({
         to: data.email,
-        subject: `🎉 Session Booking Confirmed: ${data.serviceType} | Prodsnap`,
+        subject: `🎉 Session Booking Confirmed: ${hdr(data.serviceType)} | Prodsnap`,
         html,
         type: 'mentorship'
     })
@@ -438,19 +449,19 @@ export async function sendMentorshipPaymentNotification(data: {
                 <div class="content">
                     <div class="info-box">
                         <div class="label">Customer Name</div>
-                        <div class="value">${data.name}</div>
+                        <div class="value">${esc(data.name)}</div>
                     </div>
                     <div class="info-box">
                         <div class="label">Email Address</div>
-                        <div class="value">${data.email}</div>
+                        <div class="value">${esc(data.email)}</div>
                     </div>
                     <div class="info-box">
                         <div class="label">Phone Number</div>
-                        <div class="value">${data.phone}</div>
+                        <div class="value">${esc(data.phone)}</div>
                     </div>
                     <div class="info-box">
                         <div class="label">Session Type</div>
-                        <div class="value">${data.serviceType}</div>
+                        <div class="value">${esc(data.serviceType)}</div>
                     </div>
                     <div class="info-box">
                         <div class="label">Amount Paid</div>
@@ -475,7 +486,7 @@ export async function sendMentorshipPaymentNotification(data: {
 
     return sendEmail({
         to: adminEmail,
-        subject: `📚 New Mentorship Booking from ${data.name} - ${data.serviceType} (₹${data.amount})`,
+        subject: `📚 New Mentorship Booking from ${hdr(data.name)} - ${hdr(data.serviceType)} (₹${hdr(data.amount)})`,
         html,
         type: 'mentorship_notification'
     })
@@ -509,13 +520,13 @@ export async function sendFeedbackRequestEmail(data: {
             <div class="container">
                 <div class="header">
                     <h1 style="margin: 0;">✨ How was your session?</h1>
-                    <p style="margin: 10px 0 0 0; opacity: 0.9;">We'd love to hear your feedback, ${data.name}!</p>
+                    <p style="margin: 10px 0 0 0; opacity: 0.9;">We'd love to hear your feedback, ${esc(data.name)}!</p>
                 </div>
                 <div class="content">
                     <div class="stars">⭐⭐⭐⭐⭐</div>
                     
                     <div class="info-box">
-                        <p style="margin: 0; font-size: 18px;">Your <strong>${data.serviceType}</strong> session has been completed!</p>
+                        <p style="margin: 0; font-size: 18px;">Your <strong>${esc(data.serviceType)}</strong> session has been completed!</p>
                         <p style="margin: 10px 0 0 0; color: #666;">Please take a moment to share your experience.</p>
                     </div>
                     
@@ -539,7 +550,7 @@ export async function sendFeedbackRequestEmail(data: {
 
     return sendEmail({
         to: data.email,
-        subject: `✨ Share Your Feedback - ${data.serviceType} Session | Prodsnap`,
+        subject: `✨ Share Your Feedback - ${hdr(data.serviceType)} Session | Prodsnap`,
         html,
         type: 'feedback_request'
     })
@@ -597,8 +608,8 @@ export async function sendMentorshipScheduledEmail(data: {
                     <p style="margin: 10px 0 0 0; opacity: 0.9;">Your mentorship session is scheduled.</p>
                 </div>
                 <div class="content">
-                    <p>Hi <strong>${data.name}</strong>,</p>
-                    <p>Great news! Your <strong>${data.serviceType}</strong> session has been approved and scheduled.</p>
+                    <p>Hi <strong>${esc(data.name)}</strong>,</p>
+                    <p>Great news! Your <strong>${esc(data.serviceType)}</strong> session has been approved and scheduled.</p>
                     
                     <div class="info-box">
                         <p style="margin: 5px 0;"><strong>📅 Date:</strong> ${date}</p>
@@ -624,7 +635,7 @@ export async function sendMentorshipScheduledEmail(data: {
 
     return sendEmail({
         to: data.email,
-        subject: `📅 Scheduled: ${data.serviceType} with Ravi Barnwal - ${date}`,
+        subject: `📅 Scheduled: ${hdr(data.serviceType)} with Ravi Barnwal - ${date}`,
         html,
         type: 'mentorship_scheduled'
     })
@@ -665,19 +676,19 @@ export async function sendContactFormNotification(data: {
                 <div class="content">
                     <div class="info-box">
                         <div class="label">Full Name</div>
-                        <div class="value">${data.name}</div>
+                        <div class="value">${esc(data.name)}</div>
                         
                         <div class="label">Email Address</div>
-                        <div class="value">${data.email}</div>
+                        <div class="value">${esc(data.email)}</div>
                     </div>
                     
                     <div class="message-box">
                         <div class="label" style="color: #1e40af;">Message</div>
-                        <div class="message-text">${data.message}</div>
+                        <div class="message-text">${esc(data.message)}</div>
                     </div>
                     
                     <p style="margin-top: 30px; color: #666;">
-                        Please respond to this inquiry at your earliest convenience. You can reply directly to <strong>${data.email}</strong>.
+                        Please respond to this inquiry at your earliest convenience. You can reply directly to <strong>${esc(data.email)}</strong>.
                     </p>
                     
                     <a href="${process.env.NEXT_PUBLIC_APP_URL || 'https://prodsnap-gamma.vercel.app'}/admin" class="cta">
@@ -694,7 +705,7 @@ export async function sendContactFormNotification(data: {
 
     return sendEmail({
         to: adminEmail,
-        subject: `📬 New Contact Form Submission from ${data.name}`,
+        subject: `📬 New Contact Form Submission from ${hdr(data.name)}`,
         html,
         type: 'contact_form'
     })
@@ -728,7 +739,7 @@ export async function sendSupportReply(data: {
                     <h2 style="margin: 0;">Support Response from Prodsnap</h2>
                 </div>
                 <div class="content">
-                    <p>Hi <strong>${data.name}</strong>,</p>
+                    <p>Hi <strong>${esc(data.name)}</strong>,</p>
                     <p>Thank you for reaching out to Prodsnap. Here is the response to your inquiry:</p>
                     
                     <div class="reply-box">
@@ -793,7 +804,7 @@ export async function sendRejectionNotification(data: {
                     <p style="margin: 10px 0 0 0; opacity: 0.9;">Regarding your ${data.type === 'subscription' ? 'Premium Subscription' : 'Mentorship Booking'} request</p>
                 </div>
                 <div class="content">
-                    <p>Hi <strong>${data.name}</strong>,</p>
+                    <p>Hi <strong>${esc(data.name)}</strong>,</p>
                     
                     <div class="alert-box">
                         <p style="margin: 0; color: #991b1b; font-weight: 600;">Unfortunately, we were unable to verify your payment at this time.</p>
@@ -870,7 +881,7 @@ export async function sendAdminManualReply(data: {
                     <h2 style="margin: 0;">Message from Prodsnap Support</h2>
                 </div>
                 <div class="content">
-                    <p>Hi <strong>${data.name}</strong>,</p>
+                    <p>Hi <strong>${esc(data.name)}</strong>,</p>
                     <p>We're writing to you regarding your recent interaction on Prodsnap.</p>
                     
                     <div class="reply-box">

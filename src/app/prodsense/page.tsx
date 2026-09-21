@@ -1,4 +1,18 @@
 export const dynamic = 'force-dynamic'
+import type { Metadata } from "next"
+
+export const metadata: Metadata = {
+    title: "Product Puzzles | Daily Product Sense Practice for PMs",
+    description: "One product puzzle every day. Build product intuition through bite-sized challenges drawn from real Indian tech scenarios, and keep your streak alive.",
+    keywords: ["product sense practice","daily PM puzzle","product intuition exercises","product sense questions"],
+    alternates: { canonical: "/prodsense" },
+    openGraph: {
+        url: "https://prodsnap.in/prodsense",
+        title: "Product Puzzles | Daily Product Sense Practice for PMs",
+        description: "One product puzzle every day. Build product intuition through bite-sized challenges drawn from real Indian tech scenarios, and keep your streak alive.",
+    },
+}
+
 import { Header } from "@/components/Header"
 import { Footer } from "@/components/Footer"
 import { Sparkles, Brain, Zap, Target, Trophy, Users } from "lucide-react"

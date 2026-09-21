@@ -6,7 +6,17 @@ import { getMentorshipPrice, SUBSCRIPTION_PRICE } from "@/lib/constants"
 
 export async function POST(request: NextRequest) {
     try {
+        // Login is required to buy. The package grid is public (so it can be indexed),
+        // so this route is the real gate — without it anyone can create bookings,
+        // pollute the admin queue and burn Cashfree order quota anonymously.
         const user = await getUser()
+        if (!user) {
+            return NextResponse.json(
+                { error: "Please sign in to continue with payment." },
+                { status: 401 }
+            )
+        }
+
         const body = await request.json()
         const {
             type = 'mentorship',

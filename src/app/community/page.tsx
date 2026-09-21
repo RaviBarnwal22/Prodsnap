@@ -1,3 +1,17 @@
+import type { Metadata } from "next"
+
+export const metadata: Metadata = {
+    title: "PM WhatsApp Community | Free Product Management Resources",
+    description: "Join the Prodsnap WhatsApp community — connect with fellow PM aspirants, get curated interview guides, frameworks and case studies, and ask mentors your questions.",
+    keywords: ["PM community","product management WhatsApp group","PM interview resources","product manager community India"],
+    alternates: { canonical: "/community" },
+    openGraph: {
+        url: "https://prodsnap.in/community",
+        title: "PM WhatsApp Community | Free Product Management Resources",
+        description: "Join the Prodsnap WhatsApp community — connect with fellow PM aspirants, get curated interview guides, frameworks and case studies, and ask mentors your questions.",
+    },
+}
+
 import { Header } from "@/components/Header"
 import { Footer } from "@/components/Footer"
 import { CommunityContent, FeaturedGuide } from "@/components/CommunityContent"

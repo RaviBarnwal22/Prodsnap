@@ -116,8 +116,12 @@ export function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps) {
             } else {
                 setStep('signup')
             }
-        } catch (err) {
-            setError('An unexpected error occurred')
+        } catch (err: any) {
+            // A tab opened before the last deploy holds server action ids that no
+            // longer exist; tell the user to reload instead of failing opaquely.
+            setError(String(err?.message || '').includes('Failed to find Server Action')
+                ? 'This page is out of date. Please refresh and try again.'
+                : 'Something went wrong. Please try again.')
         } finally {
             setIsLoading(false)
         }
@@ -130,7 +134,15 @@ export function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps) {
         try {
             const { data, error } = await supabase.auth.signInWithPassword({ email, password })
             if (error) {
-                setError(error.message)
+                // Supabase uses one message for both a missing account and a wrong password
+                if (error.message.toLowerCase().includes('invalid login credentials')) {
+                    const { exists } = await checkUserExists(email)
+                    setError(exists
+                        ? 'Incorrect password. Please try again or reset your password.'
+                        : "No account found with this email. Please sign up to get started.")
+                } else {
+                    setError(error.message)
+                }
             } else if (data.session) {
                 setMessage('Successfully logged in!')
                 setTimeout(() => {

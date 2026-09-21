@@ -1,11 +1,11 @@
 'use client'
 
 import { useState, useRef, useEffect } from "react"
-import { useRouter, useSearchParams } from "next/navigation"
+import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { createClient } from '@/lib/supabase/client'
 import { useAuth } from "@/components/AuthContext"
-import { MENTORSHIP_SERVICES, formatPriceINR, DEMO_SERVICE_TITLE } from "@/lib/constants"
+import { MENTORSHIP_SERVICES, formatPriceINR } from "@/lib/constants"
 import {
     Star,
     GraduationCap,
@@ -42,9 +42,6 @@ import {
 
 export default function MentorshipClient() {
     const router = useRouter()
-    // TEMPORARY — the ₹1 demo package is only offered on /mentorship?demo=1 so real
-    // customers never see it. Remove with the demo entry in lib/constants.ts.
-    const showDemoPackage = useSearchParams().get('demo') === '1'
     const { openAuthModal } = useAuth()
 
     const [selectedService, setSelectedService] = useState<any>(null)
@@ -203,35 +200,44 @@ export default function MentorshipClient() {
         ],
         services: [
             {
-                title: "1:1 Mock Interview",
-                duration: MENTORSHIP_SERVICES["1:1 Mock Interview"].duration,
-                price: formatPriceINR(MENTORSHIP_SERVICES["1:1 Mock Interview"].priceINR),
-                description: "Full mock PM interview with detailed feedback on product sense, execution, and behavioral questions.",
-                features: ["Real PM interview simulation", "Detailed written feedback", "Recording shared", "Follow-up tips"],
+                title: "PM Career Accelerator",
+                duration: MENTORSHIP_SERVICES["PM Career Accelerator"].duration,
+                price: formatPriceINR(MENTORSHIP_SERVICES["PM Career Accelerator"].priceINR),
+                description: "Everything you need to break into product management — strategy, a real mock interview, and a resume that gets shortlisted.",
+                features: [
+                    "Session 1 — Career strategy mapped to your profile",
+                    "Session 2 — Full mock PM interview + written feedback",
+                    "Session 3 — Line-by-line resume rewrite",
+                    "1 month Prodsnap AI case practice — free",
+                    "Interview recording + follow-up plan"
+                ],
                 popular: true
+            },
+            {
+                title: "Profile & Resume Booster",
+                duration: MENTORSHIP_SERVICES["Profile & Resume Booster"].duration,
+                price: formatPriceINR(MENTORSHIP_SERVICES["Profile & Resume Booster"].priceINR),
+                strikePrice: formatPriceINR(999),
+                description: "Know exactly where you stand and walk away with a resume built for PM shortlists.",
+                features: [
+                    "Session 1 — Career strategy from your current profile",
+                    "Session 2 — Line-by-line resume review",
+                    "1 month Prodsnap AI case practice — free",
+                    "Skill gap analysis + company targeting"
+                ]
             },
             {
                 title: "Resume Review",
                 duration: MENTORSHIP_SERVICES["Resume Review"].duration,
                 price: formatPriceINR(MENTORSHIP_SERVICES["Resume Review"].priceINR),
                 description: "Deep dive into your resume to make it ATS-friendly and impactful for top-tier PM roles.",
-                features: ["Line-by-line review", "ATS optimization", "Action verb enhancement", "Storytelling tips"]
+                features: [
+                    "Line-by-line review",
+                    "ATS optimization",
+                    "Action verb enhancement",
+                    "1 month Prodsnap AI case practice — free"
+                ]
             },
-            {
-                title: "Career Strategy",
-                duration: MENTORSHIP_SERVICES["Career Strategy"].duration,
-                price: formatPriceINR(MENTORSHIP_SERVICES["Career Strategy"].priceINR),
-                description: "Personalized roadmap to transition into PM or grow in your current PM role.",
-                features: ["Skill gap analysis", "Company targeting strategy", "Networking plan", "Resource toolkit"]
-            },
-            // TEMPORARY — remove with the demo entry in lib/constants.ts
-            ...(showDemoPackage ? [{
-                title: DEMO_SERVICE_TITLE,
-                duration: MENTORSHIP_SERVICES[DEMO_SERVICE_TITLE].duration,
-                price: formatPriceINR(MENTORSHIP_SERVICES[DEMO_SERVICE_TITLE].priceINR),
-                description: "Internal test package used to verify the live payment flow. Not a real session.",
-                features: ["Payment flow verification only"]
-            }] : [])
         ]
     }
 
@@ -532,11 +538,6 @@ export default function MentorshipClient() {
                                         </button>
                                     </div>
 
-                                    <div className="pt-2 border-t border-gray-100 dark:border-gray-800">
-                                        <p className="text-[11px] text-center text-gray-400">
-                                            If you are from outside India, drop a line to <a href="mailto:support@prodsnap.in" className="text-violet-600 hover:underline">support@prodsnap.in</a>.
-                                        </p>
-                                    </div>
                                 </div>
                             ) : (
                                 <div className="animate-in slide-in-from-left-10 duration-300">
@@ -750,14 +751,14 @@ export default function MentorshipClient() {
                         </p>
                     </div>
 
-                    {!userId ? (
+                    {!userId && (
                         <div className="bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800 p-10 md:p-12 rounded-3xl border border-gray-200 dark:border-gray-700 text-center max-w-xl mx-auto shadow-xl">
                             <div className="w-16 h-16 bg-violet-100 dark:bg-violet-900/30 rounded-2xl flex items-center justify-center mb-5 mx-auto text-violet-600">
                                 <Lock size={28} />
                             </div>
-                            <h3 className="text-2xl font-black mb-2">Sign In to Book & View Packages</h3>
+                            <h3 className="text-2xl font-black mb-2">Sign In to Book a Session</h3>
                             <p className="text-gray-500 dark:text-gray-400 mb-6 text-sm leading-relaxed">
-                                Sign in to explore available 1:1 session slots, resume reviews, and career strategy packages.
+                                Browse the packages below. Sign in when you are ready to book — sessions are confirmed against your account.
                             </p>
                             <button
                                 onClick={() => openAuthModal()}
@@ -767,8 +768,9 @@ export default function MentorshipClient() {
                                 Sign In to Continue
                             </button>
                         </div>
-                    ) : (
-                        <div className="grid md:grid-cols-3 gap-8">
+                    )}
+
+                    <div className="grid md:grid-cols-3 gap-8">
                             {mentor.services.map((service, i) => (
                                 <div
                                     key={i}
@@ -789,7 +791,12 @@ export default function MentorshipClient() {
                                         <span>{service.duration}</span>
                                     </div>
 
-                                    <div className="text-3xl font-black text-violet-600 mb-6">{service.price}</div>
+                                    <div className="flex items-baseline gap-2 mb-6">
+                                        <span className="text-3xl font-black text-violet-600">{service.price}</span>
+                                        {'strikePrice' in service && service.strikePrice && (
+                                            <span className="text-lg font-bold text-gray-400 line-through">{service.strikePrice}</span>
+                                        )}
+                                    </div>
 
                                     <p className="text-gray-600 dark:text-gray-300 text-sm mb-6 leading-relaxed">{service.description}</p>
 
@@ -803,19 +810,18 @@ export default function MentorshipClient() {
                                     </ul>
 
                                     <button
-                                        onClick={() => handleBookNow(service)}
+                                        onClick={() => userId ? handleBookNow(service) : openAuthModal(() => handleBookNow(service))}
                                         className={`w-full py-3.5 rounded-xl font-bold flex items-center justify-center gap-2 transition-all ${service.popular
                                             ? 'bg-gradient-to-r from-violet-600 to-purple-600 text-white hover:shadow-lg'
                                             : 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white hover:bg-gray-200 dark:hover:bg-gray-600'
                                             }`}
                                     >
                                         <Calendar size={18} />
-                                        Book Now
+                                        {userId ? 'Book Now' : 'Sign In to Book'}
                                     </button>
                                 </div>
-                            ))}
-                        </div>
-                    )}
+                        ))}
+                    </div>
                 </div>
             </section>
 

@@ -2,6 +2,9 @@ import { useRef, useEffect, useState } from 'react'
 import { Send, User, Bot, Loader2, Mic, MicOff } from 'lucide-react'
 import { CoachMessage } from '@/lib/ai-coach/types'
 import { marked } from 'marked'
+// marked passes raw HTML through by default, and message content includes model
+// output, which is untrusted: a prompt can make it emit <img onerror=...>.
+import DOMPurify from 'isomorphic-dompurify'
 
 interface ChatWindowProps {
     messages: CoachMessage[];
@@ -131,7 +134,7 @@ export function ChatWindow({ messages, onSendMessage, isLoading }: ChatWindowPro
                             }`}>
                                 <div 
                                     className="prose prose-invert max-w-none prose-p:leading-relaxed prose-pre:bg-black/50 prose-pre:border prose-pre:border-gray-700"
-                                    dangerouslySetInnerHTML={{ __html: marked.parse(msg.content) }}
+                                    dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(marked.parse(msg.content) as string) }}
                                 />
                             </div>
                         </div>

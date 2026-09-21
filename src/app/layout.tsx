@@ -3,6 +3,7 @@ import { Geist } from "next/font/google";
 import Script from "next/script";
 import "./globals.css";
 import ClientProviders from "@/components/ClientProviders";
+import { SiteStructuredData } from "@/components/SiteStructuredData";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -27,12 +28,17 @@ export const metadata: Metadata = {
     "Product Sense Coaching",
     "Master PM Interviews"
   ],
-  authors: [{ name: "Prodsnap Team" }],
+  alternates: {
+    canonical: "/",
+  },
+  applicationName: "Prodsnap",
+  category: "education",
+  authors: [{ name: "Ravi Barnwal", url: "https://www.linkedin.com/in/barnwalravi/" }],
   creator: "Prodsnap",
   publisher: "Prodsnap",
   openGraph: {
     type: "website",
-    locale: "en_US",
+    locale: "en_IN",
     url: "https://prodsnap.in",
     title: "Prodsnap | Elevate Your PM Skills with AI. Are You Ready?",
     description: "The 'secret weapon' for ambitious PMs. Get instant AI feedback on your case solutions and crack top tech interviews faster.",
@@ -78,6 +84,7 @@ export default function RootLayout({
         <link rel="dns-prefetch" href="https://images.unsplash.com" />
       </head>
       <body className={`${geistSans.variable} antialiased`}>
+        <SiteStructuredData />
         {/* ClientProviders holds all ssr:false dynamic imports — keeps this Server Component clean */}
         <ClientProviders>
           {children}

@@ -1,4 +1,18 @@
 export const dynamic = "force-dynamic"
+import type { Metadata } from "next"
+
+export const metadata: Metadata = {
+    title: "Verified PM Mentors | Learn from Product Managers Who Built at Scale",
+    description: "Browse verified product management mentors on Prodsnap — practising PMs who have built for India's scale and now coach on interviews, resumes and career strategy.",
+    keywords: ["PM mentors","product management mentors India","find a PM mentor","product manager coaching"],
+    alternates: { canonical: "/mentors" },
+    openGraph: {
+        url: "https://prodsnap.in/mentors",
+        title: "Verified PM Mentors | Learn from Product Managers Who Built at Scale",
+        description: "Browse verified product management mentors on Prodsnap — practising PMs who have built for India's scale and now coach on interviews, resumes and career strategy.",
+    },
+}
+
 import { prisma } from "@/lib/prisma"
 import { Header } from "@/components/Header"
 import { Briefcase, Star } from "lucide-react"

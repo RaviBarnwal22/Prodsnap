@@ -1,3 +1,16 @@
+import type { Metadata } from "next"
+
+export const metadata: Metadata = {
+    title: "Privacy Policy | Prodsnap",
+    description: "How Prodsnap collects, uses and protects your personal data, including account information, practice submissions and payment details.",
+    alternates: { canonical: "/privacy" },
+    openGraph: {
+        url: "https://prodsnap.in/privacy",
+        title: "Privacy Policy | Prodsnap",
+        description: "How Prodsnap collects, uses and protects your personal data, including account information, practice submissions and payment details.",
+    },
+}
+
 export default function PrivacyPolicy() {
     return (
         <main className="flex-grow pt-20 pb-16 px-4">

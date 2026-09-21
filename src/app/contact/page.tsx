@@ -1,4 +1,18 @@
 export const dynamic = 'force-dynamic'
+import type { Metadata } from "next"
+
+export const metadata: Metadata = {
+    title: "Contact Prodsnap | Talk to the PM Interview Prep Team",
+    description: "Questions about PM interview prep, mentorship packages or your Prodsnap subscription? Get in touch and we will get back to you.",
+    keywords: ["contact Prodsnap","PM interview prep support"],
+    alternates: { canonical: "/contact" },
+    openGraph: {
+        url: "https://prodsnap.in/contact",
+        title: "Contact Prodsnap | Talk to the PM Interview Prep Team",
+        description: "Questions about PM interview prep, mentorship packages or your Prodsnap subscription? Get in touch and we will get back to you.",
+    },
+}
+
 import { Header } from "@/components/Header"
 import { Footer } from "@/components/Footer"
 import { Mail, MessageCircle, Linkedin, Instagram } from "lucide-react"

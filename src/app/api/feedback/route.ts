@@ -30,8 +30,13 @@ export async function POST(request: NextRequest) {
         }
 
         // Check if booking exists
-        const booking = await prisma.mentorshipBooking.findUnique({
-            where: { id: bookingId },
+        // Scope to the caller: booking ids are guessable from an emailed link, and
+        // an unscoped lookup lets anyone review someone else's session.
+        const booking = await prisma.mentorshipBooking.findFirst({
+            where: {
+                id: bookingId,
+                OR: [{ userId: user.id }, { email: user.email }]
+            },
             include: { feedback: true }
         })
 
@@ -93,8 +98,11 @@ export async function GET(request: NextRequest) {
             )
         }
 
-        const booking = await prisma.mentorshipBooking.findUnique({
-            where: { id: bookingId },
+        const booking = await prisma.mentorshipBooking.findFirst({
+            where: {
+                id: bookingId,
+                OR: [{ userId: user.id }, { email: user.email }]
+            },
             include: { feedback: true }
         })
 

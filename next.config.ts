@@ -28,13 +28,19 @@ const nextConfig: NextConfig = {
         ],
       },
       {
-        // Cache public assets for 1 week
-        source: '/:path((?!api).*)',
+        // Security headers on EVERY response, API routes included.
+        // Deliberately no full Content-Security-Policy yet: a script-src policy has to be
+        // validated against the Cashfree SDK, Supabase and Calendly before it can ship, and
+        // a wrong one breaks checkout. frame-ancestors is safe on its own — it only controls
+        // who may frame us, and replaces X-Frame-Options.
+        source: '/:path*',
         headers: [
-          {
-            key: 'X-Content-Type-Options',
-            value: 'nosniff',
-          },
+          { key: 'X-Content-Type-Options', value: 'nosniff' },
+          { key: 'Content-Security-Policy', value: "frame-ancestors 'self'" },
+          { key: 'X-Frame-Options', value: 'SAMEORIGIN' },
+          { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
+          { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=(), payment=(self)' },
+          { key: 'Strict-Transport-Security', value: 'max-age=63072000; includeSubDomains; preload' },
         ],
       },
     ];
