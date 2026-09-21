@@ -1,58 +1,25 @@
-﻿/**
+/**
  * Cashfree Payment Gateway Integration Helper
  * API Version: 2023-08-01
  */
 
-const CASHFREE_APP_ID = process.env.CASHFREE_APP_ID || ''
-const CASHFREE_SECRET_KEY = process.env.CASHFREE_SECRET_KEY || ''
-const CASHFREE_ENV = process.env.CASHFREE_ENV || 'production'
-
-const CASHFREE_BASE_URL =
-    CASHFREE_ENV === 'production'
+function getCashfreeConfig() {
+    const appId = process.env.CASHFREE_APP_ID || ''
+    const secretKey = process.env.CASHFREE_SECRET_KEY || ''
+    const env = process.env.CASHFREE_ENV || 'production'
+    const baseUrl = env === 'production'
         ? 'https://api.cashfree.com/pg'
         : 'https://sandbox.cashfree.com/pg'
 
-export interface CreateOrderParams {
-    orderId: string
-    orderAmount: number
-    orderCurrency?: string
-    customerDetails: {
-        customerId: string
-        customerName: string
-        customerEmail: string
-        customerPhone: string
-    }
-    orderMeta?: {
-        returnUrl?: string
-        notifyUrl?: string
-    }
-    orderNote?: string
-}
-
-export interface CashfreeOrderResponse {
-    cf_order_id: string
-    order_id: string
-    entity: string
-    order_currency: string
-    order_amount: number
-    order_status: 'ACTIVE' | 'PAID' | 'EXPIRED' | 'TERMINATED'
-    payment_session_id: string
-    order_expiry_time?: string
-    customer_details?: {
-        customer_id: string
-        customer_name: string
-        customer_email: string
-        customer_phone: string
-    }
-    message?: string
-    code?: string
-    type?: string
+    return { appId, secretKey, env, baseUrl }
 }
 
 export async function createCashfreeOrder(
     params: CreateOrderParams
 ): Promise<CashfreeOrderResponse> {
-    if (!CASHFREE_APP_ID || !CASHFREE_SECRET_KEY) {
+    const { appId, secretKey, baseUrl } = getCashfreeConfig()
+
+    if (!appId || !secretKey) {
         throw new Error('Cashfree credentials are not configured in environment')
     }
 
@@ -81,12 +48,12 @@ export async function createCashfreeOrder(
         order_note: params.orderNote || 'Prodsnap Order'
     }
 
-    const response = await fetch(`${CASHFREE_BASE_URL}/orders`, {
+    const response = await fetch(`${baseUrl}/orders`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
-            'x-client-id': CASHFREE_APP_ID,
-            'x-client-secret': CASHFREE_SECRET_KEY,
+            'x-client-id': appId,
+            'x-client-secret': secretKey,
             'x-api-version': '2023-08-01'
         },
         body: JSON.stringify(payload)
@@ -103,15 +70,17 @@ export async function createCashfreeOrder(
 }
 
 export async function getCashfreeOrder(orderId: string): Promise<CashfreeOrderResponse> {
-    if (!CASHFREE_APP_ID || !CASHFREE_SECRET_KEY) {
+    const { appId, secretKey, baseUrl } = getCashfreeConfig()
+
+    if (!appId || !secretKey) {
         throw new Error('Cashfree credentials are not configured in environment')
     }
 
-    const response = await fetch(`${CASHFREE_BASE_URL}/orders/${orderId}`, {
+    const response = await fetch(`${baseUrl}/orders/${orderId}`, {
         method: 'GET',
         headers: {
-            'x-client-id': CASHFREE_APP_ID,
-            'x-client-secret': CASHFREE_SECRET_KEY,
+            'x-client-id': appId,
+            'x-client-secret': secretKey,
             'x-api-version': '2023-08-01'
         }
     })
