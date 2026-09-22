@@ -1,16 +1,12 @@
-export const dynamic = 'force-dynamic'
 import Link from "next/link"
 import Image from "next/image"
 import { Header } from "@/components/Header"
 import { Footer } from "@/components/Footer"
 import { ArrowRight, Users, Sparkles, BookOpen, Zap } from "lucide-react"
-import { getUser } from "@/lib/auth"
 import { InteractiveMicroCase } from "@/components/InteractiveMicroCase"
+import { HomeFAQ } from "@/components/HomeFAQ"
 
-export default async function Home() {
-  // Single getUser call — result passed to Header to avoid a second Supabase+DB round trip
-  const user = await getUser()
-
+export default function Home() {
   const testimonialPeople = [
     {
       img: "/shivam.jpg",
@@ -29,7 +25,7 @@ export default async function Home() {
 
   return (
     <div className="min-h-screen flex flex-col bg-white dark:bg-gray-950">
-      <Header user={user} />
+      <Header />
 
       <main className="flex-grow">
         {/* Hero Section */}
@@ -193,6 +189,8 @@ export default async function Home() {
             </div>
           </div>
         </section>
+
+        <HomeFAQ />
       </main>
 
       <Footer />

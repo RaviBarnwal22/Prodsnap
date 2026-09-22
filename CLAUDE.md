@@ -143,6 +143,8 @@ A component loaded that way renders a `BailoutToCSR` boundary. If it is an *ance
 
 `ssr: false` is still fine for a component that renders **no visible markup and wraps nothing** (analytics, session timers). Wrap each one in its own `<Suspense>` so its bailout stays contained.
 
+**The header must stay cookie-free.** `<Header />` is a static shell; the account state is resolved in the browser by `HeaderAuth` via `/api/auth/me`. That is what allows the homepage, the six pillar pages and every content page to be statically generated. Re-introducing `getUser()` (or anything reading `cookies()`) into `Header` would quietly drag all of them back to dynamic rendering — the build output is the tell: `○` and `●` are good, `ƒ` on a content route means something started reading cookies.
+
 Catching it is one command — it must print `0`:
 
 ```bash
@@ -165,6 +167,7 @@ Every new or edited **public** route satisfies all of these before it is called 
 ### Metadata contract
 
 - `metadataBase` is set once in `src/app/layout.tsx`; every canonical below it is a root-relative path (`"/mentorship"`), never a hardcoded absolute URL.
+- **`alternates` is inherited, and that is a trap.** The root layout sets `canonical: "/"`, so any page that does not set its own `alternates` silently declares itself a duplicate of the homepage. This actually shipped: six pillar pages and `/practice` all pointed at `https://prodsnap.in`. Every indexable route must set its own canonical — a missing one is worse than no canonical at all.
 - Titles: `Primary Keyword | Qualifier | Prodsnap`, under ~60 characters so they don't truncate in the SERP. Every title on the site is unique.
 - The root layout's metadata *is* the homepage's metadata. Changing it changes the homepage.
 - `keywords` has near-zero ranking value — keep it short and honest, and never treat it as a substitute for the keyword actually appearing in the `h1`, body copy and internal anchors.
@@ -248,8 +251,8 @@ Keyword stuffing, doorway pages spun from a template with swapped nouns, schema 
 
 ### Known gaps — not yet fixed
 
-- **The six pillar pages are `force-dynamic`**, because `<Header />` calls `getUser()` and reads cookies. They'd be CDN-cacheable as `force-static` (as the 28 detail pages already are), but the trade-off is that a logged-in user would see a logged-out header — which is exactly what already happens on the detail pages. Worth fixing properly by streaming the header's auth state behind `<Suspense>` rather than by flipping the flag.
-- **No FAQ block on the homepage.** `FAQPage` schema there would be eligible for rich results, but only once real, visible FAQ copy exists on the page.
+- **The free-attempt limit disagrees with itself.** `@/lib/constants` exports `FREE_ATTEMPT_LIMIT = 5` and the practice page shows that number, but `src/app/api/start-attempt/route.ts` redeclares its own `const FREE_ATTEMPT_LIMIT = 3` and enforces it. Users are cut off two attempts before the UI says they will be. Unifying it is a revenue decision (3 → 5 gives away more free AI calls), so it needs the founder's call, not a silent fix.
+- **Jobs feature is recoverable, not rebuildable.** The `Job` model is still in the schema and the table exists but holds **0 rows**. The six deleted files (~1,260 lines) are in commit `8cd6977`. Restoring the UI without wiring a data source ships an empty page.
 - **`/blog` is a bare redirect to `/community`.** Fine as a redirect; it is deliberately excluded from the sitemap.
 - Confirmation-email deliverability (see **Known broken**) indirectly hurts conversion from organic traffic.
 

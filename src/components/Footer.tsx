@@ -33,6 +33,7 @@ export function Footer() {
                     <div>
                         <h4 className="font-bold text-xs uppercase tracking-widest text-gray-900 dark:text-white mb-4">PM Guides & Hubs</h4>
                         <ul className="space-y-2.5 text-sm text-gray-600 dark:text-gray-400">
+                            <li><Link href="/product-management" className="hover:text-violet-600 transition">What is Product Management?</Link></li>
                             <li><Link href="/product-management-interview" className="hover:text-violet-600 transition">Interview Prep Hub</Link></li>
                             <li><Link href="/frameworks" className="hover:text-violet-600 transition">PM Frameworks (RICE, Kano)</Link></li>
                             <li><Link href="/product-analytics" className="hover:text-violet-600 transition">Product Analytics & Metrics</Link></li>

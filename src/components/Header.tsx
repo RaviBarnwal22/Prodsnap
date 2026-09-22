@@ -1,21 +1,21 @@
 import Link from 'next/link'
 import Image from 'next/image'
-import { getUser } from '@/lib/auth'
 import { MobileMenu } from './MobileMenu'
 import { Navigation } from './Navigation'
-import { SignInButton } from './SignInButton'
-
-type User = Awaited<ReturnType<typeof getUser>>
+import { HeaderAuth } from './HeaderAuth'
 
 interface HeaderProps {
-    // Accept pre-fetched user to avoid duplicate DB calls on pages that already have it
-    user?: User
+    // When false, the account slice is omitted entirely. Only needed for
+    // surfaces that deliberately render no auth UI; everything else should
+    // leave this alone.
+    showAuth?: boolean
 }
 
-export async function Header({ user: userProp }: HeaderProps = {}) {
-    // Only fetch if not already provided — avoids duplicate Supabase+Prisma round trips
-    const user = userProp !== undefined ? userProp : await getUser()
-
+/**
+ * Static header shell. It no longer reads cookies, so a page rendering
+ * <Header /> is free to be statically generated — see HeaderAuth for why.
+ */
+export function Header({ showAuth = true }: HeaderProps = {}) {
     return (
         <header className="border-b bg-white dark:bg-gray-900 sticky top-0 z-50">
             <div className="container mx-auto px-4 h-16 flex items-center justify-between">
@@ -26,34 +26,13 @@ export async function Header({ user: userProp }: HeaderProps = {}) {
 
                 <Navigation />
 
-                <div className="flex items-center gap-2">
-                    <div className="hidden md:flex items-center gap-4">
-                        {user ? (
-                            <div className="flex items-center gap-4">
-                                {user.email === 'ravibarnwal89@gmail.com' && (
-                                    <Link
-                                        href="/admin"
-                                        className="text-[10px] font-black uppercase tracking-widest px-3 py-1.5 rounded-full bg-amber-50 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400 border border-amber-100 dark:border-amber-800 hover:bg-amber-100 dark:hover:bg-amber-900/40 transition-colors flex items-center gap-1.5"
-                                    >
-                                        <div className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
-                                        Admin Panel
-                                    </Link>
-                                )}
-                                <div className="flex items-center gap-3">
-                                    <span className="text-sm font-medium">{user.firstName || user.name?.split(' ')[0] || user.email.split('@')[0]}</span>
-                                    <a href="/auth/signout" className="text-xs text-gray-500 hover:text-red-500 transition">Sign Out</a>
-                                </div>
-                            </div>
-                        ) : (
-                            <SignInButton className="bg-violet-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-violet-700 transition" />
-                        )}
+                {showAuth ? (
+                    <HeaderAuth />
+                ) : (
+                    <div className="flex items-center gap-2">
+                        <MobileMenu isLoggedIn={false} />
                     </div>
-                    <MobileMenu
-                        isLoggedIn={!!user}
-                        isAdmin={user?.email === 'ravibarnwal89@gmail.com'}
-                        userName={user?.firstName || user?.name || user?.email}
-                    />
-                </div>
+                )}
             </div>
         </header>
     )

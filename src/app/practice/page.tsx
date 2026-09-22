@@ -5,6 +5,7 @@ export const metadata: Metadata = {
     title: "Practice PM Case Studies | Prodsnap Engine",
     description: "Solve 200+ product management case studies with real-time AI feedback. Practice product design, metrics, growth, and GTM strategy questions.",
     keywords: ["PM Case Study Practice", "Product Sensing Questions", "Guesstimates Practice", "Product Design Interview", "Root Cause Analysis PM", "Product Management Mock Interview"],
+    alternates: { canonical: "/practice" },
 }
 
 export const dynamic = "force-dynamic"
