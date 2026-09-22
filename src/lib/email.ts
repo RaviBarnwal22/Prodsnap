@@ -31,6 +31,20 @@ const esc = (value: unknown): string =>
 const hdr = (value: unknown): string =>
     String(value ?? '').replace(/[\r\n]+/g, ' ').slice(0, 200)
 
+// Email is read outside the app, so every link in it must be an absolute,
+// publicly reachable URL. NEXT_PUBLIC_APP_URL is a developer convenience and is
+// routinely set to localhost — which previously shipped
+// `http://localhost:3001/...` to a paying customer's inbox. Only trust it when
+// it is not a local address, and never let a bad value beat the real domain.
+const publicUrl = (path = ''): string => {
+    const configured = process.env.NEXT_PUBLIC_APP_URL?.trim().replace(/\/+$/, '')
+    const usable =
+        configured &&
+        /^https?:\/\//.test(configured) &&
+        !/^https?:\/\/(localhost|127\.0\.0\.1|0\.0\.0\.0|\[::1\])(:|\/|$)/i.test(configured)
+    return `${usable ? configured : 'https://prodsnap.in'}${path}`
+}
+
 interface EmailOptions {
     to: string
     subject: string
@@ -193,7 +207,7 @@ export async function sendPaymentNotification(data: {
                         Please log in to the admin panel to review the payment details.
                     </p>
                     
-                    <a href="${process.env.NEXT_PUBLIC_APP_URL || 'https://prodsnap.in'}/admin" class="cta">
+                    <a href="${publicUrl()}/admin" class="cta">
                         Open Admin Panel →
                     </a>
                 </div>
@@ -327,7 +341,7 @@ export async function sendApprovalNotification(data: {
                     </div>
                     
                     <div style="text-align: center;">
-                        <a href="${process.env.NEXT_PUBLIC_APP_URL || 'https://prodsnap.in'}/practice" class="cta">
+                        <a href="${publicUrl()}/practice" class="cta">
                             Start Practicing Now →
                         </a>
                     </div>
@@ -357,7 +371,15 @@ export async function sendMentorshipBookingConfirmation(data: {
     serviceType: string
     amount: number
 }) {
-    const bookingUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'https://prodsnap.in'}/payment/status?type=mentorship`
+    // This used to point at /payment/status?type=mentorship, which reads an
+    // `order_id` from the query string. With none present the page renders its
+    // FAILURE state — "No Order ID found... if money was deducted it will be
+    // refunded" — to a customer who had just paid successfully. Send them
+    // straight to the scheduler instead, with their details prefilled.
+    const calendly = process.env.NEXT_PUBLIC_CALENDLY_URL?.trim()
+    const bookingUrl = calendly
+        ? `${calendly}${calendly.includes('?') ? '&' : '?'}name=${encodeURIComponent(data.name)}&email=${encodeURIComponent(data.email)}`
+        : publicUrl('/mentorship')
     const html = `
         <!DOCTYPE html>
         <html>
@@ -390,13 +412,18 @@ export async function sendMentorshipBookingConfirmation(data: {
                         <strong>💰 Amount Paid:</strong> ₹${data.amount}
                     </div>
                     
+                    ${calendly ? `
                     <div class="info-box">
                         <strong>📅 Next Step: Book Your Time Slot</strong>
-                        <p style="margin: 5px 0 10px 0;">Please select your preferred date & time for the 1:1 mentorship call on Calendly:</p>
+                        <p style="margin: 5px 0 10px 0;">Please select your preferred date &amp; time for the 1:1 mentorship call on Calendly:</p>
                         <div style="text-align: center;">
                             <a href="${bookingUrl}" class="cta-btn">Book Your Slot Now →</a>
                         </div>
-                    </div>
+                    </div>` : `
+                    <div class="info-box">
+                        <strong>📅 Next Step: Scheduling</strong>
+                        <p style="margin: 5px 0 10px 0;">We'll email you shortly to arrange a time for your 1:1 session.</p>
+                    </div>`}
 
                     <div class="info-box" style="background: #e0f2fe; border-left-color: #3b82f6;">
                         <strong style="color: #1e40af;">Need Assistance?</strong>
@@ -479,7 +506,7 @@ export async function sendMentorshipPaymentNotification(data: {
                         Please review the payment and reach out to the customer to schedule the session.
                     </p>
                     
-                    <a href="${process.env.NEXT_PUBLIC_APP_URL || 'https://prodsnap-gamma.vercel.app'}/admin" class="cta">
+                    <a href="${publicUrl()}/admin" class="cta">
                         Open Admin Panel →
                     </a>
                 </div>
@@ -506,7 +533,7 @@ export async function sendFeedbackRequestEmail(data: {
     bookingId: string
     serviceType: string
 }) {
-    const feedbackUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'https://prodsnap-gamma.vercel.app'}/feedback/${data.bookingId}`
+    const feedbackUrl = `${publicUrl()}/feedback/${data.bookingId}`
 
     const html = `
         <!DOCTYPE html>
@@ -698,7 +725,7 @@ export async function sendContactFormNotification(data: {
                         Please respond to this inquiry at your earliest convenience. You can reply directly to <strong>${esc(data.email)}</strong>.
                     </p>
                     
-                    <a href="${process.env.NEXT_PUBLIC_APP_URL || 'https://prodsnap-gamma.vercel.app'}/admin" class="cta">
+                    <a href="${publicUrl()}/admin" class="cta">
                         View in Admin Panel →
                     </a>
                 </div>
@@ -833,7 +860,7 @@ export async function sendRejectionNotification(data: {
                     </div>
                     
                     <div style="text-align: center;">
-                        <a href="${process.env.NEXT_PUBLIC_APP_URL || 'https://prodsnap-gamma.vercel.app'}/${data.type === 'subscription' ? 'practice' : 'mentorship'}" class="cta">
+                        <a href="${publicUrl()}/${data.type === 'subscription' ? 'practice' : 'mentorship'}" class="cta">
                             Try Again →
                         </a>
                     </div>
