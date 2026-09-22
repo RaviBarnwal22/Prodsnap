@@ -16,7 +16,7 @@ import Link from "next/link"
 const FAQS: { q: string; a: string }[] = [
     {
         q: "How does Prodsnap's AI feedback work?",
-        a: "You answer a real product management case in your own words, the same way you would in an interview. The AI then evaluates your structure, product sense, choice of metrics and the trade-offs you made, and returns written feedback within seconds — pointing at what a strong answer would have covered and where yours fell short.",
+        a: "You answer a real product management case in your own words, the same way you would in an interview. The AI then evaluates your structure, product sense, choice of metrics and the trade-offs you made, and returns written feedback within seconds. It shows you what a strong answer would have covered and where yours fell short.",
     },
     {
         q: "Is Prodsnap free to try?",
@@ -28,7 +28,7 @@ const FAQS: { q: string; a: string }[] = [
     },
     {
         q: "How is this different from a mock interview with a person?",
-        a: "It is instant and repeatable — no scheduling, no waiting, and you can attempt the same case again after seeing where your reasoning broke down. Use it to build volume and fix patterns. A human mock is still better for reading your delivery and presence, which is what the 1:1 mentorship sessions are for.",
+        a: "It is instant and repeatable. There is nothing to schedule and no waiting, and you can attempt the same case again once you have seen where your reasoning broke down. Use it to build volume and fix patterns. A human mock is still better for reading your delivery and presence, which is what the 1:1 mentorship sessions are for.",
     },
     {
         q: "Do you offer 1:1 mentorship as well?",
