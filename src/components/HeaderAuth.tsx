@@ -1,7 +1,8 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
+import { ChevronDown, User, Receipt, CreditCard, LogOut } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { MobileMenu } from './MobileMenu'
 import { SignInButton } from './SignInButton'
@@ -9,6 +10,86 @@ import { SignInButton } from './SignInButton'
 type Session =
     | { authenticated: false }
     | { authenticated: true; displayName: string; menuName: string; isAdmin: boolean }
+
+const MENU_ITEMS = [
+    { href: '/account', label: 'Profile', icon: User },
+    { href: '/account/orders', label: 'My Orders', icon: Receipt },
+    { href: '/account/subscription', label: 'Subscription', icon: CreditCard },
+]
+
+/** Click the name to open account links. Closes on outside click, Escape, or navigation. */
+function AccountMenu({ displayName }: { displayName: string }) {
+    const [open, setOpen] = useState(false)
+    const wrapRef = useRef<HTMLDivElement>(null)
+
+    useEffect(() => {
+        if (!open) return
+
+        const onPointerDown = (e: MouseEvent | TouchEvent) => {
+            if (!wrapRef.current?.contains(e.target as Node)) setOpen(false)
+        }
+        const onKeyDown = (e: KeyboardEvent) => {
+            if (e.key === 'Escape') setOpen(false)
+        }
+
+        document.addEventListener('mousedown', onPointerDown)
+        document.addEventListener('touchstart', onPointerDown)
+        document.addEventListener('keydown', onKeyDown)
+        return () => {
+            document.removeEventListener('mousedown', onPointerDown)
+            document.removeEventListener('touchstart', onPointerDown)
+            document.removeEventListener('keydown', onKeyDown)
+        }
+    }, [open])
+
+    return (
+        <div className="relative" ref={wrapRef}>
+            <button
+                type="button"
+                onClick={() => setOpen(o => !o)}
+                aria-expanded={open}
+                aria-haspopup="menu"
+                className="flex items-center gap-1.5 text-sm font-medium px-2 py-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors cursor-pointer"
+            >
+                <span className="max-w-[10rem] truncate">{displayName}</span>
+                <ChevronDown
+                    size={15}
+                    className={`text-gray-400 transition-transform ${open ? 'rotate-180' : ''}`}
+                    aria-hidden="true"
+                />
+            </button>
+
+            {open && (
+                <div
+                    role="menu"
+                    className="absolute right-0 top-full mt-2 w-56 bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 shadow-xl py-1.5 z-50"
+                >
+                    {MENU_ITEMS.map(({ href, label, icon: Icon }) => (
+                        <Link
+                            key={href}
+                            href={href}
+                            role="menuitem"
+                            onClick={() => setOpen(false)}
+                            className="flex items-center gap-2.5 px-4 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                        >
+                            <Icon size={16} className="text-gray-400" />
+                            {label}
+                        </Link>
+                    ))}
+                    <div className="my-1.5 border-t border-gray-100 dark:border-gray-800" />
+                    <a
+                        href="/auth/signout"
+                        role="menuitem"
+                        className="flex items-center gap-2.5 px-4 py-2.5 text-sm font-medium text-gray-500 hover:text-red-500 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                    >
+                        <LogOut size={16} />
+                        Sign Out
+                    </a>
+                </div>
+            )}
+        </div>
+    )
+}
 
 /**
  * The header's auth-dependent slice, resolved in the browser.
@@ -88,15 +169,7 @@ export function HeaderAuth() {
                                 Admin Panel
                             </Link>
                         )}
-                        <div className="flex items-center gap-3">
-                            <span className="text-sm font-medium">{session.displayName}</span>
-                            <a
-                                href="/auth/signout"
-                                className="text-xs text-gray-500 hover:text-red-500 transition"
-                            >
-                                Sign Out
-                            </a>
-                        </div>
+                        <AccountMenu displayName={session.displayName} />
                     </div>
                 ) : (
                     <SignInButton className="bg-violet-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-violet-700 transition" />

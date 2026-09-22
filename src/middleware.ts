@@ -35,8 +35,15 @@ export async function middleware(request: NextRequest) {
     const authRoutes = ['/login', '/signup', '/admin/login']
     const isAuthRoute = authRoutes.some(route => pathname === route || pathname === route + '/')
 
-    // Explicitly check for protected prefixes
-    const isProtected = (pathname.startsWith('/admin') || pathname.startsWith('/feedback') || pathname.startsWith('/dashboard')) && !isAuthRoute
+    // Explicitly check for protected prefixes.
+    // `/dashboard` has no route in the app — kept only so the guard stays in
+    // place if one is ever added. `/account` is the real signed-in area.
+    const isProtected = (
+        pathname.startsWith('/admin') ||
+        pathname.startsWith('/feedback') ||
+        pathname.startsWith('/account') ||
+        pathname.startsWith('/dashboard')
+    ) && !isAuthRoute
 
     // 4. Handle Protection (Only call getUser if needed)
     if (isProtected || isAuthRoute) {

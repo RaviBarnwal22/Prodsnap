@@ -104,6 +104,22 @@ export function MobileMenu({ isLoggedIn, isAdmin, userName }: MobileMenuProps) {
                                 <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Signed in as</p>
                                 <p className="font-bold text-gray-900 dark:text-white truncate">{userName}</p>
                             </div>
+                            <div className="grid grid-cols-3 gap-2">
+                                {[
+                                    { href: '/account', label: 'Profile' },
+                                    { href: '/account/orders', label: 'Orders' },
+                                    { href: '/account/subscription', label: 'Plan' },
+                                ].map(({ href, label }) => (
+                                    <Link
+                                        key={href}
+                                        href={href}
+                                        onClick={toggleMenu}
+                                        className="text-center py-3 bg-gray-100 dark:bg-gray-800 rounded-2xl font-bold text-sm text-gray-700 dark:text-gray-200 hover:bg-violet-100 dark:hover:bg-violet-900/30 hover:text-violet-700 dark:hover:text-violet-300 transition-all"
+                                    >
+                                        {label}
+                                    </Link>
+                                ))}
+                            </div>
                             {isAdmin && (
                                 <Link
                                     href="/admin"

@@ -67,7 +67,11 @@ Not yet fixed — treat as known risk: **there is no rate limiting anywhere**, w
 
 **Admin check** — `isAdmin()` / `requireAdmin()` exist in `@/lib/auth`; use them for new code. **The 15 existing call sites have not been migrated** and still inline `user?.email === 'ravibarnwal89@gmail.com' || user?.role === 'ADMIN'`. Migrating them is outstanding work.
 
-**`src/middleware.ts` excludes `/api`** — it only guards `/admin`, `/feedback`, `/dashboard`. Every API route must do its own auth.
+**`src/middleware.ts` excludes `/api`** — it only guards `/admin`, `/feedback`, `/account`, `/dashboard`. Every API route must do its own auth. (`/dashboard` has no route; the guard is kept in case one is added.)
+
+**The signed-in account area is `/account`** (Profile · Orders · Subscription), reached from the header dropdown. It is `noindex`, absent from the sitemap, and server-rendered per user. Queries live in `@/lib/account` and are always scoped to the user resolved by `getUser()` — never to an id supplied by the caller. `AccountLayout` re-checks the session itself rather than trusting middleware.
+
+**Orders are matched on `userId`, then on email only where `userId` is null.** `MentorshipBooking.userId` is a nullable loose column with no Prisma relation, and 4 of 23 live rows have it null. Those 4 are guest bookings with no account at all, so the email branch currently rescues none of them — it exists so a booking is picked up if that person ever signs up with the same (Supabase-verified) address. Do not widen this to match email generally: the contact email on a booking is user-editable.
 
 **Data fetching is inconsistent** — three patterns coexist (server component → Prisma, server actions, client `fetch` → API route). Prefer server actions for new mutations.
 
