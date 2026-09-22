@@ -6,6 +6,7 @@ import { createClient } from '@/lib/supabase/client'
 import { Lock, Crown, Loader2, Sparkles, CheckCircle2, Clock, ChevronRight } from 'lucide-react'
 import Link from 'next/link'
 import { PremiumUpgradeModal } from './PremiumUpgradeModal'
+import { FREE_ATTEMPT_LIMIT } from '@/lib/constants'
 import { useAuth } from './AuthContext'
 
 interface PracticeQuestionClientProps {
@@ -28,8 +29,6 @@ interface PracticeQuestionClientProps {
     history?: any[]
     initialResult?: any
 }
-
-const FREE_ATTEMPT_LIMIT = 3
 
 export function PracticeQuestionClient({
     questionId,

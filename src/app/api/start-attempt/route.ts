@@ -2,8 +2,10 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getUser } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { hasActiveSubscription } from '@/lib/subscription'
-
-const FREE_ATTEMPT_LIMIT = 3
+// Single source of truth. This route used to redeclare its own limit of 3 while
+// /practice displayed the constant's 5, so free users were cut off two attempts
+// before the UI said they would be.
+import { FREE_ATTEMPT_LIMIT } from '@/lib/constants'
 
 export async function POST(request: NextRequest) {
     try {
