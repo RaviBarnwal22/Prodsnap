@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
+import { after } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { getCashfreeOrder } from "@/lib/cashfree"
 import { getMentorshipAiBonusMonths } from "@/lib/constants"
@@ -77,21 +78,28 @@ async function verifyOrder(orderId: string) {
                 }
             })
 
-            // Fire confirmation emails asynchronously
-            sendMentorshipBookingConfirmation({
-                name: booking.name,
-                email: booking.email,
-                serviceType: booking.serviceType,
-                amount: booking.amount
-            }).catch(err => console.error('[Email] Mentorship booking confirmation failed:', err))
+            // Send after the response, not alongside it. A bare floating promise
+            // is not safe on serverless: once the response is returned the
+            // instance can be frozen or torn down, killing the in-flight SMTP
+            // conversation, so a confirmation could silently never be sent.
+            // `after()` keeps the invocation alive until this finishes while
+            // still not blocking the user's redirect.
+            after(async () => {
+                await sendMentorshipBookingConfirmation({
+                    name: booking.name,
+                    email: booking.email,
+                    serviceType: booking.serviceType,
+                    amount: booking.amount
+                }).catch(err => console.error('[Email] Mentorship booking confirmation failed:', err))
 
-            sendMentorshipPaymentNotification({
-                name: booking.name,
-                email: booking.email,
-                phone: booking.phone,
-                serviceType: booking.serviceType,
-                amount: booking.amount
-            }).catch(err => console.error('[Email] Mentorship payment admin notification failed:', err))
+                await sendMentorshipPaymentNotification({
+                    name: booking.name,
+                    email: booking.email,
+                    phone: booking.phone,
+                    serviceType: booking.serviceType,
+                    amount: booking.amount
+                }).catch(err => console.error('[Email] Mentorship payment admin notification failed:', err))
+            })
 
             await grantAiAccessBonus(booking.userId, booking.email, booking.serviceType)
         }
@@ -150,11 +158,14 @@ async function verifyOrder(orderId: string) {
                     }
                 })
 
-                sendApprovalNotification({
-                    name: subRequest.name,
-                    email: subRequest.email,
-                    endDate
-                }).catch((err: any) => console.error('[Email] Subscription approval email failed:', err))
+                // Same reasoning as the mentorship emails above — see `after()` there.
+                after(async () => {
+                    await sendApprovalNotification({
+                        name: subRequest.name,
+                        email: subRequest.email,
+                        endDate
+                    }).catch((err: unknown) => console.error('[Email] Subscription approval email failed:', err))
+                })
             }
         }
 

@@ -44,10 +44,17 @@ export async function sendEmail({ to, subject, html, type = "general", bookingId
         const senderName = "Prodsnap Team"
         const senderEmail = process.env.SMTP_SENDER || 'info.prodsnap@gmail.com'
 
+        // The From address must be on a domain Brevo is authorised to sign for,
+        // otherwise the message fails DKIM/SPF alignment and gets filtered. Use
+        // SMTP_REPLY_TO to route replies to a human inbox (e.g. a Gmail account)
+        // without putting that unsignable address in the From header.
+        const replyTo = process.env.SMTP_REPLY_TO || undefined
+
         console.log(`[Email] Attempting to send email to: ${to} | Subject: ${subject}`)
 
         const info = await transporter.sendMail({
             from: `"${senderName}" <${senderEmail}>`,
+            ...(replyTo ? { replyTo } : {}),
             to,
             subject,
             html
