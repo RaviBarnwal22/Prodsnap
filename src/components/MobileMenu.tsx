@@ -34,11 +34,9 @@ export function MobileMenu({ isLoggedIn, isAdmin, userName }: MobileMenuProps) {
     }, [isOpen])
 
     const navLinks = [
-        { name: 'About Us', href: '/about' },
         { name: 'Case Simulator', href: '/practice' },
         { name: 'Mentorship', href: '/mentorship' },
         { name: 'Community & Blogs', href: '/community' },
-        { name: 'Contact Us', href: '/contact' },
     ]
 
     return (
