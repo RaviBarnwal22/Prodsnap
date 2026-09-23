@@ -30,6 +30,8 @@ interface AnswerFormProps {
     }
     isPremium?: boolean
     initialResult?: AIEvaluationResponse
+    /** Next case in this category, or null when this is the last one. */
+    nextCase?: { id: string; title: string } | null
 }
 
 export function AnswerForm({
@@ -45,7 +47,8 @@ export function AnswerForm({
     onRetry,
     previousSubmission,
     isPremium = false,
-    initialResult
+    initialResult,
+    nextCase
 }: AnswerFormProps) {
     const { openAuthModal } = useAuth()
     // Initialize result with prop if provided
@@ -526,6 +529,70 @@ export function AnswerForm({
                         </div>
                     )}
 
+                    {/* What to do next.
+                        This sits ABOVE the survey on purpose: the results screen used
+                        to end on the NPS form, with the only way onward a grey
+                        "Clear & Retry" below it, so finishing a case was a dead end
+                        and people had to navigate back by hand. */}
+                    <div className="bg-gradient-to-br from-violet-50 to-blue-50 dark:from-violet-900/20 dark:to-blue-900/20 border border-violet-100 dark:border-violet-900/40 rounded-3xl p-6 md:p-7">
+                        <p className="text-xs font-black uppercase tracking-widest text-violet-600 dark:text-violet-400 mb-4">
+                            What next?
+                        </p>
+
+                        <div className="grid sm:grid-cols-2 gap-3">
+                            {nextCase ? (
+                                <Link
+                                    href={`/practice/${nextCase.id}`}
+                                    className="sm:col-span-2 group bg-gradient-to-r from-violet-600 to-blue-600 text-white rounded-2xl px-5 py-4 font-bold flex items-center justify-between gap-3 hover:shadow-lg hover:shadow-violet-500/25 transition-all"
+                                >
+                                    <span className="min-w-0">
+                                        <span className="block text-[11px] uppercase tracking-widest opacity-80 font-black">
+                                            Next case
+                                        </span>
+                                        <span className="block truncate">{nextCase.title}</span>
+                                    </span>
+                                    <ArrowRight size={20} className="shrink-0 group-hover:translate-x-0.5 transition-transform" />
+                                </Link>
+                            ) : (
+                                <Link
+                                    href="/practice"
+                                    className="sm:col-span-2 group bg-gradient-to-r from-violet-600 to-blue-600 text-white rounded-2xl px-5 py-4 font-bold flex items-center justify-between gap-3 hover:shadow-lg hover:shadow-violet-500/25 transition-all"
+                                >
+                                    <span>
+                                        <span className="block text-[11px] uppercase tracking-widest opacity-80 font-black">
+                                            Category complete
+                                        </span>
+                                        <span className="block">Pick your next case</span>
+                                    </span>
+                                    <ArrowRight size={20} className="shrink-0 group-hover:translate-x-0.5 transition-transform" />
+                                </Link>
+                            )}
+
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    killFeedbackTriggers()
+                                    setResult(null)
+                                    setPreviousAnswer('')
+                                    setValue('answer', '')
+                                    if (onRetry) onRetry()
+                                }}
+                                className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white rounded-2xl px-5 py-3.5 font-bold text-sm hover:border-violet-300 dark:hover:border-violet-700 transition-all flex items-center justify-center gap-2 cursor-pointer"
+                            >
+                                <ArrowRight size={16} className="rotate-180" />
+                                Retry this case
+                            </button>
+
+                            <Link
+                                href="/practice"
+                                className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white rounded-2xl px-5 py-3.5 font-bold text-sm hover:border-violet-300 dark:hover:border-violet-700 transition-all flex items-center justify-center gap-2"
+                            >
+                                <BarChart3 size={16} />
+                                All cases
+                            </Link>
+                        </div>
+                    </div>
+
                     {/* Detailed Experience Feedback */}
                     <div className="bg-white dark:bg-gray-800 border-2 border-dashed border-gray-100 dark:border-gray-700 rounded-3xl p-8 space-y-8">
                         {feedbackSubmitted ? (
@@ -608,18 +675,6 @@ export function AnswerForm({
                         )}
                     </div>
 
-                    <button
-                        onClick={() => {
-                            killFeedbackTriggers()
-                            setResult(null)
-                            setPreviousAnswer('')
-                            setValue('answer', '')
-                            if (onRetry) onRetry()
-                        }}
-                        className="w-full bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white py-4 rounded-xl font-bold transition-all"
-                    >
-                        Clear & Retry
-                    </button>
                 </div>
             </div>
         )

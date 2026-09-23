@@ -19,6 +19,8 @@ interface PracticeQuestionClientProps {
     sampleAnswer?: string
     isLocked: boolean
     isPremium?: boolean
+    /** Next case in this category, or null when this is the last one. */
+    nextCase?: { id: string; title: string } | null
     userEmail?: string
     userName?: string
     previousSubmission?: {
@@ -40,6 +42,7 @@ export function PracticeQuestionClient({
     sampleAnswer,
     isLocked,
     isPremium: initialIsPremium = false,
+    nextCase,
     userEmail,
     userName,
     previousSubmission: initialPreviousSubmission,
@@ -365,6 +368,7 @@ export function PracticeQuestionClient({
                         onRetry={handleRetry}
                         previousSubmission={previousSubmission || undefined}
                         isPremium={initialIsPremium}
+                        nextCase={nextCase}
                         initialResult={previousSubmission?.aiScore ? JSON.parse(previousSubmission.aiScore) : undefined}
                     />
                 </div>

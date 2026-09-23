@@ -59,7 +59,8 @@ export default async function QuestionPage({ params }: { params: Promise<{ id: s
     // Calculate if this is the "First Case" of the category to allow free viewing
     const categoryQuestions = await prisma.practiceQuestion.findMany({
         where: { category: question.category },
-        select: { id: true, difficulty: true }
+        // title is needed so the results screen can name the next case.
+        select: { id: true, difficulty: true, title: true }
     })
 
     const difficultyOrder: Record<string, number> = { 'easy': 1, 'Easy': 1, 'medium': 2, 'Medium': 2, 'hard': 3, 'Hard': 3 }
@@ -69,6 +70,14 @@ export default async function QuestionPage({ params }: { params: Promise<{ id: s
         if (orderA !== orderB) return orderA - orderB
         return a.id.localeCompare(b.id) // Matches page.tsx sort
     })
+
+    // The case that follows this one in the same category, so the results screen
+    // can offer a real next step instead of leaving the user to navigate back.
+    // Null on the last case of a category rather than wrapping around, which
+    // would silently send someone back to a case they have already done.
+    const currentIndex = categoryQuestions.findIndex(q => q.id === question.id)
+    const next = currentIndex >= 0 ? categoryQuestions[currentIndex + 1] : undefined
+    const nextCase = next ? { id: next.id, title: next.title } : null
 
     const isFirstCase = categoryQuestions[0]?.id === id
     const isLocked = !isFirstCase && !hasFullAccess
@@ -152,6 +161,7 @@ export default async function QuestionPage({ params }: { params: Promise<{ id: s
                             sampleAnswer={question.sampleAnswer || undefined}
                             isLocked={isLocked}
                             isPremium={hasFullAccess}
+                            nextCase={nextCase}
                             previousSubmission={latestSubmission ? {
                                 answerText: latestSubmission.answerText,
                                 aiScore: latestSubmission.aiScore || undefined,
