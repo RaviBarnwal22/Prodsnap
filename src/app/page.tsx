@@ -1,3 +1,11 @@
+// The homepage hosts the live demo's server action, which calls Gemini.
+// Measured evaluation latency is 12.6s minimum and ~18s median, so on Vercel's
+// default function limit (10s on Hobby, 15s on Pro) the function was being
+// killed before the model replied — which is what pushed evaluations into the
+// mock fallback and showed fabricated feedback. Server Actions inherit the
+// hosting segment's maxDuration.
+export const maxDuration = 60
+
 import Link from "next/link"
 import Image from "next/image"
 import { Header } from "@/components/Header"

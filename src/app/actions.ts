@@ -790,7 +790,10 @@ export async function evaluateMicroCase(questionTitle: string, answerText: strin
     }
 
     try {
-        const aiResponse = await evaluateAnswer(questionTitle, answerText, 30);
+        // The demo does not render improved_example, and generating that 400-500
+        // word model answer is most of the response time. Skipping it here keeps
+        // the "instant" demo closer to instant.
+        const aiResponse = await evaluateAnswer(questionTitle, answerText, 30, undefined, false);
 
         // A mock result means no provider answered. Surfacing it would show
         // fabricated feedback as if it were real, so treat it as a failure —

@@ -76,7 +76,7 @@ async function logApiUsage(
 }
 
 
-export async function evaluateAnswer(questionTitle: string, userAnswer: string, elapsedTimeSeconds?: number, chatContext?: string): Promise<AIEvaluationResponse> {
+export async function evaluateAnswer(questionTitle: string, userAnswer: string, elapsedTimeSeconds?: number, chatContext?: string, includeGoldStandard: boolean = true): Promise<AIEvaluationResponse> {
     const { gemini: geminiKeys, groq: groqKeys } = getApiKeys();
     console.log(`[AI Engine] Gemini keys: ${geminiKeys.length}, Groq keys: ${groqKeys.length}`);
 
@@ -85,7 +85,7 @@ export async function evaluateAnswer(questionTitle: string, userAnswer: string, 
         return getMockResponse();
     }
 
-    const prompt = PRODUCT_SENSE_PROMPT(questionTitle, userAnswer, elapsedTimeSeconds, chatContext);
+    const prompt = PRODUCT_SENSE_PROMPT(questionTitle, userAnswer, elapsedTimeSeconds, chatContext, includeGoldStandard);
     let lastErrorMessage = "Unknown error";
 
     // 1. Attempt Gemini first (Free Daily Refill)

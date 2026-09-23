@@ -1,6 +1,11 @@
 import { prisma } from "@/lib/prisma"
 import { Metadata } from 'next'
 
+// Hosts submitAnswer, which calls Gemini. Evaluations take ~18s on average, so
+// the default Vercel function limit killed them before the model replied. See
+// the note in src/app/page.tsx.
+export const maxDuration = 60
+
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
     const { id } = await params
     const question = await prisma.practiceQuestion.findUnique({

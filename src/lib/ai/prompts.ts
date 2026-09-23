@@ -1,4 +1,13 @@
-export const PRODUCT_SENSE_PROMPT = (questionTitle: string, userAnswer: string, elapsedTimeSeconds?: number, chatContext?: string) => {
+export const PRODUCT_SENSE_PROMPT = (
+  questionTitle: string,
+  userAnswer: string,
+  elapsedTimeSeconds?: number,
+  chatContext?: string,
+  // The 400-500 word gold standard answer is the bulk of the generated tokens and
+  // therefore the bulk of the latency. The homepage demo never renders it, so it
+  // is skipped there; the full practice flow, which does show it, keeps it.
+  includeGoldStandard: boolean = true
+) => {
   const timeInfo = elapsedTimeSeconds
     ? `\n**Time Taken**: ${Math.floor(elapsedTimeSeconds / 60)} minutes ${elapsedTimeSeconds % 60} seconds`
     : 'Not measured';
@@ -34,7 +43,7 @@ ${clarificationInfo}
 4. **Evidence rule for strengths**: A strength may only describe something the candidate ACTUALLY wrote, and must point at the specific thing they said. Never praise an ability the answer does not demonstrate. If nothing genuinely merits praise, return an empty array. An empty "strengths" array is a correct and expected answer for a weak submission. Never pad it to reach a certain number of items.
 
 5. **Weaknesses must be concrete**: say what is missing and what the candidate should have done instead, referring to this case.
-6. **Gold Standard Solution**: Provide a detailed, industry-standard "Perfect Answer" that would get a "Strong Hire" rating. Always provide this, including for a non-answer, since it is what the candidate should learn from.
+${includeGoldStandard ? `6. **Gold Standard Solution**: Provide a detailed, industry-standard "Perfect Answer" that would get a "Strong Hire" rating. Always provide this, including for a non-answer, since it is what the candidate should learn from.` : `6. **Brevity**: Do NOT write a model answer. Keep every field concise.`}
 
 **Dimensions for Scoring**:
 - **comprehend_goal**: Quality of clarifying questions asked in the Interviewer Hub and alignment with the core problem statement.
@@ -73,7 +82,9 @@ ${clarificationInfo}
   "strengths": [],
   "weaknesses": ["string", "string"],
   "feedback": "Framework: [Name]. Logic for pass/fail. Be insightful but direct. If this is a NON-ANSWER or VAGUE submission, say so plainly in the first sentence and explain what an answer needed to contain.",
-  "improved_example": "A high-quality, comprehensive 'Gold Standard Solution' (400-500 words). Walk through the perfect path step-by-step. IMPORTANT: Do NOT use symbols like dashes (-), asterisks (*), or bullets. Instead, use clear, structured paragraphs with bold headers for each section. Ensure it is professional, deep, and reads like a cohesive expert strategy."
+  "improved_example": ${includeGoldStandard
+      ? `"A high-quality, comprehensive 'Gold Standard Solution' (400-500 words). Walk through the perfect path step-by-step. IMPORTANT: Do NOT use symbols like dashes (-), asterisks (*), or bullets. Instead, use clear, structured paragraphs with bold headers for each section. Ensure it is professional, deep, and reads like a cohesive expert strategy."`
+      : `""`}
 }
 `;
 }
