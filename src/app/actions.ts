@@ -53,7 +53,8 @@ export async function submitAnswer(questionId: string, answer: string, elapsedTi
     let aiResponse;
     try {
         console.log(`[submitAnswer] Calling AI Engine...`);
-        aiResponse = await evaluateAnswer(question.title, answer, elapsedTimeSeconds, chatContext)
+        // Practice cases use Gemini (includes gold standard, ~18s) not Groq (demo only).
+        aiResponse = await evaluateAnswer(question.title, answer, elapsedTimeSeconds, chatContext, true, 'gemini')
         console.log(`[submitAnswer] AI Engine success`);
     } catch (error) {
         console.error("[submitAnswer] AI Error", error)
@@ -792,8 +793,9 @@ export async function evaluateMicroCase(questionTitle: string, answerText: strin
     try {
         // The demo does not render improved_example, and generating that 400-500
         // word model answer is most of the response time. Skipping it here keeps
-        // the "instant" demo closer to instant.
-        const aiResponse = await evaluateAnswer(questionTitle, answerText, 30, undefined, false);
+        // the "instant" demo closer to instant. Use Groq first (1-3s) with Gemini
+        // fallback for speed on the homepage.
+        const aiResponse = await evaluateAnswer(questionTitle, answerText, 30, undefined, false, 'groq');
 
         // A mock result means no provider answered. Surfacing it would show
         // fabricated feedback as if it were real, so treat it as a failure —

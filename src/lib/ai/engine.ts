@@ -76,9 +76,16 @@ async function logApiUsage(
 }
 
 
-export async function evaluateAnswer(questionTitle: string, userAnswer: string, elapsedTimeSeconds?: number, chatContext?: string, includeGoldStandard: boolean = true): Promise<AIEvaluationResponse> {
+export async function evaluateAnswer(
+    questionTitle: string,
+    userAnswer: string,
+    elapsedTimeSeconds?: number,
+    chatContext?: string,
+    includeGoldStandard: boolean = true,
+    preferredProvider: 'groq' | 'gemini' = 'gemini'
+): Promise<AIEvaluationResponse> {
     const { gemini: geminiKeys, groq: groqKeys } = getApiKeys();
-    console.log(`[AI Engine] Gemini keys: ${geminiKeys.length}, Groq keys: ${groqKeys.length}`);
+    console.log(`[AI Engine] Gemini keys: ${geminiKeys.length}, Groq keys: ${groqKeys.length}, Preferred: ${preferredProvider}`);
 
     if (geminiKeys.length === 0 && groqKeys.length === 0) {
         console.warn("No API keys found. Using mock response.");
@@ -88,86 +95,95 @@ export async function evaluateAnswer(questionTitle: string, userAnswer: string, 
     const prompt = PRODUCT_SENSE_PROMPT(questionTitle, userAnswer, elapsedTimeSeconds, chatContext, includeGoldStandard);
     let lastErrorMessage = "Unknown error";
 
-    // 1. Attempt Gemini first (Free Daily Refill)
-    for (const key of geminiKeys) {
-        const startTime = Date.now();
-        console.log(`[AI Engine] Attempting Gemini fallback (Daily Free tier)`);
+    // Reorder providers based on preference: try preferred first, then fallback
+    const providers = preferredProvider === 'groq'
+        ? ['groq', 'gemini'] as const
+        : ['gemini', 'groq'] as const;
 
-        try {
-            const modelsToTry = ["gemini-2.5-flash", "gemini-1.5-flash-latest", "gemini-1.5-flash"];
-            let text = "";
-            let geminiSuccess = false;
-            let geminiLastException: any = null;
+    for (const providerName of providers) {
+        if (providerName === 'groq') {
+            // Attempt Groq (1-3s latency, used for demo)
+            for (const key of groqKeys) {
+                const startTime = Date.now();
+                console.log(`[AI Engine] Attempting Groq (Llama-3.3)`);
 
-            for (const modelId of modelsToTry) {
                 try {
-                    console.log(`[AI Engine] Trying Gemini model: ${modelId}`);
-                    const genAI = new GoogleGenerativeAI(key);
-                    const model = genAI.getGenerativeModel({ model: modelId });
+                    const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                            "Authorization": `Bearer ${key}`
+                        },
+                        body: JSON.stringify({
+                            model: "llama-3.3-70b-versatile",
+                            messages: [
+                                { role: "system", content: "You are an expert PM interviewer. Respond strictly in valid JSON." },
+                                { role: "user", content: prompt }
+                            ],
+                            temperature: 0.2
+                        })
+                    });
 
-                    const result = await model.generateContent(prompt);
-                    text = result.response.text();
+                    if (!res.ok) {
+                        const errorText = await res.text();
+                        throw new Error(`Groq API Error: ${res.status} - ${errorText.substring(0, 100)}`);
+                    }
 
-                    const responseTime = Date.now() - startTime;
-                    const estimatedTokens = Math.ceil((prompt.length + text.length) / 4);
-                    await logApiUsage('gemini', modelId, 'success', responseTime, undefined, estimatedTokens);
+                    const data = await res.json();
+                    const text = data.choices[0].message.content;
 
-                    geminiSuccess = true;
-                    break;
-                } catch (geminiError: any) {
-                    geminiLastException = geminiError;
-                    console.warn(`[AI Engine] Gemini model ${modelId} failed: ${geminiError.message}`);
-                    continue;
+                    if (text) {
+                        const responseTime = Date.now() - startTime;
+                        await logApiUsage('groq', 'llama-3.3-70b', 'success', responseTime);
+                        return enforceScoringRules(processAIResult(text), questionTitle, userAnswer);
+                    }
+                } catch (error: any) {
+                    lastErrorMessage = error.message;
+                    console.error(`[AI Engine] Groq attempt FAILED:`, lastErrorMessage);
                 }
             }
+        } else {
+            // Attempt Gemini (18-37s latency, used for practice)
+            for (const key of geminiKeys) {
+                const startTime = Date.now();
+                console.log(`[AI Engine] Attempting Gemini`);
 
-            if (geminiSuccess && text) {
-                return enforceScoringRules(processAIResult(text), questionTitle, userAnswer);
+                try {
+                    const modelsToTry = ["gemini-2.5-flash", "gemini-1.5-flash-latest", "gemini-1.5-flash"];
+                    let text = "";
+                    let geminiSuccess = false;
+                    let geminiLastException: any = null;
+
+                    for (const modelId of modelsToTry) {
+                        try {
+                            console.log(`[AI Engine] Trying Gemini model: ${modelId}`);
+                            const genAI = new GoogleGenerativeAI(key);
+                            const model = genAI.getGenerativeModel({ model: modelId });
+
+                            const result = await model.generateContent(prompt);
+                            text = result.response.text();
+
+                            const responseTime = Date.now() - startTime;
+                            const estimatedTokens = Math.ceil((prompt.length + text.length) / 4);
+                            await logApiUsage('gemini', modelId, 'success', responseTime, undefined, estimatedTokens);
+
+                            geminiSuccess = true;
+                            break;
+                        } catch (geminiError: any) {
+                            geminiLastException = geminiError;
+                            console.warn(`[AI Engine] Gemini model ${modelId} failed: ${geminiError.message}`);
+                            continue;
+                        }
+                    }
+
+                    if (geminiSuccess && text) {
+                        return enforceScoringRules(processAIResult(text), questionTitle, userAnswer);
+                    }
+                } catch (error: any) {
+                    lastErrorMessage = error.message;
+                    console.error(`[AI Engine] Gemini attempt FAILED:`, lastErrorMessage);
+                }
             }
-        } catch (error: any) {
-            lastErrorMessage = error.message;
-            console.error(`[AI Engine] Gemini attempt FAILED:`, lastErrorMessage);
-        }
-    }
-
-    // 2. Attempt Groq as backup (High speed daily refill)
-    for (const key of groqKeys) {
-        const startTime = Date.now();
-        console.log(`[AI Engine] Attempting Groq backup (Llama-3.3)`);
-
-        try {
-            const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": `Bearer ${key}`
-                },
-                body: JSON.stringify({
-                    model: "llama-3.3-70b-versatile",
-                    messages: [
-                        { role: "system", content: "You are an expert PM interviewer. Respond strictly in valid JSON." },
-                        { role: "user", content: prompt }
-                    ],
-                    temperature: 0.2
-                })
-            });
-
-            if (!res.ok) {
-                const errorText = await res.text();
-                throw new Error(`Groq API Error: ${res.status} - ${errorText.substring(0, 100)}`);
-            }
-
-            const data = await res.json();
-            const text = data.choices[0].message.content;
-
-            if (text) {
-                const responseTime = Date.now() - startTime;
-                await logApiUsage('groq', 'llama-3.3-70b', 'success', responseTime);
-                return enforceScoringRules(processAIResult(text), questionTitle, userAnswer);
-            }
-        } catch (error: any) {
-            lastErrorMessage = error.message;
-            console.error(`[AI Engine] Groq attempt FAILED:`, lastErrorMessage);
         }
     }
 
