@@ -2,9 +2,11 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { Sparkles, ArrowRight, Loader2, RotateCcw, CheckCircle2, AlertTriangle, Target, Zap, Bot } from 'lucide-react'
+import { Sparkles, ArrowRight, Loader2, RotateCcw, CheckCircle2, AlertTriangle, Target, Zap, Bot, Lock } from 'lucide-react'
 import { evaluateMicroCase } from '@/app/actions'
 import { AIEvaluationResponse } from '@/lib/ai/engine'
+import { useAuth } from '@/components/AuthContext'
+import { FREE_ATTEMPT_LIMIT } from '@/lib/constants'
 
 interface MicroCaseItem {
     id: string
@@ -68,6 +70,11 @@ export function InteractiveMicroCase() {
     const [isLoading, setIsLoading] = useState(false)
     const [evaluationResult, setEvaluationResult] = useState<AIEvaluationResponse | null>(null)
     const [errorMessage, setErrorMessage] = useState<string | null>(null)
+    // Signed-out visitors get a few real evaluations a day; these track that
+    // allowance so the UI can prompt for an account instead of showing an error.
+    const [limitReached, setLimitReached] = useState(false)
+    const [guestTriesLeft, setGuestTriesLeft] = useState<number | null>(null)
+    const { openAuthModal } = useAuth()
 
     const handleSelectCase = (c: MicroCaseItem) => {
         setSelectedCase(c)
@@ -80,6 +87,9 @@ export function InteractiveMicroCase() {
         setAnswerText('')
         setEvaluationResult(null)
         setErrorMessage(null)
+        setGuestTriesLeft(null)
+        // limitReached is deliberately not cleared — the daily allowance is
+        // spent, and clearing the form should not appear to hand back a try.
     }
 
     const handleEvaluate = async () => {
@@ -94,13 +104,19 @@ export function InteractiveMicroCase() {
 
         try {
             const res = await evaluateMicroCase(selectedCase.title, answerText)
+
             if (res.success && res.aiResponse) {
                 setEvaluationResult(res.aiResponse)
+                setGuestTriesLeft(res.isGuest ? res.remaining ?? null : null)
+            } else if (res.limitReached) {
+                // Out of free tries: an invitation, not a failure.
+                setLimitReached(true)
+                setGuestTriesLeft(0)
             } else {
                 setErrorMessage(res.error || 'Evaluation timed out. Please try again.')
             }
-        } catch (err: any) {
-            setErrorMessage(err.message || 'Something went wrong during evaluation.')
+        } catch (err: unknown) {
+            setErrorMessage(err instanceof Error ? err.message : 'Something went wrong during evaluation.')
         } finally {
             setIsLoading(false)
         }
@@ -196,7 +212,27 @@ export function InteractiveMicroCase() {
                                 </div>
                             </div>
 
-                            {errorMessage && (
+                            {limitReached ? (
+                                <div className="p-5 bg-violet-50 dark:bg-violet-900/20 border border-violet-200 dark:border-violet-800/40 rounded-2xl text-center">
+                                    <div className="w-11 h-11 rounded-xl bg-violet-100 dark:bg-violet-900/40 text-violet-600 dark:text-violet-300 flex items-center justify-center mx-auto mb-3">
+                                        <Lock size={20} />
+                                    </div>
+                                    <p className="font-black text-gray-900 dark:text-white mb-1">
+                                        That&apos;s your free tries for today
+                                    </p>
+                                    <p className="text-sm text-gray-600 dark:text-gray-300 mb-4 max-w-sm mx-auto leading-relaxed">
+                                        Create a free account to keep going — you get {FREE_ATTEMPT_LIMIT} full
+                                        cases with detailed AI feedback, no card needed.
+                                    </p>
+                                    <button
+                                        type="button"
+                                        onClick={() => openAuthModal()}
+                                        className="inline-flex items-center gap-2 bg-gradient-to-r from-violet-600 to-purple-600 text-white px-6 py-3 rounded-full font-bold text-sm hover:shadow-lg hover:shadow-violet-500/25 transition-all cursor-pointer"
+                                    >
+                                        Sign up to continue <ArrowRight size={16} />
+                                    </button>
+                                </div>
+                            ) : errorMessage && (
                                 <div className="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800/40 rounded-xl text-xs text-red-600 dark:text-red-400 flex items-center gap-2">
                                     <AlertTriangle size={15} className="shrink-0" />
                                     <span>{errorMessage}</span>
@@ -210,7 +246,7 @@ export function InteractiveMicroCase() {
                                 <button
                                     type="button"
                                     onClick={handleEvaluate}
-                                    disabled={isLoading}
+                                    disabled={isLoading || limitReached}
                                     className="w-full sm:w-auto px-8 py-3.5 bg-gradient-to-r from-violet-600 to-blue-600 text-white rounded-full font-black text-sm hover:shadow-lg hover:shadow-violet-500/25 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
                                     {isLoading ? (
@@ -308,6 +344,31 @@ export function InteractiveMicroCase() {
                                     </ul>
                                 </div>
                             </div>
+
+                            {/* Shown only to signed-out visitors, right after they have
+                                seen real feedback — the moment they are most convinced. */}
+                            {guestTriesLeft !== null && (
+                                <div className="p-5 bg-violet-50 dark:bg-violet-900/20 border border-violet-200 dark:border-violet-800/40 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-4">
+                                    <div className="text-center sm:text-left">
+                                        <p className="font-black text-gray-900 dark:text-white text-sm mb-0.5">
+                                            Want to keep practising?
+                                        </p>
+                                        <p className="text-xs text-gray-600 dark:text-gray-300">
+                                            Create a free account for {FREE_ATTEMPT_LIMIT} more cases.
+                                            {guestTriesLeft > 0 && (
+                                                <> You have {guestTriesLeft} free {guestTriesLeft === 1 ? 'try' : 'tries'} left today.</>
+                                            )}
+                                        </p>
+                                    </div>
+                                    <button
+                                        type="button"
+                                        onClick={() => openAuthModal()}
+                                        className="w-full sm:w-auto shrink-0 px-6 py-3 bg-gradient-to-r from-violet-600 to-purple-600 text-white rounded-full font-bold text-sm hover:shadow-lg hover:shadow-violet-500/25 transition-all flex items-center justify-center gap-2 cursor-pointer"
+                                    >
+                                        Create free account <ArrowRight size={16} />
+                                    </button>
+                                </div>
+                            )}
 
                             <div className="pt-2 flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-gray-100 dark:border-gray-800">
                                 <p className="text-xs text-gray-500 dark:text-gray-400 text-center sm:text-left">

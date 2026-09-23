@@ -7,6 +7,7 @@ import { getUser } from "@/lib/auth"
 import { sendContactFormNotification, sendSupportReply, sendAdminManualReply } from "@/lib/email"
 import { MAX_ANSWER_CHARS, MAX_MESSAGE_CHARS, MAX_NAME_CHARS, MAX_EMAIL_CHARS } from "@/lib/constants"
 import { canAttemptCategory, incrementCategoryAttempt } from "@/lib/subscription"
+import { getClientFingerprint, getGuestDemoUsage, recordGuestDemoUse, GUEST_DEMO_DAILY_LIMIT } from "@/lib/guest-quota"
 
 export async function submitAnswer(questionId: string, answer: string, elapsedTimeSeconds?: number, chatContext?: string) {
     const user = await getUser()
@@ -756,20 +757,56 @@ Tone: Storyteller. Line breaks for readability. Output ONLY the post content.`;
 }
 
 export async function evaluateMicroCase(questionTitle: string, answerText: string) {
+    // The homepage demo is a shop window: a signed-out visitor gets a few real
+    // evaluations per day so they can judge the product before being asked for
+    // anything. This used to return a bare "Unauthorized", which showed a raw
+    // error to someone who had just written out a full case answer.
     const user = await getUser();
-    if (!user) return { success: false, error: "Unauthorized" };
 
+    // Validate before spending anything, signed in or not.
     if (!answerText || answerText.trim().length < 10) {
         return { success: false, error: "Please provide an answer with at least 10 characters." };
     }
     if (answerText.length > MAX_ANSWER_CHARS) {
         return { success: false, error: "Answer is too long." };
     }
+
+    let fingerprint: string | null = null;
+
+    if (!user) {
+        fingerprint = await getClientFingerprint();
+        const used = await getGuestDemoUsage(fingerprint);
+
+        if (used >= GUEST_DEMO_DAILY_LIMIT) {
+            // A signal the UI turns into a sign-up prompt, never an error message.
+            return {
+                success: false,
+                limitReached: true,
+                isGuest: true,
+                remaining: 0,
+                error: "Free demo limit reached.",
+            };
+        }
+    }
+
     try {
         const aiResponse = await evaluateAnswer(questionTitle, answerText, 30);
-        return { success: true, aiResponse };
-    } catch (e: any) {
+
+        // Charged only on a real answer, so a failure never costs a free try.
+        if (fingerprint) {
+            await recordGuestDemoUse(fingerprint);
+            const used = await getGuestDemoUsage(fingerprint);
+            return {
+                success: true,
+                aiResponse,
+                isGuest: true,
+                remaining: Math.max(0, GUEST_DEMO_DAILY_LIMIT - used),
+            };
+        }
+
+        return { success: true, aiResponse, isGuest: false };
+    } catch (e: unknown) {
         console.error("[evaluateMicroCase] Error:", e);
-        return { success: false, error: e.message || "Evaluation failed" };
+        return { success: false, error: e instanceof Error ? e.message : "Evaluation failed" };
     }
 }

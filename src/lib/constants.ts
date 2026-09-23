@@ -2,6 +2,11 @@
 export const FREE_ATTEMPT_LIMIT = 5
 export const SUBSCRIPTION_PRICE = 199
 
+// Homepage live demo: how many AI evaluations a signed-out visitor gets per day,
+// counted per network address rather than per account. Enough to prove the
+// product works, small enough that scripting it is pointless.
+export const GUEST_DEMO_DAILY_LIMIT = 3
+
 // Input bounds. Prisma String maps to Postgres `text`, so the database imposes no
 // ceiling: unbounded free text is a DoS vector and, for anything reaching an AI
 // prompt, a direct cost-abuse vector. Enforce these server-side, never in the UI only.
