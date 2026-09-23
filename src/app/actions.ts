@@ -792,6 +792,13 @@ export async function evaluateMicroCase(questionTitle: string, answerText: strin
     try {
         const aiResponse = await evaluateAnswer(questionTitle, answerText, 30);
 
+        // A mock result means no provider answered. Surfacing it would show
+        // fabricated feedback as if it were real, so treat it as a failure —
+        // and do not spend one of the visitor's free tries on it.
+        if (aiResponse.isMock) {
+            return { success: false, error: "The AI evaluator is busy right now. Please try again in a moment." };
+        }
+
         // Charged only on a real answer, so a failure never costs a free try.
         if (fingerprint) {
             await recordGuestDemoUse(fingerprint);

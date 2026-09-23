@@ -122,7 +122,7 @@ export async function evaluateAnswer(questionTitle: string, userAnswer: string, 
             }
 
             if (geminiSuccess && text) {
-                return processAIResult(text);
+                return enforceScoringRules(processAIResult(text), questionTitle, userAnswer);
             }
         } catch (error: any) {
             lastErrorMessage = error.message;
@@ -163,7 +163,7 @@ export async function evaluateAnswer(questionTitle: string, userAnswer: string, 
             if (text) {
                 const responseTime = Date.now() - startTime;
                 await logApiUsage('groq', 'llama-3.3-70b', 'success', responseTime);
-                return processAIResult(text);
+                return enforceScoringRules(processAIResult(text), questionTitle, userAnswer);
             }
         } catch (error: any) {
             lastErrorMessage = error.message;
@@ -177,6 +177,73 @@ export async function evaluateAnswer(questionTitle: string, userAnswer: string, 
         feedback: `Note: Live evaluation failed. Error: ${lastErrorMessage}`,
         isMock: true
     };
+}
+
+const SCORE_KEYS = [
+    'comprehend_goal', 'identify_users', 'report_needs',
+    'cut_prioritization', 'list_solutions', 'evaluate_tradeoffs',
+] as const
+
+function words(s: string): string[] {
+    return (s || '').toLowerCase().match(/[a-z0-9']+/g) || []
+}
+
+/**
+ * Deterministic backstop for the scoring rules in PRODUCT_SENSE_PROMPT.
+ *
+ * The prompt asks the model to triage non-answers and vague answers, but a model
+ * will not obey reliably: pasting the question back as the answer was scoring 4/5
+ * with invented praise. These rules are enforced in code so the score cannot be
+ * flattering when the submission does not deserve it.
+ */
+function enforceScoringRules(
+    result: AIEvaluationResponse,
+    questionTitle: string,
+    userAnswer: string
+): AIEvaluationResponse {
+    const scores = { ...result.scores }
+
+    // 1. Force every dimension into the documented 0-5 integer range. Models
+    //    intermittently answer on a 0-10 scale, which the UI then rendered as
+    //    "8 out of 10".
+    for (const k of SCORE_KEYS) {
+        const v = Number(scores[k])
+        scores[k] = Number.isFinite(v) ? Math.max(0, Math.min(5, Math.round(v))) : 0
+    }
+
+    // 2. "overall" is the average of the dimensions, never an independent
+    //    impression. This also corrects a 0-10 overall attached to 0-5 parts.
+    const avg = SCORE_KEYS.reduce((sum, k) => sum + scores[k], 0) / SCORE_KEYS.length
+    scores.overall = Math.max(0, Math.min(5, Math.round(avg)))
+
+    const answerWords = words(userAnswer)
+    const titleWords = new Set(words(questionTitle))
+
+    // 3. Non-answer detection that does not depend on the model's judgement:
+    //    too short to contain reasoning, or mostly the question echoed back.
+    const shared = answerWords.filter(w => titleWords.has(w)).length
+    const echoRatio = answerWords.length ? shared / answerWords.length : 0
+    const isNonAnswer =
+        answerWords.length < 25 ||
+        (echoRatio > 0.6 && answerWords.length < 120)
+
+    let strengths = Array.isArray(result.strengths) ? result.strengths : []
+
+    if (isNonAnswer) {
+        for (const k of SCORE_KEYS) scores[k] = Math.min(scores[k], 1)
+        scores.overall = Math.min(scores.overall, 1)
+    }
+
+    // 4. Praise has to be earned. A weak submission returns no strengths at all
+    //    rather than generic compliments.
+    if (scores.overall <= 2) strengths = []
+
+    return {
+        ...result,
+        scores,
+        strengths: strengths.slice(0, 4),
+        weaknesses: Array.isArray(result.weaknesses) ? result.weaknesses : [],
+    }
 }
 
 function processAIResult(text: string): AIEvaluationResponse {
@@ -210,29 +277,40 @@ function processAIResult(text: string): AIEvaluationResponse {
     return { ...cleanupResponse(jsonData), isMock: false };
 }
 
+/**
+ * Returned only when no evaluation could be produced: no API keys, or every
+ * provider failed.
+ *
+ * This used to return a flattering canned result - overall 4/5 with strengths
+ * "Excellent user identification" and "Structured solution exploration" - which
+ * the UI rendered as a genuine 8/10. A submission that was never evaluated was
+ * being praised. Scores are now zero and no strengths are claimed, so a failure
+ * cannot be mistaken for a pass. Callers should check `isMock` and show an error
+ * rather than presenting this as feedback.
+ */
 function getMockResponse(): AIEvaluationResponse {
     return {
         scores: {
-            comprehend_goal: 4,
-            identify_users: 5,
-            report_needs: 3,
-            cut_prioritization: 4,
-            list_solutions: 5,
-            evaluate_tradeoffs: 3,
-            overall: 4
+            comprehend_goal: 0,
+            identify_users: 0,
+            report_needs: 0,
+            cut_prioritization: 0,
+            list_solutions: 0,
+            evaluate_tradeoffs: 0,
+            overall: 0
         },
         detailed_analysis: {
-            comprehend_goal: "You clearly defined the problem and identified the key objective. Success metrics were well-aligned with the goal.",
-            identify_users: "Excellent segmentation. You covered both primary and secondary personas with clear motivations.",
-            report_needs: "You identified some functional needs but could have delved deeper into the emotional pain points.",
-            cut_prioritization: "Good reasoning for focusing on safety first. However, a clearer framework for trade-offs here would help.",
-            list_solutions: "Creative range of solutions, from haptic feedback to bone conduction. Good variety.",
-            evaluate_tradeoffs: "Trade-offs were mentioned but lacked a deep dive into technical feasibility vs. cost."
+            comprehend_goal: "Not evaluated.",
+            identify_users: "Not evaluated.",
+            report_needs: "Not evaluated.",
+            cut_prioritization: "Not evaluated.",
+            list_solutions: "Not evaluated.",
+            evaluate_tradeoffs: "Not evaluated."
         },
-        strengths: ["Excellent user identification", "Structured solution exploration"],
-        weaknesses: ["Trade-off analysis was a bit shallow", "Prioritization could be more data-driven"],
-        feedback: "Great application of the CIRCLES framework. Section-wise scores reflect strong structure.",
-        improved_example: "To improve the trade-offs section, consider using a matrix for impact vs. effort...",
+        strengths: [],
+        weaknesses: [],
+        feedback: "Your answer could not be evaluated because the AI service did not respond. Nothing here reflects the quality of your answer. Please try again in a moment.",
+        improved_example: "",
         isMock: true
     };
 }

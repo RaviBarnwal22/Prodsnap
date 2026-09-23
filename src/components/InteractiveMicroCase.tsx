@@ -310,17 +310,20 @@ export function InteractiveMicroCase() {
                                         <CheckCircle2 size={15} /> Strengths
                                     </div>
                                     <ul className="space-y-1.5 text-xs text-gray-700 dark:text-gray-300 leading-relaxed">
-                                        {evaluationResult.strengths?.slice(0, 3).map((s, idx) => (
-                                            <li key={idx} className="flex items-start gap-1.5">
-                                                <span className="text-emerald-500 font-bold">•</span>
-                                                <span>{s}</span>
+                                        {/* No invented praise. These lists used to fall back to
+                                            hardcoded compliments, so a weak answer was told it had
+                                            "clear user segmentation" it never wrote. */}
+                                        {evaluationResult.strengths?.length ? (
+                                            evaluationResult.strengths.slice(0, 3).map((s, idx) => (
+                                                <li key={idx} className="flex items-start gap-1.5">
+                                                    <span className="text-emerald-500 font-bold">•</span>
+                                                    <span>{s}</span>
+                                                </li>
+                                            ))
+                                        ) : (
+                                            <li className="text-gray-500 dark:text-gray-400 italic">
+                                                Nothing stood out yet. Work through the weaknesses below and try again.
                                             </li>
-                                        )) || (
-                                            <>
-                                                <li>• Clear user segmentation focused on first-time drop-offs</li>
-                                                <li>• Actionable solution targeting choice paralysis</li>
-                                                <li>• Measurable North Star retention metric</li>
-                                            </>
                                         )}
                                     </ul>
                                 </div>
@@ -330,16 +333,17 @@ export function InteractiveMicroCase() {
                                         <Target size={15} /> Growth Opportunities
                                     </div>
                                     <ul className="space-y-1.5 text-xs text-gray-700 dark:text-gray-300 leading-relaxed">
-                                        {evaluationResult.weaknesses?.slice(0, 3).map((w, idx) => (
-                                            <li key={idx} className="flex items-start gap-1.5">
-                                                <span className="text-amber-500 font-bold">•</span>
-                                                <span>{w}</span>
+                                        {evaluationResult.weaknesses?.length ? (
+                                            evaluationResult.weaknesses.slice(0, 3).map((w, idx) => (
+                                                <li key={idx} className="flex items-start gap-1.5">
+                                                    <span className="text-amber-500 font-bold">•</span>
+                                                    <span>{w}</span>
+                                                </li>
+                                            ))
+                                        ) : (
+                                            <li className="text-gray-500 dark:text-gray-400 italic">
+                                                No specific gaps flagged.
                                             </li>
-                                        )) || (
-                                            <>
-                                                <li>• Could explore merchant / restaurant kitchen bandwidth trade-offs</li>
-                                                <li>• Consider secondary guardrail metrics (e.g. food quality complaints)</li>
-                                            </>
                                         )}
                                     </ul>
                                 </div>

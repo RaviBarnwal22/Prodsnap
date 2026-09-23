@@ -18,9 +18,23 @@ ${clarificationInfo}
 
 **Task**:
 1. **Framework Analysis**: Identify the most effective framework for this specific case (e.g., CIRCLES for design, BUS for strategy, HEART for metrics). 
-2. **Quality & Depth Evaluation**: Analyze the structure, user empathy, strategic clarity, and solution rigor in the candidate's answer. If the candidate submitted an empty, gibberish, or irrelevant answer, award 0-1 points across all dimensions.
-3. **Comprehensive Scoring**: Rate the candidate on a scale of 0-5 across the 6 core dimensions (0 = completely missing/empty, 5 = world-class).
-4. **Gold Standard Solution**: Provide a detailed, industry-standard "Perfect Answer" that would get a "Strong Hire" rating.
+2. **Triage FIRST (do this before anything else)**: Decide which of these three the submission is. This decision overrides every other instruction.
+
+   **NON-ANSWER** if ANY of the following is true:
+   the answer is empty or near-empty; it is gibberish or random characters; it restates, paraphrases or copies the case question back instead of answering it; it is about a different topic; it asks you to write the answer; it is a placeholder such as "test", "asdf" or "I don't know"; or it contains no reasoning of the candidate's own.
+   Then: every dimension scores 0 or 1, "overall" is 0 or 1, and "strengths" MUST be an empty array [].
+
+   **VAGUE** if the answer is on topic but generic: it names no specific user segment, proposes no concrete solution, cites no metric, gives no prioritisation reasoning, and discusses no trade-off. Generic PM vocabulary ("I would use a framework", "focus on the user", "look at the data") without applying it to THIS case is vague.
+   Then: no dimension may exceed 3, "overall" must not exceed 3, and "strengths" MUST be an empty array [].
+
+   **GENUINE ATTEMPT** only if the candidate has done real reasoning specific to this case. Score normally.
+
+3. **Comprehensive Scoring**: Rate 0-5 on each of the 6 dimensions. 0 = absent, 1 = non-answer, 2 = named but not developed, 3 = partially developed, 4 = solid and specific, 5 = world-class. "overall" is the rounded average of the six dimension scores. Never award an "overall" that the six dimensions do not support, and never use a 0-10 scale.
+
+4. **Evidence rule for strengths**: A strength may only describe something the candidate ACTUALLY wrote, and must point at the specific thing they said. Never praise an ability the answer does not demonstrate. If nothing genuinely merits praise, return an empty array. An empty "strengths" array is a correct and expected answer for a weak submission. Never pad it to reach a certain number of items.
+
+5. **Weaknesses must be concrete**: say what is missing and what the candidate should have done instead, referring to this case.
+6. **Gold Standard Solution**: Provide a detailed, industry-standard "Perfect Answer" that would get a "Strong Hire" rating. Always provide this, including for a non-answer, since it is what the candidate should learn from.
 
 **Dimensions for Scoring**:
 - **comprehend_goal**: Quality of clarifying questions asked in the Interviewer Hub and alignment with the core problem statement.
@@ -56,9 +70,9 @@ ${clarificationInfo}
     "list_solutions": "Analysis...",
     "evaluate_tradeoffs": "Analysis..."
   },
-  "strengths": ["string", "string"],
+  "strengths": [],
   "weaknesses": ["string", "string"],
-  "feedback": "Framework: [Name]. Logic for pass/fail. Be insightful but direct.",
+  "feedback": "Framework: [Name]. Logic for pass/fail. Be insightful but direct. If this is a NON-ANSWER or VAGUE submission, say so plainly in the first sentence and explain what an answer needed to contain.",
   "improved_example": "A high-quality, comprehensive 'Gold Standard Solution' (400-500 words). Walk through the perfect path step-by-step. IMPORTANT: Do NOT use symbols like dashes (-), asterisks (*), or bullets. Instead, use clear, structured paragraphs with bold headers for each section. Ensure it is professional, deep, and reads like a cohesive expert strategy."
 }
 `;
