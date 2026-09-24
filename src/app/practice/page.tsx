@@ -317,6 +317,11 @@ export default async function PracticePage({
                                 </h1>
                                 <p className="text-lg text-gray-500 dark:text-gray-400 leading-relaxed max-w-xl">
                                     Pick a focus area. Each track contains hand-picked cases to test specific PM skills.
+                                    The newest one covers product work built on models, and there is a written{" "}
+                                    <Link href="/ai-product-management" className="text-violet-600 dark:text-violet-400 font-semibold underline decoration-violet-300 underline-offset-2 hover:decoration-violet-600">
+                                        guide to AI product management
+                                    </Link>{" "}
+                                    to read alongside it.
                                 </p>
                             </div>
 

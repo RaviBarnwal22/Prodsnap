@@ -112,7 +112,7 @@ export const SEOContentData: Record<string, Record<string, SEOContentPage>> = {
           answer: "No. While technical acumen is highly valuable for communicating with engineers, successful PMs come from diverse backgrounds including business, marketing, design, analytics, and humanities."
         }
       ],
-      relatedSlugs: ["product-manager-roadmap", "product-strategy", "product-discovery"]
+      relatedSlugs: ["product-manager-roadmap", "product-strategy", "product-discovery", "ai-product-management/ai-pm-vs-traditional-pm"]
     },
     "product-manager-roadmap": {
       slug: "product-manager-roadmap",
@@ -521,7 +521,7 @@ export const SEOContentData: Record<string, Record<string, SEOContentPage>> = {
           answer: "No. Revenue is a lagging indicator. The NSM should focus on value delivery (a leading indicator), which subsequently drives revenue growth naturally."
         }
       ],
-      relatedSlugs: ["product-metrics"]
+      relatedSlugs: ["product-metrics", "ai-product-management/llm-evaluation-for-product-managers"]
     }
   },
   "product-management-interview": {
@@ -543,7 +543,7 @@ export const SEOContentData: Record<string, Record<string, SEOContentPage>> = {
           answer: "In a real interview, you should aim to run through a complete product design case in 30 to 45 minutes, spending about 10-15 minutes on user identification and brainstorming."
         }
       ],
-      relatedSlugs: ["product-strategy", "product-execution"]
+      relatedSlugs: ["product-strategy", "product-execution", "ai-product-management/ai-product-manager-interview-questions"]
     },
     "product-strategy": {
       slug: "product-strategy",
@@ -801,7 +801,7 @@ export const SEOContentData: Record<string, Record<string, SEOContentPage>> = {
           answer: "Tools like Jira Product Discovery, Productboard, and ProductPlan are industry standards. For early-stage startups, a clean Notion page or Google Sheet is sufficient."
         }
       ],
-      relatedSlugs: ["product-requirements-document", "user-stories", "product-discovery"]
+      relatedSlugs: ["product-requirements-document", "user-stories", "product-discovery", "ai-product-management/ai-product-roadmap-template"]
     },
     "user-stories": {
       slug: "user-stories",
