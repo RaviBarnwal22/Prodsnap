@@ -1,3 +1,19 @@
+// Cases in the AI_PRODUCT category are judged against the same six dimensions,
+// but "good" means something different: an answer that never mentions evaluation,
+// failure modes or the cost of being wrong is not a strong AI product answer even
+// when the general product reasoning is sound. Without this the evaluator scores
+// an AI case exactly like a consumer design case and rewards the wrong things.
+const AI_PRODUCT_LENS = `
+**Domain Lens (AI / ML product case)**: This case is about building a product on top of a model whose output is probabilistic. Apply the six dimensions with these expectations, and treat their absence as a real gap rather than a stylistic omission:
+Comprehend the goal: did the candidate establish what an acceptable error rate is, and who absorbs the cost when the model is wrong?
+Identify users: did they distinguish users by tolerance for error and by their ability to verify the output themselves? An expert reviewing a draft and a novice trusting an answer are different segments.
+Report needs: is the pain point one that a probabilistic system can actually serve, or are they applying AI to a problem that wants a deterministic answer?
+Cut and prioritise: did they reason about prompt versus retrieval versus fine-tuning versus a non-AI baseline, and about latency, cost and quality as competing constraints?
+List solutions: did they consider human in the loop design, guardrails, fallbacks when confidence is low, and how the product degrades rather than fails?
+Evaluate trade-offs: did they describe how the feature would be evaluated at all, offline and in production, what a regression after a model upgrade would look like, and what harm a confident wrong answer causes?
+Do NOT require the candidate to use this exact vocabulary. Reward the reasoning wherever it appears, in their own words.
+`;
+
 export const PRODUCT_SENSE_PROMPT = (
   questionTitle: string,
   userAnswer: string,
@@ -6,8 +22,10 @@ export const PRODUCT_SENSE_PROMPT = (
   // The 400-500 word gold standard answer is the bulk of the generated tokens and
   // therefore the bulk of the latency. The homepage demo never renders it, so it
   // is skipped there; the full practice flow, which does show it, keeps it.
-  includeGoldStandard: boolean = true
+  includeGoldStandard: boolean = true,
+  category?: string
 ) => {
+  const domainLens = category === 'AI_PRODUCT' ? AI_PRODUCT_LENS : '';
   const timeInfo = elapsedTimeSeconds
     ? `\n**Time Taken**: ${Math.floor(elapsedTimeSeconds / 60)} minutes ${elapsedTimeSeconds % 60} seconds`
     : 'Not measured';
@@ -52,8 +70,8 @@ ${includeGoldStandard ? `6. **Gold Standard Solution**: Provide a detailed, indu
 - **cut_prioritization**: Rigorous logic and decision-making framework for selecting solutions.
 - **list_solutions**: Creativity, feasibility, and variety of proposed ideas.
 - **evaluate_tradeoffs**: Understanding of risks, second-order effects, and counter-metrics.
-
-**Constraint**: 
+${domainLens}
+**Constraint**:
 1. **No Symbols**: NEVER use dashes (-), asterisks (*), or bullet points (•) for lists or formatting. 
 2. **Structure**: Use double paragraph breaks and clear, bold headers (using capitalized words) to separate sections. 
 3. **Professionalism**: Ensure every sentence is a complete, well-formed thought. Avoid fragments or 'note-taking' style.

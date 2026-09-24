@@ -54,7 +54,8 @@ export async function submitAnswer(questionId: string, answer: string, elapsedTi
     try {
         console.log(`[submitAnswer] Calling AI Engine...`);
         // Practice cases use Gemini (includes gold standard, ~18s) not Groq (demo only).
-        aiResponse = await evaluateAnswer(question.title, answer, elapsedTimeSeconds, chatContext, true, 'gemini')
+        // Category is passed so AI_PRODUCT cases are judged against the AI domain lens.
+        aiResponse = await evaluateAnswer(question.title, answer, elapsedTimeSeconds, chatContext, true, 'gemini', question.category)
         console.log(`[submitAnswer] AI Engine success`);
     } catch (error) {
         console.error("[submitAnswer] AI Error", error)

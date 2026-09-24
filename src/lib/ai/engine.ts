@@ -82,7 +82,8 @@ export async function evaluateAnswer(
     elapsedTimeSeconds?: number,
     chatContext?: string,
     includeGoldStandard: boolean = true,
-    preferredProvider: 'groq' | 'gemini' = 'gemini'
+    preferredProvider: 'groq' | 'gemini' = 'gemini',
+    category?: string
 ): Promise<AIEvaluationResponse> {
     const { gemini: geminiKeys, groq: groqKeys } = getApiKeys();
     console.log(`[AI Engine] Gemini keys: ${geminiKeys.length}, Groq keys: ${groqKeys.length}, Preferred: ${preferredProvider}`);
@@ -92,7 +93,7 @@ export async function evaluateAnswer(
         return getMockResponse();
     }
 
-    const prompt = PRODUCT_SENSE_PROMPT(questionTitle, userAnswer, elapsedTimeSeconds, chatContext, includeGoldStandard);
+    const prompt = PRODUCT_SENSE_PROMPT(questionTitle, userAnswer, elapsedTimeSeconds, chatContext, includeGoldStandard, category);
     let lastErrorMessage = "Unknown error";
 
     // Reorder providers based on preference: try preferred first, then fallback

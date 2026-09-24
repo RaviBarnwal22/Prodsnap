@@ -7,7 +7,7 @@ const baseUrl = "https://prodsnap.in";
 // still told Google the entire site had changed. That devalues the signal.
 // Content-bearing routes now carry the date their content last actually moved
 // — bump CONTENT_LAST_MODIFIED when the SEO content or page copy changes.
-const CONTENT_LAST_MODIFIED = new Date("2026-09-22");
+const CONTENT_LAST_MODIFIED = new Date("2026-09-23");
 
 export default function sitemap(): MetadataRoute.Sitemap {
   // Routes whose content genuinely changes often.
@@ -21,6 +21,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   // Stable marketing / conversion routes.
   const staticRoutes: MetadataRoute.Sitemap = [
     { url: `${baseUrl}/mentorship`, changeFrequency: "monthly" as const, priority: 0.9 },
+    { url: `${baseUrl}/how-it-works`, changeFrequency: "monthly" as const, priority: 0.8 },
     { url: `${baseUrl}/about`, changeFrequency: "monthly" as const, priority: 0.6 },
     { url: `${baseUrl}/community`, changeFrequency: "monthly" as const, priority: 0.6 },
     { url: `${baseUrl}/exam`, changeFrequency: "monthly" as const, priority: 0.7 },
@@ -37,6 +38,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     "/product-analytics",
     "/templates",
     "/glossary",
+    "/ai-product-management",
   ].map((route) => ({
     url: `${baseUrl}${route}`,
     lastModified: CONTENT_LAST_MODIFIED,

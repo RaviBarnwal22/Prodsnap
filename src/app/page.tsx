@@ -10,7 +10,7 @@ import Link from "next/link"
 import Image from "next/image"
 import { Header } from "@/components/Header"
 import { Footer } from "@/components/Footer"
-import { ArrowRight, Users, Sparkles, BookOpen, Zap } from "lucide-react"
+import { ArrowRight, Sparkles, MessageSquare, Trophy, Zap } from "lucide-react"
 import { InteractiveMicroCase } from "@/components/InteractiveMicroCase"
 import { HomeFAQ } from "@/components/HomeFAQ"
 
@@ -49,11 +49,11 @@ export default function Home() {
               {/* Left Side - Text Content */}
               <div className="text-center lg:text-left">
                 <h1 className="text-4xl md:text-6xl lg:text-7xl font-black tracking-tight mb-8 text-gray-900 dark:text-white leading-[1.1]">
-                  Master Product Management <br className="hidden md:block" />
-                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-600 via-blue-600 to-cyan-500">With AI-Guided Precision</span>
+                  Practice PM cases with an <br className="hidden md:block" />
+                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-600 via-blue-600 to-cyan-500">AI interviewer that scores you</span>
                 </h1>
                 <p className="text-lg md:text-xl text-gray-600 dark:text-gray-300 max-w-xl mb-10 leading-relaxed font-medium lg:mx-0 mx-auto">
-                  The only platform that evaluates your product sensing questions using adaptive case frameworks and instant AI-powered feedback.
+                  Pick a case, answer it, and get a six-dimension scorecard with a model answer in seconds. Over 200 cases across 10 PM skills, including product management for AI.
                 </p>
                 <div className="flex flex-col sm:flex-row justify-center lg:justify-start gap-4">
                   <a href="#playground" className="bg-gradient-to-r from-violet-600 to-blue-600 text-white px-8 py-4 rounded-full font-black text-lg hover:shadow-xl hover:shadow-violet-500/30 transition-all flex items-center justify-center gap-2 group cursor-pointer">
@@ -118,9 +118,11 @@ export default function Home() {
                   </div>
 
                   {/* Stats card */}
+                  {/* Describes the product, not an outcome. The previous "95% Success
+                      Rate" had no data behind it and could not be substantiated. */}
                   <div className="absolute -left-4 bottom-8 bg-gradient-to-r from-violet-600 to-blue-600 text-white p-4 rounded-2xl shadow-xl animate-float" style={{ animationDelay: '2s' }}>
-                    <p className="text-3xl font-black">95%</p>
-                    <p className="text-sm opacity-80">Success Rate</p>
+                    <p className="text-3xl font-black">6</p>
+                    <p className="text-sm opacity-80">Scored Dimensions</p>
                   </div>
                 </div>
               </div>
@@ -165,35 +167,35 @@ export default function Home() {
         {/* Core Pillars */}
         <section className="py-24 px-4 container mx-auto border-b border-gray-100 dark:border-gray-800">
           <div className="text-center mb-16">
-            <h2 className="text-xs uppercase tracking-[0.3em] font-black text-violet-600 mb-4">The Ecosystem</h2>
-            <h3 className="text-4xl font-black tracking-tight">Everything you need to <span className="italic text-transparent bg-clip-text bg-gradient-to-r from-violet-600 to-blue-600">scale</span>.</h3>
+            <h2 className="text-xs uppercase tracking-[0.3em] font-black text-violet-600 mb-4">The Platform</h2>
+            <h3 className="text-4xl font-black tracking-tight">The AI interviewer for the next generation of PMs, <span className="italic text-transparent bg-clip-text bg-gradient-to-r from-violet-600 to-blue-600">including the ones building AI</span>.</h3>
           </div>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
             <div className="group bg-gradient-to-br from-violet-50 to-white dark:from-gray-900 dark:to-gray-900 p-8 rounded-3xl border border-violet-100 dark:border-gray-800 hover:shadow-xl hover:shadow-violet-500/10 transition-all">
               <div className="bg-gradient-to-br from-violet-500 to-purple-600 text-white w-16 h-16 flex items-center justify-center rounded-2xl mb-6 group-hover:scale-110 transition-transform shadow-lg">
                 <Sparkles size={32} />
               </div>
-              <h3 className="text-2xl font-bold mb-4">Practice Engine</h3>
-              <p className="text-gray-500 dark:text-gray-400 leading-relaxed font-medium mb-4">Real-time feedback on your verbal and written answers using industry-standard frameworks.</p>
-              <Link href="/practice" className="inline-flex items-center gap-2 text-violet-600 font-bold hover:underline group-hover:gap-3 transition-all">Launch engine <ArrowRight size={16} /></Link>
+              <h3 className="text-2xl font-bold mb-4">AI Evaluation</h3>
+              <p className="text-gray-500 dark:text-gray-400 leading-relaxed font-medium mb-4">Every answer is scored on six dimensions, from goal comprehension to trade-off reasoning, with concrete gaps and a model answer.</p>
+              <Link href="/how-it-works" className="inline-flex items-center gap-2 text-violet-600 font-bold hover:underline group-hover:gap-3 transition-all">See how scoring works <ArrowRight size={16} /></Link>
             </div>
 
             <div className="group bg-gradient-to-br from-blue-50 to-white dark:from-gray-900 dark:to-gray-900 p-8 rounded-3xl border border-blue-100 dark:border-gray-800 hover:shadow-xl hover:shadow-blue-500/10 transition-all">
               <div className="bg-gradient-to-br from-blue-500 to-cyan-600 text-white w-16 h-16 flex items-center justify-center rounded-2xl mb-6 group-hover:scale-110 transition-transform shadow-lg">
-                <BookOpen size={32} />
+                <MessageSquare size={32} />
               </div>
-              <h3 className="text-2xl font-bold mb-4">Knowledge & Blogs</h3>
-              <p className="text-gray-500 dark:text-gray-400 leading-relaxed font-medium mb-4">Explore insightful articles, PM frameworks, and interview guides curated by industry experts.</p>
-              <Link href="/blog" className="inline-flex items-center gap-2 text-blue-600 font-bold hover:underline group-hover:gap-3 transition-all">Read blogs <ArrowRight size={16} /></Link>
+              <h3 className="text-2xl font-bold mb-4">AI Interviewer</h3>
+              <p className="text-gray-500 dark:text-gray-400 leading-relaxed font-medium mb-4">Ask clarifying questions mid-case and get answers in character, the way a real interviewer would push back. Then sit the timed qualification test.</p>
+              <Link href="/exam" className="inline-flex items-center gap-2 text-blue-600 font-bold hover:underline group-hover:gap-3 transition-all">Take the test <ArrowRight size={16} /></Link>
             </div>
 
             <div className="group bg-gradient-to-br from-emerald-50 to-white dark:from-gray-900 dark:to-gray-900 p-8 rounded-3xl border border-emerald-100 dark:border-gray-800 hover:shadow-xl hover:shadow-emerald-500/10 transition-all">
               <div className="bg-gradient-to-br from-emerald-500 to-green-600 text-white w-16 h-16 flex items-center justify-center rounded-2xl mb-6 group-hover:scale-110 transition-transform shadow-lg">
-                <Users size={32} />
+                <Trophy size={32} />
               </div>
-              <h3 className="text-2xl font-bold mb-4">Community</h3>
-              <p className="text-gray-500 dark:text-gray-400 leading-relaxed font-medium mb-4">Join our WhatsApp community for PM openings, exclusive materials, peer learning, and expert guidance.</p>
-              <Link href="/community" className="inline-flex items-center gap-2 text-emerald-600 font-bold hover:underline group-hover:gap-3 transition-all">Join community <ArrowRight size={16} /></Link>
+              <h3 className="text-2xl font-bold mb-4">Daily Product Puzzles</h3>
+              <p className="text-gray-500 dark:text-gray-400 leading-relaxed font-medium mb-4">One bite-sized product challenge every day. Build intuition in a few minutes and keep your streak alive.</p>
+              <Link href="/prodsense" className="inline-flex items-center gap-2 text-emerald-600 font-bold hover:underline group-hover:gap-3 transition-all">Today&apos;s puzzle <ArrowRight size={16} /></Link>
             </div>
           </div>
         </section>

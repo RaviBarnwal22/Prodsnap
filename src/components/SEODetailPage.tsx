@@ -11,6 +11,64 @@ interface SEODetailPageProps {
   categorySlug: string;
 }
 
+/**
+ * These pages are guides, glossary entries and templates, not cases. The CTA
+ * used to tell every one of them "practice this case with real-time feedback",
+ * which made no sense on an article the reader cannot practise. Each pillar now
+ * states the actual gap between reading the page and being scored on a case.
+ */
+const PRACTICE_CTA: Record<string, { tag: string; heading: string; body: string; action: string; href: string }> = {
+  frameworks: {
+    tag: "Framework Practice Drills",
+    heading: "Want to practice applying these frameworks to real cases?",
+    body: "Frameworks only create value when applied to ambiguous, real-world product dilemmas. Put this methodology to work across realistic case studies with instant AI rubric evaluation.",
+    action: "Practice case drills",
+    href: "/practice",
+  },
+  "product-analytics": {
+    tag: "Metrics Practice",
+    heading: "Want to practice defining metrics on a real product?",
+    body: "Reading about North Star metrics is the easy part. Choosing one under ambiguity, and naming the counter-metric you would watch alongside it, is what interviews actually test. Try it on a live case and get scored.",
+    action: "Try a metrics case",
+    href: "/practice?category=METRICS",
+  },
+  glossary: {
+    tag: "See It In Context",
+    heading: "Want to see this concept inside a real interview case?",
+    body: "A definition tells you what a term means. A case tells you when to reach for it and what it costs you. Work through a scenario where this idea decides the answer, and get scored on how you apply it.",
+    action: "Browse the case library",
+    href: "/practice",
+  },
+  templates: {
+    tag: "Practice The Decisions",
+    heading: "Want to practice the thinking behind this document?",
+    body: "A template gives you the structure. Interviews test the judgment that fills it in: what you cut, what you measure, and which trade-off you are willing to defend. Work a real case and get scored on that reasoning.",
+    action: "Practice a case",
+    href: "/practice",
+  },
+  "product-management-interview": {
+    tag: "Interactive AI Case Coach",
+    heading: "Ready to try this on a real interview case?",
+    body: "You have seen the structure. The gap most candidates never close is applying it under time pressure without a worked answer in front of them. Submit your own and get scored the way an interviewer would.",
+    action: "Practice live now",
+    href: "/practice",
+  },
+  "ai-product-management": {
+    tag: "AI Product Cases",
+    heading: "Want to practice this on a real AI product case?",
+    body: "AI product questions reward specifics: how you would evaluate the feature, what error rate you would ship at, and what breaks after a model upgrade. Work a case and get scored against exactly that bar.",
+    action: "Try an AI product case",
+    href: "/practice?category=AI_PRODUCT",
+  },
+  "product-management": {
+    tag: "Interactive AI Case Coach",
+    heading: "Want to put this into practice?",
+    body: "Reading about the craft builds vocabulary. Interviews test judgment under ambiguity. Work through a real product case and get scored on six dimensions, with a model answer to compare yours against.",
+    action: "Try a live case",
+    href: "/practice",
+  },
+}
+
 export function SEODetailPage({ pageData, pillarId, categorySlug }: SEODetailPageProps) {
   const pillar = SEOPillars[pillarId];
 
@@ -138,9 +196,13 @@ export function SEODetailPage({ pageData, pillarId, categorySlug }: SEODetailPag
                 </section>
               ))}
 
-              {/* In-article Interactive Practice CTA Banner */}
+              {/* In-article practice CTA, worded per pillar. See PRACTICE_CTA. */}
               {(() => {
-                const isFramework = pillarId === "frameworks" || pageData.category?.toLowerCase().includes("framework") || pillarId === "product-analytics" || pillarId === "glossary" || pillarId === "templates";
+                const cta =
+                  PRACTICE_CTA[pillarId] ??
+                  (pageData.category?.toLowerCase().includes("framework")
+                    ? PRACTICE_CTA["frameworks"]
+                    : PRACTICE_CTA["product-management"]);
 
                 return (
                   <div className="p-6 md:p-8 rounded-3xl bg-gradient-to-br from-violet-900 via-indigo-900 to-gray-950 text-white border border-violet-500/20 shadow-xl">
@@ -148,24 +210,16 @@ export function SEODetailPage({ pageData, pillarId, categorySlug }: SEODetailPag
                       <div className="space-y-2">
                         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold bg-violet-500/20 text-violet-300 border border-violet-400/30">
                           <Sparkles size={13} />
-                          {isFramework ? "Framework Practice Drills" : "Interactive AI Case Coach"}
+                          {cta.tag}
                         </div>
-                        <h3 className="text-xl md:text-2xl font-black">
-                          {isFramework
-                            ? "Want to practice applying these frameworks to real cases?"
-                            : "Want to practice this case with real-time feedback?"}
-                        </h3>
-                        <p className="text-sm text-violet-200/80 max-w-xl leading-relaxed">
-                          {isFramework
-                            ? "Frameworks only create value when applied to ambiguous, real-world product dilemmas. Put this methodology to work across realistic case studies with instant AI rubric evaluation."
-                            : "Stop just reading solutions. Submit your clarifying questions, user persona breakdown, and metrics directly to our AI coach to receive instant rubric scoring and personalized critique."}
-                        </p>
+                        <h3 className="text-xl md:text-2xl font-black">{cta.heading}</h3>
+                        <p className="text-sm text-violet-200/80 max-w-xl leading-relaxed">{cta.body}</p>
                       </div>
                       <Link
-                        href={pageData.practiceUrl || (isFramework ? "/practice?category=GROWTH_RETENTION" : "/practice")}
+                        href={pageData.practiceUrl || cta.href}
                         className="shrink-0 px-6 py-3.5 bg-white text-violet-900 hover:bg-violet-50 font-black rounded-xl text-sm transition-all shadow-lg hover:shadow-violet-500/20 flex items-center justify-center gap-2"
                       >
-                        {isFramework ? "Practice Case Drills" : "Practice Live Now"} <ArrowRight size={16} />
+                        {cta.action} <ArrowRight size={16} />
                       </Link>
                     </div>
                   </div>
@@ -254,15 +308,25 @@ export function SEODetailPage({ pageData, pillarId, categorySlug }: SEODetailPag
                   </h4>
                   <ul className="space-y-3">
                     {pageData.relatedSlugs.map((relSlug, idx) => {
+                      // A related entry may be a bare slug (same pillar) or a
+                      // "pillar/slug" path for cross-pillar linking. Rendering a
+                      // cross-pillar slug under the current pillar would 404.
+                      const isCrossPillar = relSlug.includes("/");
+                      const href = isCrossPillar ? `/${relSlug}` : `/${pillarId}/${relSlug}`;
+                      const label = (isCrossPillar ? relSlug.split("/").pop() || relSlug : relSlug)
+                        .split("-")
+                        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+                        .join(" ");
+
                       return (
                         <li key={idx}>
                           <Link
-                            href={`/${pillarId}/${relSlug}`}
+                            href={href}
                             className="text-xs font-semibold text-gray-700 dark:text-gray-300 hover:text-violet-600 dark:hover:text-violet-400 transition-colors flex items-center gap-1 group"
                           >
                             <span className="text-violet-600 group-hover:translate-x-0.5 transition-transform">→</span>
                             <span className="truncate max-w-[200px]">
-                              {relSlug.split("-").map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(" ")}
+                              {label}
                             </span>
                           </Link>
                         </li>

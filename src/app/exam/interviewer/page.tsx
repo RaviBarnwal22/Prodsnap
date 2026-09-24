@@ -9,15 +9,15 @@ import {
 const EXAM_QUESTIONS = [
   {
     id: 1, category: 'Product Sense', timeLimit: 20,
-    question: "You are the PM for Swiggy Instamart. Grocery delivery adoption in Tier-2 cities is 60% lower than metros. Walk me through how you would approach this problem, define success metrics, and propose your top 3 solutions.",
+    question: "You are the PM for Amazon Fresh grocery delivery. Adoption outside major metros is 60% lower than within them. Walk me through how you would approach this problem, define success metrics, and propose your top 3 solutions.",
   },
   {
     id: 2, category: 'Metrics & Execution', timeLimit: 15,
-    question: "CRED's 7-day retention has dropped from 42% to 28% in the last quarter. How do you diagnose the root cause?",
+    question: "Spotify's 7-day retention has dropped from 42% to 28% in the last quarter. How do you diagnose the root cause?",
   },
   {
     id: 3, category: 'Strategy', timeLimit: 15,
-    question: "PhonePe wants to enter B2B payments. Should they build, buy, or partner?",
+    question: "PayPal wants to enter B2B payments. Should they build, buy, or partner?",
   },
 ]
 

@@ -21,29 +21,29 @@ interface MicroCaseItem {
 
 const MICRO_CASES: MicroCaseItem[] = [
     {
-        id: 'zomato',
-        brand: 'Zomato',
+        id: 'netflix-discovery',
+        brand: 'Netflix',
         category: 'Product Design',
         difficulty: 'Easy',
-        title: 'Improve the food discovery experience for first-time Zomato users.',
+        title: 'Improve the discovery experience for first-time Netflix users.',
         framework: 'CIRCLES Framework',
-        sampleAnswer: `1. Goal: Reduce drop-off during first-time ordering by eliminating choice paralysis.
-2. Target Segment: Budget-conscious college students & young working professionals ordering lunch.
-3. Key Pain Points: Overwhelming menus (100+ items), hidden delivery fees, and lack of visual dish previews.
-4. Proposed Solution: "Quick 3-Dish Curated Trays" under ₹199 with guaranteed 20-min delivery and 1-tap reorder.
-5. North Star Metric: First-week second-order retention rate (aim for +15% uplift).`,
+        sampleAnswer: `1. Goal: Reduce drop-off in the first session by eliminating choice paralysis before a new subscriber ever presses play.
+2. Target Segment: New subscribers in their first week who have no watch history for the recommender to learn from.
+3. Key Pain Points: An endless grid with no signal, trailers that autoplay before intent is clear, and no sense of how long a commitment a series is.
+4. Proposed Solution: A three-title "Start Here" row picked from sign-up taste questions, each with a one-line reason it was chosen and a visible episode count.
+5. North Star Metric: Share of new subscribers who finish a first episode within 48 hours (aim for +15%).`,
         caseUrl: '/practice/cmkee65df0001qtxrh6684fp8'
     },
     {
-        id: 'swiggy',
+        id: 'quick-commerce',
         brand: 'Quick Commerce',
         category: 'Root Cause Analysis',
         difficulty: 'Medium',
-        title: 'Order cancellation rate spiked by 8% on Swiggy Instamart during 7-9 PM peak. How do you diagnose it?',
+        title: 'Cancellations on Amazon\'s ten minute delivery spiked 8% during the evening peak. How do you diagnose it?',
         framework: '5-Whys & Metric Tree',
         sampleAnswer: `1. Clarify Scope: Isolate by geography (single dark store vs city-wide), platform (iOS vs Android), and user cohort (new vs power users).
 2. Internal Funnel Analysis: Check if cancellation happens pre-packing (stockouts/SKU mismatch) or post-dispatch (delivery partner shortage).
-3. External Variables: Verify extreme weather (Bengaluru rains), traffic gridlocks, or local festival surges.
+3. External Variables: Verify extreme weather, traffic gridlock, or a local event surge.
 4. Action Plan: Implement real-time dynamic delivery SLA buffer and auto-reassign nearest dark stores.
 5. Guardrail Metric: Dark store pick-and-pack turnaround time (< 4 mins).`,
         caseUrl: '/practice'
@@ -53,13 +53,13 @@ const MICRO_CASES: MicroCaseItem[] = [
         brand: 'Fintech',
         category: 'Growth & Strategy',
         difficulty: 'Medium',
-        title: 'Design an automated savings & budgeting app for middle-class Indian families.',
+        title: 'Design an automated savings and budgeting app for households sharing one budget.',
         framework: 'Jobs To Be Done (JTBD)',
-        sampleAnswer: `1. Core User Insight: Middle-class Indian households save after discretionary spending rather than before, leading to end-of-month cash crunches.
-2. Proposed Feature: "Round-up UPI Vault" — automatically rounds off every UPI merchant transaction to nearest ₹10 and deposits surplus into high-yield digital gold / liquid funds.
-3. Social Anchor: Family pooled goal (e.g., Diwali shopping / school fees) with shared visibility.
-4. Monetization: 0.25% AUM management fee + partner affiliate credit card offers.
-5. Success Metric: 30-day savings retention and average monthly deposit per active family.`,
+        sampleAnswer: `1. Core User Insight: These households save whatever is left after discretionary spending rather than saving first, which leads to an end-of-month cash crunch.
+2. Proposed Feature: A round-up vault that rounds every card and transfer payment up to the nearest whole unit and sweeps the surplus into a high-yield account.
+3. Social Anchor: A pooled family goal such as school fees or a holiday, with shared visibility across members.
+4. Monetization: 0.25% management fee on assets plus partner affiliate offers.
+5. Success Metric: 30-day savings retention and average monthly deposit per active household.`,
         caseUrl: '/practice/cmkee65df0000qtxrdmu046lr'
     }
 ]

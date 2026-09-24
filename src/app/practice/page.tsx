@@ -12,7 +12,7 @@ export const dynamic = "force-dynamic"
 import { prisma } from "@/lib/prisma"
 import Link from "next/link"
 import { Header } from "@/components/Header"
-import { Briefcase, BarChart3, TrendingUp, ArrowRight, Sparkles, ChevronLeft, Cpu, Rocket, Users, Search, Calculator, Lock, Unlock, CheckCircle, Target } from "lucide-react"
+import { Briefcase, BarChart3, TrendingUp, ArrowRight, Sparkles, ChevronLeft, Cpu, Rocket, Users, Search, Calculator, Lock, Unlock, CheckCircle, Target, Bot } from "lucide-react"
 import { getUser } from "@/lib/auth"
 import { SkillRadarChart } from "@/components/SkillRadarChart"
 import { getTotalAttemptCount, hasActiveSubscription } from "@/lib/subscription"
@@ -39,7 +39,7 @@ const categoryConfig: Record<string, { label: string; icon: React.ReactNode; col
         bgLight: "bg-blue-50/50",
         bgDark: "dark:bg-blue-900/10",
         description: "Consumer design challenges.",
-        longDescription: "Master the art of designing products for the next billion users. This track covers everything from hyperlocal Indian logistics to vernacular fintech solutions."
+        longDescription: "Design products people reach for every day. This track spans marketplaces, streaming, fintech and logistics across mature and emerging markets alike."
     },
     METRICS: {
         label: "Success Metrics",
@@ -48,7 +48,7 @@ const categoryConfig: Record<string, { label: string; icon: React.ReactNode; col
         bgLight: "bg-purple-50/50",
         bgDark: "dark:bg-purple-900/10",
         description: "Master KPIs & North Star logic.",
-        longDescription: "Develop deep analytical rigor. Learn to define North Star metrics, handle metric trade-offs, and measure success for multi-faceted Indian platforms."
+        longDescription: "Develop deep analytical rigor. Learn to define North Star metrics, handle metric trade-offs, and measure success across multi-sided global platforms."
     },
     GROWTH_RETENTION: {
         label: "Growth Strategy",
@@ -57,7 +57,7 @@ const categoryConfig: Record<string, { label: string; icon: React.ReactNode; col
         bgLight: "bg-orange-50/50",
         bgDark: "dark:bg-orange-900/10",
         description: "Scale & retention for real products.",
-        longDescription: "Learn how to drive sustainable growth in a high-CAC market. This track focuses on habit formation, referral loops, and retention mechanics for Indian consumers."
+        longDescription: "Learn how to drive sustainable growth when acquisition is expensive. This track focuses on habit formation, referral loops, and retention mechanics that hold up at scale."
     },
     TECH_ACUMEN: {
         label: "Tech Acumen",
@@ -75,7 +75,7 @@ const categoryConfig: Record<string, { label: string; icon: React.ReactNode; col
         bgLight: "bg-pink-50/50",
         bgDark: "dark:bg-pink-900/10",
         description: "Launch strategies that win.",
-        longDescription: "Master the art of product launches. From pricing to positioning, learn how to take products to market in India's competitive landscape."
+        longDescription: "Master the art of product launches. From pricing to positioning, learn how to take a product to market and defend it against incumbents."
     },
     BEHAVIORAL: {
         label: "Behavioral",
@@ -102,7 +102,7 @@ const categoryConfig: Record<string, { label: string; icon: React.ReactNode; col
         bgLight: "bg-emerald-50/50",
         bgDark: "dark:bg-emerald-900/10",
         description: "Market sizing & Fermi problems.",
-        longDescription: "Sharpen your estimation skills with India-specific market sizing problems. Practice breaking down complex numbers into logical assumptions."
+        longDescription: "Sharpen your estimation skills on market sizing problems from around the world. Practice breaking down complex numbers into logical, defensible assumptions."
     },
     STRATEGY: {
         label: "Product Strategy",
@@ -112,6 +112,15 @@ const categoryConfig: Record<string, { label: string; icon: React.ReactNode; col
         bgDark: "dark:bg-rose-900/10",
         description: "Big picture & ecosystem thinking.",
         longDescription: "Master high-level strategic thinking. Learn to evaluate market entry, competitive threats, and ecosystem plays for global tech giants."
+    },
+    AI_PRODUCT: {
+        label: "AI Product Management",
+        icon: <Bot size={28} />,
+        color: "text-violet-600 dark:text-violet-400",
+        bgLight: "bg-violet-50/50",
+        bgDark: "dark:bg-violet-900/10",
+        description: "Build products on top of models.",
+        longDescription: "Product work changes when the output is probabilistic. This track covers evaluation and hallucination budgets, human in the loop design, build versus buy on models, and how to price a feature whose cost scales with usage."
     }
 }
 
@@ -161,7 +170,7 @@ export default async function PracticePage({
         })
     })
 
-    const categoryOrder = ['CONSUMER_PRODUCT_DESIGN', 'STRATEGY', 'METRICS', 'GROWTH_RETENTION', 'TECH_ACUMEN', 'GTM', 'BEHAVIORAL', 'RCA', 'GUESTIMATES']
+    const categoryOrder = ['AI_PRODUCT', 'CONSUMER_PRODUCT_DESIGN', 'STRATEGY', 'METRICS', 'GROWTH_RETENTION', 'TECH_ACUMEN', 'GTM', 'BEHAVIORAL', 'RCA', 'GUESTIMATES']
 
     const isAdmin = user?.email === 'ravibarnwal89@gmail.com' || (user as any)?.role === 'ADMIN'
     const isPremium = isSubscriptionActive || isAdmin

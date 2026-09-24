@@ -23,9 +23,11 @@ export function Footer() {
                         <h4 className="font-bold text-xs uppercase tracking-widest text-gray-900 dark:text-white mb-4">Platform</h4>
                         <ul className="space-y-2.5 text-sm text-gray-600 dark:text-gray-400">
                             <li><Link href="/practice" className="hover:text-violet-600 transition">Case Simulator</Link></li>
+                            <li><Link href="/practice?category=AI_PRODUCT" className="hover:text-violet-600 transition">AI Product Cases</Link></li>
                             <li><Link href="/practice?category=CONSUMER_PRODUCT_DESIGN" className="hover:text-violet-600 transition">Product Sense Practice</Link></li>
-                            <li><Link href="/practice?category=ROOT_CAUSE_ANALYSIS" className="hover:text-violet-600 transition">RCA Drills</Link></li>
+                            <li><Link href="/practice?category=RCA" className="hover:text-violet-600 transition">RCA Drills</Link></li>
                             <li><Link href="/practice?category=METRICS" className="hover:text-violet-600 transition">Metrics & North Star</Link></li>
+                            <li><Link href="/how-it-works" className="hover:text-violet-600 transition">How the AI Scores You</Link></li>
                             <li><Link href="/mentorship" className="hover:text-violet-600 transition">1:1 Mentorship</Link></li>
                         </ul>
                     </div>
@@ -38,6 +40,7 @@ export function Footer() {
                             <li><Link href="/frameworks" className="hover:text-violet-600 transition">PM Frameworks (RICE, Kano)</Link></li>
                             <li><Link href="/product-analytics" className="hover:text-violet-600 transition">Product Analytics & Metrics</Link></li>
                             <li><Link href="/templates" className="hover:text-violet-600 transition">PRD & Roadmap Templates</Link></li>
+                            <li><Link href="/ai-product-management" className="hover:text-violet-600 transition">AI Product Management</Link></li>
                             <li><Link href="/glossary" className="hover:text-violet-600 transition">Product Management Glossary</Link></li>
                         </ul>
                     </div>

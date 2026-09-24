@@ -13,7 +13,7 @@ const EXAM_QUESTIONS = [
     category: 'Product Sense',
     timeLimit: 20,
     question:
-      "You are the PM for Swiggy Instamart. Grocery delivery adoption in Tier-2 cities is 60% lower than metros. Walk me through how you would approach this problem, define success metrics, and propose your top 3 solutions.",
+      "You are the PM for Amazon Fresh grocery delivery. Adoption outside major metros is 60% lower than within them. Walk me through how you would approach this problem, define success metrics, and propose your top 3 solutions.",
     hints: ['Clarify the problem', 'Segment users', 'Prioritise with rationale'],
   },
   {
@@ -21,7 +21,7 @@ const EXAM_QUESTIONS = [
     category: 'Metrics & Execution',
     timeLimit: 15,
     question:
-      "CRED's 7-day retention has dropped from 42% to 28% in the last quarter after a new onboarding redesign. How do you diagnose the root cause and what would you do next?",
+      "Spotify's 7-day retention has dropped from 42% to 28% in the last quarter after a new onboarding redesign. How do you diagnose the root cause and what would you do next?",
     hints: ['Funnel analysis', 'Cohort comparison', 'Hypothesis-driven approach'],
   },
   {
@@ -29,7 +29,7 @@ const EXAM_QUESTIONS = [
     category: 'Strategy',
     timeLimit: 15,
     question:
-      "PhonePe wants to enter the B2B payments space (paying vendors, managing payroll for SMEs). Should they build, buy, or partner? Justify with a framework.",
+      "PayPal wants to enter the B2B payments space (paying vendors, managing payroll for SMEs). Should they build, buy, or partner? Justify with a framework.",
     hints: ['Market sizing', 'Build vs. Buy analysis', 'Risk & trade-offs'],
   },
 ]

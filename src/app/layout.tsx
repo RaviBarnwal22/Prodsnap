@@ -13,20 +13,19 @@ const geistSans = Geist({
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://prodsnap.in"),
-  title: "Prodsnap | Master PM Interviews with AI-Powered Feedback",
-  description: "Stop practicing blindly. Get real-time AI feedback on your PM case solutions and master the frameworks used by the world's leading tech companies.",
+  title: "AI PM Interview Practice | Get Scored on Real Cases | Prodsnap",
+  description: "Answer real PM cases and get scored by an AI interviewer on six dimensions in seconds, with a model answer every time. Over 200 cases, including AI product management.",
   keywords: [
+    "AI PM interview practice",
+    "AI product manager interview questions",
     "Product Management Interview Prep",
-    "Global PM Case Study Practice",
-    "AI PM Mock Interview",
+    "PM case study practice",
+    "AI mock interview for PMs",
     "CIRCLES framework practice",
     "Associate Product Manager (APM) Prep",
     "PM Interview Questions and Answers",
-    "Google PM Interview Prep",
-    "Meta Product Management Case",
-    "Amazon PM Writing Exercise",
-    "Product Sense Coaching",
-    "Master PM Interviews"
+    "product sense practice",
+    "AI product management"
   ],
   alternates: {
     canonical: "/",
@@ -38,10 +37,10 @@ export const metadata: Metadata = {
   publisher: "Prodsnap",
   openGraph: {
     type: "website",
-    locale: "en_IN",
+    locale: "en_US",
     url: "https://prodsnap.in",
-    title: "Prodsnap | Elevate Your PM Skills with AI. Are You Ready?",
-    description: "The 'secret weapon' for ambitious PMs. Get instant AI feedback on your case solutions and crack top tech interviews faster.",
+    title: "Prodsnap | The AI Interviewer for Product Managers",
+    description: "Answer a real PM case and get a six-dimension scorecard in seconds. Over 200 cases from global tech, including AI product management.",
     siteName: "Prodsnap",
     images: [
       {
@@ -54,8 +53,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Prodsnap | Crack Your Dream PM Role with AI",
-    description: "Real-time AI reality checks for your PM case practice. Stop guessing, start mastering.",
+    title: "Prodsnap | The AI Interviewer for Product Managers",
+    description: "Answer a real PM case, get scored on six dimensions in seconds. Over 200 cases, including AI product management.",
     images: ["/og-image.png"],
   },
   robots: {

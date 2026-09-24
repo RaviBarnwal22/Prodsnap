@@ -188,8 +188,9 @@ Every new or edited **public** route satisfies all of these before it is called 
 
 Ranking for head terms like "product management" is a domain-authority contest against Product School, Atlassian, Reforge and Lenny's — it is not winnable with on-page work alone, and pretending otherwise wastes effort. Prodsnap wins on **specific, high-intent, long-tail queries** and compounds authority from there:
 
-- Target the question a candidate actually types: *"design Uber for kids product sense answer"*, *"Swiggy delivery time RCA case"*, *"RICE vs ICE prioritization"*, *"PM interview questions India"*.
-- Prefer India-context and named-company cases — far less competition, and they match the product's real differentiator.
+- Target the question a candidate actually types: *"design Uber for kids product sense answer"*, *"AI product manager interview questions"*, *"RICE vs ICE prioritization"*, *"LLM evaluation for product managers"*.
+- **Cases are framed internationally, not India-first.** This reversed a previous strategy on 2026-09-23: 73 of 211 cases were rewritten off India-only brands (Swiggy, Zomato, Flipkart, CRED, Paytm, IRCTC, UPI) and onto products a PM recognises anywhere (Amazon, Uber, Google, Microsoft, Stripe, PayPal, Spotify, Netflix, Airbnb, Shopify, eBay, Booking.com). A regional swap is not a fix: Rappi, Getir and Glovo fail the same test as Swiggy. The test is whether a PM on another continent knows the product. Cases whose lesson depends on an emerging-market constraint (offline-first, low literacy, cash-only, smallholder farmers) keep the constraint but name no country. Guesstimates are scoped as "worldwide" or "a city of 5 million" so anyone can reason about them. One case, Tesla entering India, is kept deliberately as a market-entry exercise.
+- **`AI_PRODUCT` is the newest track** and the sharpest wedge: "AI product manager interview questions" is high-growth and low-competition. Its cases are scored through a domain lens in `PRODUCT_SENSE_PROMPT` that rewards eval design, hallucination budgets and failure-mode thinking; without it the evaluator grades an AI case like a consumer design case. The matching content pillar is `/ai-product-management`.
 - One page per query intent. Two pages chasing the same intent cannibalise each other; consolidate and redirect instead.
 - Depth beats volume. A thin page on a competitive term ranks for nothing and drags sitewide quality signals down.
 - **E-E-A-T is the moat.** Ravi is a practising PM — every content page carries a real author with a real LinkedIn. Keep it that way.
@@ -255,7 +256,7 @@ Keyword stuffing, doorway pages spun from a template with swapped nouns, schema 
 
 ### Known gaps — not yet fixed
 
-- **The free-attempt limit disagrees with itself.** `@/lib/constants` exports `FREE_ATTEMPT_LIMIT = 5` and the practice page shows that number, but `src/app/api/start-attempt/route.ts` redeclares its own `const FREE_ATTEMPT_LIMIT = 3` and enforces it. Users are cut off two attempts before the UI says they will be. Unifying it is a revenue decision (3 → 5 gives away more free AI calls), so it needs the founder's call, not a silent fix.
+- **The `BAILOUT_TO_CLIENT_SIDE_RENDERING` check below over-reports.** `grep -c` matches the contained `<template data-dgst="BAILOUT_TO_CLIENT_SIDE_RENDERING">` markers that the Suspense-wrapped analytics components legitimately emit, so it prints 1 on a healthy page. What actually matters is that the page still returns its real `<h1>` and body copy. Verified against production on 2026-09-23: one `h1`, full copy served.
 - **Jobs feature is recoverable, not rebuildable.** The `Job` model is still in the schema and the table exists but holds **0 rows**. The six deleted files (~1,260 lines) are in commit `8cd6977`. Restoring the UI without wiring a data source ships an empty page.
 - **`/blog` is a bare redirect to `/community`.** Fine as a redirect; it is deliberately excluded from the sitemap.
 - Confirmation-email deliverability (see **Known broken**) indirectly hurts conversion from organic traffic.
