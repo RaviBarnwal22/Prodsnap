@@ -10,7 +10,7 @@ import Link from "next/link"
 import Image from "next/image"
 import { Header } from "@/components/Header"
 import { Footer } from "@/components/Footer"
-import { ArrowRight, Sparkles, MessageSquare, Trophy, Zap } from "lucide-react"
+import { ArrowRight, Sparkles, MessageSquare, BookOpen, Zap } from "lucide-react"
 import { InteractiveMicroCase } from "@/components/InteractiveMicroCase"
 import { HomeFAQ } from "@/components/HomeFAQ"
 
@@ -191,11 +191,11 @@ export default function Home() {
 
             <div className="group bg-gradient-to-br from-emerald-50 to-white dark:from-gray-900 dark:to-gray-900 p-8 rounded-3xl border border-emerald-100 dark:border-gray-800 hover:shadow-xl hover:shadow-emerald-500/10 transition-all">
               <div className="bg-gradient-to-br from-emerald-500 to-green-600 text-white w-16 h-16 flex items-center justify-center rounded-2xl mb-6 group-hover:scale-110 transition-transform shadow-lg">
-                <Trophy size={32} />
+                <BookOpen size={32} />
               </div>
-              <h3 className="text-2xl font-bold mb-4">Daily Product Puzzles</h3>
-              <p className="text-gray-500 dark:text-gray-400 leading-relaxed font-medium mb-4">One bite-sized product challenge every day. Build intuition in a few minutes and keep your streak alive.</p>
-              <Link href="/prodsense" className="inline-flex items-center gap-2 text-emerald-600 font-bold hover:underline group-hover:gap-3 transition-all">Today&apos;s puzzle <ArrowRight size={16} /></Link>
+              <h3 className="text-2xl font-bold mb-4">The Case Library</h3>
+              <p className="text-gray-500 dark:text-gray-400 leading-relaxed font-medium mb-4">Over 200 cases across ten tracks, from product design and root cause analysis to a full track on building AI products.</p>
+              <Link href="/practice" className="inline-flex items-center gap-2 text-emerald-600 font-bold hover:underline group-hover:gap-3 transition-all">Browse the library <ArrowRight size={16} /></Link>
             </div>
           </div>
         </section>

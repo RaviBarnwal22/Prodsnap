@@ -14,7 +14,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const frequentRoutes: MetadataRoute.Sitemap = [
     { url: `${baseUrl}`, changeFrequency: "daily" as const, priority: 1.0 },
     { url: `${baseUrl}/practice`, changeFrequency: "daily" as const, priority: 0.9 },
-    { url: `${baseUrl}/prodsense`, changeFrequency: "daily" as const, priority: 0.8 },
     { url: `${baseUrl}/mentors`, changeFrequency: "weekly" as const, priority: 0.7 },
   ].map((r) => ({ ...r, lastModified: new Date() }));
 

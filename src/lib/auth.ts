@@ -46,7 +46,7 @@ export const getUser = cache(async function getUser() {
 
         if (!existing) {
             // Create if doesn't exist
-            return await prisma.user.create({
+            const created = await prisma.user.create({
                 data: {
                     email: authUser.email!,
                     authId: authUser.id,
@@ -57,6 +57,15 @@ export const getUser = cache(async function getUser() {
                     role: "STUDENT"
                 }
             })
+
+            // This branch runs exactly once per account, which makes it the only
+            // honest signup moment: Supabase sign-up can succeed without the user
+            // ever reaching the app, and a "signed up" event fired from the client
+            // would count those.
+            const { logEvent } = await import('./analytics')
+            await logEvent('signup_completed', '/auth', created.id)
+
+            return created
         }
 
         // COOLDOWN: Only update lastLoginAt if it's more than 5 minutes old to save DB writes

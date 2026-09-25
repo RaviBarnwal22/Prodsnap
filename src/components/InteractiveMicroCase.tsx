@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import Link from 'next/link'
 import { Sparkles, ArrowRight, Loader2, RotateCcw, CheckCircle2, AlertTriangle, Target, Zap, Bot, Lock } from 'lucide-react'
 import { evaluateMicroCase } from '@/app/actions'
@@ -74,6 +74,19 @@ export function InteractiveMicroCase() {
     // allowance so the UI can prompt for an account instead of showing an error.
     const [limitReached, setLimitReached] = useState(false)
     const [guestTriesLeft, setGuestTriesLeft] = useState<number | null>(null)
+
+    // Fired once per visit, on first keystroke. Everything else in the funnel has
+    // a server moment to log from; "someone actually started writing" does not,
+    // and the gap between starting and submitting is the drop-off we are blind to.
+    const demoStartLogged = useRef(false)
+    const markDemoStarted = () => {
+        if (demoStartLogged.current) return
+        demoStartLogged.current = true
+        // Deliberately not awaited: analytics must never delay typing.
+        import('@/app/actions')
+            .then(({ trackActivity }) => trackActivity('/', 'demo_started', selectedCase.title))
+            .catch(() => { })
+    }
     const { openAuthModal } = useAuth()
 
     const handleSelectCase = (c: MicroCaseItem) => {
@@ -190,6 +203,7 @@ export function InteractiveMicroCase() {
                                 <textarea
                                     value={answerText}
                                     onChange={(e) => {
+                                        if (e.target.value.trim().length > 0) markDemoStarted()
                                         setAnswerText(e.target.value)
                                         if (errorMessage) setErrorMessage(null)
                                     }}

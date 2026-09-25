@@ -5,9 +5,11 @@ import { evaluateAnswer } from "@/lib/ai/engine"
 import { revalidatePath } from "next/cache"
 import { getUser } from "@/lib/auth"
 import { sendContactFormNotification, sendSupportReply, sendAdminManualReply } from "@/lib/email"
-import { MAX_ANSWER_CHARS, MAX_MESSAGE_CHARS, MAX_NAME_CHARS, MAX_EMAIL_CHARS } from "@/lib/constants"
+import { MAX_ANSWER_CHARS, MAX_MESSAGE_CHARS, MAX_NAME_CHARS, MAX_EMAIL_CHARS, MAX_CLARIFYING_QUESTION_CHARS, MAX_CLARIFYING_HISTORY_TURNS, GUEST_INTERVIEWER_DAILY_LIMIT, GEMINI_MODEL_CHAIN } from "@/lib/constants"
 import { canAttemptCategory, incrementCategoryAttempt } from "@/lib/subscription"
+import { getCompetencyForKey, COMPETENCIES, COMPETENCY_LABELS } from "@/lib/ai/rubrics"
 import { getClientFingerprint, getGuestDemoUsage, recordGuestDemoUse, GUEST_DEMO_DAILY_LIMIT } from "@/lib/guest-quota"
+import { logEvent } from "@/lib/analytics"
 
 export async function submitAnswer(questionId: string, answer: string, elapsedTimeSeconds?: number, chatContext?: string) {
     const user = await getUser()
@@ -42,6 +44,9 @@ export async function submitAnswer(questionId: string, answer: string, elapsedTi
     // /api/start-attempt is advisory only — this action is directly invokable.
     const quota = await canAttemptCategory(question.category)
     if (!quota.canAttempt) {
+        // Not derivable from pageviews: the user reached the point of submitting
+        // and was stopped by the free limit rather than losing interest.
+        await logEvent('paywall_hit', `/practice/${questionId}`, userId, question.category)
         return {
             success: false,
             error: "You've used all your free attempts. Upgrade to Premium for unlimited practice.",
@@ -55,7 +60,23 @@ export async function submitAnswer(questionId: string, answer: string, elapsedTi
         console.log(`[submitAnswer] Calling AI Engine...`);
         // Practice cases use Gemini (includes gold standard, ~18s) not Groq (demo only).
         // Category is passed so AI_PRODUCT cases are judged against the AI domain lens.
-        aiResponse = await evaluateAnswer(question.title, answer, elapsedTimeSeconds, chatContext, true, 'gemini', question.category)
+        // The brief and the author's reference answer are passed so the grader
+        // judges against the actual case and OUR key points, rather than the
+        // title alone plus an ideal answer it invents fresh on every run.
+        aiResponse = await evaluateAnswer(
+            question.title,
+            answer,
+            elapsedTimeSeconds,
+            chatContext,
+            true,
+            'gemini',
+            question.category,
+            {
+                questionDescription: question.description,
+                solutionText: question.solutionText || undefined,
+                sampleAnswer: question.sampleAnswer || undefined,
+            }
+        )
         console.log(`[submitAnswer] AI Engine success`);
     } catch (error) {
         console.error("[submitAnswer] AI Error", error)
@@ -80,6 +101,10 @@ export async function submitAnswer(questionId: string, answer: string, elapsedTi
         if (!quota.isPremium) {
             await incrementCategoryAttempt(question.category)
         }
+
+        // Logged after the grade is saved, so this counts completed evaluations
+        // rather than attempts that died in the AI call.
+        await logEvent('practice_submitted', `/practice/${questionId}`, userId, question.category)
 
         revalidatePath(`/practice/${questionId}`)
         return { success: true, submissionId: submission.id, aiResponse }
@@ -135,7 +160,11 @@ export async function submitContactForm(data: { name: string, email: string, mes
     }
 }
 
-// Track user activity (server action)
+// Track user activity (server action).
+// This is deliberately callable without a session, since most of what is worth
+// measuring happens before anyone signs up. That makes it a public write, so
+// every field is bounded before it reaches Prisma: the columns are Postgres
+// `text` with no ceiling, and the caller is the browser.
 export async function trackActivity(page: string, action: string, metadata?: string) {
     const user = await getUser()
     const { headers } = await import('next/headers')
@@ -148,17 +177,18 @@ export async function trackActivity(page: string, action: string, metadata?: str
         await prisma.userActivity.create({
             data: {
                 userId: user?.id || null,
-                page,
-                action,
-                metadata,
-                ipAddress: ip,
-                userAgent: ua
+                page: String(page || '').slice(0, 200),
+                action: String(action || 'view').slice(0, 60),
+                metadata: metadata ? String(metadata).slice(0, 500) : null,
+                ipAddress: ip.slice(0, 100),
+                userAgent: ua.slice(0, 300)
             }
         })
     } catch (error) {
         console.error("[trackActivity] Error:", error);
     }
 }
+
 
 // Submit practice feedback (NPS style)
 export async function submitPracticeFeedback(data: {
@@ -324,40 +354,41 @@ export async function getUserSkillScores() {
 
         if (submissions.length === 0) return { success: true, scores: null }
 
-        // Average out the scores
-        const totals = {
-            comprehend_goal: 0,
-            identify_users: 0,
-            report_needs: 0,
-            cut_prioritization: 0,
-            list_solutions: 0,
-            evaluate_tradeoffs: 0
-        }
+        // Dimension keys differ per rubric now (an RCA attempt and a design
+        // attempt share no key names), so the radar aggregates on COMPETENCY.
+        // Each dimension declares which axis it rolls up into; unknown keys are
+        // skipped rather than silently averaged in as zero.
+        const totals: Record<string, number> = {}
+        const counts: Record<string, number> = {}
 
-        let validCount = 0
         submissions.forEach(sub => {
             try {
                 const results = JSON.parse(sub.aiScore || '{}')
-                if (results.scores) {
-                    Object.keys(totals).forEach(key => {
-                        // @ts-ignore
-                        totals[key] += results.scores[key] || 0
-                    })
-                    validCount++
-                }
+                if (!results.scores) return
+
+                Object.entries(results.scores).forEach(([key, value]) => {
+                    if (key === 'overall') return
+                    const competency = getCompetencyForKey(key)
+                    if (!competency) return
+                    const score = Number(value)
+                    if (!Number.isFinite(score)) return
+                    totals[competency] = (totals[competency] || 0) + score
+                    counts[competency] = (counts[competency] || 0) + 1
+                })
             } catch (e) {
                 console.error("Parse error in skill scores", e)
             }
         })
 
-        if (validCount === 0) return { success: true, scores: null }
-
-        const averages = Object.keys(totals).map(key => ({
-            subject: key.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' '),
-            // @ts-ignore
-            A: Number((totals[key] / validCount).toFixed(1)),
+        // Every axis is returned even when untouched, so the radar keeps its
+        // shape instead of collapsing as the user tries different case types.
+        const averages = COMPETENCIES.map(competency => ({
+            subject: COMPETENCY_LABELS[competency],
+            A: counts[competency] ? Number((totals[competency] / counts[competency]).toFixed(1)) : 0,
             fullMark: 5
         }))
+
+        if (!Object.keys(counts).length) return { success: true, scores: null }
 
         return { success: true, scores: averages }
 
@@ -373,10 +404,47 @@ export async function askClarifyingQuestion(data: {
     userMessage: string,
     history: { role: 'user' | 'model', parts: { text: string }[] }[]
 }) {
-    // Server actions are directly invokable endpoints; without this an anonymous
-    // caller gets an unmetered proxy to our paid Gemini/Groq keys.
+    // Open to signed-out visitors by design — the hub is part of the demo. It is
+    // still a directly invokable endpoint backed by paid AI keys, so the limits
+    // below are enforced here and not trusted from the UI.
     const user = await getUser();
-    if (!user) return { success: false, error: "Unauthorized" }
+
+    const userMessage = String(data?.userMessage ?? '').trim().slice(0, MAX_CLARIFYING_QUESTION_CHARS)
+    if (!userMessage) return { success: false, error: "Please enter a question." }
+    if (String(data?.userMessage ?? '').trim().length > MAX_CLARIFYING_QUESTION_CHARS) {
+        return { success: false, error: `Keep your question under ${MAX_CLARIFYING_QUESTION_CHARS} characters.` }
+    }
+
+    // The history is client-supplied too, and it is the larger cost vector: a
+    // capped question with an uncapped transcript is still an unbounded prompt.
+    const history = (Array.isArray(data?.history) ? data.history : [])
+        .slice(-MAX_CLARIFYING_HISTORY_TURNS)
+        .map(h => ({
+            role: h?.role === 'model' ? 'model' as const : 'user' as const,
+            parts: [{ text: String(h?.parts?.[0]?.text ?? '').slice(0, MAX_CLARIFYING_QUESTION_CHARS * 10) }]
+        }))
+
+    // Signed-out visitors get a per-network daily budget. The UI caps guests at 5
+    // questions, but that check lives in the browser and can simply be skipped.
+    let guestFingerprint: string | null = null
+    if (!user) {
+        const { getClientFingerprint, getGuestDemoUsage, INTERVIEWER_ACTION } = await import("@/lib/guest-quota")
+        guestFingerprint = await getClientFingerprint()
+        const used = await getGuestDemoUsage(guestFingerprint, INTERVIEWER_ACTION)
+        if (used >= GUEST_INTERVIEWER_DAILY_LIMIT) {
+            return { success: false, error: "You've used your free questions for today. Sign in to keep going." }
+        }
+    }
+
+    data = { ...data, userMessage, history }
+
+    // Counted only once the AI has actually answered, so a failure or an
+    // unconfigured key never burns a visitor's free questions.
+    const recordGuestUse = async () => {
+        if (!guestFingerprint) return
+        const { recordGuestDemoUse, INTERVIEWER_ACTION } = await import("@/lib/guest-quota")
+        await recordGuestDemoUse(guestFingerprint, INTERVIEWER_ACTION, '/practice')
+    }
 
     const { getApiKeys } = await import("@/lib/ai/engine");
     const { gemini: geminiKeys, groq: groqKeys } = getApiKeys();
@@ -388,7 +456,7 @@ export async function askClarifyingQuestion(data: {
 
     // Try Gemini First
     for (const key of geminiKeys) {
-        const modelsToTry = ["gemini-2.5-flash", "gemini-1.5-flash-latest", "gemini-1.5-flash"];
+        const modelsToTry = GEMINI_MODEL_CHAIN;
         for (const modelId of modelsToTry) {
             try {
                 const { GoogleGenerativeAI } = await import("@google/generative-ai");
@@ -401,6 +469,7 @@ export async function askClarifyingQuestion(data: {
                     history: data.history.map(h => ({ role: h.role, parts: h.parts })),
                 });
                 const result = await chat.sendMessage(data.userMessage);
+                await recordGuestUse();
                 return { success: true, text: result.response.text() };
             } catch (e: any) {
                 console.warn(`[askClarifyingQuestion] ${modelId} failed: ${e?.message}`);
@@ -428,6 +497,7 @@ export async function askClarifyingQuestion(data: {
             });
             if (res.ok) {
                 const result = await res.json();
+                await recordGuestUse();
                 return { success: true, text: result.choices[0].message.content };
             }
         } catch (e) { }
@@ -804,6 +874,10 @@ export async function evaluateMicroCase(questionTitle: string, answerText: strin
         if (aiResponse.isMock) {
             return { success: false, error: "The AI evaluator is busy right now. Please try again in a moment." };
         }
+
+        // Logged for signed-in visitors too, not just guests. The guest quota
+        // row is a separate concern and counts only anonymous usage.
+        await logEvent('demo_submitted', '/', user?.id ?? null);
 
         // Charged only on a real answer, so a failure never costs a free try.
         if (fingerprint) {

@@ -10,6 +10,36 @@ export const GUEST_DEMO_DAILY_LIMIT = 3
 // Input bounds. Prisma String maps to Postgres `text`, so the database imposes no
 // ceiling: unbounded free text is a DoS vector and, for anything reaching an AI
 // prompt, a direct cost-abuse vector. Enforce these server-side, never in the UI only.
+// Gemini models to try in order, first success wins. gemini-1.5-flash and
+// gemini-1.5-flash-latest were RETIRED by Google and now 404 — they sat here as
+// "fallbacks" that could never fire. Verify any addition against
+// GET https://generativelanguage.googleapis.com/v1beta/models before adding it.
+// If every entry fails, the AI engine falls through to Groq.
+export const GEMINI_MODEL_CHAIN = [
+    "gemini-2.5-flash",        // primary
+    "gemini-flash-lite-latest", // verified live on this key
+    "gemini-3-flash-preview",   // verified live on this key
+]
+
+// Groq models to try in order. NOTE: llama-3.3-70b-versatile was hardcoded here
+// previously and is NOT available on our account, so the "Groq fallback" could
+// never have worked even once a key was set. Verify with
+// GET https://api.groq.com/openai/v1/models before changing this.
+// Ordered fast-but-good first: Groq exists to keep the homepage demo snappy,
+// and the larger model is the quality backstop behind it.
+export const GROQ_MODEL_CHAIN = [
+    "openai/gpt-oss-20b",   // ~2.6s, valid JSON
+    "openai/gpt-oss-120b",  // ~4.6s, strongest
+    "qwen/qwen3.8-27b",     // ~1.8s, last resort
+]
+
+// Interviewer Hub: open to signed-out visitors, so the bounds do the work auth
+// used to. A clarifying question is one short sentence; the transcript cap matters
+// just as much, since history is client-supplied and drives the real prompt cost.
+export const MAX_CLARIFYING_QUESTION_CHARS = 100
+export const MAX_CLARIFYING_HISTORY_TURNS = 12
+export const GUEST_INTERVIEWER_DAILY_LIMIT = 5
+
 export const MAX_ANSWER_CHARS = 20000
 export const MAX_MESSAGE_CHARS = 2000
 export const MAX_NAME_CHARS = 120

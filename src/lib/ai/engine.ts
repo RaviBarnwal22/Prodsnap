@@ -1,25 +1,22 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { PRODUCT_SENSE_PROMPT } from "./prompts";
 import { prisma } from "@/lib/prisma";
+import { GEMINI_MODEL_CHAIN, GROQ_MODEL_CHAIN } from "@/lib/constants";
+import { getRubricKeys } from "./rubrics";
 
 
+/**
+ * Dimension keys are rubric-dependent (see lib/ai/rubrics.ts), so these are
+ * index signatures rather than the six fixed CIRCLES keys. `overall` is always
+ * present; the UI renders whatever other keys come back.
+ */
 export interface AIEvaluationResponse {
     scores: {
-        comprehend_goal: number;
-        identify_users: number;
-        report_needs: number;
-        cut_prioritization: number;
-        list_solutions: number;
-        evaluate_tradeoffs: number;
         overall: number;
+        [dimension: string]: number;
     };
     detailed_analysis: {
-        comprehend_goal: string;
-        identify_users: string;
-        report_needs: string;
-        cut_prioritization: string;
-        list_solutions: string;
-        evaluate_tradeoffs: string;
+        [dimension: string]: string;
     };
     strengths: string[];
     weaknesses: string[];
@@ -83,17 +80,34 @@ export async function evaluateAnswer(
     chatContext?: string,
     includeGoldStandard: boolean = true,
     preferredProvider: 'groq' | 'gemini' = 'gemini',
-    category?: string
+    category?: string,
+    /**
+     * The full case brief and any author-written reference answer. Optional so
+     * the homepage demo, which has neither, still works — but the practice flow
+     * should always pass them: without the brief the grader only sees the title.
+     */
+    caseContext?: { questionDescription?: string; solutionText?: string; sampleAnswer?: string }
 ): Promise<AIEvaluationResponse> {
     const { gemini: geminiKeys, groq: groqKeys } = getApiKeys();
-    console.log(`[AI Engine] Gemini keys: ${geminiKeys.length}, Groq keys: ${groqKeys.length}, Preferred: ${preferredProvider}`);
+    const rubricKeys = getRubricKeys(category);
+    console.log(`[AI Engine] Gemini keys: ${geminiKeys.length}, Groq keys: ${groqKeys.length}, Preferred: ${preferredProvider}, Rubric: ${category || 'default'}`);
 
     if (geminiKeys.length === 0 && groqKeys.length === 0) {
         console.warn("No API keys found. Using mock response.");
         return getMockResponse();
     }
 
-    const prompt = PRODUCT_SENSE_PROMPT(questionTitle, userAnswer, elapsedTimeSeconds, chatContext, includeGoldStandard, category);
+    const prompt = PRODUCT_SENSE_PROMPT({
+        questionTitle,
+        userAnswer,
+        elapsedTimeSeconds,
+        chatContext,
+        includeGoldStandard,
+        category,
+        questionDescription: caseContext?.questionDescription,
+        solutionText: caseContext?.solutionText,
+        sampleAnswer: caseContext?.sampleAnswer,
+    });
     let lastErrorMessage = "Unknown error";
 
     // Reorder providers based on preference: try preferred first, then fallback
@@ -105,42 +119,46 @@ export async function evaluateAnswer(
         if (providerName === 'groq') {
             // Attempt Groq (1-3s latency, used for demo)
             for (const key of groqKeys) {
-                const startTime = Date.now();
-                console.log(`[AI Engine] Attempting Groq (Llama-3.3)`);
+                // Walk the model chain like Gemini does. A single hardcoded model
+                // meant one deprecation silently disabled the whole provider.
+                for (const groqModel of GROQ_MODEL_CHAIN) {
+                    const startTime = Date.now();
+                    console.log(`[AI Engine] Attempting Groq model: ${groqModel}`);
 
-                try {
-                    const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-                        method: "POST",
-                        headers: {
-                            "Content-Type": "application/json",
-                            "Authorization": `Bearer ${key}`
-                        },
-                        body: JSON.stringify({
-                            model: "llama-3.3-70b-versatile",
-                            messages: [
-                                { role: "system", content: "You are an expert PM interviewer. Respond strictly in valid JSON." },
-                                { role: "user", content: prompt }
-                            ],
-                            temperature: 0.2
-                        })
-                    });
+                    try {
+                        const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+                            method: "POST",
+                            headers: {
+                                "Content-Type": "application/json",
+                                "Authorization": `Bearer ${key}`
+                            },
+                            body: JSON.stringify({
+                                model: groqModel,
+                                messages: [
+                                    { role: "system", content: "You are an expert PM interviewer. Respond strictly in valid JSON." },
+                                    { role: "user", content: prompt }
+                                ],
+                                temperature: 0.2
+                            })
+                        });
 
-                    if (!res.ok) {
-                        const errorText = await res.text();
-                        throw new Error(`Groq API Error: ${res.status} - ${errorText.substring(0, 100)}`);
+                        if (!res.ok) {
+                            const errorText = await res.text();
+                            throw new Error(`Groq API Error: ${res.status} - ${errorText.substring(0, 100)}`);
+                        }
+
+                        const data = await res.json();
+                        const text = data.choices[0]?.message?.content;
+
+                        if (text) {
+                            const responseTime = Date.now() - startTime;
+                            await logApiUsage('groq', groqModel, 'success', responseTime);
+                            return enforceScoringRules(processAIResult(text), questionTitle, userAnswer, rubricKeys);
+                        }
+                    } catch (error: any) {
+                        lastErrorMessage = error.message;
+                        console.error(`[AI Engine] Groq model ${groqModel} FAILED:`, lastErrorMessage);
                     }
-
-                    const data = await res.json();
-                    const text = data.choices[0].message.content;
-
-                    if (text) {
-                        const responseTime = Date.now() - startTime;
-                        await logApiUsage('groq', 'llama-3.3-70b', 'success', responseTime);
-                        return enforceScoringRules(processAIResult(text), questionTitle, userAnswer);
-                    }
-                } catch (error: any) {
-                    lastErrorMessage = error.message;
-                    console.error(`[AI Engine] Groq attempt FAILED:`, lastErrorMessage);
                 }
             }
         } else {
@@ -150,7 +168,7 @@ export async function evaluateAnswer(
                 console.log(`[AI Engine] Attempting Gemini`);
 
                 try {
-                    const modelsToTry = ["gemini-2.5-flash", "gemini-1.5-flash-latest", "gemini-1.5-flash"];
+                    const modelsToTry = GEMINI_MODEL_CHAIN;
                     let text = "";
                     let geminiSuccess = false;
                     let geminiLastException: any = null;
@@ -173,12 +191,38 @@ export async function evaluateAnswer(
                         } catch (geminiError: any) {
                             geminiLastException = geminiError;
                             console.warn(`[AI Engine] Gemini model ${modelId} failed: ${geminiError.message}`);
+
+                            // 503 / 429 / 500 are load, not a broken request: the same
+                            // call usually succeeds moments later. Measured ~20% 503 on
+                            // the primary model, which surfaced to users as "the AI
+                            // evaluator is busy". One short retry before moving down the
+                            // chain costs a second only on the unhappy path.
+                            const msg = String(geminiError?.message || '');
+                            if (/\b(429|500|503)\b|overload|unavailable|rate limit/i.test(msg)) {
+                                await new Promise(r => setTimeout(r, 900));
+                                try {
+                                    console.log(`[AI Engine] Retrying Gemini model: ${modelId}`);
+                                    const retryModel = new GoogleGenerativeAI(key).getGenerativeModel({ model: modelId });
+                                    const retryResult = await retryModel.generateContent(prompt);
+                                    text = retryResult.response.text();
+
+                                    const responseTime = Date.now() - startTime;
+                                    const estimatedTokens = Math.ceil((prompt.length + text.length) / 4);
+                                    await logApiUsage('gemini', modelId, 'success_after_retry', responseTime, undefined, estimatedTokens);
+
+                                    geminiSuccess = true;
+                                    break;
+                                } catch (retryError: any) {
+                                    geminiLastException = retryError;
+                                    console.warn(`[AI Engine] Retry of ${modelId} also failed: ${retryError.message}`);
+                                }
+                            }
                             continue;
                         }
                     }
 
                     if (geminiSuccess && text) {
-                        return enforceScoringRules(processAIResult(text), questionTitle, userAnswer);
+                        return enforceScoringRules(processAIResult(text), questionTitle, userAnswer, rubricKeys);
                     }
                 } catch (error: any) {
                     lastErrorMessage = error.message;
@@ -216,21 +260,29 @@ function words(s: string): string[] {
 function enforceScoringRules(
     result: AIEvaluationResponse,
     questionTitle: string,
-    userAnswer: string
+    userAnswer: string,
+    /**
+     * The dimension keys this case is actually graded on. Varies by rubric, so
+     * it cannot be a module constant: clamping against the wrong key list would
+     * zero every real score and average over dimensions that were never asked for.
+     */
+    expectedKeys: readonly string[] = SCORE_KEYS
 ): AIEvaluationResponse {
-    const scores = { ...result.scores }
+    const raw = { ...result.scores } as Record<string, number>
+    const scores: { overall: number;[dimension: string]: number } = { overall: 0 }
 
-    // 1. Force every dimension into the documented 0-5 integer range. Models
-    //    intermittently answer on a 0-10 scale, which the UI then rendered as
-    //    "8 out of 10".
-    for (const k of SCORE_KEYS) {
-        const v = Number(scores[k])
+    // 1. Keep only the dimensions this rubric defines, and force each into the
+    //    documented 0-5 integer range. Models intermittently answer on a 0-10
+    //    scale, which the UI then rendered as "8 out of 10". A missing key
+    //    scores 0 rather than disappearing, so the UI always renders six.
+    for (const k of expectedKeys) {
+        const v = Number(raw[k])
         scores[k] = Number.isFinite(v) ? Math.max(0, Math.min(5, Math.round(v))) : 0
     }
 
     // 2. "overall" is the average of the dimensions, never an independent
     //    impression. This also corrects a 0-10 overall attached to 0-5 parts.
-    const avg = SCORE_KEYS.reduce((sum, k) => sum + scores[k], 0) / SCORE_KEYS.length
+    const avg = expectedKeys.reduce((sum, k) => sum + scores[k], 0) / expectedKeys.length
     scores.overall = Math.max(0, Math.min(5, Math.round(avg)))
 
     const answerWords = words(userAnswer)
@@ -247,7 +299,7 @@ function enforceScoringRules(
     let strengths = Array.isArray(result.strengths) ? result.strengths : []
 
     if (isNonAnswer) {
-        for (const k of SCORE_KEYS) scores[k] = Math.min(scores[k], 1)
+        for (const k of expectedKeys) scores[k] = Math.min(scores[k], 1)
         scores.overall = Math.min(scores.overall, 1)
     }
 

@@ -16,6 +16,8 @@ import { GUEST_DEMO_DAILY_LIMIT } from '@/lib/constants'
  */
 
 const DEMO_ACTION = 'guest_micro_case_demo'
+/** Separate counter so the interviewer hub and the homepage demo do not share a budget. */
+export const INTERVIEWER_ACTION = 'guest_interviewer_hub'
 const WINDOW_MS = 24 * 60 * 60 * 1000
 
 /**
@@ -44,10 +46,10 @@ export async function getClientFingerprint(): Promise<string> {
 }
 
 /** How many demo evaluations this network has used in the last 24 hours. */
-export async function getGuestDemoUsage(fp: string): Promise<number> {
+export async function getGuestDemoUsage(fp: string, action: string = DEMO_ACTION): Promise<number> {
     return prisma.userActivity.count({
         where: {
-            action: DEMO_ACTION,
+            action,
             ipAddress: fp,
             createdAt: { gte: new Date(Date.now() - WINDOW_MS) },
         },
@@ -58,13 +60,13 @@ export async function getGuestDemoUsage(fp: string): Promise<number> {
  * Records one consumed evaluation. Logged only after the AI actually answered,
  * so a failed or errored attempt does not burn the visitor's quota.
  */
-export async function recordGuestDemoUse(fp: string): Promise<void> {
+export async function recordGuestDemoUse(fp: string, action: string = DEMO_ACTION, page: string = '/'): Promise<void> {
     try {
         await prisma.userActivity.create({
             data: {
                 userId: null,
-                page: '/',
-                action: DEMO_ACTION,
+                page,
+                action,
                 ipAddress: fp,
             },
         })

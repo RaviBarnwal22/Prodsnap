@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { after } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { getCashfreeOrder } from "@/lib/cashfree"
+import { logEvent } from "@/lib/analytics"
 import { getMentorshipAiBonusMonths } from "@/lib/constants"
 import {
     sendMentorshipBookingConfirmation,
@@ -102,6 +103,10 @@ async function verifyOrder(orderId: string) {
             })
 
             await grantAiAccessBonus(booking.userId, booking.email, booking.serviceType)
+
+            // Inside the status guard, so a repeated verify (the page polls) does
+            // not count the same purchase twice.
+            await logEvent('purchase_completed', '/payment/status', booking.userId, booking.serviceType)
         }
 
         // Deliberately omits customer name / booking id: this endpoint is reachable
@@ -166,6 +171,8 @@ async function verifyOrder(orderId: string) {
                         endDate
                     }).catch((err: unknown) => console.error('[Email] Subscription approval email failed:', err))
                 })
+
+                await logEvent('purchase_completed', '/payment/status', user.id, 'subscription')
             }
         }
 

@@ -1,16 +1,16 @@
 export const dynamic = 'force-dynamic'
 import type { Metadata } from "next"
 
+// Parked. The DailyPuzzle table holds zero rows, so this page tells every
+// visitor to check back tomorrow and never has anything to show. It is
+// noindex and out of the sitemap until puzzles actually exist, and nothing
+// on the site links to it. The route is left intact so the feature can be
+// switched back on by seeding puzzles and restoring the metadata below.
 export const metadata: Metadata = {
-    title: "Product Puzzles | Daily Product Sense Practice for PMs",
-    description: "One product puzzle every day. Build product intuition through bite-sized challenges drawn from real Indian tech scenarios, and keep your streak alive.",
-    keywords: ["product sense practice","daily PM puzzle","product intuition exercises","product sense questions"],
+    title: "Product Puzzles | Prodsnap",
+    description: "Daily product sense puzzles.",
     alternates: { canonical: "/prodsense" },
-    openGraph: {
-        url: "https://prodsnap.in/prodsense",
-        title: "Product Puzzles | Daily Product Sense Practice for PMs",
-        description: "One product puzzle every day. Build product intuition through bite-sized challenges drawn from real Indian tech scenarios, and keep your streak alive.",
-    },
+    robots: { index: false, follow: false },
 }
 
 import { Header } from "@/components/Header"

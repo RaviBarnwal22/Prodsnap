@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma"
 import { getUser } from "@/lib/auth"
 import { createCashfreeOrder } from "@/lib/cashfree"
 import { getMentorshipPrice, SUBSCRIPTION_PRICE } from "@/lib/constants"
+import { logEvent } from "@/lib/analytics"
 
 export async function POST(request: NextRequest) {
     try {
@@ -97,6 +98,11 @@ export async function POST(request: NextRequest) {
                 orderNote: `Mentorship: ${serviceType}`
             })
 
+            // Intent to pay: the order exists at Cashfree and checkout is about to
+            // open. Paired with purchase_completed this gives the checkout
+            // abandonment rate, which nothing measured before.
+            await logEvent('checkout_started', '/mentorship', user.id, serviceType)
+
             return NextResponse.json({
                 success: true,
                 orderId,
@@ -136,6 +142,8 @@ export async function POST(request: NextRequest) {
                 },
                 orderNote: `Prodsnap Premium Subscription (${planType})`
             })
+
+            await logEvent('checkout_started', '/practice', user.id, 'subscription')
 
             return NextResponse.json({
                 success: true,

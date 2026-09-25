@@ -1,9 +1,11 @@
+import { getRubric, AI_PRODUCT_ADDENDUM } from "./rubrics"
+
 // Cases in the AI_PRODUCT category are judged against the same six dimensions,
 // but "good" means something different: an answer that never mentions evaluation,
 // failure modes or the cost of being wrong is not a strong AI product answer even
 // when the general product reasoning is sound. Without this the evaluator scores
 // an AI case exactly like a consumer design case and rewards the wrong things.
-const AI_PRODUCT_LENS = `
+const _UNUSED_AI_PRODUCT_LENS = `
 **Domain Lens (AI / ML product case)**: This case is about building a product on top of a model whose output is probabilistic. Apply the six dimensions with these expectations, and treat their absence as a real gap rather than a stylistic omission:
 Comprehend the goal: did the candidate establish what an acceptable error rate is, and who absorbs the cost when the model is wrong?
 Identify users: did they distinguish users by tolerance for error and by their ability to verify the output themselves? An expert reviewing a draft and a novice trusting an answer are different segments.
@@ -14,37 +16,100 @@ Evaluate trade-offs: did they describe how the feature would be evaluated at all
 Do NOT require the candidate to use this exact vocabulary. Reward the reasoning wherever it appears, in their own words.
 `;
 
-export const PRODUCT_SENSE_PROMPT = (
-  questionTitle: string,
-  userAnswer: string,
-  elapsedTimeSeconds?: number,
-  chatContext?: string,
-  // The 400-500 word gold standard answer is the bulk of the generated tokens and
-  // therefore the bulk of the latency. The homepage demo never renders it, so it
-  // is skipped there; the full practice flow, which does show it, keeps it.
-  includeGoldStandard: boolean = true,
+export interface EvaluationPromptInput {
+  questionTitle: string
+  userAnswer: string
+  elapsedTimeSeconds?: number
+  chatContext?: string
+  /**
+   * The 400-500 word gold standard answer is the bulk of the generated tokens and
+   * therefore the bulk of the latency. The homepage demo never renders it, so it
+   * is skipped there; the full practice flow, which does show it, keeps it.
+   */
+  includeGoldStandard?: boolean
   category?: string
-) => {
-  const domainLens = category === 'AI_PRODUCT' ? AI_PRODUCT_LENS : '';
+  /**
+   * The full case text. Previously only the TITLE reached the grader, so it was
+   * judging a detailed answer against a headline, blind to the constraints the
+   * candidate was actually given.
+   */
+  questionDescription?: string
+  /**
+   * Author-written reference material from the question record. When present the
+   * grader measures against the points WE decided matter, instead of inventing a
+   * fresh ideal answer on every run and grading against that.
+   */
+  solutionText?: string
+  sampleAnswer?: string
+}
+
+export const PRODUCT_SENSE_PROMPT = (input: EvaluationPromptInput) => {
+  const {
+    questionTitle,
+    userAnswer,
+    elapsedTimeSeconds,
+    chatContext,
+    includeGoldStandard = true,
+    category,
+    questionDescription,
+    solutionText,
+    sampleAnswer,
+  } = input
+
+  const rubric = getRubric(category)
+  const domainLens = category === 'AI_PRODUCT' ? AI_PRODUCT_ADDENDUM : '';
+
   const timeInfo = elapsedTimeSeconds
     ? `\n**Time Taken**: ${Math.floor(elapsedTimeSeconds / 60)} minutes ${elapsedTimeSeconds % 60} seconds`
     : 'Not measured';
 
+  const caseDetail = questionDescription
+    ? `\n- **Full Case Brief**: ${questionDescription}`
+    : '';
+
+  // Author reference beats a model-invented ideal: it is consistent between runs
+  // and reflects what this question was actually written to test.
+  const reference = (solutionText || sampleAnswer)
+    ? `\n**Author Reference (NOT shown to the candidate)**:\n${solutionText || sampleAnswer}\nTreat this as the bar. Credit the candidate for the substance they covered even when their wording, ordering or framework differs. Penalise a missing point only if it is genuinely load-bearing for this case. Do NOT require them to match this text.`
+    : '';
+
+  // The hub transcript used to be graded only as "were the questions insightful".
+  // What actually separates a strong candidate is whether the answer HONOURS what
+  // the interviewer told them, so that is now what is being asked for.
   const clarificationInfo = chatContext
-    ? `\n**Clarification Hub History (Interviewer Chat)**:\n${chatContext}\nAnalyze whether the candidate asked insightful clarifying questions and incorporated the interviewer's answers into their final solution.`
-    : '\n**Clarification Hub**: Not used or not applicable for this standalone case evaluation. Do NOT penalize the candidate for missing clarifying questions; evaluate the written submission directly on its own merits.';
+    ? `\n**Interviewer Hub Transcript**:\n${chatContext}
+
+**How to use this transcript (important)**: First list, for yourself, the facts and constraints the interviewer ESTABLISHED in it. Then judge the final answer against them:
+Reward an answer that visibly builds on those facts and narrows its scope accordingly.
+Penalise an answer that ignores them, and penalise it heavily if it CONTRADICTS something the interviewer stated. A candidate told the budget is fixed who then proposes an expensive build has failed to listen, however good the writing is.
+Also judge the questions themselves: sharp, decision-changing questions score well; generic or already-answered ones do not.`
+    : '\n**Interviewer Hub**: Not used for this submission. Do NOT penalise the candidate for the absence of clarifying questions; judge discovery from how well the written answer frames the problem and states its own assumptions.';
+
+  const dimensionList = rubric.dimensions
+    .map(d => `- **${d.key}**: ${d.guidance}`)
+    .join('\n');
+
+  const scoresSchema = rubric.dimensions
+    .map(d => `    "${d.key}": 0`)
+    .join(',\n');
+
+  const analysisSchema = rubric.dimensions
+    .map(d => `    "${d.key}": "Specific feedback on this dimension, referring to what the candidate actually wrote."`)
+    .join(',\n');
 
   return `
 **Role**: You are a Senior Product Leader and Interview Bar Raiser at a top global tech company. You evaluate PM candidates with extreme rigor, looking for strategic depth, user-centricity, and structural excellence.
 
-**Context**: 
-- **Case Question**: "${questionTitle}"
+**Context**:
+- **Case Question**: "${questionTitle}"${caseDetail}
+- **Case Type**: ${category || 'General product case'}
 - **Candidate's Final Answer**: ${userAnswer}
 - **Time Taken**: ${timeInfo}
 ${clarificationInfo}
+${reference}
 
 **Task**:
-1. **Framework Analysis**: Identify the most effective framework for this specific case (e.g., CIRCLES for design, BUS for strategy, HEART for metrics). 
+1. **Framework**: This case is graded against **${rubric.framework}**. Judge the answer by the dimensions listed below, which are the ones that matter for THIS type of case. Do not impose a different framework's structure, and do not penalise the candidate for not naming the framework, only for not doing the underlying thinking.
 2. **Triage FIRST (do this before anything else)**: Decide which of these three the submission is. This decision overrides every other instruction.
 
    **NON-ANSWER** if ANY of the following is true:
@@ -63,13 +128,8 @@ ${clarificationInfo}
 5. **Weaknesses must be concrete**: say what is missing and what the candidate should have done instead, referring to this case.
 ${includeGoldStandard ? `6. **Gold Standard Solution**: Provide a detailed, industry-standard "Perfect Answer" that would get a "Strong Hire" rating. Always provide this, including for a non-answer, since it is what the candidate should learn from.` : `6. **Brevity**: Do NOT write a model answer. Keep every field concise.`}
 
-**Dimensions for Scoring**:
-- **comprehend_goal**: Quality of clarifying questions asked in the Interviewer Hub and alignment with the core problem statement.
-- **identify_users**: Depth of segmentation and prioritization of target audience.
-- **report_needs**: Understanding of pain points and user-centric framing.
-- **cut_prioritization**: Rigorous logic and decision-making framework for selecting solutions.
-- **list_solutions**: Creativity, feasibility, and variety of proposed ideas.
-- **evaluate_tradeoffs**: Understanding of risks, second-order effects, and counter-metrics.
+**Dimensions for Scoring** (${rubric.framework}):
+${dimensionList}
 ${domainLens}
 **Constraint**:
 1. **No Symbols**: NEVER use dashes (-), asterisks (*), or bullet points (•) for lists or formatting. 
@@ -81,21 +141,11 @@ ${domainLens}
 **Output Format (Strict VALID JSON ONLY)**:
 {
   "scores": {
-    "comprehend_goal": 0, 
-    "identify_users": 0, 
-    "report_needs": 0, 
-    "cut_prioritization": 0, 
-    "list_solutions": 0, 
-    "evaluate_tradeoffs": 0, 
-    "overall": 0 
+${scoresSchema},
+    "overall": 0
   },
   "detailed_analysis": {
-    "comprehend_goal": "Direct feedback on their clarifying questions and goal definition...",
-    "identify_users": "Analysis...",
-    "report_needs": "Analysis...",
-    "cut_prioritization": "Analysis...",
-    "list_solutions": "Analysis...",
-    "evaluate_tradeoffs": "Analysis..."
+${analysisSchema}
   },
   "strengths": [],
   "weaknesses": ["string", "string"],

@@ -6,6 +6,7 @@ import { hasActiveSubscription } from '@/lib/subscription'
 // /practice displayed the constant's 5, so free users were cut off two attempts
 // before the UI said they would be.
 import { FREE_ATTEMPT_LIMIT } from '@/lib/constants'
+import { logEvent } from '@/lib/analytics'
 
 export async function POST(request: NextRequest) {
     try {
@@ -26,6 +27,7 @@ export async function POST(request: NextRequest) {
 
         if (isPremium) {
             // Premium users have unlimited attempts
+            await logEvent('practice_started', '/practice', user.id, category)
             return NextResponse.json({ success: true, isPremium: true })
         }
 
@@ -46,6 +48,8 @@ export async function POST(request: NextRequest) {
                 limit: FREE_ATTEMPT_LIMIT
             }, { status: 403 })
         }
+
+        await logEvent('practice_started', '/practice', user.id, category)
 
         return NextResponse.json({
             success: true,

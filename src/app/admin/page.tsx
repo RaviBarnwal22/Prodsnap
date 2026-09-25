@@ -4,7 +4,7 @@ import { getUser } from "@/lib/auth"
 import { redirect } from "next/navigation"
 import Link from "next/link"
 import Image from "next/image"
-import { Users, Activity, FileText, Calendar, MessageSquare, BarChart3, ShieldCheck, LogOut, Home, Brain } from "lucide-react"
+import { ShieldCheck, LogOut, Home, Brain } from "lucide-react"
 import { AdminUserList } from "@/components/admin/AdminUserList"
 import { UserFeedbackList } from "@/components/admin/UserFeedbackList"
 import { AdminPaymentRequests } from "@/components/admin/AdminPaymentRequests"
@@ -13,31 +13,10 @@ import { AdminSupportQueue } from "@/components/admin/AdminSupportQueue"
 import { ApiUsageMonitor } from "@/components/admin/ApiUsageMonitor"
 import { AdminFeedbackQueue } from "@/components/admin/AdminFeedbackQueue"
 import { AdminTabs } from "@/components/admin/AdminTabs"
+import { AdminMetricsPanel } from "@/components/admin/AdminMetricsPanel"
+import { getAdminMetrics } from "@/lib/admin-metrics"
 
 
-
-// Helper to format date
-function formatDate(date: Date) {
-    return new Intl.DateTimeFormat('en-IN', {
-        day: 'numeric',
-        month: 'short',
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
-    }).format(date)
-}
-
-// Get last N days
-function getLastNDays(n: number) {
-    const dates = []
-    for (let i = n - 1; i >= 0; i--) {
-        const date = new Date()
-        date.setDate(date.getDate() - i)
-        date.setHours(0, 0, 0, 0)
-        dates.push(date)
-    }
-    return dates
-}
 
 export default async function AdminPage() {
     const user = await getUser()
@@ -47,6 +26,8 @@ export default async function AdminPage() {
     if (!user || !isAdminEmail) {
         redirect('/admin/login')
     }
+
+    const metrics = await getAdminMetrics()
 
     // Fetch all users with all submissions for detailed checking
     const users = await prisma.user.findMany({
@@ -81,11 +62,7 @@ export default async function AdminPage() {
         }
     })
 
-    // Fetch submissions stats
-    const totalSubmissions = await prisma.practiceSubmission.count()
-    const totalQuestions = await prisma.practiceQuestion.count()
-    const totalActivities = await prisma.userActivity.count()
-    const totalBookings = await prisma.mentorshipBooking.count()
+    // Counts still shown in the pipeline banner above the tabs.
     const pendingRequests = await prisma.subscriptionRequest.count({ where: { status: 'pending' } })
     const pendingBookings = await prisma.mentorshipBooking.count({ where: { status: 'pending' } })
 
@@ -94,84 +71,6 @@ export default async function AdminPage() {
         orderBy: { createdAt: 'desc' },
         take: 10
     })
-
-    // Daily user signups (last 7 days)
-    const last7Days = getLastNDays(7)
-    const usersByDay = await Promise.all(
-        last7Days.map(async (date) => {
-            const nextDay = new Date(date)
-            nextDay.setDate(nextDay.getDate() + 1)
-            const count = await prisma.user.count({
-                where: {
-                    createdAt: {
-                        gte: date,
-                        lt: nextDay
-                    }
-                }
-            })
-            return {
-                date: date.toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric' }),
-                count
-            }
-        })
-    )
-
-    // Recent activities (limited for log view)
-    const recentActivities = await prisma.userActivity.findMany({
-        orderBy: { createdAt: 'desc' },
-        take: 20,
-        include: { user: true }
-    })
-
-    // Today's stats
-    const today = new Date()
-    today.setHours(0, 0, 0, 0)
-    const todayUsers = await prisma.user.count({
-        where: { createdAt: { gte: today } }
-    })
-    const todaySubmissions = await prisma.practiceSubmission.count({
-        where: { createdAt: { gte: today } }
-    })
-    const todayActivities = await prisma.userActivity.count({
-        where: { createdAt: { gte: today } }
-    })
-
-    // This week's stats
-    const weekStart = new Date()
-    weekStart.setDate(weekStart.getDate() - 7)
-    weekStart.setHours(0, 0, 0, 0)
-    const weekUsers = await prisma.user.count({
-        where: { createdAt: { gte: weekStart } }
-    })
-    const weekSubmissions = await prisma.practiceSubmission.count({
-        where: { createdAt: { gte: weekStart } }
-    })
-
-    // This month's stats
-    const monthStart = new Date()
-    monthStart.setDate(1)
-    monthStart.setHours(0, 0, 0, 0)
-    const monthUsers = await prisma.user.count({
-        where: { createdAt: { gte: monthStart } }
-    })
-    const monthSubmissions = await prisma.practiceSubmission.count({
-        where: { createdAt: { gte: monthStart } }
-    })
-
-    // Calculate Unique Visitors (using raw SQL for efficiency)
-    const totalVisitorsRaw = await prisma.$queryRaw<[{ count: bigint }]>`
-        SELECT COUNT(DISTINCT COALESCE("userId", "ipAddress")) as count 
-        FROM "UserActivity"
-    `
-    const totalVisitors = Number(totalVisitorsRaw[0]?.count || 0)
-
-    const todayVisitorsRaw = await prisma.$queryRaw<[{ count: bigint }]>`
-        SELECT COUNT(DISTINCT COALESCE("userId", "ipAddress")) as count 
-        FROM "UserActivity" 
-        WHERE "createdAt" >= ${today}
-    `
-    const todayVisitors = Number(todayVisitorsRaw[0]?.count || 0)
-
 
     return (
         <div className="min-h-screen bg-gray-900">
@@ -244,150 +143,7 @@ export default async function AdminPage() {
                 <AdminTabs
                     overviewContent={
                         <>
-                            {/* Stats Grid */}
-                            <div className="grid grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-                                <div className="bg-gray-800 rounded-2xl p-6 border border-gray-700">
-                                    <div className="flex flex-col gap-3">
-                                        <div className="bg-blue-500/20 w-10 h-10 flex items-center justify-center rounded-xl text-blue-400">
-                                            <Users size={20} />
-                                        </div>
-                                        <div>
-                                            <p className="text-2xl font-black text-white">{users.length}</p>
-                                            <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Total Users</p>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div className="bg-gray-800 rounded-2xl p-6 border border-gray-700">
-                                    <div className="flex flex-col gap-3">
-                                        <div className="bg-indigo-500/20 w-10 h-10 flex items-center justify-center rounded-xl text-indigo-400">
-                                            <Activity size={20} />
-                                        </div>
-                                        <div>
-                                            <p className="text-2xl font-black text-white">{totalVisitors}</p>
-                                            <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Unique Visitors</p>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div className="bg-gray-800 rounded-2xl p-6 border border-gray-700">
-                                    <div className="flex flex-col gap-3">
-                                        <div className="bg-green-500/20 w-10 h-10 flex items-center justify-center rounded-xl text-green-400">
-                                            <FileText size={20} />
-                                        </div>
-                                        <div>
-                                            <p className="text-2xl font-black text-white">{totalSubmissions}</p>
-                                            <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Case Submissions</p>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div className="bg-gray-800 rounded-2xl p-6 border border-gray-700">
-                                    <div className="flex flex-col gap-3">
-                                        <div className="bg-cyan-500/20 w-10 h-10 flex items-center justify-center rounded-xl text-cyan-400">
-                                            <Calendar size={20} />
-                                        </div>
-                                        <div>
-                                            <p className="text-2xl font-black text-white">{totalBookings}</p>
-                                            <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Mentorships</p>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div className="bg-gray-800 rounded-2xl p-6 border border-gray-700">
-                                    <div className="flex flex-col gap-3">
-                                        <div className="bg-purple-500/20 w-10 h-10 flex items-center justify-center rounded-xl text-purple-400">
-                                            <BarChart3 size={20} />
-                                        </div>
-                                        <div>
-                                            <p className="text-2xl font-black text-white">{totalQuestions}</p>
-                                            <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Live Tracks</p>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div className="bg-gray-800 rounded-2xl p-6 border border-gray-700">
-                                    <div className="flex flex-col gap-3">
-                                        <div className="bg-orange-500/20 w-10 h-10 flex items-center justify-center rounded-xl text-orange-400">
-                                            <Activity size={20} />
-                                        </div>
-                                        <div>
-                                            <p className="text-2xl font-black text-white">{totalActivities}</p>
-                                            <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Engagement (Views)</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Usage Analytics - Today, Week, Month */}
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                                <div className="bg-gradient-to-br from-green-600 to-emerald-700 rounded-2xl p-6 text-white">
-                                    <h3 className="text-sm font-bold uppercase tracking-widest opacity-80 mb-4">Today&apos;s Activity</h3>
-                                    <div className="grid grid-cols-2 gap-4">
-                                        <div>
-                                            <p className="text-3xl font-black">{todayUsers}</p>
-                                            <p className="text-xs font-bold uppercase tracking-widest opacity-70">New Users</p>
-                                        </div>
-                                        <div>
-                                            <p className="text-3xl font-black">{todayVisitors}</p>
-                                            <p className="text-xs font-bold uppercase tracking-widest opacity-70">Visitors</p>
-                                        </div>
-                                        <div>
-                                            <p className="text-3xl font-black">{todaySubmissions}</p>
-                                            <p className="text-xs font-bold uppercase tracking-widest opacity-70">Submissions</p>
-                                        </div>
-                                        <div>
-                                            <p className="text-3xl font-black">{todayActivities}</p>
-                                            <p className="text-xs font-bold uppercase tracking-widest opacity-70">Total Views</p>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div className="bg-gradient-to-br from-blue-600 to-indigo-700 rounded-2xl p-6 text-white">
-                                    <h3 className="text-sm font-bold uppercase tracking-widest opacity-80 mb-4">This Week (7 Days)</h3>
-                                    <div className="grid grid-cols-2 gap-4">
-                                        <div>
-                                            <p className="text-3xl font-black">{weekUsers}</p>
-                                            <p className="text-xs font-bold uppercase tracking-widest opacity-70">Users</p>
-                                        </div>
-                                        <div>
-                                            <p className="text-3xl font-black">{weekSubmissions}</p>
-                                            <p className="text-xs font-bold uppercase tracking-widest opacity-70">Cases</p>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div className="bg-gradient-to-br from-purple-600 to-pink-700 rounded-2xl p-6 text-white">
-                                    <h3 className="text-sm font-bold uppercase tracking-widest opacity-80 mb-4">This Month</h3>
-                                    <div className="grid grid-cols-2 gap-4">
-                                        <div>
-                                            <p className="text-3xl font-black">{monthUsers}</p>
-                                            <p className="text-xs font-bold uppercase tracking-widest opacity-70">Users</p>
-                                        </div>
-                                        <div>
-                                            <p className="text-3xl font-black">{monthSubmissions}</p>
-                                            <p className="text-xs font-bold uppercase tracking-widest opacity-70">Cases</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Daily Signups Chart */}
-                            <div className="bg-gray-800 rounded-2xl p-6 border border-gray-700">
-                                <h2 className="text-lg font-black mb-6 flex items-center gap-2 text-white">
-                                    <Calendar className="text-blue-400" size={20} />
-                                    User Signup Trajectory (7 Days)
-                                </h2>
-                                <div className="flex items-end gap-4 h-40 px-4">
-                                    {usersByDay.map((day, i) => (
-                                        <div key={i} className="flex-1 flex flex-col items-center group">
-                                            <div className="invisible group-hover:visible mb-2 px-2 py-1 bg-white text-gray-900 text-xs rounded-lg font-bold">
-                                                {day.count}
-                                            </div>
-                                            <div
-                                                className="w-full bg-blue-500/30 rounded-t-lg group-hover:bg-blue-500 transition-all duration-300"
-                                                style={{
-                                                    height: `${Math.max(day.count * 30, 8)}px`,
-                                                }}
-                                            ></div>
-                                            <p className="text-xs font-bold text-gray-500 mt-3">{day.date}</p>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
+                            <AdminMetricsPanel metrics={metrics} />
                         </>
                     }
                     apiUsageContent={
