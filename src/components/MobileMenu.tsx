@@ -35,6 +35,7 @@ export function MobileMenu({ isLoggedIn, isAdmin, userName }: MobileMenuProps) {
 
     const navLinks = [
         { name: 'Case Simulator', href: '/practice' },
+        { name: 'Playground', href: '/playground' },
         { name: 'Mentorship', href: '/mentorship' },
         { name: 'Community & Blogs', href: '/community' },
     ]

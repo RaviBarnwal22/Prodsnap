@@ -1,0 +1,1074 @@
+{
+  "slug": "guesstimates",
+  "framework": "Top-down Estimation",
+  "sections": {
+    "discovery_and_framing": {
+      "key": "discovery_and_framing",
+      "competency": "problem_framing",
+      "subtitle": "Master the art of scope, geography, and constraints.",
+      "lesson": {
+        "hook": "Do not dive into math before you even know what you are counting.",
+        "what": "Discovery and framing is the crucial first step of any guesstimate interview. You define the exact geography, timeframe, unit, and inclusions or exclusions.",
+        "how": [
+          "State your exact target metric clearly.",
+          "Explicitly mention inclusions and exclusions.",
+          "Define the time and place boundaries."
+        ],
+        "example": "To estimate daily coffee sales in London, I will focus on standard morning commuter takeaway coffees during a typical weekday, excluding evening alcohol sales and rural cafes. This sets a clear baseline before we do any math.",
+        "mistake": "Rushing into formulas and calculations without defining boundaries leaves your interviewer completely lost."
+      },
+      "questions": [
+        {
+          "caseTitle": "Estimate the number of commercial flights in the air right now globally.",
+          "source": "case",
+          "scenario": "You are interviewing at a major travel tech company and need to estimate global flights.",
+          "question": "What is the best way to handle private jets and military aircraft during your framing?",
+          "options": [
+            "Deliberately exclude them to keep the math manageable.",
+            "Add a secret multiplier later in the final calculation.",
+            "Include them because they take up actual runway space.",
+            "Ask the interviewer if they matter for global traffic."
+          ],
+          "correctIndex": 0,
+          "explanation": "Explicitly stating exclusions keeps your model clean and shows strategic discipline. It prevents scope creep from ruining your math later.",
+          "whyWrong": [
+            "",
+            "Adding secret multipliers hides messy assumptions instead of handling them cleanly upfront in the framework.",
+            "A smart candidate might think air traffic includes all planes, but military data is restricted and ruins simple consumer models.",
+            "Asking the interviewer shifts ownership away from you, which makes you look weak and unprepared."
+          ]
+        },
+        {
+          "caseTitle": "Amount of storage required to host all of Spotify's music.",
+          "source": "case",
+          "scenario": "You are asked to estimate Spotify's total raw audio storage requirements in a system design round.",
+          "question": "Which scoping choice is most critical for the initial framing step here?",
+          "options": [
+            "Ignore album art and user playlists to focus on audio.",
+            "Ask if we should count lossless FLAC files for audiophiles.",
+            "Include every single podcast episode ever recorded globally.",
+            "Estimate user profile pictures alongside the main catalog."
+          ],
+          "correctIndex": 0,
+          "explanation": "Stripping out metadata and non-core files keeps the calculation focused on the main storage driver. This demonstrates strong prioritization skills.",
+          "whyWrong": [
+            "",
+            "Lossless files are not the standard tier for most users and would distort your average file size baseline.",
+            "Podcasts are a massive separate media category that would completely bloat your primary music storage model.",
+            "User profile pictures and metadata are tiny rounding errors compared to raw audio files."
+          ]
+        },
+        {
+          "caseTitle": "How many smartphones are sold in the US annually?",
+          "source": "case",
+          "scenario": "Your interviewer asks for annual smartphone sales in the United States market today.",
+          "question": "How should you handle used and refurbished phones in your opening scope?",
+          "options": [
+            "Include them because second hand sales represent real demand.",
+            "Count them only if they were traded in at Apple.",
+            "Exclude them to focus entirely on new device purchases.",
+            "Split them evenly across all major carrier retail stores."
+          ],
+          "correctIndex": 2,
+          "explanation": "Market sizing prompts typically target gross new manufacturing shipments and primary retail sales unless specified otherwise. Excluding used phones keeps the primary demand clean.",
+          "whyWrong": [
+            "Splitting them across stores is a calculation tactic, not a discovery and framing decision.",
+            "",
+            "Second hand sales do not generate primary manufacturer revenue in the same way new units do.",
+            "Focusing only on Apple trade-ins misses the massive Android secondary market completely."
+          ]
+        },
+        {
+          "caseTitle": "Amazon.in Daily Sales",
+          "source": "case",
+          "scenario": "You are estimating daily sales volume for Amazon in the Indian domestic market.",
+          "question": "What is the best way to treat digital downloads and B2B orders in your frame?",
+          "options": [
+            "Estimate them using gross merchandise value multipliers later.",
+            "Deliberately exclude them to keep physical retail grounded.",
+            "Ask the interviewer if digital goods matter for revenue.",
+            "Include them to capture the full economic marketplace value."
+          ],
+          "correctIndex": 1,
+          "explanation": "Bounding your problem to physical goods delivered to households keeps the delivery and order math manageable. B2B and digital goods operate on completely different unit economics.",
+          "whyWrong": [
+            "Using hidden multipliers skips the vital upfront framing step of defining what you count.",
+            "",
+            "Asking the interviewer for permission shows a lack of structured product ownership.",
+            "Including digital downloads introduces software margins that break simple physical shipping assumptions."
+          ]
+        },
+        {
+          "caseTitle": "Saturday Food Delivery Orders in a Large City",
+          "source": "case",
+          "scenario": "An interviewer asks you to estimate Saturday food delivery orders in a ten million person city.",
+          "question": "How should you treat grocery deliveries and direct phone orders?",
+          "options": [
+            "Exclude them to focus strictly on app restaurant deliveries.",
+            "Ask the panel which delivery apps they personally prefer.",
+            "Include them because food delivery covers all food types.",
+            "Add them as a separate percentage of total household income."
+          ],
+          "correctIndex": 0,
+          "explanation": "Setting clear boundaries ensures you do not mix grocery logistics with hot restaurant meal delivery. Different unit economics require separate mental buckets.",
+          "whyWrong": [
+            "Grocery deliveries happen on completely different schedules and basket sizes than hot meals.",
+            "",
+            "Adding them as an income percentage mixes up demographic segmentation with channel scoping.",
+            "Asking about personal preferences wastes precious interview time on irrelevant anecdotes."
+          ]
+        },
+        {
+          "caseTitle": "Estimate the daily revenue of a Starbucks in New York City.",
+          "source": "case",
+          "scenario": "You need to estimate the daily revenue of a single busy Starbucks location in Manhattan.",
+          "question": "What is the most professional way to handle airport kiosks and drive-thrus?",
+          "options": [
+            "Include them to capture all possible coffee purchase methods.",
+            "Average them out with standard urban store footprints.",
+            "Deliberately exclude them because economics differ entirely.",
+            "Ask if the manager is running any special holiday promos."
+          ],
+          "correctIndex": 2,
+          "explanation": "Manhattan foot traffic operates under vastly different cost and volume structures than highway drive-thrus or airport security zones. Scoping them out preserves model integrity.",
+          "whyWrong": [
+            "Airport kiosks have captive audiences and different pricing, which ruins your baseline assumptions.",
+            "Averaging wildly different store formats together produces a meaningless hybrid estimate.",
+            "",
+            "Holiday promotions are temporary operational noise that regular guesstimates ignore."
+          ]
+        },
+        {
+          "caseTitle": "Bonus: Netflix Monthly Active Users in Brazil",
+          "source": "bonus",
+          "scenario": "You are consulting for a streaming service and need to size the Brazilian subscriber base.",
+          "question": "Which scoping statement demonstrates the best discovery and framing practice?",
+          "options": [
+            "Count active household streaming profiles while excluding free trials.",
+            "Estimate mobile data caps before looking at subscriber numbers.",
+            "Include every single person living inside the country borders.",
+            "Ask the interviewer how many subscribers Netflix currently has."
+          ],
+          "correctIndex": 0,
+          "explanation": "Focusing on active paying household profiles filters out inactive accounts and free trials, giving you a realistic base for revenue or engagement models.",
+          "whyWrong": [
+            "Counting every single citizen ignores babies, toddlers, and people without internet access.",
+            "",
+            "Asking for the exact answer defeats the entire purpose of a guesstimate interview case.",
+            "Mobile data caps are an implementation detail that belongs deeper in the technical segment."
+          ]
+        },
+        {
+          "caseTitle": "Bonus: Airbnb Nightly Bookings Worldwide",
+          "source": "bonus",
+          "scenario": "You are evaluating travel marketplace metrics and need to size global Airbnb transactions.",
+          "question": "What is the best way to frame the types of properties included in your count?",
+          "options": [
+            "Add a luxury villa multiplier to your final transaction sum.",
+            "Ask the interviewer which countries are currently restricted.",
+            "Focus on short-term residential rentals while excluding hotels.",
+            "Include traditional hotel rooms since they compete directly."
+          ],
+          "correctIndex": 2,
+          "explanation": "Airbnb primarily facilitates peer-to-peer residential stays, so excluding traditional commercial hotels keeps the supply side model aligned with their actual core business.",
+          "whyWrong": [
+            "Luxury multipliers hide sloppy scoping rather than defining what is actually in your market.",
+            "Restricted countries are a geography question, whereas properties define the product scope.",
+            "",
+            "Traditional hotels operate on hotel management systems and booking channels outside Airbnb."
+          ]
+        }
+      ]
+    },
+    "structure": {
+      "key": "structure",
+      "competency": "structured_thinking",
+      "subtitle": "Master MECE structure to build a clean, calculable estimation tree.",
+      "lesson": {
+        "hook": "Stop guessing numbers blindly. Build a tree that does the heavy lifting for you.",
+        "what": "Structure means breaking a massive market down into mutually exclusive and collectively exhaustive parts. This turns an impossible guess into simple multiplication.",
+        "how": [
+          "Define your scope and explicitly state exclusions.",
+          "Split the total market into logical sub-segments.",
+          "Check that your branches cover everything without overlap."
+        ],
+        "example": "For Spotify storage, segment the total catalog size by average song duration and standard audio bitrate. This creates a clear calculation path from tracks to gigabytes.",
+        "mistake": "Skipping straight to math without a structured breakdown leaves critical segments uncounted."
+      },
+      "questions": [
+        {
+          "caseTitle": "Estimate the number of commercial flights in the air right now globally.",
+          "source": "case",
+          "scenario": "You are interviewing at a top tech firm and need to estimate airborne commercial flights globally right now.",
+          "question": "Which top-down structure best ensures your estimate is mutually exclusive and collectively exhaustive?",
+          "options": [
+            "Split global flights by 24 hour time zones and regional flight density.",
+            "Calculate total flights using airline revenue and average ticket prices.",
+            "Segment by long haul international routes and short haul domestic routes.",
+            "Divide by aircraft manufacturer type and average passenger seating capacity."
+          ],
+          "correctIndex": 0,
+          "explanation": "Splitting by time zones and regional density captures global activity across a full daily cycle without gaps. Time zones and regional density form a MECE coverage of the globe.",
+          "whyWrong": [
+            "",
+            "Using revenue and ticket prices relates to financial metrics rather than physical flight counts in the air.",
+            "Dividing by route length misses regional and cargo flights that do not fit standard domestic versus international buckets.",
+            "A smart candidate might try aircraft types, but manufacturer models do not scale cleanly to global hourly flight counts."
+          ]
+        },
+        {
+          "caseTitle": "Amount of storage required to host all of Spotify's music.",
+          "source": "case",
+          "scenario": "An engineering panel asks you to size the raw storage needed to host every single audio track on Spotify.",
+          "question": "What is the most rigorous structural breakdown for calculating this total audio storage volume?",
+          "options": [
+            "Multiply total tracks by average song duration and standard audio bitrate.",
+            "Calculate storage based on active daily users and their playlist downloads.",
+            "Estimate total server costs and divide by average gigabyte hosting prices.",
+            "Segment songs by music genre and average compression ratios used by artists."
+          ],
+          "correctIndex": 0,
+          "explanation": "Multiplying tracks, duration, and bitrate covers every audio file directly through fundamental data units. This creates a calculable tree directly from file characteristics.",
+          "whyWrong": [
+            "",
+            "User playlist downloads measure consumption rather than the total hosted catalog storage requested by the prompt.",
+            "Server costs and hosting prices lead to financial figures instead of raw digital storage capacity.",
+            "Genre segmentation is unnecessary and does not cleanly map to standardized file sizes or bitrate calculations."
+          ]
+        },
+        {
+          "caseTitle": "Estimate the global market size for electric scooters.",
+          "source": "case",
+          "scenario": "You need to size the global market for electric scooters during a product strategy interview case.",
+          "question": "How should you structure the top-down estimation tree for global electric scooter sales?",
+          "options": [
+            "Calculate market size using average battery life and manufacturing material costs.",
+            "Segment by maximum speed capabilities and battery charging station availability.",
+            "Divide total sales between consumer retail purchases and commercial fleet rentals.",
+            "Split the global population by urban density and personal vehicle adoption rates."
+          ],
+          "correctIndex": 2,
+          "explanation": "Splitting between consumer retail and commercial fleets captures all buyers without overlap. Retail and commercial fleet rentals are mutually exclusive channels that cover the whole market.",
+          "whyWrong": [
+            "Battery life and material costs are unit economics details, not top-level market sizing branches.",
+            "Speed capabilities and charging stations describe product features rather than total market purchase volume.",
+            "",
+            "Urban density is helpful for context, but population splits alone do not cleanly capture scooter purchase channels."
+          ]
+        },
+        {
+          "caseTitle": "How many WhatsApp messages are sent worldwide per day?",
+          "source": "case",
+          "scenario": "An interviewer wants to know the total daily message volume processed by WhatsApp across the globe.",
+          "question": "Which structural approach provides the cleanest MECE foundation for global message volume?",
+          "options": [
+            "Split messages into text format, photo attachments, and video uploads.",
+            "Calculate volume using company server bandwidth and average packet sizes.",
+            "Divide total messages by mobile operating systems and cellular network speeds.",
+            "Segment active users by demographic regions and average daily message frequency."
+          ],
+          "correctIndex": 3,
+          "explanation": "Segmenting users by region and frequency scales message volume cleanly across the global active user base. User regions and frequency form a comprehensive, non overlapping tree.",
+          "whyWrong": [
+            "Splitting by media type leaves out group chat dynamics and fails to cover total volume easily.",
+            "Server bandwidth and packet sizes represent technical infrastructure rather than user messaging behavior.",
+            "Operating systems and network speeds do not correlate reliably with individual messaging habits.",
+            ""
+          ]
+        },
+        {
+          "caseTitle": "Number of daily subway riders in Tokyo.",
+          "source": "case",
+          "scenario": "You are tasked with estimating unique daily subway riders in the Tokyo metropolitan area.",
+          "question": "What is the best structural way to carve up the Tokyo population for this estimate?",
+          "options": [
+            "Divide residents by age brackets to separate commuter and student travel habits.",
+            "Calculate ridership using total station turnstile capacity and train schedules.",
+            "Split daily riders by tourist visitors and local corporate office workers.",
+            "Segment the population by daily income levels and preferred transit methods."
+          ],
+          "correctIndex": 0,
+          "explanation": "Age brackets separate students, working adults, and seniors whose travel habits differ significantly. Demographics by age provide a reliable proxy for daily transit usage rates.",
+          "whyWrong": [
+            "",
+            "Turnstile capacity and train schedules describe supply constraints rather than actual rider demand.",
+            "Tourists and office workers miss large segments of the population including school children and retirees.",
+            "Income levels do not dictate subway usage as clearly as age and daily commuting obligations do."
+          ]
+        },
+        {
+          "caseTitle": "Estimate Google's annual revenue worldwide.",
+          "source": "case",
+          "scenario": "You are asked to estimate Google annual revenue worldwide during a business case interview.",
+          "question": "Which structure correctly breaks down Google revenue into distinct, comprehensive pillars?",
+          "options": [
+            "Split revenue streams by geographic regions and local currency exchange rates.",
+            "Segment by search ads, YouTube ads, Google Cloud, and app store commissions.",
+            "Calculate earnings using global internet users, click-through rates, and ad prices.",
+            "Divide total revenue between enterprise software clients and consumer hardware buyers."
+          ],
+          "correctIndex": 1,
+          "explanation": "Google makes money through distinct monetization engines that cover its entire business model without overlap. These four pillars represent the true revenue streams of the parent company.",
+          "whyWrong": [
+            "Geographic regions mix different product lines together instead of isolating distinct business models.",
+            "",
+            "Users and click-through rates are calculation inputs for ads, not the top-level revenue pillars.",
+            "Enterprise software and consumer hardware ignore the massive advertising engine that drives most of the business."
+          ]
+        },
+        {
+          "caseTitle": "Netflix Daily Global Streaming Hours",
+          "source": "bonus",
+          "scenario": "You need to estimate the total number of hours users spend streaming video on Netflix globally each day.",
+          "question": "What is the most effective MECE structure to calculate total daily streaming hours?",
+          "options": [
+            "Segment streaming hours by movie length, TV show episodes, and documentaries.",
+            "Multiply total paid subscribers by average hours watched per subscriber daily.",
+            "Divide global population by broadband internet penetration and subscription tiers.",
+            "Calculate total hours using server bandwidth consumption and video bitrates."
+          ],
+          "correctIndex": 1,
+          "explanation": "Subscribers multiplied by daily viewing hours per subscriber directly yields total streaming hours. This structure uses the core customer base as the primary calculation node.",
+          "whyWrong": [
+            "Segmenting by content type makes it difficult to estimate aggregate time spent across millions of users.",
+            "",
+            "Broadband penetration and subscription tiers complicate the top level before you account for user habits.",
+            "Server bandwidth and bitrates measure data transfer rather than human viewing time."
+          ]
+        },
+        {
+          "caseTitle": "Duolingo Daily Active Learners",
+          "source": "bonus",
+          "scenario": "An interviewer asks you to estimate the number of daily active users learning languages on Duolingo.",
+          "question": "Which top-down structure creates a solid MECE framework for estimating daily active users?",
+          "options": [
+            "Segment total registered user accounts by geographic region and retention tier.",
+            "Divide the global population by smartphone ownership and language learning interest.",
+            "Calculate users by daily push notifications sent and average click rates.",
+            "Split learners by school students, career professionals, and casual hobbyists."
+          ],
+          "correctIndex": 1,
+          "explanation": "Splitting global population by smartphone access and learning interest filters down to the addressable audience. Smartphone ownership and interest form a clean funnel to active users.",
+          "whyWrong": [
+            "Registered accounts often include inactive or churned users, making it a misleading starting point.",
+            "",
+            "Notifications and click rates are product engagement tactics, not population segmentation roots.",
+            "Learner intent categories overlap heavily and do not cover the entire active user base cleanly."
+          ]
+        }
+      ]
+    },
+    "assumptions": {
+      "key": "assumptions",
+      "competency": "structured_thinking",
+      "subtitle": "State explicit assumptions with defensible backing rather than guessing blindly.",
+      "lesson": {
+        "hook": "Stop pulling numbers out of thin air before interviewers catch you.",
+        "what": "Assumptions form the backbone of any top down estimation model. You must state them clearly and back them with logic.",
+        "how": [
+          "Define scope limits clearly",
+          "State baseline metrics explicitly",
+          "Justify every split you make"
+        ],
+        "example": "For Spotify, we assume one hundred million tracks and calculate storage based on standard audio bitrates.",
+        "mistake": "Picking random numbers without explaining why they make sense for the target market."
+      },
+      "questions": [
+        {
+          "caseTitle": "Estimate the number of commercial flights in the air right now globally.",
+          "source": "case",
+          "scenario": "You are estimating global commercial flights airborne right this minute.",
+          "question": "How should you handle private jets and military aircraft in your model?",
+          "options": [
+            "Include them inside a broad aviation growth category",
+            "Add a ten percent buffer for private aviation usage",
+            "Estimate them separately using military budget data",
+            "Deliberately exclude them to keep the math manageable"
+          ],
+          "correctIndex": 3,
+          "explanation": "Explicitly excluding edge cases keeps your scope clean and manageable. This defensible boundary prevents unnecessary math complexity.",
+          "whyWrong": [
+            "Including them creates unnecessary complexity since their data is hard to source.",
+            "Adding arbitrary buffers without clear reasoning violates estimation best practices.",
+            "Military data is classified and will derail your core estimation flow.",
+            ""
+          ]
+        },
+        {
+          "caseTitle": "Amount of storage required to host all of Spotify's music.",
+          "source": "case",
+          "scenario": "You are calculating the raw storage needed to host all of Spotify's music library.",
+          "question": "What is the best way to handle user playlists and album art in your setup?",
+          "options": [
+            "Calculate them using average user account storage consumption",
+            "Bundle them into a single metadata storage multiplier",
+            "Ignore album art and playlists for now to focus on audio",
+            "Estimate image file sizes across all active user playlists"
+          ],
+          "correctIndex": 2,
+          "explanation": "Focusing purely on the core audio files keeps the primary assumption defensible. Secondary assets can be acknowledged and explicitly left out.",
+          "whyWrong": [
+            "User account storage varies wildly and makes your baseline assumption weak.",
+            "Multiplying blind metadata figures adds ungrounded complexity to the model.",
+            "",
+            "Calculating image sizes for playlists drags you into unnecessary peripheral math."
+          ]
+        },
+        {
+          "caseTitle": "How many smartphones are sold in the US annually?",
+          "source": "case",
+          "scenario": "You are estimating annual smartphone sales in the United States market.",
+          "question": "How should you treat enterprise bulk orders and used phones?",
+          "options": [
+            "Estimate enterprise sales separately using corporate tech budget reports",
+            "Include them to capture the total active device replacement cycle",
+            "Add a secondhand market adjustment factor to your total sales",
+            "Explicitly exclude them to focus on new consumer purchases"
+          ],
+          "correctIndex": 3,
+          "explanation": "Explicit exclusions keep your target segment clean and easy to calculate. Trying to blend enterprise and consumer creates messy assumptions.",
+          "whyWrong": [
+            "Corporate tech budgets introduce too many variables for a quick guesstimate.",
+            "Mixing enterprise bulk purchases with consumer sales corrupts your adoption math.",
+            "Secondhand phones do not count toward new annual hardware sales volume.",
+            ""
+          ]
+        },
+        {
+          "caseTitle": "Amazon.in Daily Sales",
+          "source": "case",
+          "scenario": "You are estimating daily sales on Amazon dot in across India.",
+          "question": "Which assumption should you make regarding digital downloads and B2B orders?",
+          "options": [
+            "Factor in digital downloads using active Prime subscriber penetration rates",
+            "Leave them out to keep the physical goods math grounded",
+            "Estimate B2B bulk orders using average merchant shipping weights",
+            "Include digital goods because they drive high margin platform revenue"
+          ],
+          "correctIndex": 1,
+          "explanation": "Leaving out non-core items establishes a clear boundary for your physical goods model. This defensible scoping protects your underlying calculations.",
+          "whyWrong": [
+            "Subscriber rates do not cleanly map to digital download transaction counts.",
+            "",
+            "Merchant shipping weights are irrelevant when estimating consumer physical retail volume.",
+            "Digital goods follow entirely different logistics and inventory cost structures."
+          ]
+        },
+        {
+          "caseTitle": "Saturday Food Delivery Orders in a Large City",
+          "source": "case",
+          "scenario": "You are sizing app-based restaurant deliveries on a Saturday in a large city.",
+          "question": "How should you treat grocery deliveries and direct phone orders?",
+          "options": [
+            "Explicitly exclude them because habits vary across categories",
+            "Combine grocery and food delivery into one massive delivery bucket",
+            "Include them since they run on identical third-party logistics networks",
+            "Factor them in using standard local restaurant order ratios"
+          ],
+          "correctIndex": 0,
+          "explanation": "Excluding grocery and phone orders ensures your delivery assumption remains focused. Different categories have different frequency patterns and unit economics.",
+          "whyWrong": [
+            "",
+            "Combining them destroys the granular accuracy of your top-down model.",
+            "Grocery orders and restaurant meals have completely different ordering frequencies.",
+            "Local phone orders lack app data transparency and skew delivery averages."
+          ]
+        },
+        {
+          "caseTitle": "Google Search Queries per Second",
+          "source": "case",
+          "scenario": "You are calculating global text, image, and voice queries on Google Search.",
+          "question": "What is the correct approach for handling API traffic and internal pings?",
+          "options": [
+            "Deliberately exclude them to focus on genuine human search behavior",
+            "Estimate API traffic using enterprise cloud computing usage benchmarks",
+            "Include them because they represent automated queries on the infrastructure",
+            "Factor in developer pings as a percentage of total web traffic"
+          ],
+          "correctIndex": 0,
+          "explanation": "Excluding automated traffic ensures your assumption measures actual user search habits. Human behavior is much easier to segment by population demographics.",
+          "whyWrong": [
+            "",
+            "Cloud computing benchmarks have no direct correlation to search query frequency.",
+            "Automated API calls do not reflect normal daily human search intent.",
+            "Developer pings introduce noise that ruins your clean top-down population model."
+          ]
+        },
+        {
+          "caseTitle": "Netflix Daily Global Streaming Hours",
+          "source": "bonus",
+          "scenario": "You are estimating the total daily streaming hours across all Netflix users globally.",
+          "question": "How should you account for shared accounts and multiple viewers per screen?",
+          "options": [
+            "State an explicit average of viewers per active household login",
+            "Assume every single subscriber streams content simultaneously during peak hours",
+            "Calculate multi-viewer households using broadband connection speed data reports",
+            "Ignore shared accounts because billing tiers already capture household usage"
+          ],
+          "correctIndex": 0,
+          "explanation": "Stating an explicit average per household grounds your viewing time math in reality. Assuming simultaneous streaming for all users would inflate your numbers.",
+          "whyWrong": [
+            "",
+            "Assuming everyone streams at once creates an absurdly high and unrealistic volume.",
+            "Broadband speeds do not correlate with how many people watch the screen.",
+            "Ignoring account sharing misses a major driver of actual viewing hours."
+          ]
+        },
+        {
+          "caseTitle": "Airbnb Active Listings Worldwide",
+          "source": "bonus",
+          "scenario": "You are estimating the total number of active property listings on Airbnb globally.",
+          "question": "How should you handle vacant homes and inactive host accounts in your model?",
+          "options": [
+            "Estimate inactive hosts using regional real estate vacancy rate statistics",
+            "Assume every host lists multiple properties across different urban locations",
+            "Define an active listing threshold based on minimum annual bookings",
+            "Include all registered properties since they remain visible on the platform"
+          ],
+          "correctIndex": 2,
+          "explanation": "Defining a clear threshold for activity makes your supply-side assumption defensible. Registered accounts do not equal active marketplace inventory.",
+          "whyWrong": [
+            "Real estate vacancy rates apply to long-term housing, not short-term rentals.",
+            "Assuming multiple listings per host without proof skews your supply calculation.",
+            "",
+            "Registered properties often include abandoned accounts that never accept guests."
+          ]
+        }
+      ]
+    },
+    "arithmetic": {
+      "key": "arithmetic",
+      "competency": "measurement",
+      "subtitle": "Master the art of clean calculation during high stakes interviews.",
+      "lesson": {
+        "hook": "Do not let simple math anxiety ruin a brilliant structured framework.",
+        "what": "Arithmetic in guesstimates requires multiplying factors clearly and rounding numbers logically. Clean multiplication steps keep your interviewer following your logic effortlessly.",
+        "how": [
+          "Break complex numbers down into simple multiples.",
+          "Round aggressively before multiplying large figures together.",
+          "State your intermediate totals aloud to maintain clarity."
+        ],
+        "example": "If five million people order twice weekly, calculate ten million weekly orders easily.",
+        "mistake": "Trying to calculate exact decimals in your head instead of using sensible rounded numbers."
+      },
+      "questions": [
+        {
+          "caseTitle": "Estimate the number of commercial flights in the air right now globally.",
+          "source": "case",
+          "scenario": "You are calculating global airborne commercial flights across a twenty four hour rolling cycle.",
+          "question": "If twenty thousand flights fly daily and each stays airborne for three hours, how many are up simultaneously?",
+          "options": [
+            "Two thousand five hundred commercial planes aloft right now.",
+            "Two thousand five hundred active flights in total.",
+            "Two thousand five hundred commercial airplanes.",
+            "Two thousand five hundred planes currently in the sky."
+          ],
+          "correctIndex": 0,
+          "explanation": "Divide twenty thousand daily flights by eight three hour blocks to get two thousand five hundred. Clear division makes the math traceable.",
+          "whyWrong": [
+            "A smart candidate might use exact flight hours instead of simple blocks.",
+            "",
+            "Candidates might rush the division step and miss the core calculation.",
+            "Someone might forget to mention commercial planes explicitly in the final tally."
+          ]
+        },
+        {
+          "caseTitle": "Amount of storage required to host all of Spotify's music.",
+          "source": "case",
+          "scenario": "You are sizing the raw audio storage for one hundred million tracks on Spotify.",
+          "question": "With one hundred million tracks averaging four minutes at one megabyte per minute, what is the total storage?",
+          "options": [
+            "Four hundred thousand gigabytes required for tracks.",
+            "Four hundred thousand gigabytes of raw audio storage space.",
+            "Four hundred thousand gigabytes.",
+            "Four hundred thousand gigabytes of total audio data."
+          ],
+          "correctIndex": 2,
+          "explanation": "One hundred million tracks multiplied by four megabytes each equals four hundred million megabytes, which converts to four hundred thousand gigabytes.",
+          "whyWrong": [
+            "A smart person might include album art storage by accident in this number.",
+            "A candidate might mistakenly convert megabytes straight to gigabytes by dividing by one thousand.",
+            "",
+            "Someone could confuse megabytes with kilobytes during the initial track sizing estimation."
+          ]
+        },
+        {
+          "caseTitle": "How many smartphones are sold in the US annually?",
+          "source": "case",
+          "scenario": "You are estimating annual smartphone sales in the United States for a consumer electronics market sizing case.",
+          "question": "If three hundred thirty million people buy a new phone every three years, what is the annual sales volume?",
+          "options": [
+            "One hundred ten million smartphones sold each year.",
+            "One hundred ten million new smartphones sold annually.",
+            "One hundred ten million devices purchased every year.",
+            "One hundred ten million phones."
+          ],
+          "correctIndex": 1,
+          "explanation": "Divide the three hundred thirty million population by the three year replacement cycle to get one hundred ten million annual sales.",
+          "whyWrong": [
+            "Someone could use a four year replacement cycle by mistake in the calculation.",
+            "",
+            "A smart candidate might multiply population by three instead of dividing by three.",
+            "A candidate might factor in enterprise bulk purchases incorrectly into consumer sales."
+          ]
+        },
+        {
+          "caseTitle": "Amazon.in Daily Sales",
+          "source": "case",
+          "scenario": "You are calculating daily physical goods orders on Amazon in India for a market sizing exercise.",
+          "question": "If three hundred million households order one package every ten days, what is the daily order volume?",
+          "options": [
+            "Thirty million daily orders.",
+            "Thirty million daily package deliveries processed across India.",
+            "Thirty million orders fulfilled every day.",
+            "Thirty million packages delivered to households daily."
+          ],
+          "correctIndex": 0,
+          "explanation": "Divide three hundred million households by the ten day frequency to arrive at thirty million daily orders.",
+          "whyWrong": [
+            "",
+            "A candidate might accidentally multiply households by ten instead of dividing.",
+            "A smart person might confuse household counts with total individual population figures.",
+            "Someone could use a seven day weekly cycle by mistake in the math."
+          ]
+        },
+        {
+          "caseTitle": "Uber Rides Worldwide in a Day",
+          "source": "case",
+          "scenario": "You are estimating global daily rides for Uber across ten thousand cities worldwide.",
+          "question": "If ten thousand cities average two thousand rides per city daily, what is the global daily total?",
+          "options": [
+            "Twenty million rides across all cities.",
+            "Twenty million trips taken worldwide every day.",
+            "Twenty million rides.",
+            "Twenty million daily rides completed globally."
+          ],
+          "correctIndex": 2,
+          "explanation": "Multiply ten thousand cities by two thousand rides each to get twenty million daily rides worldwide.",
+          "whyWrong": [
+            "A smart person might add instead of multiplying the two figures together.",
+            "Someone could assume every city has identical ride volume without segmenting tiers.",
+            "",
+            "A candidate might miscount zeros when multiplying thousands by thousands."
+          ]
+        },
+        {
+          "caseTitle": "Estimate the daily revenue of a Starbucks in New York City.",
+          "source": "case",
+          "scenario": "You are breaking down the daily revenue of a busy Manhattan Starbucks location across operating shifts.",
+          "question": "If three hundred morning customers spend ten dollars each, what is the morning rush revenue total?",
+          "options": [
+            "Three thousand dollars from morning coffee sales.",
+            "Three thousand dollars in morning revenue.",
+            "Three thousand dollars earned during morning peak.",
+            "Three thousand dollars."
+          ],
+          "correctIndex": 3,
+          "explanation": "Multiply three hundred customers by ten dollars average ticket size to get three thousand dollars in revenue.",
+          "whyWrong": [
+            "A smart person might include afternoon mobile orders in the morning block.",
+            "A candidate might divide instead of multiplying the customer count and ticket size.",
+            "Someone could use a twenty dollar ticket size by overestimating pastry purchases.",
+            ""
+          ]
+        },
+        {
+          "caseTitle": "Netflix Global Annual Subscription Revenue",
+          "source": "case",
+          "scenario": "You are estimating global subscription revenue for Netflix using a top down subscriber tier model.",
+          "question": "If two hundred million subscribers pay an average of fifteen dollars monthly, what is the annual revenue?",
+          "options": [
+            "Thirty six billion dollars in total yearly subscription revenue.",
+            "Thirty six billion dollars collected annually from global streaming users.",
+            "Thirty six billion dollars generated by Netflix each year.",
+            "Thirty six billion dollars."
+          ],
+          "correctIndex": 3,
+          "explanation": "Two hundred million times fifteen dollars is three billion monthly, multiplied by twelve months gives thirty six billion dollars annually.",
+          "whyWrong": [
+            "A candidate might forget to multiply the monthly total by twelve months.",
+            "Someone could use a ten dollar average price point by assuming lower emerging market tiers.",
+            "A smart person might include advertising revenue tiers incorrectly in basic subscription math.",
+            ""
+          ]
+        },
+        {
+          "caseTitle": "Spotify Premium Family Plan Conversion",
+          "source": "case",
+          "scenario": "You are calculating monthly revenue for Spotify family plan upgrades in a European market case.",
+          "question": "If five million users upgrade to a fifteen dollar family plan, what is the total monthly revenue?",
+          "options": [
+            "Seventy five million dollars generated every month.",
+            "Seventy five million dollars.",
+            "Seventy five million dollars collected from upgrades.",
+            "Seventy five million dollars in monthly subscription revenue."
+          ],
+          "correctIndex": 1,
+          "explanation": "Multiply five million users by fifteen dollars each to calculate seventy five million dollars in monthly revenue.",
+          "whyWrong": [
+            "Someone could use a ten dollar individual price point by mixing up plan tiers.",
+            "",
+            "A smart person might calculate annual revenue instead of the requested monthly figure.",
+            "A candidate might divide the user count by the price instead of multiplying."
+          ]
+        }
+      ]
+    },
+    "sanity_check": {
+      "key": "sanity_check",
+      "competency": "measurement",
+      "subtitle": "Reality check your final number against known reference points.",
+      "lesson": {
+        "hook": "Stop trusting your math blindly before the interviewer laughs at your billions.",
+        "what": "A sanity check is a quick reality test of your final number against known real world benchmarks. It ensures your calculations did not accidentally produce an impossible scale.",
+        "how": [
+          "Identify a known benchmark metric for comparison.",
+          "Compare your total output per capita or per day.",
+          "Adjust your underlying assumptions if the math defies logic."
+        ],
+        "example": "If your model says a coffee shop serves fifty thousand coffees daily, pause and check if the staff can physically pour one per second.",
+        "mistake": "Accepting a wildly impossible final number just because you multiplied the factors correctly."
+      },
+      "questions": [
+        {
+          "caseTitle": "Estimate the number of commercial flights in the air right now globally.",
+          "source": "case",
+          "scenario": "You just calculated twenty five thousand planes airborne right now.",
+          "question": "How do you perform a proper sanity check on this global total?",
+          "options": [
+            "Compare against total daily flights tracked by major aviation databases.",
+            "Verify the total passenger capacity matches global hotel room counts.",
+            "Check if each airline has enough pilots to fly them.",
+            "Assume the math is correct because multiplication was done cleanly."
+          ],
+          "correctIndex": 0,
+          "explanation": "Comparing your output against published aviation industry flight statistics is the most direct validation. It anchors your abstract calculation in concrete reality.",
+          "whyWrong": [
+            "",
+            "Hotel room counts measure accommodation rather than active commercial aviation traffic volume.",
+            "Pilot availability is an operational constraint rather than a direct check on total aircraft currently aloft.",
+            "Trusting unchecked multiplication defeats the entire purpose of doing a structured sanity check."
+          ]
+        },
+        {
+          "caseTitle": "Amount of storage required to host all of Spotify's music.",
+          "source": "case",
+          "scenario": "Your model outputs one hundred petabytes of total audio storage for Spotify.",
+          "question": "What is the best way to sanity check this storage calculation?",
+          "options": [
+            "Ensure users have enough phone storage to download every song.",
+            "Compare the total storage against known public data center capacities.",
+            "Multiply average track size by total catalog size to verify baseline.",
+            "Check how many physical hard drives fit inside a server rack."
+          ],
+          "correctIndex": 1,
+          "explanation": "Comparing your derived storage size against known public benchmarks for large streaming services grounds your numbers. It catches massive order of magnitude errors instantly.",
+          "whyWrong": [
+            "User device storage limits have little correlation with total server side music hosting requirements.",
+            "",
+            "Multiplying track size by catalog size is how you built the model, not a sanity check.",
+            "Hard drive physical rack sizing is an infrastructure detail unrelated to high level storage validation."
+          ]
+        },
+        {
+          "caseTitle": "Estimate the daily revenue of a Starbucks in New York City.",
+          "source": "case",
+          "scenario": "Your model concludes a single Manhattan Starbucks makes fifty thousand dollars daily.",
+          "question": "How should you sanity check this daily revenue figure?",
+          "options": [
+            "Verify that rental costs in Manhattan match the projected profit margin.",
+            "Calculate if a barista can process enough transactions within operating hours.",
+            "Check if total neighborhood coffee consumption supports this large store revenue.",
+            "Assume high foot traffic justifies any revenue number you calculate."
+          ],
+          "correctIndex": 1,
+          "explanation": "Checking transaction throughput against physical time limits and staffing constraints reveals if the revenue is logistically possible. Fifty thousand dollars requires processing hundreds of orders every single hour.",
+          "whyWrong": [
+            "Rental costs and profit margins are financial variables distinct from transaction volume throughput.",
+            "",
+            "Neighborhood coffee consumption is already part of your initial top down demand estimation.",
+            "Assuming high traffic justifies any number skips the actual validation process entirely."
+          ]
+        },
+        {
+          "caseTitle": "How many WhatsApp messages are sent worldwide per day?",
+          "source": "case",
+          "scenario": "You calculate one hundred billion messages sent globally every single day.",
+          "question": "What is a reliable way to sanity check this messaging volume?",
+          "options": [
+            "Verify that smartphone batteries can sustain this heavy messaging activity level.",
+            "Compare daily message volume against total global smartphone user population counts.",
+            "Ensure cellular networks have enough bandwidth to transmit all data packets.",
+            "Calculate average messages per user to see if humanly possible."
+          ],
+          "correctIndex": 3,
+          "explanation": "Breaking the total down to a per user basis lets you evaluate if thirty messages per person daily makes sense. It prevents you from pitching absurdly high or low daily totals.",
+          "whyWrong": [
+            "Battery consumption limits do not provide a clear numerical benchmark for daily message volume.",
+            "Comparing against population counts gives total users, but does not test per person messaging frequency.",
+            "Cellular network bandwidth is an infrastructure concern rather than a personal usage behavior check.",
+            ""
+          ]
+        },
+        {
+          "caseTitle": "How many tennis balls can fit in a Boeing 747?",
+          "source": "case",
+          "scenario": "Your calculation says two million tennis balls fit inside the aircraft cabin.",
+          "question": "How do you sanity check this physical volume estimation?",
+          "options": [
+            "Assume the packing efficiency percentage accurately accounts for empty cabin spaces.",
+            "Compare total ball volume against known cargo capacity limits in liters.",
+            "Measure the exact diameter of a standard tennis ball with precision.",
+            "Check if the aircraft wings can support the weight of tennis balls."
+          ],
+          "correctIndex": 1,
+          "explanation": "Checking your calculated volume against official aircraft cargo capacity in cubic meters or liters instantly exposes math errors. It keeps your spatial estimation grounded in real aircraft dimensions.",
+          "whyWrong": [
+            "Assuming packing efficiency is correct ignores the need to validate the final output against benchmarks.",
+            "",
+            "Measuring a single ball precision is a setup step, not a macro level sanity check.",
+            "Wing support is a structural weight question, whereas fitting balls is primarily a volume capacity test."
+          ]
+        },
+        {
+          "caseTitle": "Number of daily subway riders in Tokyo.",
+          "source": "case",
+          "scenario": "Your model yields twenty five million daily subway riders in Tokyo.",
+          "question": "What is the most effective sanity check for this transit number?",
+          "options": [
+            "Verify that platform safety barriers can withstand massive crowd pressures.",
+            "Ensure train schedules run on time during the morning rush hour.",
+            "Compare your rider count against the total Tokyo metro population size.",
+            "Calculate the total electricity needed to power all station ticket gates."
+          ],
+          "correctIndex": 2,
+          "explanation": "Comparing daily ridership against total population helps you realize twenty five million riders exceeds the entire city population. That simple comparison flags an obvious overcount.",
+          "whyWrong": [
+            "Platform safety barriers are physical safety features rather than a ridership volume benchmark.",
+            "Train schedule punctuality is an operational metric unrelated to passenger count validation.",
+            "",
+            "Electricity needs for ticket gates do not help validate passenger trip volume totals."
+          ]
+        },
+        {
+          "caseTitle": "Estimate Netflix global monthly active subscribers",
+          "source": "bonus",
+          "scenario": "You calculate four billion active Netflix subscribers globally across all regions.",
+          "question": "How do you perform a quick sanity check on this subscriber total?",
+          "options": [
+            "Check if production studios can produce enough shows for everyone.",
+            "Assume global smartphone penetration supports high streaming service adoption rates.",
+            "Verify that video streaming bandwidth costs match company profit margins.",
+            "Compare your total against the global broadband internet connected population."
+          ],
+          "correctIndex": 3,
+          "explanation": "Comparing subscriber totals against the worldwide broadband internet population immediately reveals that four billion exceeds the total number of connected households globally.",
+          "whyWrong": [
+            "Studio production capacity is an operational input rather than a subscriber volume validation check.",
+            "Smartphone penetration is too broad since streaming primarily happens on TVs and broadband homes.",
+            "Bandwidth costs and profit margins are financial figures rather than direct subscriber base checks.",
+            ""
+          ]
+        },
+        {
+          "caseTitle": "Estimate annual global sales of Apple iPhones",
+          "source": "bonus",
+          "scenario": "Your top down model estimates one billion iPhones sold annually worldwide.",
+          "question": "What is the best sanity check for this annual hardware sales figure?",
+          "options": [
+            "Verify that retail store employees can process transactions fast enough.",
+            "Check if mobile network carriers have enough data plans available.",
+            "Calculate average manufacturing assembly time for a single device unit.",
+            "Compare the final units against total global smartphone shipments."
+          ],
+          "correctIndex": 3,
+          "explanation": "Checking your annual sales total against published global smartphone shipment data provides an immediate reality check. It ensures your model aligns with known industry analyst reports.",
+          "whyWrong": [
+            "Retail store processing speed does not account for online purchases and carrier stores.",
+            "Network data plan availability is largely independent of annual hardware purchase volumes.",
+            "Assembly time is a micro manufacturing detail rather than a macro market sales validation.",
+            ""
+          ]
+        }
+      ]
+    },
+    "sensitivity": {
+      "key": "sensitivity",
+      "competency": "prioritization",
+      "subtitle": "Master the art of checking your assumptions under pressure.",
+      "lesson": {
+        "hook": "Knowing your math is useless if your core assumption is off by a mile.",
+        "what": "Sensitivity analysis identifies which single variable moves your final output the most. It tells you where to focus your mental energy when time is running out.",
+        "how": [
+          "Find the variable with the highest multiplicative leverage.",
+          "Calculate the percentage shift when that single input alters.",
+          "State clearly which assumption breaks your model if wrong."
+        ],
+        "example": "For Spotify storage, your math is most sensitive to the average bit rate per track. If compression changes, the entire total shifts dramatically.",
+        "mistake": "Testing minor variables like metadata size instead of the core traffic driver."
+      },
+      "questions": [
+        {
+          "caseTitle": "Amount of storage required to host all of Spotify's music.",
+          "source": "case",
+          "scenario": "You are estimating the total raw storage needed for all tracks on Spotify globally.",
+          "question": "Which assumption is the final storage calculation most sensitive to?",
+          "options": [
+            "The average file size of a standard audio track.",
+            "The metadata storage required for user playlists.",
+            "The total number of active users streaming daily.",
+            "The distribution of genres across independent artists."
+          ],
+          "correctIndex": 0,
+          "explanation": "Audio file size directly multiplies the entire catalog count, making it the primary leverage point. Small changes here swing petabytes of data.",
+          "whyWrong": [
+            "",
+            "Metadata is tiny compared to raw audio files and will not move the total storage needle significantly.",
+            "Active users matter for bandwidth but do not directly change the raw storage footprint of the music catalog.",
+            "Genre distribution has a negligible impact on the overall average bit rate and file size math."
+          ]
+        },
+        {
+          "caseTitle": "Estimate the daily revenue of a Starbucks in New York City.",
+          "source": "case",
+          "scenario": "You are calculating daily revenue for a flagship Manhattan Starbucks location on a Tuesday.",
+          "question": "Which variable will cause the largest shift in total revenue if your estimate is wrong?",
+          "options": [
+            "The cost of dairy milk substitutes purchased weekly.",
+            "The percentage of customers who buy a pastry item.",
+            "The average price paid per transaction.",
+            "The total number of customers served during peak morning hours."
+          ],
+          "correctIndex": 3,
+          "explanation": "Morning peak volume drives the vast majority of daily transactions in an urban commuter store. Missing this flow ruins the entire revenue model.",
+          "whyWrong": [
+            "COGS affects profit margins rather than the top line revenue calculation you are trying to estimate.",
+            "Food attach rates matter, but beverage volume remains the core engine of daily store earnings.",
+            "Average ticket size stays relatively stable due to standard pricing, making volume the higher leverage swing factor.",
+            ""
+          ]
+        },
+        {
+          "caseTitle": "Google Search Queries per Second",
+          "source": "case",
+          "scenario": "You are estimating global Google search volume over a standard twenty four hour cycle.",
+          "question": "How does your final queries per second number move if internet penetration in developing regions is overestimated?",
+          "options": [
+            "The monetization rate per query improves across western markets.",
+            "The average search query length increases due to language barriers.",
+            "The server latency for image searches decreases globally.",
+            "The total query volume drops significantly across all time zones."
+          ],
+          "correctIndex": 3,
+          "explanation": "Overestimating user population in developing regions inflates the base multiplier, so correcting it drops total global volume. This variable controls the entire scale of the model.",
+          "whyWrong": [
+            "Ad monetization rates are separate from raw search query volume calculations in a top down model.",
+            "Population counts affect total query volume rather than the linguistic length of individual text searches.",
+            "Infrastructure latency is a technical engineering metric unrelated to population size assumptions.",
+            ""
+          ]
+        },
+        {
+          "caseTitle": "How many ride hailing drivers are active in a large city now?",
+          "source": "case",
+          "scenario": "You are sizing active ride hailing drivers in a five million person city during peak afternoon hours.",
+          "question": "What happens to your driver count if you assume drivers work full shifts instead of part time splits?",
+          "options": [
+            "The commission fee charged by the platform goes up.",
+            "Your total active driver count becomes drastically underestimated.",
+            "The total city population required for the model decreases.",
+            "The average trip distance for passengers increases substantially."
+          ],
+          "correctIndex": 1,
+          "explanation": "Part time shift splitting means more unique human drivers log in during peak hours, so ignoring it leads to a severe undercount. This is the most sensitive behavioral assumption in the case.",
+          "whyWrong": [
+            "Platform commission rates are set by business policy rather than individual driver shift patterns.",
+            "",
+            "City population is a fixed demographic input that does not move based on driver shift schedules.",
+            "Driver shift lengths do not physically change how far passengers travel across the city grid."
+          ]
+        },
+        {
+          "caseTitle": "Estimate the global market size for electric scooters.",
+          "source": "case",
+          "scenario": "You are building a top down model for the global annual sales of urban electric kick scooters.",
+          "question": "Which assumption carries the highest sensitivity risk for your total market size calculation?",
+          "options": [
+            "The annual replacement rate of commuter scooters.",
+            "The average wattage of the electric motor inside.",
+            "The typical color preference of urban riders.",
+            "The shipping cost from manufacturing plants in Asia."
+          ],
+          "correctIndex": 0,
+          "explanation": "Replacement frequency multiplies the active installed base to determine annual sales volume. Getting this lifecycle number wrong skews the final market size by billions.",
+          "whyWrong": [
+            "",
+            "Motor wattage varies by model tier but has minimal impact on total unit sales volume estimations.",
+            "Aesthetic choices like color do not alter the macro purchasing behavior or total market demand.",
+            "Logistics costs affect unit economics and retail pricing rather than total unit sales volume."
+          ]
+        },
+        {
+          "caseTitle": "Number of daily subway riders in Tokyo.",
+          "source": "case",
+          "scenario": "You are estimating daily unique subway riders in the Tokyo metropolitan area on a weekday.",
+          "question": "Which variable will distort your final rider count the most if your initial estimate is flawed?",
+          "options": [
+            "The average ticket price for a single zone ride.",
+            "The percentage of commuters who transfer between different subway lines.",
+            "The cleaning schedule of platform floors during off peak hours.",
+            "The total number of vending machines located inside stations."
+          ],
+          "correctIndex": 1,
+          "explanation": "Transfer rates determine whether multi line journeys count as single riders or multiple trips. Misjudging this directly distorts the unique daily passenger total.",
+          "whyWrong": [
+            "Ticket pricing affects revenue calculations rather than the physical count of human passenger trips.",
+            "",
+            "Cleaning schedules are operational logistics that do not influence passenger journey counts.",
+            "Station vending is an ancillary retail revenue stream unrelated to commuter ridership volume."
+          ]
+        },
+        {
+          "caseTitle": "Netflix Daily Global Streaming Hours",
+          "source": "bonus",
+          "scenario": "You are estimating total hours streamed on Netflix worldwide on a typical Sunday evening.",
+          "question": "Which core assumption dictates the sensitivity of your total streaming hours calculation?",
+          "options": [
+            "The subscription tier distribution across standard and premium plans.",
+            "The number of original movies released by the platform monthly.",
+            "The percentage of users streaming on mobile devices versus TVs.",
+            "The average duration of content watched per active subscriber session."
+          ],
+          "correctIndex": 3,
+          "explanation": "Session duration directly multiplies the user base to yield total hours. If session length is off by thirty minutes, billions of streaming hours vanish from the model.",
+          "whyWrong": [
+            "Tier distribution affects billing revenue rather than the total volume of hours consumed.",
+            "Content release cadence influences subscriber acquisition rather than daily streaming duration.",
+            "Device type changes video resolution and bandwidth but has a minor effect on total watch time.",
+            ""
+          ]
+        },
+        {
+          "caseTitle": "Apple App Store Daily Downloads",
+          "source": "bonus",
+          "scenario": "You are estimating total daily app downloads across the global iOS App Store ecosystem.",
+          "question": "How does your sensitivity model react if smartphone upgrade cycles lengthen globally?",
+          "options": [
+            "New device activation volume drops, reducing initial app download spikes.",
+            "The average file size of downloaded mobile applications increases rapidly.",
+            "The developer commission split enforced by the platform goes down.",
+            "The proportion of paid apps versus free downloads shifts dramatically."
+          ],
+          "correctIndex": 0,
+          "explanation": "Longer phone lifecycles mean fewer new device setups, which is the primary driver of bulk app downloads. This structural shift moves the entire daily download baseline.",
+          "whyWrong": [
+            "",
+            "Hardware upgrade cycles are entirely separate from software application file size metrics.",
+            "Platform commission splits are determined by corporate policy rather than consumer hardware trends.",
+            "Monetization pricing models depend on developer strategy rather than hardware replacement timing."
+          ]
+        }
+      ]
+    }
+  }
+}

@@ -1,5 +1,6 @@
 import { MetadataRoute } from "next";
 import { SEOContentData } from "@/lib/seo-content";
+import { PLAYGROUND_CATEGORIES } from "@/lib/playground/categories";
 
 const baseUrl = "https://prodsnap.in";
 
@@ -20,6 +21,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
   // Stable marketing / conversion routes.
   const staticRoutes: MetadataRoute.Sitemap = [
     { url: `${baseUrl}/mentorship`, changeFrequency: "monthly" as const, priority: 0.9 },
+    { url: `${baseUrl}/playground`, changeFrequency: "weekly" as const, priority: 0.8 },
+    ...PLAYGROUND_CATEGORIES.map((c) => ({ url: `${baseUrl}/playground/${c.slug}`, changeFrequency: "monthly" as const, priority: 0.6 })),
     { url: `${baseUrl}/how-it-works`, changeFrequency: "monthly" as const, priority: 0.8 },
     { url: `${baseUrl}/about`, changeFrequency: "monthly" as const, priority: 0.6 },
     { url: `${baseUrl}/community`, changeFrequency: "monthly" as const, priority: 0.6 },

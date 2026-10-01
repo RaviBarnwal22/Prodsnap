@@ -1,0 +1,1074 @@
+{
+  "slug": "product-design",
+  "framework": "CIRCLES",
+  "sections": {
+    "discovery_and_framing": {
+      "key": "discovery_and_framing",
+      "competency": "problem_framing",
+      "subtitle": "Master discovery and framing to anchor your design cases.",
+      "lesson": {
+        "hook": "Never build a solution before you even know what is broken.",
+        "what": "Discovery and framing is the critical opening phase of any design case. It forces you to ask clarifying questions, set clear boundaries, and nail down a razor-sharp goal before dreaming up features.",
+        "how": [
+          "Ask smart clarifying questions about users and tech.",
+          "Establish strict scope constraints to keep focus tight.",
+          "Restate the core goal cleanly before starting ideation."
+        ],
+        "example": "For a farming price tracker, you narrow the scope to smallholder farmers in developing regions using basic 2G networks. This immediate framing keeps your subsequent feature ideas grounded and practical.",
+        "mistake": "Jumping straight into brainstorming cool features without defining constraints or user segments first."
+      },
+      "questions": [
+        {
+          "caseTitle": "Design a product for farmers to track crop prices.",
+          "source": "case",
+          "scenario": "You just received the prompt to design a crop price tracker for farmers globally.",
+          "question": "What is the best way to handle this during discovery?",
+          "options": [
+            "Ask about the business model before defining users.",
+            "Design offline features for all global agricultural markets.",
+            "Narrow the scope to smallholder farmers.",
+            "Propose building a web app for large commercial farms."
+          ],
+          "correctIndex": 2,
+          "explanation": "Narrowing scope to a specific user segment prevents vague answers. This anchors your entire design.",
+          "whyWrong": [
+            "Business models distract from the initial user discovery and framing phase.",
+            "Designing for every global market at once makes the scope impossible.",
+            "",
+            "Commercial farms are too broad and miss the core struggle of smallholders."
+          ]
+        },
+        {
+          "caseTitle": "Redesign ticket booking for a national rail network.",
+          "source": "case",
+          "scenario": "You are asked to redesign the ticket booking flow for a major national rail service.",
+          "question": "How should you start your framing response?",
+          "options": [
+            "Discuss pricing strategies for first class seats.",
+            "List twenty potential features for the homepage.",
+            "Focus on high demand holiday travel moments.",
+            "Assume mobile apps are the only relevant channel."
+          ],
+          "correctIndex": 2,
+          "explanation": "Focusing on high demand moments targets the real pain point of system crashes. This proves you understand the core system failure mode.",
+          "whyWrong": [
+            "",
+            "Assuming channels without checking context ignores platform constraints.",
+            "Listing features early violates the rule against premature ideation.",
+            "Pricing strategies take you away from core booking flow reliability."
+          ]
+        },
+        {
+          "caseTitle": "Design a digital product for street vendors who trade in cash.",
+          "source": "case",
+          "scenario": "You must design a product for cash-based street vendors in busy urban markets.",
+          "question": "What is the most crucial framing step for this prompt?",
+          "options": [
+            "Propose a hardware point of sale terminal immediately.",
+            "Confirm the target vendors operate in urban India.",
+            "Ask if they want a crypto payment system built.",
+            "Estimate total market size in revenue dollars first."
+          ],
+          "correctIndex": 1,
+          "explanation": "Confirming the geographic market grounds your assumptions in real infrastructure limits. This helps you design for actual constraints.",
+          "whyWrong": [
+            "Proposing hardware is premature solution jumping before scoping.",
+            "",
+            "Crypto payment systems ignore current vendor behavioral realities.",
+            "Estimating market size skips the vital user framing step."
+          ]
+        },
+        {
+          "caseTitle": "Design a daily planning app for college students.",
+          "source": "case",
+          "scenario": "The prompt asks you to create a new daily planner app for university students.",
+          "question": "Which framing action demonstrates strong product thinking?",
+          "options": [
+            "Suggest adding social media sharing to the calendar.",
+            "Highlight non linear schedules as the main failure.",
+            "Focus exclusively on rigid corporate work blocks.",
+            "Ask the interviewer what features they personally use."
+          ],
+          "correctIndex": 1,
+          "explanation": "Highlighting non-linear schedules shows deep empathy for student routines. Traditional apps fail them for exactly this reason.",
+          "whyWrong": [
+            "Adding social sharing is a feature idea, not a discovery constraint.",
+            "",
+            "Corporate work blocks completely miss the student lifestyle reality.",
+            "Asking about personal preferences wastes valuable interview time."
+          ]
+        },
+        {
+          "caseTitle": "Improve the 'Save for Later' experience on Amazon.",
+          "source": "case",
+          "scenario": "You need to improve the Save for Later list inside the Amazon ecosystem.",
+          "question": "How should you frame this optimization task?",
+          "options": [
+            "Treat the list as an active purchase driver.",
+            "Redesign the entire main checkout funnel first.",
+            "Assume users want a social feed of saved items.",
+            "Focus on desktop web browsers for maximum space."
+          ],
+          "correctIndex": 0,
+          "explanation": "Framing the list as an active purchase driver changes the goal from storage to conversion. This gives your design clear commercial intent.",
+          "whyWrong": [
+            "",
+            "Redesigning the main checkout funnel expands scope beyond the prompt.",
+            "A social feed introduces features before validating user intent.",
+            "Focusing on desktop ignores where mobile impulse traffic happens."
+          ]
+        },
+        {
+          "caseTitle": "Design a grocery delivery app for local neighborhood stores.",
+          "source": "bonus",
+          "scenario": "You are asked to design a grocery delivery service specifically for small corner shops.",
+          "question": "What is the best way to open your discovery phase?",
+          "options": [
+            "Design a loyalty points program for repeat buyers.",
+            "Establish inventory sync constraints with shop owners.",
+            "Build a drone delivery fleet model for speed.",
+            "Ask about the optimal warehouse lighting setup."
+          ],
+          "correctIndex": 1,
+          "explanation": "Establishing inventory sync constraints tackles the hardest operational hurdle first. Local shops struggle with real-time stock updates.",
+          "whyWrong": [
+            "Loyalty programs are solutions that bypass core inventory framing.",
+            "",
+            "Drone delivery is an unrealistic feature for small corner shops.",
+            "Warehouse lighting has nothing to do with grocery app discovery."
+          ]
+        },
+        {
+          "caseTitle": "Design a digital loyalty card wallet for local coffee shops.",
+          "source": "bonus",
+          "scenario": "You need to design a unified loyalty wallet app for independent cafes.",
+          "question": "How should you begin framing this product case?",
+          "options": [
+            "Define the primary user as busy morning commuters.",
+            "Ask if we should build physical NFC stamp cards.",
+            "Focus on enterprise coffee chains with large budgets.",
+            "Propose integrating mobile ordering and payment APIs."
+          ],
+          "correctIndex": 0,
+          "explanation": "Defining the busy morning commuter anchors the speed and convenience requirements. This keeps your user focus sharp and narrow.",
+          "whyWrong": [
+            "",
+            "Physical NFC cards contradict the premise of a digital app.",
+            "Enterprise chains ignore the prompt instruction about local cafes.",
+            "API integration details are technical solutions, not user framing."
+          ]
+        },
+        {
+          "caseTitle": "Improve the notification system for Slack to reduce noise.",
+          "source": "case",
+          "scenario": "You are tasked with redesigning Slack alerts to minimize user fatigue.",
+          "question": "What is the proper framing approach for this request?",
+          "options": [
+            "Focus on casual personal chat use cases instead.",
+            "Target knowledge workers in multiple active channels.",
+            "Ask the interviewer to pick your target user group.",
+            "Suggest deleting all notifications by default always."
+          ],
+          "correctIndex": 1,
+          "explanation": "Targeting knowledge workers in multiple channels hits the exact population suffering from alert fatigue. This ensures your scope is realistic.",
+          "whyWrong": [
+            "Personal chat use cases ignore Slack's enterprise workflow context.",
+            "",
+            "Asking the interviewer to pick shows a lack of leadership.",
+            "Deleting all alerts is an extreme solution, not a thoughtful constraint."
+          ]
+        }
+      ]
+    },
+    "user_segmentation": {
+      "key": "user_segmentation",
+      "competency": "user_insight",
+      "subtitle": "Master user segmentation to build focused products.",
+      "lesson": {
+        "hook": "Stop trying to build apps for everyone, because building for everyone means building for no one.",
+        "what": "User segmentation is the practice of dividing a broad target market into distinct subsets based on specific needs, behaviors, or constraints. It allows you to focus your limited engineering resources where they create the most value.",
+        "how": [
+          "Identify distinct user groups within your market",
+          "Evaluate each segment by constraints and pain points",
+          "Defend your choice of who to build for first"
+        ],
+        "example": "For a ticket booking redesign, you segment travelers into casual commuters and frantic holiday shoppers, then choose to build for the holiday shoppers whose demand causes system crashes.",
+        "mistake": "Picking a segment so broad that your solution ends up completely generic."
+      },
+      "questions": [
+        {
+          "caseTitle": "Design a product for farmers to track crop prices.",
+          "source": "case",
+          "scenario": "You are starting the farmer price tracker case and need to define your initial target audience.",
+          "question": "Which of these is the strongest approach to user segmentation for this case?",
+          "options": [
+            "Target all agricultural workers globally to maximize the total addressable market size immediately.",
+            "Target wealthy commercial farm owners who buy enterprise software subscriptions annually.",
+            "Focus on urban consumers who want to buy fresh vegetables directly from local farmers online.",
+            "Focus on smallholder farmers in developing agricultural regions where 2G or intermittent data is normal."
+          ],
+          "correctIndex": 3,
+          "explanation": "This option targets a specific demographic with distinct connectivity constraints and severe pain points. It avoids a generic audience while addressing a high-impact problem.",
+          "whyWrong": [
+            "Targeting all agricultural workers globally is too broad and ignores wildly different technological constraints.",
+            "Commercial farm owners have different needs and existing enterprise tools, missing the core problem.",
+            "Urban consumers buying vegetables shift the product from a farmer tool to a consumer marketplace.",
+            ""
+          ]
+        },
+        {
+          "caseTitle": "Redesign ticket booking for a national rail network.",
+          "source": "case",
+          "scenario": "You are analyzing the national rail network ticket booking redesign case.",
+          "question": "How should you segment users for this specific transportation booking challenge?",
+          "options": [
+            "Target leisure tourists who book months in advance and carefully compare scenic train route options.",
+            "Target travelers during holiday demand spikes or major strike days when the system crashes.",
+            "Target business travelers who expense their tickets and prioritize first-class seating availability.",
+            "Target daily commuters who already know their exact schedule and prefer automated annual ticket renewals."
+          ],
+          "correctIndex": 1,
+          "explanation": "This segment directly addresses the core stress test of the system when demand outstrips supply. It isolates the exact moment where the current booking flow fails users.",
+          "whyWrong": [
+            "Leisure tourists booking months in advance do not face the high-stakes friction of system crashes.",
+            "",
+            "Business travelers care about expense management and seating rather than system capacity crashes.",
+            "Daily commuters experience stable routines and do not highlight the severe systemic crashes."
+          ]
+        },
+        {
+          "caseTitle": "Design a digital product for street vendors who trade in cash.",
+          "source": "case",
+          "scenario": "You are tackling the street vendor digital product case in an urban market context.",
+          "question": "What is the best way to segment your users before designing features for these vendors?",
+          "options": [
+            "Target young college students who buy food from street vendors during their lunch breaks.",
+            "Target municipal regulators who license street vendors and collect daily market operational fees.",
+            "Focus on street vendors trading purely in physical cash who struggle with security and loans.",
+            "Focus exclusively on established market stall owners who already process digital payments online."
+          ],
+          "correctIndex": 2,
+          "explanation": "This segment targets the core problem statement of cash dependency, security risks, and lack of credit history. It directly matches the prompt's intent.",
+          "whyWrong": [
+            "Targeting college students changes the product from a vendor tool to a food delivery app.",
+            "Municipal regulators are stakeholders rather than the primary end users of the vendor product.",
+            "",
+            "Stall owners who already use digital payments do not experience the cash-only security pain points."
+          ]
+        },
+        {
+          "caseTitle": "Design a daily planning app for college students.",
+          "source": "case",
+          "scenario": "You need to segment the college student demographic for a brand new daily planning productivity app.",
+          "question": "Which segmentation choice best captures the unique planning challenges students face?",
+          "options": [
+            "Focus on MBA students who manage strict corporate recruiting schedules and structured career interviews.",
+            "Focus on online degree students who complete coursework asynchronously from remote home offices.",
+            "Focus on undergraduate students juggling unpredictable lectures, impromptu groups, and social commitments.",
+            "Focus on part-time evening students who balance full-time daytime jobs with night classes."
+          ],
+          "correctIndex": 2,
+          "explanation": "Undergraduates experience the specific non-linear planning failure mode described in the prompt. Their chaotic schedules break traditional productivity apps.",
+          "whyWrong": [
+            "MBA students have structured professional schedules that behave more like traditional corporate work blocks.",
+            "Online asynchronous students lack the campus social commitments and impromptu group meetings.",
+            "",
+            "Part-time evening students follow rigid routine blocks rather than erratic campus social schedules."
+          ]
+        },
+        {
+          "caseTitle": "Improve the 'Save for Later' experience on Amazon.",
+          "source": "case",
+          "scenario": "You are working on the Amazon Save for Later feature improvement case.",
+          "question": "How should you segment the user base to solve this digital junk drawer problem?",
+          "options": [
+            "Focus on desktop power users who meticulously curate wishlists for holiday gift sharing.",
+            "Focus on elderly shoppers who exclusively use voice assistants to place routine grocery orders.",
+            "Focus on US mobile app shoppers who accumulate forgotten items driven by price volatility.",
+            "Focus on international wholesale buyers who purchase bulk inventory for small retail businesses."
+          ],
+          "correctIndex": 2,
+          "explanation": "This segment targets the high-volume mobile traffic where impulse additions and indecision happen. It directly links user behavior to the business goal.",
+          "whyWrong": [
+            "Desktop power users represent a tiny fraction of impulse consideration traffic compared to mobile.",
+            "Elderly voice assistant shoppers do not interact with the digital save for later shopping list.",
+            "",
+            "International wholesale buyers use specialized business accounts rather than consumer save lists."
+          ]
+        },
+        {
+          "caseTitle": "Redesign TikTok for Seniors",
+          "source": "case",
+          "scenario": "You are framing the target user for the TikTok for Seniors product design case.",
+          "question": "Which user definition provides the most actionable focus for this demographic expansion?",
+          "options": [
+            "Focus on middle-aged parents who use short-form video apps to market their small local businesses.",
+            "Focus on teenagers who teach their aging relatives how to watch viral dance trends online.",
+            "Focus on retired software engineers who already build custom video editing tools on desktop PCs.",
+            "Focus on seventy-year-old grandparents who want to connect with grandchildren but find fast edits overwhelming."
+          ],
+          "correctIndex": 3,
+          "explanation": "This segment identifies the exact emotional motivation and technical barrier of the target group. It sets a clear boundary for subsequent design decisions.",
+          "whyWrong": [
+            "Middle-aged parents are already comfortable with social apps and do not face the senior alienation.",
+            "Teenagers are the existing core demographic rather than the newly targeted senior population.",
+            "Retired software engineers possess advanced technical skills that do not represent mainstream seniors.",
+            ""
+          ]
+        },
+        {
+          "caseTitle": "Spotify Collaborative Playlist Generator",
+          "source": "bonus",
+          "scenario": "You are designing a brand new collaborative playlist feature for Spotify to improve user retention.",
+          "question": "What is the most effective way to segment Spotify users for this new feature?",
+          "options": [
+            "Focus on solo classical music enthusiasts who listen exclusively to long orchestral albums offline.",
+            "Focus on professional club DJs who manage commercial audio mixing hardware during live sets.",
+            "Focus on friend groups planning weekend road trips who struggle to merge disparate music tastes.",
+            "Focus on corporate office managers who need background music playlists for commercial lobbies."
+          ],
+          "correctIndex": 2,
+          "explanation": "Friend groups planning trips experience active social friction when trying to build shared playlists. This creates a clear product opportunity for collaboration features.",
+          "whyWrong": [
+            "Solo classical listeners do not require collaborative playlist generation features for groups.",
+            "Professional club DJs rely on advanced hardware mixing tools rather than consumer app playlists.",
+            "",
+            "Corporate office managers operate outside consumer social music sharing use cases."
+          ]
+        },
+        {
+          "caseTitle": "Duolingo Family Plan Sharing Hub",
+          "source": "bonus",
+          "scenario": "You are designing a family plan sharing and motivation hub for a language learning platform.",
+          "question": "How should you segment your users to ensure the sharing hub drives engagement?",
+          "options": [
+            "Focus on competitive university students studying foreign languages for semester exams alone.",
+            "Focus on multi-generational households where parents manage learning progress for kids and grandparents.",
+            "Focus on solo professional translators who use advanced desktop software for rapid localization.",
+            "Focus on corporate human resource teams purchasing bulk educational licenses for employees."
+          ],
+          "correctIndex": 1,
+          "explanation": "Multi-generational households face unique friction points in shared account management and motivation. This segment captures both the buyer and the diverse learners.",
+          "whyWrong": [
+            "Competitive university students study independently and do not fit family plan dynamics.",
+            "",
+            "Solo professional translators do not need family plan sharing hubs or gamified motivation.",
+            "Corporate human resource teams manage B2B procurement rather than family household learning."
+          ]
+        }
+      ]
+    },
+    "pain_points": {
+      "key": "pain_points",
+      "competency": "user_insight",
+      "subtitle": "Uncover specific, non-obvious user needs backed by evidence",
+      "lesson": {
+        "hook": "Stop guessing what users want and start uncovering the hidden pain driving their behavior.",
+        "what": "Identifying pain points means finding the exact friction in a user's daily life. You must focus on specific frustrations rather than broad, generic complaints.",
+        "how": [
+          "Target a specific user segment with distinct daily struggles.",
+          "Identify the exact moments where current solutions completely fail them.",
+          "Back up every claimed frustration with concrete behavioral evidence."
+        ],
+        "example": "For college students, traditional planning apps fail within forty-eight hours because their days consist of unpredictable, non-linear schedules. We focus on this exact scheduling chaos to design a truly useful mobile planner.",
+        "mistake": "Listing generic complaints like it is too expensive or too slow instead of deep behavioral frictions."
+      },
+      "questions": [
+        {
+          "caseTitle": "Design a product for farmers to track crop prices.",
+          "source": "case",
+          "scenario": "You are interviewing for an agricultural tech app aimed at smallholder farmers in developing regions.",
+          "question": "Which statement best identifies a specific, non-obvious pain point for this target user group?",
+          "options": [
+            "Farmers struggle with slow internet speeds when loading heavy weather radar graphics online.",
+            "Farmers find mobile applications too confusing to navigate during their daily morning routines.",
+            "Farmers lose money because middlemen exploit their lack of current market pricing data.",
+            "Farmers want modern smartphone devices with better battery life for long outdoor shifts."
+          ],
+          "correctIndex": 2,
+          "explanation": "This option highlights the exact economic vulnerability of smallholder farmers dealing with predatory middlemen. It grounds the pain in a specific financial outcome rather than a generic tech complaint.",
+          "whyWrong": [
+            "A smart candidate might focus on connectivity limits, but weather graphics miss the core economic problem.",
+            "UI confusion is too generic and applies to almost any software product in any market segment.",
+            "",
+            "Hardware battery life addresses a physical device constraint rather than the core market trading friction."
+          ]
+        },
+        {
+          "caseTitle": "Design a digital product for street vendors who trade in cash.",
+          "source": "case",
+          "scenario": "You are designing a financial tool for urban street vendors who operate entirely in physical cash transactions.",
+          "question": "What is the strongest pain point to highlight before proposing any new software features?",
+          "options": [
+            "Vendors want digital payment badges to attract younger tech savvy urban shoppers.",
+            "Vendors carry heavy cash all day which creates constant theft and security risks.",
+            "Vendors spend too much time calculating daily profit margins using paper notebooks.",
+            "Vendors dislike carrying heavy physical coins inside their pockets during hot weather."
+          ],
+          "correctIndex": 1,
+          "explanation": "Security risks from carrying physical cash address a severe daily operational threat. It provides a strong foundation for why digital intervention is urgently needed.",
+          "whyWrong": [
+            "Attracting younger shoppers assumes a growth goal rather than solving an immediate survival problem.",
+            "",
+            "Manual calculations are a real issue, but security risks present a much stronger foundational driver.",
+            "Pocket weight is a minor physical inconvenience rather than a critical business vulnerability."
+          ]
+        },
+        {
+          "caseTitle": "Design a daily planning app for college students.",
+          "source": "case",
+          "scenario": "You are tackling a case study about building a new productivity schedule application for university students.",
+          "question": "Which observation correctly pinpoints why traditional productivity tools fail college students?",
+          "options": [
+            "Students forget their passwords because they use too many separate campus software apps.",
+            "Students prefer writing tasks on paper notebooks because digital apps lack colorful themes.",
+            "Student days bounce between lectures and impromptu groups, making linear planners fail fast.",
+            "Students have too many assignments to track across multiple different online university portals."
+          ],
+          "correctIndex": 2,
+          "explanation": "This identifies the specific failure mode of non-linear days, explaining why standard tools break. It directly connects student behavior to a structural product flaw.",
+          "whyWrong": [
+            "Password fatigue is a generic tech issue affecting all users, not a unique student planning friction.",
+            "Paper preference describes a medium choice rather than the fundamental planning failure mode.",
+            "",
+            "Multiple portals are annoying, but the core failure is the non-linear structure of the student day."
+          ]
+        },
+        {
+          "caseTitle": "Improve the 'Save for Later' experience on Amazon.",
+          "source": "case",
+          "scenario": "You are proposing improvements for the Save for Later list inside the main mobile shopping app.",
+          "question": "How should you frame the underlying user pain point regarding this neglected feature?",
+          "options": [
+            "Customers dump items into the list and forget them because price volatility causes indecision.",
+            "Customers lose their saved items whenever they log out of their personal account.",
+            "Customers cannot find the save button easily because the mobile navigation menu is cluttered.",
+            "Customers want discount codes sent via email every single day for saved products."
+          ],
+          "correctIndex": 0,
+          "explanation": "It targets the psychological friction of price drops and indecision that turns the list into a digital junk drawer. This provides a clear behavioral reason for the current abandonment.",
+          "whyWrong": [
+            "",
+            "Account logouts happen rarely and do not explain why active lists become forgotten junk drawers.",
+            "Navigation clutter is a basic usability issue rather than the core psychological reason for abandonment.",
+            "Discount requests focus on a feature solution rather than diagnosing the underlying user hesitation."
+          ]
+        },
+        {
+          "caseTitle": "Design a mental health feature for Instagram.",
+          "source": "case",
+          "scenario": "You are designing a wellbeing intervention to curb excessive screen time on a major social media platform.",
+          "question": "What is the most precise pain point regarding why users fail to stop scrolling?",
+          "options": [
+            "Videos load too slowly on mobile networks, causing frustration during casual browsing sessions.",
+            "Profiles look cluttered with advertisements that distract users from viewing friend content.",
+            "Willpower fails when boredom hits, allowing mindless scrolling before anxiety sets in.",
+            "Notifications arrive too frequently during late night hours and interrupt sleep cycles."
+          ],
+          "correctIndex": 2,
+          "explanation": "This accurately identifies the psychological trap where habit and boredom override personal willpower. It focuses the intervention on the exact moment anxiety begins to build.",
+          "whyWrong": [
+            "Slow video loading is a technical performance metric rather than a psychological mental health friction.",
+            "Ad clutter is a monetization frustration rather than the root cause of compulsive usage.",
+            "",
+            "Late night notifications are a general alert issue, not the core behavioral scrolling addiction."
+          ]
+        },
+        {
+          "caseTitle": "Design a habit-building app for busy working professionals.",
+          "source": "case",
+          "scenario": "You are building a habit tracker tailored specifically for career professionals with demanding schedules.",
+          "question": "Which insight correctly identifies why standard habit applications fail this specific demographic?",
+          "options": [
+            "Standard apps feature complicated user interfaces that confuse older professional demographic groups.",
+            "Standard apps punish a single missed day by resetting streaks, triggering immediate abandonment.",
+            "Standard apps require paid subscriptions before unlocking basic daily tracking reminder features.",
+            "Standard apps lack integration with popular corporate calendar software tools like Outlook."
+          ],
+          "correctIndex": 1,
+          "explanation": "It highlights the punitive nature of strict streak resets, which directly causes user drop-off for busy people. This targets a specific product design flaw in existing habit tools.",
+          "whyWrong": [
+            "UI confusion is too broad and ignores the specific psychological trigger of broken streaks.",
+            "",
+            "Paywalls are a business model constraint rather than the core behavioral design flaw of habit apps.",
+            "Calendar integration is a feature request rather than the emotional pain point of failing a habit."
+          ]
+        },
+        {
+          "caseTitle": "Design a digital portfolio tracker for freelance graphic designers",
+          "source": "bonus",
+          "scenario": "You are designing a workflow application for freelance graphic designers who manage multiple creative clients.",
+          "question": "What is the core pain point you should highlight regarding their project management process?",
+          "options": [
+            "Freelancers want more followers on social media to showcase their creative portfolios.",
+            "Freelancers experience slow internet connection speeds when uploading large design files.",
+            "Freelancers waste billable hours chasing client feedback scattered across chaotic email threads.",
+            "Freelancers struggle to purchase expensive software licenses due to fluctuating monthly income."
+          ],
+          "correctIndex": 2,
+          "explanation": "Fragmented feedback across emails directly addresses the operational friction of client communication. It proves you understand the specific administrative tax freelancers pay.",
+          "whyWrong": [
+            "Social media followers represent a marketing goal rather than an internal workflow challenge.",
+            "Upload speeds relate to file hosting infrastructure rather than the core project management pain.",
+            "",
+            "Income fluctuation is real, but the immediate daily workflow friction is messy client feedback."
+          ]
+        },
+        {
+          "caseTitle": "Design a meal planning app for parents with picky toddlers",
+          "source": "bonus",
+          "scenario": "You are building a family nutrition app targeted at parents dealing with unpredictable toddler eating habits.",
+          "question": "Which statement best captures the primary pain point these parents face every evening?",
+          "options": [
+            "Parents experience severe mental fatigue preparing separate meals after toddlers reject dinner.",
+            "Parents cannot find healthy recipes that cook in under ten minutes on weeknights.",
+            "Parents spend too much money buying organic ingredients at local neighborhood grocery stores.",
+            "Parents forget to check their refrigerator inventory before driving to the supermarket."
+          ],
+          "correctIndex": 0,
+          "explanation": "Preparing separate meals due to sudden toddler rejection captures the exact emotional and operational exhaustion parents face. It defines a precise, high-friction household problem.",
+          "whyWrong": [
+            "",
+            "Quick cooking times address time management rather than the specific challenge of toddler pickiness.",
+            "Grocery store costs touch on budgeting, but the daily emotional burden is dealing with food rejection.",
+            "Inventory tracking is a utility feature rather than the core emotional pain of mealtime battles."
+          ]
+        }
+      ]
+    },
+    "solution_ideation": {
+      "key": "solution_ideation",
+      "competency": "solutioning",
+      "subtitle": "Brainstorm creative, feasible, and diverse solutions for product cases",
+      "lesson": {
+        "hook": "Stop pitching the exact same generic app feature for every single prompt.",
+        "what": "Solution ideation means generating multiple distinct ideas that solve the core user problem. A strong answer balances creative concepts with technical feasibility and real variety.",
+        "how": [
+          "Brainstorm three very different solution paths before picking one.",
+          "Ensure ideas match your defined user and their specific technical constraints.",
+          "Propose features that offer genuine utility rather than superficial novelty."
+        ],
+        "example": "For a farming price tracker, you propose an offline SMS flash alert system alongside a simple voice interface.",
+        "mistake": "Listing random trendy tech buzzwords like blockchain without connecting them to actual user value."
+      },
+      "questions": [
+        {
+          "caseTitle": "Design a product for farmers to track crop prices.",
+          "source": "case",
+          "scenario": "You are designing the crop price tracker for smallholder farmers in developing agricultural regions with intermittent 2G data.",
+          "question": "Which set of solutions demonstrates the best range and feasibility for this constraint?",
+          "options": [
+            "Interactive daily market price updates sent via reliable SMS and basic voice calls.",
+            "A live streaming video marketplace with real time auction bidding.",
+            "An augmented reality crop scanner with deep learning analytics.",
+            "A blockchain smart contract platform for instant global futures trading."
+          ],
+          "correctIndex": 0,
+          "explanation": "SMS and voice channels match the low bandwidth reality of smallholder farmers perfectly. Advanced video and crypto solutions fail basic technical feasibility tests.",
+          "whyWrong": [
+            "",
+            "Live streaming demands high bandwidth that intermittent mobile data connections simply cannot support.",
+            "Smart candidates suggest AI tools, but 2G networks cannot support heavy image scanning.",
+            "Blockchain sounds innovative, yet rural farmers need immediate cash options over decentralized ledgers."
+          ]
+        },
+        {
+          "caseTitle": "Design a digital product for street vendors who trade in cash.",
+          "source": "case",
+          "scenario": "You are ideating solutions for urban street vendors who handle physical cash and lack formal digital credit histories.",
+          "question": "What is the most feasible and creative feature mix to help these vendors secure small business loans?",
+          "options": [
+            "A smart camera that converts daily paper cash counts into a verified digital ledger.",
+            "A neural network voice assistant trained on twenty regional dialects for instant accounting.",
+            "A peer-to-peer cryptocurrency token exchange built specifically for street market vendors.",
+            "An autonomous drone delivery network for transporting physical cash securely to banks."
+          ],
+          "correctIndex": 0,
+          "explanation": "Converting cash entries via camera bridges the physical and digital divide cleanly. Drones and neural networks introduce massive cost and complexity.",
+          "whyWrong": [
+            "",
+            "While voice is useful, training a custom model for twenty dialects introduces extreme technical risk.",
+            "Crypto introduces volatility and regulatory hurdles for vendors who rely on stable daily earnings.",
+            "Drones are wildly impractical for everyday street vendors dealing with small pocket cash amounts."
+          ]
+        },
+        {
+          "caseTitle": "Design a daily planning app for college students.",
+          "source": "case",
+          "scenario": "You are building SyncUp for college students whose daily schedules shift constantly between lectures, clubs, and social meetups.",
+          "question": "Which ideation approach best addresses the unpredictable nature of student schedules?",
+          "options": [
+            "A manual spreadsheet template requiring students to input every minute of study.",
+            "A rigid enterprise calendar imported directly from corporate Outlook servers.",
+            "A strict time management dashboard enforcing traditional hourly office productivity blocks.",
+            "A flexible time blocking engine that auto reschedules missed tasks into open gaps."
+          ],
+          "correctIndex": 3,
+          "explanation": "Auto rescheduling tackles the exact failure mode where rigid student days break traditional productivity apps. Enterprise and manual tools ignore student realities.",
+          "whyWrong": [
+            "Manual spreadsheets require too much upfront effort for busy college students to maintain.",
+            "Corporate tools appeal to professional efficiency, yet students rarely use enterprise Exchange calendars.",
+            "Strict hourly blocks fail because student life involves spontaneous study groups and social events.",
+            ""
+          ]
+        },
+        {
+          "caseTitle": "Design a smart home app for elderly users living alone.",
+          "source": "case",
+          "scenario": "You are designing safety features for an eighty two year old widow with mild arthritis living alone at home.",
+          "question": "Which solution option provides the best balance of accessibility and safety?",
+          "options": [
+            "A text heavy dashboard requiring constant manual status updates from users.",
+            "One touch voice activated check ins paired with automated fall detection alerts.",
+            "A deeply nested menu containing advanced sensor customization settings.",
+            "A multi gesture swipe navigation system requiring precise finger movements on glass."
+          ],
+          "correctIndex": 1,
+          "explanation": "Voice activation and automated alerts bypass arthritis friction and memory lapses. Complex gestures and text heavy menus frustrate elderly users.",
+          "whyWrong": [
+            "Constant manual typing creates high cognitive load for seniors trying to manage home safety.",
+            "",
+            "Advanced menus overwhelm elderly users who need simple, direct access to safety controls.",
+            "Multi gesture swipes sound modern, but they fail users with arthritis and reduced dexterity."
+          ]
+        },
+        {
+          "caseTitle": "Improve the 'Save for Later' experience on Amazon.",
+          "source": "case",
+          "scenario": "You are tackling the Amazon Save for Later list to turn a digital junk drawer into an active purchase driver.",
+          "question": "What feature set best addresses price volatility and buyer indecision?",
+          "options": [
+            "A hidden archive folder that permanently deletes items after seven days.",
+            "Smart drop alerts and peer comparison polls to nudge hesitant buyers.",
+            "A complete removal of the cart to force immediate checkout decisions.",
+            "An endless scrolling feed of random sponsored products unrelated to saves."
+          ],
+          "correctIndex": 1,
+          "explanation": "Smart drop alerts tackle price volatility directly, while polls resolve indecision without being aggressive. Deleting items or forcing checkout destroys customer trust.",
+          "whyWrong": [
+            "Auto deleting saved items destroys user intent and removes valuable long term purchase data.",
+            "",
+            "Forcing immediate checkout feels aggressive and causes frustrated users to abandon the platform entirely.",
+            "Random sponsored feeds increase noise and distract users from their actual saved item list."
+          ]
+        },
+        {
+          "caseTitle": "Improve the notification system for Slack to reduce noise.",
+          "source": "case",
+          "scenario": "You are revamping Slack alerts for desk workers suffering from crippling context switching and alert fatigue.",
+          "question": "Which creative ideation direction best reduces noise without missing critical updates?",
+          "options": [
+            "An AI digest that batches low priority chatter into a single daily summary.",
+            "A loud audio siren that plays whenever any channel receives new text.",
+            "A mandatory read receipt requirement for every single message sent.",
+            "A total block on all incoming messages between nine and five daily."
+          ],
+          "correctIndex": 0,
+          "explanation": "AI batching solves context switching by condensing chatter intelligently. Total blocks and loud sirens make communication impossible or more stressful.",
+          "whyWrong": [
+            "",
+            "Loud audio alerts increase anxiety and worsen the exact fatigue problem you are trying to fix.",
+            "Forcing read receipts adds massive social pressure and creates even more notification noise.",
+            "Blocking all messages sounds productive, but it completely breaks urgent team coordination needs."
+          ]
+        },
+        {
+          "caseTitle": "Smart Fitness Water Bottle",
+          "source": "bonus",
+          "scenario": "You are designing software features for a smart water bottle targeting endurance runners who dehydrate during long outdoor training.",
+          "question": "Which ideation path best supports runners who forget to drink while training?",
+          "options": [
+            "Haptic wristband pulses triggered by real time sweat rate and weather data.",
+            "A social media leaderboard comparing daily water intake with professional athletes.",
+            "A loud voice speaker that shouts hydration warnings in public parks.",
+            "A mandatory locking mechanism on the bottle cap until water is consumed."
+          ],
+          "correctIndex": 0,
+          "explanation": "Haptic pulses are subtle and practical for outdoor runners in motion. Loud speakers and locking caps create annoying physical barriers.",
+          "whyWrong": [
+            "",
+            "Leaderboards motivate some users, yet they do nothing to solve real time physiological dehydration.",
+            "Loud voice warnings in public parks embarrass runners and annoy people nearby.",
+            "Locking bottle caps create frustrating safety hazards for athletes needing quick hydration on runs."
+          ]
+        },
+        {
+          "caseTitle": "Virtual Cooking Assistant",
+          "source": "bonus",
+          "scenario": "You are designing an app feature for home cooks who frequently ruin recipes by losing track of multiple simultaneous timer steps.",
+          "question": "What is the most effective solution concept for managing complex cooking timelines?",
+          "options": [
+            "A complex spreadsheet editor requiring manual time calculations for every dish.",
+            "A random recipe generator that replaces dishes mid meal when timers expire.",
+            "An intelligent timeline visualizer that dynamically syncs overlapping recipe steps together.",
+            "A text chat interface that requires typing status updates while holding utensils."
+          ],
+          "correctIndex": 2,
+          "explanation": "Dynamic timeline syncing solves the multi step chaos naturally. Manual spreadsheets and typing chats fail because cooks have messy hands.",
+          "whyWrong": [
+            "Manual spreadsheets require too much math while someone is actively chopping and cooking food.",
+            "Randomly swapping recipes mid meal would ruin dinner and frustrate hungry family members.",
+            "",
+            "Typing chat messages fails because home cooks have messy hands and need hands free help."
+          ]
+        }
+      ]
+    },
+    "prioritization_logic": {
+      "key": "prioritization_logic",
+      "competency": "prioritization",
+      "subtitle": "Master the art of justifying your feature choices systematically.",
+      "lesson": {
+        "hook": "Stop guessing features and start proving why your choices actually matter.",
+        "what": "Prioritization logic gives you a clear framework to rank features. You evaluate options using impact, effort, reach, or strategic fit instead of gut feeling.",
+        "how": [
+          "Define explicit criteria like impact or effort before choosing.",
+          "Score your feature ideas against user pain points.",
+          "Defend your final choice using strategic alignment."
+        ],
+        "example": "For our smart water bottle, we prioritized hydration tracking over gamified leaderboards. This choice delivers high user health impact with minimal engineering effort.",
+        "mistake": "Listing a dozen cool features without explaining how you decided to build them first."
+      },
+      "questions": [
+        {
+          "caseTitle": "Design a product for farmers to track crop prices.",
+          "source": "case",
+          "scenario": "You have listed SMS alerts, predictive price AI, and voice search for your crop price app.",
+          "question": "How should you prioritize these three features for smallholder farmers?",
+          "options": [
+            "Build predictive price AI to showcase advanced machine learning capabilities.",
+            "Build voice search since literacy barriers prevent farmers from typing easily.",
+            "Build all three features simultaneously to maximize market penetration rapidly.",
+            "Build SMS alerts because low technical effort delivers high immediate reach."
+          ],
+          "correctIndex": 3,
+          "explanation": "SMS alerts require minimal network infrastructure while reaching 2G users instantly. This balances high user reach with low implementation effort.",
+          "whyWrong": [
+            "Advanced AI sounds impressive, but unreliable 2G connectivity makes predictive models useless here.",
+            "Voice search is helpful, but SMS alerts solve the core pricing transparency problem faster.",
+            "Building everything at once ignores resource constraints and developer bandwidth limits.",
+            ""
+          ]
+        },
+        {
+          "caseTitle": "Design a digital product for street vendors who trade in cash.",
+          "source": "case",
+          "scenario": "You need to choose between automated daily savings, micro-loans, and digital receipts.",
+          "question": "Which prioritization rationale best addresses the vendor's primary cash struggle?",
+          "options": [
+            "Prioritize complex budgeting tools to help vendors manage profit margins.",
+            "Prioritize automated daily savings to build loan eligibility over time.",
+            "Prioritize micro-loans because cash vendors urgently need capital injection.",
+            "Prioritize digital receipts because they eliminate paper waste entirely."
+          ],
+          "correctIndex": 1,
+          "explanation": "Automated savings directly solve the lack of transaction history, enabling future micro-loans. This creates a clear strategic progression for unbanked users.",
+          "whyWrong": [
+            "Complex budgeting tools assume financial literacy that cash-only street vendors rarely possess.",
+            "",
+            "Lenders will not issue micro-loans without verified digital transaction history first.",
+            "Eliminating paper waste does not solve the fundamental credit and safety risks vendors face."
+          ]
+        },
+        {
+          "caseTitle": "Improve the 'Save for Later' experience on Amazon.",
+          "source": "case",
+          "scenario": "You must decide between price drop notifications, social sharing, and AI styling suggestions.",
+          "question": "What is the most logical way to prioritize these options?",
+          "options": [
+            "Focus on AI styling suggestions to keep users browsing longer.",
+            "Focus on social sharing because viral loops drive user acquisition.",
+            "Focus on price drop notifications to directly convert saved items.",
+            "Focus on wish list folders to help users organize items neatly."
+          ],
+          "correctIndex": 2,
+          "explanation": "Price drop alerts directly address price volatility, turning a passive saved list into active purchases. This maximizes conversion impact with existing inventory data.",
+          "whyWrong": [
+            "AI styling keeps users browsing, but the goal is to convert saved items into completed checkouts.",
+            "Social sharing sounds fun, but users save items for personal consideration, not social broadcast.",
+            "",
+            "Wish list folders help organization, but they do not actively drive the purchase decision."
+          ]
+        },
+        {
+          "caseTitle": "Design a Smart Water Bottle for Fitness Enthusiasts",
+          "source": "case",
+          "scenario": "You have ideas for LED reminder lights, integrated Bluetooth music, and GPS tracking.",
+          "question": "How do you evaluate these features using impact and effort?",
+          "options": [
+            "Prioritize LED lights because they drive hydration with low battery drain.",
+            "Prioritize GPS tracking since runners always want to map their routes.",
+            "Prioritize Bluetooth music to compete directly with modern smartwatches.",
+            "Prioritize all features to create the ultimate premium fitness device."
+          ],
+          "correctIndex": 0,
+          "explanation": "LED lights directly target the core dehydration problem while consuming minimal hardware resources. This offers the best ratio of user impact to engineering effort.",
+          "whyWrong": [
+            "",
+            "GPS tracking drains battery quickly and duplicates features already found on sports watches.",
+            "Adding Bluetooth music turns a water bottle into an audio device, shifting focus away from hydration.",
+            "Building every feature increases hardware costs and compromises battery life significantly."
+          ]
+        },
+        {
+          "caseTitle": "Design a travel itinerary planner for Airbnb.",
+          "source": "case",
+          "scenario": "Your team suggests group voting, expense splitting, and live weather updates.",
+          "question": "Which prioritization logic should guide your feature roadmap?",
+          "options": [
+            "Build group voting first to solve the planning coordination bottleneck.",
+            "Build expense splitting because money management causes family trip friction.",
+            "Build chat translations to help international family reunions communicate.",
+            "Build live weather updates so families pack appropriate clothing items."
+          ],
+          "correctIndex": 0,
+          "explanation": "Group voting solves the primary pain point of family reunion paralysis during initial planning. It directly addresses the messy group chat coordination problem.",
+          "whyWrong": [
+            "",
+            "Expense splitting is useful later, but the initial planning bottleneck is agreeing on activities.",
+            "Chat translations assume international travel, whereas many family reunions happen domestically.",
+            "Live weather updates are a nice addition, but they do not solve core itinerary alignment."
+          ]
+        },
+        {
+          "caseTitle": "Design a habit-building app for busy working professionals.",
+          "source": "case",
+          "scenario": "You can build streak freezes, social leaderboards, or deep analytics dashboards.",
+          "question": "How should you prioritize features for time-starved professionals?",
+          "options": [
+            "Build streak freezes to prevent churn after a missed day.",
+            "Build social leaderboards to leverage competitive peer motivation.",
+            "Build push reminders to ensure users never forget their tasks.",
+            "Build deep analytics to show detailed habit completion trends."
+          ],
+          "correctIndex": 0,
+          "explanation": "Streak freezes protect against the harsh reality of erratic work schedules, reducing abandonment. This directly targets the primary failure mode of traditional habit apps.",
+          "whyWrong": [
+            "",
+            "Leaderboards create anxiety for busy professionals who already face intense workplace pressure.",
+            "Constant push notifications lead to notification fatigue and prompt users to delete the app.",
+            "Detailed analytics require time to review, which busy working professionals simply lack."
+          ]
+        },
+        {
+          "caseTitle": "Design a loyalty program for a coffee shop chain",
+          "source": "bonus",
+          "scenario": "You are building a mobile app loyalty program with limited engineering resources.",
+          "question": "Which feature should you prioritize first to drive customer retention?",
+          "options": [
+            "Implement a simple digital punch card for every tenth coffee free.",
+            "Implement peer-to-peer gifting of coffee points to friends and family.",
+            "Implement AI-powered flavor recommendations based on weather patterns.",
+            "Implement custom coffee bean origin storytelling via interactive video."
+          ],
+          "correctIndex": 0,
+          "explanation": "A digital punch card offers high customer value with very low engineering complexity. It mirrors familiar physical habits while driving repeat visits effectively.",
+          "whyWrong": [
+            "",
+            "Peer gifting is a secondary network effect that requires an established user base first.",
+            "AI weather recommendations add massive technical complexity for marginal retention gains.",
+            "Video storytelling builds brand affinity, but it does not incentivize daily repeat purchases."
+          ]
+        },
+        {
+          "caseTitle": "Design a receipt scanner for small business expense tracking",
+          "source": "bonus",
+          "scenario": "You must choose initial features for a new receipt scanning business tool.",
+          "question": "What is the best prioritization approach for the MVP release?",
+          "options": [
+            "Build automatic OCR text extraction to eliminate manual data entry.",
+            "Build multi-currency conversion for international business travelers.",
+            "Build tax advisory chat bots to answer complex regulatory questions.",
+            "Build team spending limits to prevent employee credit card fraud."
+          ],
+          "correctIndex": 0,
+          "explanation": "Automatic OCR text extraction solves the single biggest time sink in expense reporting. It delivers massive user impact and forms the core utility of the product.",
+          "whyWrong": [
+            "",
+            "Multi-currency support is important, but domestic business users must be served first.",
+            "Tax advisory bots introduce legal liability and high support costs for an early MVP.",
+            "Team spending limits are enterprise features, whereas early users are solo operators."
+          ]
+        }
+      ]
+    },
+    "tradeoffs_and_metrics": {
+      "key": "tradeoffs_and_metrics",
+      "competency": "measurement",
+      "subtitle": "Master risks, second-order effects, counter-metrics, and measurement.",
+      "lesson": {
+        "hook": "Features without metrics are just expensive guesses waiting to break your core product.",
+        "what": "Tradeoffs and metrics define the hidden costs and the exact numbers that prove your feature worked. They show interviewers you understand business reality beyond the happy path.",
+        "how": [
+          "Identify the primary success metric tied directly to user value.",
+          "List major negative risks and second order behavioral shifts.",
+          "Establish a counter metric to protect against unintended consequences."
+        ],
+        "example": "For Instagram mental health reminders, track daily mindful breaks taken while watching for drops in total session time.",
+        "mistake": "Naming generic metrics like revenue or engagement without explaining how the new feature specifically moves them."
+      },
+      "questions": [
+        {
+          "caseTitle": "Design a product for farmers to track crop prices.",
+          "source": "case",
+          "scenario": "Your crop price tracker is helping smallholders decide when to sell their harvest.",
+          "question": "What is the best primary counter-metric to ensure your feature does not harm users?",
+          "options": [
+            "Count the number of price queries submitted by active farmers.",
+            "Monitor daily active users to measure overall product engagement.",
+            "Track local middlemen retaliation rates against app users.",
+            "Measure total downloads across rural farming regions each week."
+          ],
+          "correctIndex": 2,
+          "explanation": "A key risk is physical or economic retaliation from entrenched middlemen losing power. Tracking this ensures the app does not endanger its users.",
+          "whyWrong": [
+            "Query volume measures usage intensity rather than protecting users from local market backlash.",
+            "This measures engagement rather than guarding against dangerous unintended real-world consequences.",
+            "",
+            "Downloads show top-of-funnel reach but say nothing about safety or negative impacts."
+          ]
+        },
+        {
+          "caseTitle": "Improve the 'Save for Later' experience on Amazon.",
+          "source": "case",
+          "scenario": "You are turning the Save for Later list into an active purchase driver on Amazon.",
+          "question": "Which metric best captures the primary success of this feature?",
+          "options": [
+            "Percentage of users who share their saved lists with friends.",
+            "Conversion rate of saved items moving to completed purchases.",
+            "Average time spent browsing the mobile application shopping feeds.",
+            "Total number of items added to the save list daily."
+          ],
+          "correctIndex": 1,
+          "explanation": "The core goal is converting idle saved items into actual purchases, making conversion rate the truest test.",
+          "whyWrong": [
+            "Sharing is a secondary social behavior not central to driving the primary purchase goal.",
+            "",
+            "Time spent browsing measures general app usage rather than specific list conversion success.",
+            "Adding more items to a junk drawer does not mean users are actually buying anything."
+          ]
+        },
+        {
+          "caseTitle": "Improve the notification system for Slack to reduce noise.",
+          "source": "case",
+          "scenario": "You are revamping Slack notifications to cut context switching and fatigue for workers.",
+          "question": "What primary counter-metric should you monitor to ensure you did not go too far?",
+          "options": [
+            "Increase in missed urgent messages flagged by team leads.",
+            "Total number of messages sent across all active channels.",
+            "Average response time for casual watercooler chat messages.",
+            "Daily active users engaging with desktop and mobile apps."
+          ],
+          "correctIndex": 0,
+          "explanation": "Reducing noise risks filtering out important updates, so tracking missed urgent messages protects communication reliability.",
+          "whyWrong": [
+            "",
+            "Message volume tracks overall platform activity rather than measuring the cost of filtered alerts.",
+            "Casual chat response time is not critical to business operations or team emergency workflows.",
+            "DAU is a macro retention metric that fails to capture micro notification delivery failures."
+          ]
+        },
+        {
+          "caseTitle": "Amazon AR Try-On for Fashion",
+          "source": "case",
+          "scenario": "You are launching an AR virtual try-on feature in the Amazon app to address fit anxiety.",
+          "question": "Which metric directly proves you solved the primary problem you targeted?",
+          "options": [
+            "Growth in overall clothing category revenue during holiday seasons.",
+            "Reduction in apparel return rates for items using AR try-on.",
+            "Number of unique items tried on via augmented reality filters.",
+            "Total time users spend interacting with the virtual camera interface."
+          ],
+          "correctIndex": 1,
+          "explanation": "The core problem was bleeding margins from high returns, making return rate reduction the ultimate proof of success.",
+          "whyWrong": [
+            "Category revenue can grow for many macro reasons unrelated to virtual try-on accuracy.",
+            "",
+            "Try-on counts show feature adoption but do not guarantee that fit anxiety was actually resolved.",
+            "High interaction time could just mean clunky controls rather than confident purchasing decisions."
+          ]
+        },
+        {
+          "caseTitle": "Design a travel itinerary planner for Airbnb.",
+          "source": "case",
+          "scenario": "You built a collaborative itinerary planner right inside the Airbnb app for family trips.",
+          "question": "What is a major second-order effect or risk of adding this planner?",
+          "options": [
+            "Guests will spend less time browsing unique homes on the main platform.",
+            "Users might plan trips outside Airbnb and book lodging on competitor sites.",
+            "Hosts will increase nightly rates to cover the cost of trip planning tools.",
+            "Customer support tickets will drop because travelers manage details themselves."
+          ],
+          "correctIndex": 1,
+          "explanation": "A collaborative planner makes it easy to organize whole trips, risking that groups export the plan and book elsewhere.",
+          "whyWrong": [
+            "The planner actually increases engagement and keeps user attention inside the core ecosystem longer.",
+            "",
+            "Hosts have no direct control over internal itinerary software features or development costs.",
+            "Support tickets might actually rise initially as users figure out collaborative editing tools."
+          ]
+        },
+        {
+          "caseTitle": "Design a mental health feature for Instagram.",
+          "source": "case",
+          "scenario": "You are introducing mindful break reminders on Instagram to interrupt mindless scrolling.",
+          "question": "What is the primary trade-off leadership will scrutinize before approving this?",
+          "options": [
+            "Slower app load times when rendering the mindfulness prompt overlays.",
+            "Higher customer acquisition costs for new accounts joining the platform.",
+            "Increased server costs from sending push notifications to active users.",
+            "Lower ad impressions and revenue caused by reduced total time spent."
+          ],
+          "correctIndex": 3,
+          "explanation": "Asking users to close the app directly trades away screen time, ad inventory, and short-term revenue.",
+          "whyWrong": [
+            "UI overlays require minimal local rendering power and do not noticeably impact app speed.",
+            "Acquisition costs relate to marketing channels rather than in-app behavioral reminder features.",
+            "Push notification delivery costs are negligible compared to potential ad impression losses.",
+            ""
+          ]
+        },
+        {
+          "caseTitle": "Spotify Collaborative Playlist Generator",
+          "source": "bonus",
+          "scenario": "You are launching an automated playlist generator that blends tastes for road trip groups.",
+          "question": "What is the best counter-metric to ensure the algorithm remains fair to all participants?",
+          "options": [
+            "Percentage of generated playlists saved to personal user libraries.",
+            "Average length of time spent listening to the collaborative queue.",
+            "Total number of songs skipped within the first thirty seconds.",
+            "Variance in track selection representation across all invited users."
+          ],
+          "correctIndex": 3,
+          "explanation": "A poor algorithm might dominate with one user's taste; tracking track representation variance guards against bias.",
+          "whyWrong": [
+            "Saves indicate general utility but do not reveal whether quiet group members got included.",
+            "Session length measures engagement duration rather than algorithmic fairness among members.",
+            "Skip rates measure song quality rather than checking if the playlist fairly represents everyone.",
+            ""
+          ]
+        },
+        {
+          "caseTitle": "Netflix Offline Smart Download Queue",
+          "source": "bonus",
+          "scenario": "You are designing an auto-download feature that fills storage with shows based on commute patterns.",
+          "question": "What is the primary risk and counter-metric you must monitor for this feature?",
+          "options": [
+            "Reducing streaming quality, monitored by video resolution feedback.",
+            "Filling user phone storage completely, monitored by uninstall rates.",
+            "Lowering completion rates, monitored by abandoned episode markers.",
+            "Increasing cellular data consumption, monitored by carrier billing complaints."
+          ],
+          "correctIndex": 1,
+          "explanation": "Automatically downloading large video files risks choking device storage, which leads directly to app uninstalls.",
+          "whyWrong": [
+            "Storage management affects device capacity rather than the video stream rendering quality.",
+            "",
+            "Completion rates measure viewing behavior rather than the hardware storage space risk.",
+            "Smart downloads typically occur over local Wi-Fi networks overnight to avoid cellular usage."
+          ]
+        }
+      ]
+    }
+  }
+}

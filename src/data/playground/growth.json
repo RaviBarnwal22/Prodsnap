@@ -1,0 +1,1074 @@
+{
+  "slug": "growth",
+  "framework": "Growth Loop / Funnel",
+  "sections": {
+    "discovery_and_framing": {
+      "key": "discovery_and_framing",
+      "competency": "problem_framing",
+      "subtitle": "Establish current funnel and baseline before proposing solutions",
+      "lesson": {
+        "hook": "Stop pitching features before you even know where the bucket leaks.",
+        "what": "Discovery and framing means defining the exact retention baseline and current funnel bottlenecks before proposing any levers. You must quantify the current state of user drop-off before touching product solutions.",
+        "how": [
+          "Map the exact user journey steps.",
+          "Identify the specific drop-off metric baseline.",
+          "State the quantitative business goal clearly."
+        ],
+        "example": "For our personal finance app, day thirty retention sits at eight percent after users check net worth once. We need to lift that baseline to fifteen percent.",
+        "mistake": "Jumping straight into building new gamification features without establishing the current leaky funnel metrics."
+      },
+      "questions": [
+        {
+          "caseTitle": "Reduce churn in a language learning platform.",
+          "source": "case",
+          "scenario": "Users download our language app, complete three lessons, and vanish by day seven.",
+          "question": "How should you frame this retention problem at the start of your answer?",
+          "options": [
+            "Introduce social leaderboards so friends can compete on daily lesson streaks.",
+            "Propose adding daily push notifications to remind users to complete lessons.",
+            "Redesign the onboarding tutorial flow to make learning languages much easier.",
+            "State our current day thirty baseline and target twenty percent retention."
+          ],
+          "correctIndex": 3,
+          "explanation": "Establishing the current baseline and target metric is the core of discovery and framing. Proposing features too early skips this essential diagnostic step.",
+          "whyWrong": [
+            "This adds engagement features before diagnosing the retention leak.",
+            "This proposes a solution lever before defining the baseline metrics.",
+            "This jumps straight to a redesign without analyzing funnel drop-offs.",
+            ""
+          ]
+        },
+        {
+          "caseTitle": "Improve retention for a personal finance app.",
+          "source": "case",
+          "scenario": "People download our finance app, connect bank accounts, look at net worth once, and vanish.",
+          "question": "What is the best way to open your case response using good framing?",
+          "options": [
+            "Gently nudge users to check their accounts every single morning at breakfast.",
+            "Note our grim eight percent day thirty retention baseline and define the goal.",
+            "Build a weekly spending summary email digest to drive daily engagement loops.",
+            "Add budgeting widgets to the home screen for quick financial tracking access."
+          ],
+          "correctIndex": 1,
+          "explanation": "Good framing requires explicitly stating the current baseline metric and target before discussing solutions. The other options introduce premature product levers.",
+          "whyWrong": [
+            "This assumes a tactical solution without first diagnosing the core leak.",
+            "",
+            "This jumps into an engagement feature before establishing the retention baseline.",
+            "This suggests a product widget before quantifying the funnel drop-off."
+          ]
+        },
+        {
+          "caseTitle": "How would you grow Netflix's user base in Southeast Asia?",
+          "source": "case",
+          "scenario": "Acquisition is stalling in Indonesia and the Philippines due to pricing and payment drop-offs.",
+          "question": "How should you structure the initial discovery phase of your answer?",
+          "options": [
+            "Run localized marketing campaigns highlighting popular regional drama series.",
+            "Suggest launching lower priced mobile tiers for price sensitive regional users.",
+            "Highlight healthy brand awareness but massive payment screen drop-offs first.",
+            "Partner with local telecom carriers to bundle subscriptions into data plans."
+          ],
+          "correctIndex": 2,
+          "explanation": "Mapping where the funnel stalls before proposing acquisition tactics demonstrates strong discovery skills. Jumping to telecom partnerships bypasses the funnel analysis.",
+          "whyWrong": [
+            "This jumps to marketing tactics before diagnosing the payment screen leak.",
+            "This proposes a pricing lever before analyzing the funnel bottlenecks.",
+            "",
+            "This suggests a distribution channel partnership without framing the drop-off."
+          ]
+        },
+        {
+          "caseTitle": "Prioritize Growth vs Retention at Uber Eats",
+          "source": "case",
+          "scenario": "We are burning engineering hours chasing new restaurants while day thirty user retention is dismal.",
+          "question": "What should be your very first move when answering this case?",
+          "options": [
+            "Redesign the restaurant discovery feed to highlight popular local food spots.",
+            "Pinpoint our fifteen percent thirty day user retention as a leaky bucket.",
+            "Slow down restaurant acquisition efforts entirely to focus on push notifications.",
+            "Offer free delivery promotions to incentivize customers to place repeat orders."
+          ],
+          "correctIndex": 1,
+          "explanation": "Framing the leaky bucket by stating the poor retention baseline establishes the core problem. The other choices immediately suggest solutions without framing.",
+          "whyWrong": [
+            "This suggests a UI redesign before establishing the funnel metrics.",
+            "",
+            "This prescribes a tactical shift without framing the underlying retention baseline.",
+            "This proposes a promotional lever before defining the retention problem."
+          ]
+        },
+        {
+          "caseTitle": "Increase daily active creators on TikTok.",
+          "source": "case",
+          "scenario": "TikTok has one billion monthly users, but only ten percent create content regularly.",
+          "question": "How should you frame the core problem during your opening statement?",
+          "options": [
+            "Build simplified editing templates to help creators produce videos faster.",
+            "Add cash incentives for creators who publish videos three times weekly.",
+            "Define our goal to increase daily active creators by ten percent soon.",
+            "Launch a creator mentorship program to guide new users through filming."
+          ],
+          "correctIndex": 2,
+          "explanation": "Establishing a clear target goal and identifying the active creator gap is proper framing. The other options jump straight into feature proposals.",
+          "whyWrong": [
+            "This proposes a product feature before establishing the creator funnel baseline.",
+            "This suggests a financial incentive lever without defining the core metric goal.",
+            "",
+            "This jumps to an operational program before analyzing the creator drop-off."
+          ]
+        },
+        {
+          "caseTitle": "Increase merchant retention on Amazon Marketplace.",
+          "source": "case",
+          "scenario": "Small sellers drop out in their first ninety days because their initial inventory sits unsold.",
+          "question": "What is the correct way to open this merchant retention case?",
+          "options": [
+            "Provide automated advertising credits to help new merchants promote products.",
+            "Lower seller subscription fees across all categories to improve merchant margins.",
+            "Create an educational webinar series explaining how to optimize product listings.",
+            "Lift ninety day retention for new merchants listing few items from twenty percent."
+          ],
+          "correctIndex": 3,
+          "explanation": "Quantifying the specific ninety-day merchant retention baseline and target demonstrates rigorous funnel discovery. The other options propose specific levers too early.",
+          "whyWrong": [
+            "This proposes a marketing lever before analyzing the merchant drop-off funnel.",
+            "This suggests a pricing change before framing the merchant retention baseline.",
+            "This jumps to an educational initiative without establishing the current metrics.",
+            ""
+          ]
+        },
+        {
+          "caseTitle": "Bonus Case: Slack Workspace Retention",
+          "source": "bonus",
+          "scenario": "Teams sign up for Slack, send fifty messages in week one, and then go completely silent.",
+          "question": "How should you begin framing this team collaboration retention case?",
+          "options": [
+            "Redesign the desktop navigation sidebar to make channel switching much faster.",
+            "Integrate video conferencing directly into channels for easier team communication.",
+            "Establish our team active threshold baseline and target weekly retention rate.",
+            "Send automated email reminders to team administrators about unread messages."
+          ],
+          "correctIndex": 2,
+          "explanation": "Defining the activity threshold and retention baseline correctly frames the problem before solutioning. All other options pitch features prematurely.",
+          "whyWrong": [
+            "This jumps to a user interface redesign without framing the funnel leak.",
+            "This suggests building a new feature before analyzing the team drop-off.",
+            "",
+            "This proposes a notification tactic before establishing the retention baseline."
+          ]
+        },
+        {
+          "caseTitle": "Bonus Case: Airbnb Host Activation",
+          "source": "bonus",
+          "scenario": "New property hosts create an account on Airbnb but never publish their first listing.",
+          "question": "What is the proper discovery and framing step to take first here?",
+          "options": [
+            "Assign a dedicated account manager to help every single new property owner.",
+            "Guarantee host earnings for their first month to remove financial listing fears.",
+            "Map our host onboarding funnel and quantify the drop-off at photo upload.",
+            "Simplify the property description form fields to reduce typing friction."
+          ],
+          "correctIndex": 2,
+          "explanation": "Mapping the onboarding funnel and identifying where hosts drop off is the exact definition of discovery and framing. The rest are solution levers.",
+          "whyWrong": [
+            "This suggests an operational staffing solution without framing the metrics.",
+            "This proposes a financial incentive before analyzing the onboarding funnel drops.",
+            "",
+            "This jumps to a form redesign before quantifying the exact activation leak."
+          ]
+        }
+      ]
+    },
+    "funnel_or_loop": {
+      "key": "funnel_or_loop",
+      "competency": "structured_thinking",
+      "subtitle": "Master the art of diagnosing leaky funnels and compounding growth loops",
+      "lesson": {
+        "hook": "Stop guessing why users leave. Master the math of leaks and loops instead.",
+        "what": "A growth model maps every conversion stage from acquisition to retention. It exposes exact drop-off points and compounding loops.",
+        "how": [
+          "Identify the exact drop-off step",
+          "Calculate current conversion baselines",
+          "Design targeted retention interventions"
+        ],
+        "example": "For Spotify, you map casual weekly listeners into daily habit loops by analyzing mid-week listening drops.",
+        "mistake": "Focusing on top-of-funnel acquisition while ignoring massive retention leaks."
+      },
+      "questions": [
+        {
+          "caseTitle": "Reduce churn in a language learning platform.",
+          "source": "case",
+          "scenario": "Users download the language app, complete three lessons quickly, and then vanish entirely by day seven.",
+          "question": "What is the primary funnel metric to target first for maximum compounding impact?",
+          "options": [
+            "Lift day thirty retention baseline",
+            "Increase total app store downloads",
+            "Lower initial content creation costs",
+            "Boost total lifetime ad revenue"
+          ],
+          "correctIndex": 0,
+          "explanation": "Targeting early habit formation directly fixes the day seven drop-off leak. This improves long-term retention before spending more on top-of-funnel acquisition.",
+          "whyWrong": [
+            "",
+            "Driving more downloads just fills a leaky bucket with more churning users.",
+            "Reducing content costs has zero direct impact on user habit formation or early retention.",
+            "A smart candidate might focus on monetization, but revenue follows engagement and retention."
+          ]
+        },
+        {
+          "caseTitle": "How would you grow Netflix's user base in Southeast Asia?",
+          "source": "case",
+          "scenario": "Brand awareness is high in Indonesia and the Philippines, but potential subscribers abandon the signup flow at the payment screen.",
+          "question": "Where is the core funnel leak requiring immediate strategic intervention?",
+          "options": [
+            "Initial social media brand awareness",
+            "The content recommendation algorithm",
+            "The pricing and payment screen",
+            "Customer service response times"
+          ],
+          "correctIndex": 2,
+          "explanation": "Users drop off at the payment screen due to monthly pricing friction in mobile-first markets. Fixing this localized payment barrier unlocks the acquisition funnel.",
+          "whyWrong": [
+            "Brand awareness is already strong, so spending effort there misses the actual drop-off point.",
+            "Recommendation algorithms affect retention later, not the initial payment screen drop-off.",
+            "",
+            "Customer service happens post-purchase and does not cause pre-payment drop-offs."
+          ]
+        },
+        {
+          "caseTitle": "Increase daily active creators on TikTok.",
+          "source": "case",
+          "scenario": "TikTok has one billion monthly users, but only ten percent create content regularly while the rest just watch.",
+          "question": "What core funnel bottleneck must be addressed to increase active creators?",
+          "options": [
+            "The slow video upload speed",
+            "The blank page creation terror",
+            "The lack of music track options",
+            "The complex app store download"
+          ],
+          "correctIndex": 1,
+          "explanation": "Creators drop off before filming because they face intimidation when staring at a blank screen. Removing this friction increases the volume of active creators.",
+          "whyWrong": [
+            "Upload speed is rarely the main reason people hesitate to start filming videos.",
+            "",
+            "Music options are abundant, so lack of tracks is not the primary creation blocker.",
+            "App store downloads happen before someone even thinks about creating content."
+          ]
+        },
+        {
+          "caseTitle": "Improve onboarding for first-time merchants on Stripe.",
+          "source": "case",
+          "scenario": "First-time merchants abandon signups during KYC verification and technical configuration steps.",
+          "question": "How should you restructure the activation funnel to improve merchant retention?",
+          "options": [
+            "Simplify compliance and technical jargon",
+            "Redesign the entire public website",
+            "Offer massive transaction fee discounts",
+            "Increase outbound sales phone calls"
+          ],
+          "correctIndex": 0,
+          "explanation": "Merchants drop off because technical jargon and complex compliance overwhelm them. Simplifying these onboarding steps directly lifts early activation rates.",
+          "whyWrong": [
+            "",
+            "A public website redesign ignores the logged-in onboarding and compliance bottleneck.",
+            "Fee discounts eat into margins without solving the actual compliance confusion.",
+            "Outbound calls do not fix the self-serve technical configuration drop-off point."
+          ]
+        },
+        {
+          "caseTitle": "Increase repeat usage for a food delivery app.",
+          "source": "case",
+          "scenario": "DoorDash loses sixty percent of new food delivery users after their first order due to high decision friction.",
+          "question": "What intervention best stabilizes the repeat usage loop for these new users?",
+          "options": [
+            "Acquire more restaurants in new cities",
+            "Increase delivery radius significantly",
+            "Send generic push notifications daily",
+            "Curate personalized repeat order options"
+          ],
+          "correctIndex": 3,
+          "explanation": "First orders involve choice overload, so surfacing curated repeat options reduces friction. This drives users past the dangerous first-order drop-off cliff.",
+          "whyWrong": [
+            "Acquiring new restaurants helps top-of-funnel but fails to fix existing user churn.",
+            "Expanding delivery radius hurts food quality and increases late delivery churn.",
+            "Generic daily push notifications annoy users and increase uninstalls instead of retention.",
+            ""
+          ]
+        },
+        {
+          "caseTitle": "Design a viral loop for Dropbox's file-sharing feature.",
+          "source": "case",
+          "scenario": "Eighty percent of free signups drop off within thirty days because they run out of storage space.",
+          "question": "Which loop mechanic best converts free signups into active paying users?",
+          "options": [
+            "Drive shared folder user adoption",
+            "Run expensive television advertising",
+            "Offer free storage for signing in",
+            "Provide unlimited files to everyone"
+          ],
+          "correctIndex": 0,
+          "explanation": "Users who share folders retain at twice the rate and convert faster. Driving shared folder adoption creates a viral loop that solves the storage drop-off.",
+          "whyWrong": [
+            "",
+            "Television ads acquire users but do not solve the underlying free-tier storage drop-off.",
+            "Giving free storage without sharing just delays the inevitable storage limit problem.",
+            "Providing unlimited free files destroys the monetization model and prevents upgrades."
+          ]
+        },
+        {
+          "caseTitle": "Slack Workspace Growth Loop",
+          "source": "bonus",
+          "scenario": "New team members join Slack workspaces via invite links, but many send zero messages and go dormant.",
+          "question": "How do you optimize the activation funnel for newly invited team members?",
+          "options": [
+            "Charge their company card immediately",
+            "Remove all channels except general",
+            "Prompt them with guided first tasks",
+            "Send weekly email digests to admins"
+          ],
+          "correctIndex": 2,
+          "explanation": "Guided first tasks reduce the intimidation of an empty workspace and drive activation. This turns invited signups into active weekly messaging participants.",
+          "whyWrong": [
+            "Charging immediately causes instant churn before users experience any team value.",
+            "Removing channels destroys context and makes communication much less relevant.",
+            "",
+            "Admin email digests do nothing to help the individual invited user send messages."
+          ]
+        },
+        {
+          "caseTitle": "Notion Template Sharing Loop",
+          "source": "bonus",
+          "scenario": "Users browse community Notion templates, duplicate them into their workspace, but never create original pages.",
+          "question": "What is the key funnel transition needed to turn template copiers into creators?",
+          "options": [
+            "Prompt custom edits within template",
+            "Force users to watch tutorials",
+            "Hide templates behind paywalls",
+            "Send promotional discount codes"
+          ],
+          "correctIndex": 0,
+          "explanation": "Prompting custom edits transforms passive template consumers into active creators. This bridges the gap between passive viewing and genuine workspace habit formation.",
+          "whyWrong": [
+            "",
+            "Forcing long video tutorials creates immense friction and drives users away.",
+            "Hiding templates behind paywalls kills the viral acquisition and duplication loop.",
+            "Discount codes do not solve the habit gap of actually building custom pages."
+          ]
+        }
+      ]
+    },
+    "lever_identification": {
+      "key": "lever_identification",
+      "competency": "prioritization",
+      "subtitle": "Pinpoint the exact funnel leak with the biggest headroom.",
+      "lesson": {
+        "hook": "Stop fixing random metrics. Find the exact bottleneck that actually moves your business.",
+        "what": "Lever identification means isolating the single step in your funnel with the highest drop-off and largest potential impact. Instead of guessing, you use baseline data to target where user behavior breaks down.",
+        "how": [
+          "Map the user journey across every single key funnel stage.",
+          "Compare drop-off rates at each node against industry benchmarks.",
+          "Calculate potential impact and pick the lever with maximum headroom."
+        ],
+        "example": "For Duolingo, instead of tweaking the home screen, you isolate day seven retention where casual users drop off.",
+        "mistake": "The most common mistake is picking top of funnel acquisition when your actual leak is deep retention."
+      },
+      "questions": [
+        {
+          "caseTitle": "Reduce churn in a language learning platform.",
+          "source": "case",
+          "scenario": "Users download your language app, complete three quick lessons, and completely vanish by day seven.",
+          "question": "Which specific retention lever provides the greatest headroom for your product team right now?",
+          "options": [
+            "Acquiring new users through expensive paid social media campaigns",
+            "Adding advanced grammar courses for power users who finish every module",
+            "Pushing day thirty retention from eight to twenty percent using early habits",
+            "Redesigning the settings page to reduce user support ticket volume"
+          ],
+          "correctIndex": 2,
+          "explanation": "Day seven churn is your biggest leak, and improving early habit formation unlocks massive long-term value. Fixing this specific drop-off protects all your acquisition efforts.",
+          "whyWrong": [
+            "More acquisition just fills a leaky bucket faster without solving the core churn problem.",
+            "Advanced courses target power users, ignoring the early drop-offs where the real leak happens.",
+            "",
+            "Support tickets are unrelated to the massive drop-off happening during the first week."
+          ]
+        },
+        {
+          "caseTitle": "Improve retention for a personal finance app.",
+          "source": "case",
+          "scenario": "People download your finance app, link their bank accounts, check net worth once, and never return.",
+          "question": "What is the primary lever you should target to fix this early user drop-off?",
+          "options": [
+            "Creating a daily habit loop without triggering severe financial anxiety",
+            "Building a referral program to bring in more curious new users",
+            "Adding cryptocurrency tracking features for younger tech savvy consumers",
+            "Lowering subscription prices to convert more free users to paid tiers"
+          ],
+          "correctIndex": 0,
+          "explanation": "Users vanish after one check because there is no sustainable habit loop. Solving this engagement drop without causing stress is the key leverage point.",
+          "whyWrong": [
+            "",
+            "Referrals amplify acquisition, but they will just churn immediately like the current cohort.",
+            "Crypto features appeal to a niche audience rather than solving the core onboarding drop-off.",
+            "Pricing adjustments do not solve the underlying lack of utility keeping users away."
+          ]
+        },
+        {
+          "caseTitle": "How would you grow Netflix's user base in Southeast Asia?",
+          "source": "case",
+          "scenario": "Brand awareness is high in Indonesia, but removing free trials causes massive drop-offs at the payment screen.",
+          "question": "Where is the exact funnel leak that requires your immediate optimization focus?",
+          "options": [
+            "The payment screen drop-off caused by high pricing and mobile friction",
+            "The top of funnel marketing spend across major urban digital channels",
+            "The content catalog depth for international movies and local television shows",
+            "The recommendation algorithm accuracy for users who finish watching a movie"
+          ],
+          "correctIndex": 0,
+          "explanation": "Users show strong intent by reaching the payment screen but drop off due to pricing and friction. Removing this barrier captures high-intent prospects.",
+          "whyWrong": [
+            "",
+            "Marketing spend is working fine because brand awareness and initial intent are already healthy.",
+            "Catalog depth does not address why people stall right when they hit the paywall.",
+            "Recommendation algorithms help with long-term retention, not the initial payment screen drop."
+          ]
+        },
+        {
+          "caseTitle": "Increase daily active creators on TikTok.",
+          "source": "case",
+          "scenario": "TikTok has one billion monthly users, but only ten percent create content while the rest just watch.",
+          "question": "Which specific lever should you pull to increase your daily active creator metric?",
+          "options": [
+            "Increasing global marketing campaigns to attract more passive viewers",
+            "Eliminating the blank page terror by simplifying initial video creation prompts",
+            "Redesigning the video playback interface to improve viewer engagement time",
+            "Negotiating exclusive music licensing deals for top tier verified creators"
+          ],
+          "correctIndex": 1,
+          "explanation": "The core problem is creator activation, specifically the fear of starting. Easing this creation friction unlocks a massive pool of latent creators.",
+          "whyWrong": [
+            "More viewers will not solve the low creation ratio among your existing user base.",
+            "",
+            "Viewer engagement metrics focus on consumption, completely ignoring the creator activation goal.",
+            "Music deals help top creators, but they do not help hesitant first-time creators start."
+          ]
+        },
+        {
+          "caseTitle": "Improve onboarding for first-time merchants on Stripe.",
+          "source": "case",
+          "scenario": "Forty percent of signups drop off during KYC verification and webhook configuration due to complex jargon.",
+          "question": "What is the highest leverage action to improve merchant activation this quarter?",
+          "options": [
+            "Updating the pricing tiers to offer better discounts for high volume transactions",
+            "Simplifying KYC verification and technical jargon to reduce signup drop-off",
+            "Adding more payment gateway integrations for international currencies and alternative wallets",
+            "Running aggressive digital advertising campaigns targeted at enterprise software companies"
+          ],
+          "correctIndex": 1,
+          "explanation": "The steep wall of compliance causes massive drop-off early on. Simplifying this onboarding flow is the fastest way to increase activation.",
+          "whyWrong": [
+            "Pricing discounts do not help merchants who cannot even complete the initial setup.",
+            "",
+            "New gateway integrations do not solve the immediate friction of identity verification.",
+            "Advertising brings in more merchants who will just hit the same compliance wall and churn."
+          ]
+        },
+        {
+          "caseTitle": "Boost Booking.com Repeat Bookings",
+          "source": "case",
+          "scenario": "Booking frequency is down year over year, forcing you to work twice as hard on expensive paid search.",
+          "question": "Which customer segment and behavior should you target to restore repeat bookings?",
+          "options": [
+            "Brand new users who find your platform through organic search engines",
+            "Business travelers who expense luxury hotel rooms every single week",
+            "Dormant accounts that have not opened your application in two years",
+            "Mobile app leisure travelers who book trips twice a year"
+          ],
+          "correctIndex": 3,
+          "explanation": "Targeting leisure app users addresses the specific frequency drop. Retaining existing travelers is cheaper than constantly buying new search traffic.",
+          "whyWrong": [
+            "New users require expensive paid acquisition, which ignores the repeat booking problem.",
+            "Business travelers have completely different booking patterns and are not the core segment here.",
+            "Dormant accounts are too cold to efficiently convert into regular repeat bookers.",
+            ""
+          ]
+        },
+        {
+          "caseTitle": "Optimize Onboarding Flow for Notion Workspaces",
+          "source": "bonus",
+          "scenario": "New teams create a Notion workspace, stare at a blank page, and abandon the tool within twenty minutes.",
+          "question": "What is the most effective lever to drive early team activation and retention?",
+          "options": [
+            "Sending daily email reminders with marketing case studies and product updates",
+            "Redesigning the brand logo and marketing homepage to improve conversion rates",
+            "Providing interactive templates that guide teams to their first completed project",
+            "Increasing the file upload storage limits for all free tier workspace accounts"
+          ],
+          "correctIndex": 2,
+          "explanation": "Interactive templates remove the blank page terror, helping teams experience core value quickly. This direct guidance drastically improves early activation.",
+          "whyWrong": [
+            "Daily emails are often ignored or marked as spam without delivering immediate product utility.",
+            "Homepage redesigns fix top-of-funnel acquisition, not the in-app workspace abandonment issue.",
+            "",
+            "Storage limits do not help teams who cannot figure out how to start writing anything."
+          ]
+        },
+        {
+          "caseTitle": "Scale Creator Monetization on Substack",
+          "source": "bonus",
+          "scenario": "Writers publish free newsletters on Substack, but struggle to convert free readers into paid subscribers.",
+          "question": "Which lever should you optimize to maximize paid subscription conversion rates?",
+          "options": [
+            "Making it seamless for writers to gate specific paragraphs behind a paywall",
+            "Adding more social media sharing buttons to the bottom of every newsletter",
+            "Building automated recommendation widgets that feature competing newsletter publications",
+            "Lowering the platform fee percentage taken from established multi-author publications"
+          ],
+          "correctIndex": 0,
+          "explanation": "The conversion leak happens when writers cannot easily create compelling paywalls. Streamlining this feature directly drives paid subscription growth.",
+          "whyWrong": [
+            "",
+            "Sharing buttons help with reach, but they do not directly convert free readers into payers.",
+            "Recommending competing newsletters might distract readers rather than converting them to paid.",
+            "Platform fees affect retention of top writers, not the conversion rate of free readers."
+          ]
+        }
+      ]
+    },
+    "retention_insight": {
+      "key": "retention_insight",
+      "competency": "user_insight",
+      "subtitle": "Master retention curves, activation moments, and habit loops",
+      "lesson": {
+        "hook": "Stop pouring water into a leaky bucket and fix your retention leaks.",
+        "what": "Retention insight is about understanding how users form lasting habits with your product. You must identify the critical activation moment that turns casual users into daily regulars.",
+        "how": [
+          "Find the exact day where retention flatlines.",
+          "Identify the core action that predicts long term usage.",
+          "Design a lightweight daily habit loop to prevent churn."
+        ],
+        "example": "At Duolingo, users who complete three lessons by day seven form a lasting daily habit.",
+        "mistake": "Focusing too much on top of funnel acquisition while ignoring immediate user churn."
+      },
+      "questions": [
+        {
+          "caseTitle": "Reduce churn in a language learning platform.",
+          "source": "case",
+          "scenario": "Your language app has strong downloads but users vanish completely by day seven.",
+          "question": "What is the most critical metric to analyze first in this retention leak?",
+          "options": [
+            "Evaluate the total revenue generated from premium subscription upgrade conversions.",
+            "Measure total app downloads across all global marketing acquisition channels.",
+            "Calculate the daily cost per click for paid user acquisition campaigns.",
+            "Track thirty day retention baseline to measure early habit formation success."
+          ],
+          "correctIndex": 3,
+          "explanation": "Thirty day retention baseline reveals the exact magnitude of early user churn. Focusing here helps you build better habit loops before scaling acquisition.",
+          "whyWrong": [
+            "Upgrade conversions matter later but do not explain why users vanish early.",
+            "Total downloads only show top of funnel volume and ignore post install dropoffs.",
+            "Cost per click measures acquisition efficiency rather than product retention health.",
+            ""
+          ]
+        },
+        {
+          "caseTitle": "Improve retention for a personal finance app.",
+          "source": "case",
+          "scenario": "Users connect their bank accounts, view net worth once, and leave forever.",
+          "question": "Why does a standard daily financial check fail to create a retention loop?",
+          "options": [
+            "Users prefer to manually log their monthly expenses inside physical spreadsheets.",
+            "The app lacks enough engaging multiplayer games to keep users returning daily.",
+            "Checking bank balances daily creates financial anxiety rather than positive engagement.",
+            "Modern banking APIs are too slow to refresh user balances every single day."
+          ],
+          "correctIndex": 2,
+          "explanation": "Forcing users to inspect checking accounts triggers stress and avoidance. Successful finance apps must provide value without causing monetary anxiety.",
+          "whyWrong": [
+            "Manual spreadsheets represent the exact friction that modern apps aim to eliminate.",
+            "Multiplayer games are irrelevant to personal finance utility and habit formation.",
+            "",
+            "API speed is rarely the primary driver of voluntary user dropoff behavior."
+          ]
+        },
+        {
+          "caseTitle": "Google Search App Engagement Retention",
+          "source": "case",
+          "scenario": "Users download the search app for quick queries and leave without returning.",
+          "question": "What causes the sharp drop in user retention between day one and seven?",
+          "options": [
+            "Marketing campaigns target the wrong demographic segments during launch phases.",
+            "The mobile application crashes whenever users search for flight status details.",
+            "Users complete transactional queries and leave without forming a habit loop.",
+            "Competitor search engines offer significantly faster web page loading speeds."
+          ],
+          "correctIndex": 2,
+          "explanation": "Single use transactional queries solve an immediate need without establishing a habit loop. Users get their answer and have no reason to reopen the app.",
+          "whyWrong": [
+            "Targeting demographics affects initial acquisition quality more than post query retention.",
+            "App crashes would cause immediate same day abandonment rather than gradual week one dropoff.",
+            "",
+            "Loading speed differences are minor compared to the fundamental lack of habit utility."
+          ]
+        },
+        {
+          "caseTitle": "Prioritize Growth vs Retention at Uber Eats",
+          "source": "case",
+          "scenario": "New restaurant acquisition is booming, but thirty day user retention sits at fifteen percent.",
+          "question": "How should the product team reallocate resources to fix this leaky bucket?",
+          "options": [
+            "Redesign the entire restaurant dashboard to improve merchant onboarding speeds.",
+            "Lower delivery fees across all tier three cities to boost order volume.",
+            "Pause top of funnel acquisition to build early ordering habit loops.",
+            "Increase marketing budgets to attract even more new restaurant customers."
+          ],
+          "correctIndex": 2,
+          "explanation": "Pouring traffic into a leaky bucket wastes marketing budget. Fixing the habit loop ensures acquired users actually stick around for the long term.",
+          "whyWrong": [
+            "Merchant dashboards help supply, but the scenario specifically highlights user retention.",
+            "Lowering fees subsidizes bad unit economics without solving the underlying retention leak.",
+            "",
+            "Increasing marketing budgets accelerates churn by acquiring users who quickly leave."
+          ]
+        },
+        {
+          "caseTitle": "Increase daily active creators on TikTok.",
+          "source": "case",
+          "scenario": "Only ten percent of monthly users create content while the rest only watch.",
+          "question": "What is the primary psychological barrier preventing casual viewers from creating content?",
+          "options": [
+            "Creators refuse to post videos unless they receive guaranteed monetary compensation.",
+            "The algorithm suppresses new creator content to protect established influencers.",
+            "Blank page terror makes filming feel overwhelming and intimidating to users.",
+            "The video editing tools are too complex for average smartphone owners."
+          ],
+          "correctIndex": 2,
+          "explanation": "Blank page terror paralyzes potential creators who open the app with good intentions. Removing friction in content creation helps activate passive viewers.",
+          "whyWrong": [
+            "Monetary compensation is not the primary driver for casual short form video creation.",
+            "Algorithm suppression affects distribution rather than the initial urge to record.",
+            "",
+            "Modern editing tools are heavily simplified, meaning creation fear is psychological."
+          ]
+        },
+        {
+          "caseTitle": "Reduce early churn for LinkedIn Premium subscribers.",
+          "source": "case",
+          "scenario": "Users purchase subscriptions for specific job searches and cancel immediately afterward.",
+          "question": "Why do subscribers churn right after their initial trial or paid month ends?",
+          "options": [
+            "Competitor professional networks offer free lifetime access to all recruiter tools.",
+            "The platform fails to process monthly credit card payments due to banking errors.",
+            "They achieve their immediate transactional goal and forget the ongoing subscription value.",
+            "Job seekers find permanent employment within forty eight hours of joining."
+          ],
+          "correctIndex": 2,
+          "explanation": "Single use utility creates a cliff when the goal is reached. Subscriptions need continuous engagement loops beyond a single job search.",
+          "whyWrong": [
+            "Free competitor networks lack the proprietary professional graph that LinkedIn provides.",
+            "Payment processing failures account for involuntary churn, not intentional cancellations.",
+            "",
+            "Employment timelines vary greatly and rarely happen within forty eight hours."
+          ]
+        },
+        {
+          "caseTitle": "Notion Workspace Habit Formation",
+          "source": "bonus",
+          "scenario": "New users create a blank workspace page and abandon it within ten minutes.",
+          "question": "What is the most effective onboarding strategy to drive long term workspace retention?",
+          "options": [
+            "Send daily reminder emails listing all available advanced database features.",
+            "Force users to watch a thirty minute video tutorial before starting.",
+            "Require users to invite five colleagues before unlocking their personal workspace.",
+            "Provide prebuilt template galleries that solve immediate documentation problems."
+          ],
+          "correctIndex": 3,
+          "explanation": "Templates eliminate blank page anxiety by giving users an immediate functional framework. This accelerates time to value and drives early activation.",
+          "whyWrong": [
+            "Reminder emails about advanced features overwhelm beginners who need basic utility.",
+            "Long video tutorials introduce heavy friction and cause immediate user dropoffs.",
+            "Requiring colleague invites creates an impossible barrier before personal value is found.",
+            ""
+          ]
+        },
+        {
+          "caseTitle": "Slack Daily Team Communication",
+          "source": "bonus",
+          "scenario": "Teams sign up for chat workspaces but stop messaging after the third day.",
+          "question": "Which specific activation threshold best predicts long term team retention in Slack?",
+          "options": [
+            "Sending two thousand total messages across multiple custom channel categories.",
+            "Integrating third party developer tools like GitHub and Google Calendar.",
+            "Purchasing an annual enterprise subscription during the first week.",
+            "Uploading a custom team profile picture for every active member."
+          ],
+          "correctIndex": 0,
+          "explanation": "Message volume is the core habit metric for communication tools. Teams that cross the threshold of two thousand messages are locked into the workflow.",
+          "whyWrong": [
+            "",
+            "Integrations are helpful but represent secondary habits compared to core messaging volume.",
+            "Enterprise purchases are financial milestones resulting from retention, not the cause.",
+            "Profile pictures are cosmetic and have zero correlation with team retention rates."
+          ]
+        }
+      ]
+    },
+    "experiment_design": {
+      "key": "experiment_design",
+      "competency": "measurement",
+      "subtitle": "Master experiment design with hypothesis, metrics, and sizing.",
+      "lesson": {
+        "hook": "Stop guessing what users want and start testing your brilliant product theories.",
+        "what": "Experiment design means turning a guess into a structured test with clear metrics. It helps you measure true impact before writing massive code.",
+        "how": [
+          "Write a clear testable hypothesis.",
+          "Pick one primary success metric.",
+          "Estimate sizing and guardrail metrics."
+        ],
+        "example": "For Spotify, we hypothesize that adding a daily prompt will lift active streams by ten percent without raising crash rates. We will run a two week test on ten percent of free users.",
+        "mistake": "Launching a massive feature test without defining a guardrail metric to catch hidden drops in core revenue."
+      },
+      "questions": [
+        {
+          "caseTitle": "Reduce churn in a language learning platform.",
+          "source": "case",
+          "scenario": "Users vanish by day seven after finishing only three quick lessons in our app.",
+          "question": "What is the best way to design an experiment for early habit formation here?",
+          "options": [
+            "Redesign the entire app navigation to make lessons feel much faster.",
+            "Offer a fifty percent discount to all churned users immediately.",
+            "Send an email survey asking why they stopped using the product.",
+            "Test push reminders targeting day three to lift week one retention."
+          ],
+          "correctIndex": 3,
+          "explanation": "Targeting day three directly attacks the exact leak point with a measurable loop. The other choices are too broad or rely on surveys.",
+          "whyWrong": [
+            "A full redesign is too broad and impossible to measure cleanly.",
+            "Discounts destroy unit economics and fail to build sustainable daily habits.",
+            "Surveys capture opinions rather than driving actual behavioral changes.",
+            ""
+          ]
+        },
+        {
+          "caseTitle": "How would you grow Netflix's user base in Southeast Asia?",
+          "source": "case",
+          "scenario": "Acquisition stalls at the payment screen in mobile first markets due to pricing friction.",
+          "question": "How should we structure an experiment to fix this payment drop off?",
+          "options": [
+            "Increase monthly subscription prices to signal higher premium quality.",
+            "Run a massive television ad campaign across the entire region.",
+            "Add a localized mobile wallet option and measure checkout conversion.",
+            "Remove all payment steps completely and make the streaming service free."
+          ],
+          "correctIndex": 2,
+          "explanation": "Adding a localized wallet directly targets the payment screen friction observed in the funnel. Free access or TV ads do not test payment fixes.",
+          "whyWrong": [
+            "Higher prices will accelerate drop off at the payment screen rather than fixing it.",
+            "Television ads are top of funnel marketing, not product checkout optimization.",
+            "",
+            "Making the service completely free destroys monetization and core business viability."
+          ]
+        },
+        {
+          "caseTitle": "Increase daily active creators on TikTok.",
+          "source": "case",
+          "scenario": "Creators suffer from blank page terror and fail to publish videos after opening the app.",
+          "question": "Which experiment design best addresses the blank page terror for new creators?",
+          "options": [
+            "Build a complex editing studio with professional desktop software tools.",
+            "Send push notifications telling creators to film viral dance trends.",
+            "Test AI video prompts and measure the percentage of users publishing.",
+            "Give cash prizes to the top ten creators with the most views."
+          ],
+          "correctIndex": 2,
+          "explanation": "AI prompts directly target creation friction with a clear metric on publishing. Cash prizes or complex tools miss the core onboarding block.",
+          "whyWrong": [
+            "Complex editing tools increase friction instead of solving blank page terror.",
+            "Push notifications are generic nudges that do not solve the root creation barrier.",
+            "",
+            "Cash prizes reward existing creators rather than helping beginners overcome fear."
+          ]
+        },
+        {
+          "caseTitle": "Improve onboarding for first-time merchants on Stripe.",
+          "source": "case",
+          "scenario": "Merchants drop off during KYC verification because technical jargon overwhelms them.",
+          "question": "How should we design a test to improve merchant activation during onboarding?",
+          "options": [
+            "Send weekly email newsletters about advanced financial management tips.",
+            "Simplify compliance copy into plain terms and track seven day activation.",
+            "Remove all security compliance checks to make onboarding completely instant.",
+            "Require all merchants to schedule a phone call with sales reps."
+          ],
+          "correctIndex": 1,
+          "explanation": "Simplifying copy addresses the jargon problem directly while tracking the right activation metric. Sales calls and removing compliance are flawed.",
+          "whyWrong": [
+            "Newsletters do not solve the immediate KYC form drop off issue.",
+            "",
+            "Removing compliance checks is illegal and ignores strict financial regulations.",
+            "Sales calls add massive friction and cannot scale for self serve merchants."
+          ]
+        },
+        {
+          "caseTitle": "Design a viral loop for Dropbox's file-sharing feature.",
+          "source": "case",
+          "scenario": "Eighty percent of free signups drop off within thirty days because storage limits run out.",
+          "question": "What experiment structure best tests a referral habit loop for this product?",
+          "options": [
+            "Charge users a monthly fee immediately after they sign up for an account.",
+            "Build a new chat messaging feature inside the file storage dashboard.",
+            "Make file sharing completely private by default to improve customer trust.",
+            "Offer extra storage space for every active friend invited and track conversion."
+          ],
+          "correctIndex": 3,
+          "explanation": "Rewarding storage invites directly tackles the retention drop off by creating a natural viral loop. Private files or instant paywalls kill growth.",
+          "whyWrong": [
+            "Charging immediately destroys top of funnel signups before they experience value.",
+            "A chat feature is a massive distraction from the core file sharing loop.",
+            "Making files private prevents sharing, which kills the core viral loop entirely.",
+            ""
+          ]
+        },
+        {
+          "caseTitle": "Increase repeat usage for a food delivery app.",
+          "source": "case",
+          "scenario": "Sixty percent of new food delivery users churn after their first order due to choice overload.",
+          "question": "How should we design an experiment to lift repeat order rates here?",
+          "options": [
+            "Test a curated reorder widget on the home screen for past items.",
+            "Send a daily customer satisfaction survey after every single meal delivered.",
+            "Double the delivery fees to increase company profit margins per order.",
+            "Hide all restaurant listings except for the single most expensive option."
+          ],
+          "correctIndex": 0,
+          "explanation": "A curated reorder widget reduces choice overload and makes repeat ordering frictionless. Higher fees or hiding options will hurt retention.",
+          "whyWrong": [
+            "",
+            "Surveys measure satisfaction but do not solve the choice overload problem.",
+            "Doubling delivery fees will increase churn rather than driving repeat usage.",
+            "Hiding restaurants destroys variety and causes frustrated users to uninstall."
+          ]
+        },
+        {
+          "caseTitle": "Slack Workplace Habit Loop",
+          "source": "case",
+          "scenario": "New teams adopt Slack but stop messaging after three days because communication stays in email.",
+          "question": "What is the most rigorous experiment design to drive team activation?",
+          "options": [
+            "Send fifty automated notifications every hour to force users to reply.",
+            "Prompt teams to import an email thread and track week two message volume.",
+            "Remove all text chat features and replace them with video conference links.",
+            "Force users to invite ten external contractors before viewing any messages."
+          ],
+          "correctIndex": 1,
+          "explanation": "Importing email threads brings existing habits into Slack and measures real message volume. The other options destroy user experience.",
+          "whyWrong": [
+            "Spamming notifications will cause users to mute the app and uninstall.",
+            "",
+            "Removing text chat completely ruins the core product value proposition.",
+            "Forcing external invites creates artificial friction that increases team churn."
+          ]
+        },
+        {
+          "caseTitle": "Notion Workspace Onboarding",
+          "source": "case",
+          "scenario": "New users open Notion, see a blank page, and leave without creating any notes or pages.",
+          "question": "How should we test a solution to the blank canvas drop off problem?",
+          "options": [
+            "Lock the account creation page until users buy an annual enterprise plan.",
+            "Require users to watch a one hour video tutorial before logging in.",
+            "Delete all default workspace features to keep the interface completely empty.",
+            "Preload templates based on user role and track thirty day active retention."
+          ],
+          "correctIndex": 3,
+          "explanation": "Preloaded templates solve the blank page problem and let us measure long term retention. Locking pages or long videos create barriers.",
+          "whyWrong": [
+            "Locking accounts behind enterprise plans will destroy signup conversion rates.",
+            "Long video tutorials cause severe drop off during the onboarding flow.",
+            "Deleting features leaves users with an even more intimidating blank screen.",
+            ""
+          ]
+        }
+      ]
+    },
+    "scaling_plan": {
+      "key": "scaling_plan",
+      "competency": "solutioning",
+      "subtitle": "Master what happens after your growth win and second-order effects.",
+      "lesson": {
+        "hook": "Winning feels great until your success breaks your infrastructure or kills your margins.",
+        "what": "A scaling plan maps out how your solution handles massive volume increases. It also covers secondary system impacts.",
+        "how": [
+          "Forecast infrastructure strain before opening up new channels.",
+          "Calculate unit economics at ten times current volume.",
+          "Identify negative second-order user behavior changes."
+        ],
+        "example": "When scaling grocery delivery slots, we evaluated server load alongside driver burnout rates across peak rush hours.",
+        "mistake": "Focusing only on initial conversion spikes while ignoring downstream support capacity."
+      },
+      "questions": [
+        {
+          "caseTitle": "Reduce churn in a language learning platform.",
+          "source": "case",
+          "scenario": "Your early habit loop intervention successfully pushed thirty day retention from eight percent to twenty percent.",
+          "question": "What critical second-order effect must you evaluate next regarding content consumption?",
+          "options": [
+            "Server costs will drop because engaged users complete lessons faster.",
+            "Daily active users will decline because longer streaks create user fatigue.",
+            "Power users will exhaust our advanced curriculum much faster than expected.",
+            "Marketing teams can immediately cut all acquisition spend across social media."
+          ],
+          "correctIndex": 2,
+          "explanation": "Users forming daily habits consume content at double the prior rate. You must scale production pipelines to prevent content exhaustion.",
+          "whyWrong": [
+            "Server costs scale up with higher daily lesson completion rates.",
+            "Streak formation actually increases daily engagement rather than causing fatigue.",
+            "",
+            "Retention gains do not replace the need for top of funnel acquisition."
+          ]
+        },
+        {
+          "caseTitle": "Improve retention for a personal finance app.",
+          "source": "case",
+          "scenario": "Your daily habit loop for checking net worth is driving massive engagement but generating high notification volume.",
+          "question": "Which second-order scaling risk threatens long-term retention in this scenario?",
+          "options": [
+            "Bank API connection fees will decrease due to bulk volume discounts.",
+            "Customer support headcount can be reduced by fifty percent immediately.",
+            "Engineering maintenance will drop because financial data rarely changes.",
+            "Users will experience notification fatigue and develop severe financial anxiety."
+          ],
+          "correctIndex": 3,
+          "explanation": "Daily balance checks without positive framing trigger anxiety and app uninstalls. Scaling reminders requires careful personalization.",
+          "whyWrong": [
+            "API provider costs scale linearly or per connection request.",
+            "Higher engagement generates more support inquiries about account syncing.",
+            "Financial integrations require constant maintenance due to bank security updates.",
+            ""
+          ]
+        },
+        {
+          "caseTitle": "How would you grow Netflix's user base in Southeast Asia?",
+          "source": "case",
+          "scenario": "Localized pricing successfully drove massive subscriber acquisition across Indonesia and the Philippines.",
+          "question": "What primary infrastructure challenge must your scaling plan address immediately?",
+          "options": [
+            "Mobile bandwidth limitations during peak evening streaming hours.",
+            "Excessive server capacity sitting idle during morning work hours.",
+            "Physical logistics delays for shipping physical media discs.",
+            "Customer acquisition costs rising because brand awareness is saturated."
+          ],
+          "correctIndex": 0,
+          "explanation": "Massive subscriber growth on mobile networks strains regional peering and CDN bandwidth. Scaling requires optimizing bitrates for local infrastructure.",
+          "whyWrong": [
+            "",
+            "While usage patterns exist, peak load is the critical infrastructure threat.",
+            "Netflix operates entirely as a digital streaming service in these markets.",
+            "Acquisition costs were solved by localized pricing, not the core scaling bottleneck."
+          ]
+        },
+        {
+          "caseTitle": "Cross-Functional Retention Initiative at Netflix",
+          "source": "case",
+          "scenario": "Your cross-functional retention push successfully lowered monthly churn between months two and three.",
+          "question": "How does this retention win impact the broader marketing and engineering ecosystem?",
+          "options": [
+            "Engineering can deprecate all recommendation algorithms to save compute power.",
+            "Marketing can afford higher customer acquisition bids because lifetime value increased.",
+            "Product teams must stop building new features and focus entirely on billing.",
+            "Customer support tickets will increase because retained users are unhappy."
+          ],
+          "correctIndex": 1,
+          "explanation": "Higher retention increases customer lifetime value. This allows growth marketing to bid more aggressively for new users.",
+          "whyWrong": [
+            "Recommendation engines drive the retention that you just successfully achieved.",
+            "",
+            "Product teams balance feature development alongside ongoing core optimization.",
+            "Retained users typically generate fewer urgent cancellation support tickets."
+          ]
+        },
+        {
+          "caseTitle": "Google Search App Engagement Retention",
+          "source": "case",
+          "scenario": "Your new habit loop successfully converts transactional search queries into daily active utility habits.",
+          "question": "What is the primary second-order monetization risk of scaling this feature?",
+          "options": [
+            "Users will perform fewer queries overall because answers are too direct.",
+            "Advertising revenue will automatically double without any additional engineering work.",
+            "Serving more complex intent queries increases compute costs per active user.",
+            "Query latency will improve because search indexes become much smaller."
+          ],
+          "correctIndex": 2,
+          "explanation": "Handling complex intent queries at scale requires significantly more machine learning compute. You must factor this into unit economics.",
+          "whyWrong": [
+            "Direct answers actually encourage higher search frequency among active users.",
+            "Ad revenue requires careful inventory management and auction scaling.",
+            "",
+            "Search indexes grow larger and more complex as usage scales up."
+          ]
+        },
+        {
+          "caseTitle": "Design a referral strategy for a hyperlocal services app.",
+          "source": "case",
+          "scenario": "Your referral program successfully creates high user density within targeted urban zip codes.",
+          "question": "What operational bottleneck will scaling this density cause for the supply side?",
+          "options": [
+            "Platform commission rates must be reduced to zero for all partners.",
+            "Marketing teams will need to expand advertising into rural areas immediately.",
+            "Supply partners in those zip codes will face high utilization and burnout.",
+            "Service providers will experience idle travel time between remote jobs."
+          ],
+          "correctIndex": 2,
+          "explanation": "High user density concentrates demand on local service providers. Without scaling supply, partners face burnout and churn.",
+          "whyWrong": [
+            "Commission adjustments are pricing levers, not direct supply operational fixes.",
+            "Hyperlocal strategy focuses on density, not expanding into low density rural zones.",
+            "",
+            "High density actually reduces travel time between jobs for service providers."
+          ]
+        },
+        {
+          "caseTitle": "Duolingo Daily Habit Formation",
+          "source": "case",
+          "scenario": "Bonus Case: Your streak preservation feature successfully shifts casual users into daily learners.",
+          "question": "What second-order behavioral risk emerges when streak lengths grow very large?",
+          "options": [
+            "Engagement automatically plateaus because users lose interest in learning languages.",
+            "Server costs decrease because long-term users require fewer daily API calls.",
+            "Users feel immense anxiety about breaking streaks and abandon the app entirely after a miss.",
+            "Monetization conversion rates increase because learners feel more confident."
+          ],
+          "correctIndex": 2,
+          "explanation": "Extremely long streaks create high psychological pressure. When life interferes and a streak breaks, users often quit permanently.",
+          "whyWrong": [
+            "Streak growth correlates with higher long-term retention and habit strength.",
+            "Daily active users generate consistent server load regardless of streak length.",
+            "",
+            "Monetization is a business metric, not a behavioral risk of the streak itself."
+          ]
+        },
+        {
+          "caseTitle": "Spotify Listening Frequency",
+          "source": "case",
+          "scenario": "Bonus Case: Your new algorithmic playlist feature successfully converts casual listeners into daily active users.",
+          "question": "What royalty and infrastructure constraint must your scaling plan address?",
+          "options": [
+            "Streaming licensing costs scale linearly with consumption while subscription revenue is flat.",
+            "Server bandwidth requirements decrease because audio caching becomes completely free.",
+            "Artists will demand lower royalty payouts because their tracks get more total plays.",
+            "Music licensing fees drop significantly when user listening hours increase past a threshold."
+          ],
+          "correctIndex": 0,
+          "explanation": "Music streaming operates on variable cost models where more listening directly increases royalty payouts. Scaling usage without premium conversion hurts margins.",
+          "whyWrong": [
+            "",
+            "Audio delivery bandwidth scales up linearly with total active listening hours.",
+            "Artist royalties are fixed contractual rates per stream across the platform.",
+            "Licensing fees generally scale per stream rather than offering volume discounts."
+          ]
+        }
+      ]
+    }
+  }
+}

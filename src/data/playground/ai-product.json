@@ -1,0 +1,1074 @@
+{
+  "slug": "ai-product",
+  "framework": "CIRCLES",
+  "sections": {
+    "discovery_and_framing": {
+      "key": "discovery_and_framing",
+      "competency": "problem_framing",
+      "subtitle": "Mastering scope, constraints, and goals in AI product interviews.",
+      "lesson": {
+        "hook": "Don't build a rocket to solve a bicycle problem. Frame it right!",
+        "what": "Discovery and framing is about asking smart questions upfront to truly understand the problem. It involves clarifying scope, identifying key constraints, and sharply restating the core goal before brainstorming solutions.",
+        "how": [
+          "Ask clarifying questions to define scope.",
+          "Identify key constraints and success metrics.",
+          "Restate the problem with a sharp, focused goal."
+        ],
+        "example": "For an AI tutor for Duolingo, a strong frame clarifies the goal isn't just usage, but long-term language retention. It then narrows the focus to intermediate Spanish learners struggling with the feature.",
+        "mistake": "Jumping directly into solutions without fully understanding the problem's nuances or user needs."
+      },
+      "questions": [
+        {
+          "caseTitle": "AI Summary Adoption Fell 40% After a Model Upgrade",
+          "source": "case",
+          "scenario": "Your AI Summary feature usage dropped 40% after a model upgrade.",
+          "question": "What is your primary clarifying question to understand this usage drop?",
+          "options": [
+            "Was the 40% drop measured by clicks, views, or total summaries generated?",
+            "What were the key changes introduced within the upgraded AI model's architecture itself?",
+            "Have we compared old and new model performance through A/B testing?",
+            "Which specific user segments experienced the most significant drop in usage?"
+          ],
+          "correctIndex": 0,
+          "explanation": "Before diagnosing the cause, it's crucial to precisely define what 'usage dropped 40%' means. Different metrics (clicks vs. generations) can point to very different underlying problems.",
+          "whyWrong": [
+            "While understanding model changes is vital for diagnosis, clarifying the scope of the 'usage' metric itself must precede diving into technical details of the model.",
+            "A/B test results are important for understanding impact, but first, you need to agree on what 'usage' metric the A/B test should have been designed to measure.",
+            "",
+            "While important, user segmentation comes after understanding the fundamental metric definition, as different segments might have different usage patterns for different metrics."
+          ]
+        },
+        {
+          "caseTitle": "Metrics for AI Search Over Company Documents",
+          "source": "case",
+          "scenario": "You need to define metrics for an AI search engine over internal company documents.",
+          "question": "What is the most important clarification to establish before defining success metrics?",
+          "options": [
+            "What existing search technologies are currently utilized by our employees?",
+            "What is the expected query volume and document size for the search engine?",
+            "Who are the target users and their primary use case for this search?",
+            "How do current users find information without the AI search feature today?"
+          ],
+          "correctIndex": 2,
+          "explanation": "Metrics must align with the user's needs and the problem being solved. Understanding the target persona and their core use case is foundational to defining what 'success' truly means.",
+          "whyWrong": [
+            "Knowing existing technologies can help with integration and competitive analysis, but it doesn't clarify the fundamental 'who' and 'why' for the new AI solution's success.",
+            "Volume and document size are important operational constraints, but they don't define the user-centric success criteria that metrics should ultimately measure.",
+            "",
+            "Understanding current user behavior is valuable for context, but it's secondary to clearly defining who the target user is and what problem the new AI search aims to solve."
+          ]
+        },
+        {
+          "caseTitle": "Build, Buy or Fine-Tune for Document Understanding",
+          "source": "case",
+          "scenario": "You are deciding whether to build, buy, or fine-tune a solution for document understanding.",
+          "question": "What is the most critical information to clarify before evaluating these options?",
+          "options": [
+            "What is the expected monthly volume and sensitivity of the documents?",
+            "What is our internal engineering team's current expertise with AI models?",
+            "What are the current market offerings for document understanding solutions?",
+            "What is the desired level of accuracy for document understanding extraction?"
+          ],
+          "correctIndex": 0,
+          "explanation": "Volume dictates scalability needs, while data sensitivity heavily influences security, compliance, and privacy considerations. These are fundamental constraints shaping any build/buy/fine-tune decision.",
+          "whyWrong": [
+            "",
+            "Team expertise is a constraint on the 'build' or 'fine-tune' options, but it's secondary to understanding the core data characteristics that all options must address.",
+            "While understanding market offerings is part of the 'buy' option analysis, it's less foundational than understanding the internal requirements and constraints of the data itself.",
+            "Desired accuracy is a key success criterion, but volume and data sensitivity often dictate what accuracy is even feasible or legally permissible, making them more fundamental to scope."
+          ]
+        },
+        {
+          "caseTitle": "Design an AI Copilot for a Trading Platform",
+          "source": "case",
+          "scenario": "Design an AI copilot for a trading platform like Robinhood.",
+          "question": "What is the most important set of constraints to establish upfront for this design?",
+          "options": [
+            "What are the key regulatory requirements regarding financial advice and data?",
+            "What specific types of trading actions will the AI copilot be allowed to take?",
+            "What is our internal budget and timeline for developing this AI copilot?",
+            "What are the existing engagement metrics for the current Robinhood mobile app?"
+          ],
+          "correctIndex": 0,
+          "explanation": "Financial services are heavily regulated, so understanding legal boundaries for advice and data handling is a non-negotiable, foundational constraint. This impacts every design choice.",
+          "whyWrong": [
+            "",
+            "While important for defining functionality, the specific actions the AI can take are often determined or limited by the overarching regulatory framework, making regulations more foundational.",
+            "Budget and timeline are practical project constraints, but regulatory compliance is a hard constraint that can stop a project entirely regardless of available resources.",
+            "Existing engagement metrics provide context but are not a constraint; they are a baseline for measuring potential impact, which comes after defining the product's safe and legal boundaries."
+          ]
+        },
+        {
+          "caseTitle": "Set a Hallucination Budget for Health Answers",
+          "source": "case",
+          "scenario": "You need to set a 'hallucination budget' for an AI providing health answers.",
+          "question": "What is the most important distinction to clarify about the product's scope?",
+          "options": [
+            "What are the potential severe adverse events from incorrect health information?",
+            "What level of accuracy is currently achieved by our existing health content?",
+            "What is the legal team's current stance on AI-generated health advice?",
+            "Is this for a consumer wellness app or a clinical diagnostic tool?"
+          ],
+          "correctIndex": 3,
+          "explanation": "The acceptable level of hallucination (and thus the 'budget') differs drastically between a casual wellness app and a critical diagnostic tool. Clarifying this defines the product's risk tolerance.",
+          "whyWrong": [
+            "Understanding adverse events is vital, but the severity and likelihood of these events are directly tied to whether the product is a consumer tool or a clinical diagnostic aid.",
+            "Existing content accuracy is a benchmark, but the appropriate hallucination budget for an AI will be set based on the specific application's risk profile, not just current performance.",
+            "While legal input is crucial, the legal team's stance will largely depend on whether the product is consumer-facing or clinical, making that distinction a prerequisite.",
+            ""
+          ]
+        },
+        {
+          "caseTitle": "Define Success for AI Meeting Summaries in Teams",
+          "source": "case",
+          "scenario": "Define success for AI meeting summaries in Microsoft Teams.",
+          "question": "What is the most crucial clarification for defining 'true' success beyond usage?",
+          "options": [
+            "How frequently do users share these AI-generated summaries with colleagues?",
+            "What is the average time users spend interacting with the meeting summaries?",
+            "What is the current click-through rate for the meeting summary feature?",
+            "What user behaviors indicate genuine value from the meeting summaries?"
+          ],
+          "correctIndex": 3,
+          "explanation": "True success for an AI feature like meeting summaries moves beyond basic engagement metrics. It requires understanding what valuable actions users take as a direct result of using the summaries.",
+          "whyWrong": [
+            "Sharing frequency is a potential indicator, but it doesn't fully capture whether the content itself is valuable or if sharing is just a default behavior, making it less direct than other behaviors.",
+            "Time spent interacting can be misleading; users might spend more time if the summary is confusing or requires editing, rather than finding it genuinely useful and efficient.",
+            "Click-through rate is a usage metric and does not inherently reflect the genuine value or impact the summaries have on user productivity or decision-making.",
+            ""
+          ]
+        },
+        {
+          "caseTitle": "AI Personal Finance Assistant",
+          "source": "bonus",
+          "scenario": "You are designing an AI-powered personal finance assistant for a bank.",
+          "question": "What is the most critical constraint to establish regarding its capabilities?",
+          "options": [
+            "Will the AI assistant provide regulated financial advice or just information?",
+            "What level of personalization will the AI assistant offer to each individual user?",
+            "What specific banking services will the AI assistant be integrated with?",
+            "What is the expected daily active user count for this new AI feature?"
+          ],
+          "correctIndex": 0,
+          "explanation": "The distinction between regulated advice and general information is a fundamental legal and ethical constraint in finance. This significantly impacts the AI's design, liability, and features.",
+          "whyWrong": [
+            "",
+            "The degree of personalization is a product design choice that must operate within the established legal and ethical boundaries of providing financial information or advice.",
+            "While important for functionality, the level of integration often depends on the more fundamental constraint of whether the AI can provide regulated advice or merely information.",
+            "Expected user count is a scalability concern, but it does not define the core legal and functional boundaries of the AI's capabilities as directly as regulatory constraints."
+          ]
+        },
+        {
+          "caseTitle": "AI for Dating App",
+          "source": "bonus",
+          "scenario": "You are tasked with designing a new AI feature for a popular dating app.",
+          "question": "What is the most important question to clarify about the core problem?",
+          "options": [
+            "What are the ethical guidelines for AI usage in personal relationships?",
+            "How do users currently find suitable matches without AI assistance?",
+            "What is the target demographic for this new AI-powered dating feature?",
+            "Is our primary goal to increase matches or improve match quality?"
+          ],
+          "correctIndex": 3,
+          "explanation": "These two goals (quantity vs. quality) lead to vastly different AI design choices and success metrics. Clarifying this upfront ensures the team builds the right solution.",
+          "whyWrong": [
+            "Ethical guidelines are crucial constraints, but defining the core objective of the feature (match quantity vs. quality) must precede how those ethics are applied to the solution.",
+            "Understanding current user behavior is helpful context, but it's secondary to defining the ultimate business or user outcome (more matches vs. better matches).",
+            "The target demographic helps narrow the user base, but the fundamental question of what 'success' looks like for those users still needs to be clarified regarding match outcomes.",
+            ""
+          ]
+        }
+      ]
+    },
+    "user_segmentation": {
+      "key": "user_segmentation",
+      "competency": "user_insight",
+      "subtitle": "Master user segmentation to build AI products for the right audience",
+      "lesson": {
+        "hook": "Building AI for everyone means building AI for no one.",
+        "what": "User segmentation splits a broad market into specific, actionable groups. Choosing the right segment keeps your AI scoped and valuable.",
+        "how": [
+          "Identify distinct user groups based on workflow needs",
+          "Evaluate value potential and technical feasibility constraints",
+          "Defend your single target segment using clear criteria"
+        ],
+        "example": "For a code assistant, target mid-level backend developers in Visual Studio Code who write boilerplate daily. They need speed more than conversation.",
+        "mistake": "Choosing a segment that is too broad, like all knowledge workers, which makes your AI feature uselessly generic."
+      },
+      "questions": [
+        {
+          "caseTitle": "Should the Code Assistant Autocomplete or Chat?",
+          "source": "case",
+          "scenario": "You are leading product for a new AI programming assistant inside a popular code editor used by millions.",
+          "question": "Which user segment should you prioritize for your initial AI feature launch?",
+          "options": [
+            "Professional software engineers using Visual Studio Code needing faster keystrokes",
+            "Engineering managers who rarely write code but review pull requests daily",
+            "Computer science students learning basic syntax in university coding labs",
+            "Junior developers who need help understanding complex legacy codebases"
+          ],
+          "correctIndex": 0,
+          "explanation": "Professional engineers in VS Code have clear productivity bottlenecks that inline autocomplete directly solves. The other groups have different needs that require separate workflows.",
+          "whyWrong": [
+            "",
+            "Engineering managers do not write enough daily code to benefit from autocomplete.",
+            "Students are focused on learning syntax rather than optimizing professional velocity.",
+            "Junior developers need conversational explanations rather than fast inline autocomplete."
+          ]
+        },
+        {
+          "caseTitle": "Metrics for AI Search Over Company Documents",
+          "source": "case",
+          "scenario": "You are designing an enterprise workplace AI search tool that answers queries over internal company documents.",
+          "question": "How should you segment the user base for this internal enterprise search tool?",
+          "options": [
+            "External enterprise clients accessing our public documentation portal weekly",
+            "Executive leadership teams reviewing quarterly financial reports and metrics",
+            "Knowledge workers in mid-sized tech firms needing quick operational knowledge",
+            "All corporate employees across every department from HR to engineering"
+          ],
+          "correctIndex": 2,
+          "explanation": "Mid-sized tech firms have high volumes of buried internal documents and clear needs for quick operational knowledge. Segmenting narrowly allows you to measure relevant retrieval success.",
+          "whyWrong": [
+            "External clients are outside the scope of internal company document search.",
+            "Executives have unique reporting needs that differ from everyday knowledge work.",
+            "",
+            "Targeting all corporate employees creates conflicting search intents across departments."
+          ]
+        },
+        {
+          "caseTitle": "Design the Failure State for a Voice Assistant",
+          "source": "case",
+          "scenario": "You are designing the failure state and recovery flow for an automated drive-thru ordering voice assistant.",
+          "question": "Which specific user segment should anchor your design choices for this system?",
+          "options": [
+            "Large families ordering multiple custom meals during weekend lunch",
+            "Elderly drivers who prefer speaking slowly to touch screen menus",
+            "Solo commuters during evening rush hour with high cognitive load",
+            "Fleet delivery drivers picking up bulk orders for corporate clients"
+          ],
+          "correctIndex": 2,
+          "explanation": "Solo commuters during evening rush hour represent the highest risk for queue blocking and frustration. Designing for their cognitive load ensures the safety fallback works.",
+          "whyWrong": [
+            "Families have complex custom orders that represent edge cases rather than the core flow.",
+            "Elderly drivers need slower pacing but are not the primary volume driver.",
+            "",
+            "Fleet drivers typically use business apps rather than standard drive-thru lanes."
+          ]
+        },
+        {
+          "caseTitle": "Ship an AI Tutor Without Undermining Learning",
+          "source": "case",
+          "scenario": "You need to fix Duolingo Max where heavy conversational users practice more yet score worse on assessments.",
+          "question": "Which target segment should you choose to address this learning paradox?",
+          "options": [
+            "Intermediate Spanish learners using the chat feature four times weekly",
+            "Absolute beginners who need help memorizing alphabet characters and basic nouns",
+            "Casual users who open the app once a month to maintain daily streaks",
+            "Advanced conversationalists practicing slang and idioms for travel readiness"
+          ],
+          "correctIndex": 0,
+          "explanation": "Intermediate Spanish learners using the feature frequently are experiencing the exact drop in assessment scores. Focusing here lets you isolate and fix the learning retention gap.",
+          "whyWrong": [
+            "",
+            "Absolute beginners lack the vocabulary to engage with open-ended conversation partners.",
+            "Casual users do not engage with the chat feature enough to measure assessment impact.",
+            "Advanced users rarely show the score drops seen in intermediate learners."
+          ]
+        },
+        {
+          "caseTitle": "Pick the First AI Feature for Schedulers",
+          "source": "bonus",
+          "scenario": "You are prioritizing features for a B2B calendar scheduling platform looking to integrate generative AI.",
+          "question": "Which user segment provides the strongest initial focus for your scheduling AI?",
+          "options": [
+            "Enterprise recruiters coordinating high-volume candidate interview slots",
+            "Internal team members scheduling casual weekly sync meetings together",
+            "Busy executive assistants managing complex calendars for enterprise CEOs",
+            "Freelancers booking client meetings through personal booking link pages"
+          ],
+          "correctIndex": 0,
+          "explanation": "Recruiters face massive volume constraints and repetitive scheduling friction that AI automation can solve. This makes them an ideal high-value segment for a first release.",
+          "whyWrong": [
+            "",
+            "Internal team syncs are easily handled by standard calendar availability tools.",
+            "Executive assistants already have deeply customized workflows and personal preference rules.",
+            "Freelancers have simpler scheduling needs that do not require complex AI coordination."
+          ]
+        },
+        {
+          "caseTitle": "Design an AI Copilot for a Trading Platform",
+          "source": "case",
+          "scenario": "You are building an AI financial copilot inside a mobile trading app subject to strict regulatory compliance.",
+          "question": "Which primary user segment should your trading copilot focus on serving?",
+          "options": [
+            "Day traders executing dozens of leveraged options trades every single hour",
+            "Retail investors on mobile seeking portfolio insights within regulatory bounds",
+            "Institutional portfolio managers handling millions in assets for pension funds",
+            "Passive long-term index fund investors who check their accounts annually"
+          ],
+          "correctIndex": 1,
+          "explanation": "Retail investors using the mobile app represent the core audience needing guided portfolio health checks. This segment aligns directly with regulatory compliance boundaries.",
+          "whyWrong": [
+            "Day traders require ultra-low latency execution rather than AI copilot insights.",
+            "",
+            "Institutional managers use professional terminal software rather than retail mobile apps.",
+            "Passive investors rarely log in and would not engage with an active trading copilot."
+          ]
+        },
+        {
+          "caseTitle": "Design an AI Expense Tracker",
+          "source": "bonus",
+          "scenario": "You are launching an AI receipt scanning and categorization feature for a personal finance mobile application.",
+          "question": "Who should be your primary target segment for this new AI feature?",
+          "options": [
+            "Small business owners managing payroll and vendor invoices every week",
+            "Retirees tracking fixed income pensions and monthly utility payments",
+            "Corporate consultants submitting complex monthly expense reports to finance teams",
+            "Gig economy workers tracking mixed personal and business mileage receipts"
+          ],
+          "correctIndex": 3,
+          "explanation": "Gig workers constantly handle messy mixed receipts and benefit immensely from automated categorization. They represent a high-pain segment eager for mobile AI scanning.",
+          "whyWrong": [
+            "Business owners need full accounting systems rather than basic receipt scanners.",
+            "Retirees have simple, predictable expenses that rarely require advanced AI scanning.",
+            "Corporate consultants use specialized enterprise software rather than consumer apps.",
+            ""
+          ]
+        },
+        {
+          "caseTitle": "Pick the First AI Feature for a Support Platform",
+          "source": "case",
+          "scenario": "You have one quarter to ship an AI feature for a B2B customer support platform like Zendesk.",
+          "question": "Which user segment should you target when launching your chosen AI feature?",
+          "options": [
+            "Tier one human agents at mid-market companies handling many weekly tickets",
+            "End customers waiting in queues for instant self-service chatbot resolution",
+            "IT administrators configuring security permissions and SSO integrations daily",
+            "Chief customer officers analyzing macro support trends and team performance"
+          ],
+          "correctIndex": 0,
+          "explanation": "Tier one agents at mid-market companies handle massive ticket volumes and benefit directly from reply drafting. Targeting them ensures high adoption and measurable time savings.",
+          "whyWrong": [
+            "",
+            "End customers have different expectations that require external chat interfaces.",
+            "IT administrators manage system configuration rather than customer support ticket volume.",
+            "Chief customer officers care about high-level metrics rather than daily agent workflows."
+          ]
+        }
+      ]
+    },
+    "pain_points": {
+      "key": "pain_points",
+      "competency": "user_insight",
+      "subtitle": "Uncover specific, non-obvious user needs with evidence and reasoning.",
+      "lesson": {
+        "hook": "Stop guessing what users want and start proving it.",
+        "what": "Pain points are the specific, friction-heavy problems users face every day. You must back them up with behavioral evidence.",
+        "how": [
+          "Select a single specific persona with a clear job.",
+          "Identify the exact bottleneck costing them time or money.",
+          "Use behavioral evidence instead of relying on generic feedback."
+        ],
+        "example": "Data analysts waste four hours weekly hunting down SQL schemas across scattered wiki pages. They experience constant context switching because our current search defaults to keyword matching rather than understanding intent.",
+        "mistake": "Listing generic complaints like the app is too slow or the interface is hard to use."
+      },
+      "questions": [
+        {
+          "caseTitle": "Metrics for AI Search Over Company Documents",
+          "source": "case",
+          "scenario": "You are analyzing enterprise search for knowledge workers in mid-sized technology firms with five hundred employees.",
+          "question": "Which statement best defines their primary operational pain point using concrete evidence?",
+          "options": [
+            "Employees find the current interface confusing and very cluttered.",
+            "Workers waste hours hunting buried operational knowledge daily.",
+            "The search feature is too slow when executing queries.",
+            "Users dislike the default color palette of the application."
+          ],
+          "correctIndex": 1,
+          "explanation": "This identifies a specific, high-friction workflow problem backed by enterprise search contexts. The other options are too vague or focus on surface aesthetics.",
+          "whyWrong": [
+            "A smart candidate might pick this because interface clutter is a common complaint, but it lacks specific operational context.",
+            "",
+            "Performance issues are tempting to guess, but they miss the core document retrieval and knowledge discovery problem.",
+            "Design preferences are subjective and do not address the core enterprise search workflow bottlenecks."
+          ]
+        },
+        {
+          "caseTitle": "Should the Code Assistant Autocomplete or Chat?",
+          "source": "case",
+          "scenario": "You are evaluating professional software engineers using Visual Studio Code for daily development tasks.",
+          "question": "What is the most precise pain point driving their need for inline tools?",
+          "options": [
+            "Engineers need faster keystrokes without context switching away.",
+            "Coding assistants are generally too expensive for small teams.",
+            "Developers want more conversational AI features in their editors.",
+            "Writing boilerplate code takes too much mental effort overall."
+          ],
+          "correctIndex": 0,
+          "explanation": "This targets the exact workflow interruption of context switching during coding. The other choices contradict the preference for speed over chat.",
+          "whyWrong": [
+            "",
+            "Pricing is a business concern rather than the immediate developer workflow friction during coding sessions.",
+            "A candidate might assume chat is helpful, but the case specifically argues against conversational windows causing context switches.",
+            "While mental effort matters, it fails to specify the exact interruption caused by moving away from the editor."
+          ]
+        },
+        {
+          "caseTitle": "Design the Failure State for a Voice Assistant",
+          "source": "case",
+          "scenario": "You are designing an automated drive-thru ordering assistant for fast food lane customers.",
+          "question": "What is the critical pain point for the solo commuter during rush hour?",
+          "options": [
+            "Voice recognition software fails to understand different regional accents.",
+            "Drivers simply want faster payment options at the window.",
+            "High cognitive load creates queue blockages from error rates.",
+            "Menu items are hard to read on digital displays."
+          ],
+          "correctIndex": 2,
+          "explanation": "This connects high cognitive load directly to operational queuing bottlenecks. The other answers miss the specific commuter context.",
+          "whyWrong": [
+            "Accent recognition is a technical hurdle, but it ignores the specific cognitive load and queue blockage context.",
+            "Payment speed is a secondary concern compared to the immediate frustration of inaccurate order taking.",
+            "",
+            "Display readability relates to visual design rather than the voice assistant failure state being analyzed."
+          ]
+        },
+        {
+          "caseTitle": "Pick the First AI Feature for a Support Platform",
+          "source": "case",
+          "scenario": "You are prioritizing AI features for tier one human agents at mid-market companies.",
+          "question": "Which pain point justifies building reply drafting over other features?",
+          "options": [
+            "Customers wait too long for initial ticket triage responses.",
+            "Ticket routing rules are too complex for new hires.",
+            "Support managers lack visibility into team performance metrics.",
+            "Agents spend excessive time writing standard replies manually."
+          ],
+          "correctIndex": 3,
+          "explanation": "This targets the exact operational bottleneck of manual drafting for tier one agents. The other options describe problems suited for triage or bots.",
+          "whyWrong": [
+            "Triage speed is a real problem, but the case specifically selects reply drafting as the primary intervention.",
+            "Complex routing is a workflow issue, but reply drafting solves a much higher volume of agent typing time.",
+            "Management visibility is important, but it does not address the daily operational workflow of front-line agents.",
+            ""
+          ]
+        },
+        {
+          "caseTitle": "Ship an AI Tutor Without Undermining Learning",
+          "source": "case",
+          "scenario": "You are investigating Duolingo Max usage patterns among intermediate Spanish learners.",
+          "question": "What is the underlying pain point revealed by their assessment scores?",
+          "options": [
+            "Spanish vocabulary lessons lack sufficient real-world conversation context.",
+            "Heavy users practice more yet score worse on assessments.",
+            "Students find the chat interface difficult to navigate daily.",
+            "The application costs too much for casual learners."
+          ],
+          "correctIndex": 1,
+          "explanation": "This identifies the paradox of engagement versus actual retention in learning apps. The other options invent surface issues not supported by the case.",
+          "whyWrong": [
+            "Lack of context seems logical, but the specific symptom is high engagement leading to poor assessment outcomes.",
+            "",
+            "Interface difficulty is a plausible guess, but the core issue is cognitive retention, not navigation.",
+            "Pricing is irrelevant since the analysis focuses on users who already actively engage with the feature."
+          ]
+        },
+        {
+          "caseTitle": "Latency, Cost and Quality: Pick Two for AI Search",
+          "source": "case",
+          "scenario": "You are addressing performance issues for data analysts using an enterprise search tool.",
+          "question": "What specific pain point drives users away when queries take too long?",
+          "options": [
+            "Complex database schemas require too much manual translation.",
+            "Search results frequently contain outdated financial metrics.",
+            "Users hit the eight second wall and leave.",
+            "Billing reports are difficult to export into spreadsheets."
+          ],
+          "correctIndex": 2,
+          "explanation": "This captures the exact user tolerance threshold mentioned in the case. The other distractors focus on unrelated data tasks.",
+          "whyWrong": [
+            "Schema translation is part of the job, but the immediate abandonment trigger is search latency.",
+            "Outdated metrics are a data quality issue, whereas the prompt specifically tests the latency threshold.",
+            "",
+            "Exporting reports is a separate administrative task unrelated to the real-time search latency wall."
+          ]
+        },
+        {
+          "caseTitle": "Design AI Smart Glasses for Outdoor Athletes",
+          "source": "bonus",
+          "scenario": "You are designing lightweight augmented reality glasses for marathon runners training outdoors in bright sunlight.",
+          "question": "What is the primary visual pain point you must solve for them?",
+          "options": [
+            "Frames feel uncomfortable after hours of heavy sweating.",
+            "Runners get distracted by too many incoming notification texts.",
+            "Battery life drains too quickly during long morning runs.",
+            "Sunlight washout makes standard interface overlays completely invisible."
+          ],
+          "correctIndex": 3,
+          "explanation": "This identifies the physical limitation of displays under direct sunlight during outdoor exercise. The other choices involve notifications, battery, or ergonomics.",
+          "whyWrong": [
+            "Ergonomics matter for wearability, but visual legibility under bright light is the core optical challenge.",
+            "Distractions are a valid concern, but sunlight washout is the most immediate physical constraint for outdoor visibility.",
+            "Battery life is a system constraint, whereas the question specifically asks about the visual pain point.",
+            ""
+          ]
+        },
+        {
+          "caseTitle": "Design an AI Meal Planner for Working Parents",
+          "source": "bonus",
+          "scenario": "You are building an AI recipe generator for busy parents cooking dinner after work with picky children.",
+          "question": "What is the exact behavioral pain point at the end of the day?",
+          "options": [
+            "Kitchen appliances lack smart integration with mobile apps.",
+            "Decision fatigue leads to last-minute unhealthy takeout orders.",
+            "Grocery delivery fees add up too quickly each month.",
+            "Children refuse to eat vegetables served at dinner."
+          ],
+          "correctIndex": 1,
+          "explanation": "This highlights the core psychological barrier and outcome of evening meal planning bottlenecks. The other options cover cost, hardware, or general kid behavior.",
+          "whyWrong": [
+            "App integration is a technical feature rather than the fundamental psychological pain point of the parent.",
+            "",
+            "Delivery costs are a financial concern, but the immediate daily bottleneck is the exhaustion of deciding what to cook.",
+            "Picky eating is a universal challenge, but decision fatigue is the specific operational bottleneck the AI solves."
+          ]
+        }
+      ]
+    },
+    "solution_ideation": {
+      "key": "solution_ideation",
+      "competency": "solutioning",
+      "subtitle": "Master creative solution ideation for AI product cases",
+      "lesson": {
+        "hook": "Stop pitching generic chat boxes when the problem demands radical creativity.",
+        "what": "Solution ideation requires brainstorming multiple distinct, feasible approaches to a specific user problem. Good PMs balance creative invention with technical and business constraints.",
+        "how": [
+          "Brainstorm distinct solutions covering various form factors.",
+          "Evaluate technical feasibility and user friction explicitly.",
+          "Select one primary approach and defend it clearly."
+        ],
+        "example": "For GitHub Copilot, instead of another chat window, we propose inline autocomplete to maintain developer focus.",
+        "mistake": "Proposing only a single obvious chatbot solution without exploring alternatives."
+      },
+      "questions": [
+        {
+          "caseTitle": "AI Summary Adoption Fell 40% After a Model Upgrade",
+          "source": "case",
+          "scenario": "Usage of AI summaries dropped 40% after a recent model upgrade on desktop and mobile clients.",
+          "question": "Which solution directly addresses the drop in user engagement with summaries?",
+          "options": [
+            "Implement a paid enterprise tier that restricts summaries to heavy users with active subscriptions.",
+            "Remove the summary feature entirely until engineering builds a brand new foundational language model.",
+            "Add a prominent one click feedback button next to summaries to capture why users dislike output.",
+            "Completely redesign the mobile app interface to support voice commands and conversational audio playback."
+          ],
+          "correctIndex": 2,
+          "explanation": "Adding immediate feedback helps diagnose the exact quality issue causing the drop. It fixes user trust without abandoning the core feature.",
+          "whyWrong": [
+            "Implementing a paid enterprise tier would likely decrease adoption even further.",
+            "Removing the feature entirely destroys existing value instead of fixing the underlying problem.",
+            "",
+            "Redesigning the mobile app interface is too broad and ignores the core regression issue."
+          ]
+        },
+        {
+          "caseTitle": "Design Human Review for AI Candidate Ranking",
+          "source": "case",
+          "scenario": "LinkedIn needs a human review loop for an AI candidate ranking model to prevent biased hiring decisions.",
+          "question": "What is the best way to design this human review process for enterprise recruiters?",
+          "options": [
+            "Replace the ranking model with standard keyword filters until human review can be fully automated.",
+            "Force recruiters to manually review every single rejected candidate before closing any open job requisition.",
+            "Outsource all candidate ranking tasks to an external team of human annotators based overseas.",
+            "Flag borderline candidates for human review while auto advancing clear top matches and bad fits."
+          ],
+          "correctIndex": 3,
+          "explanation": "Flagging borderline cases optimizes recruiter time while maintaining human oversight where the model is uncertain. It balances efficiency with fairness.",
+          "whyWrong": [
+            "Replacing the ranking model with standard keywords ignores the value of the trained AI system.",
+            "Forcing full manual reviews creates massive recruiter fatigue and defeats the purpose of AI.",
+            "Outsourcing all candidate ranking tasks introduces latency and privacy risks for enterprise users.",
+            ""
+          ]
+        },
+        {
+          "caseTitle": "Should the Code Assistant Autocomplete or Chat?",
+          "source": "case",
+          "scenario": "GitHub Copilot must decide whether to invest heavily in inline autocomplete or the chat sidebar.",
+          "question": "Which solution proposal best serves professional software engineers using Visual Studio Code?",
+          "options": [
+            "Develop an interactive voice assistant that dictates code changes directly into the active editor.",
+            "Build deep inline autocomplete to maximize keystroke speed without forcing annoying context switching.",
+            "Create a social media feed inside the editor to share fun programming snippets with peers.",
+            "Focus entirely on a conversational chat sidebar that explains complex legacy codebases in detail."
+          ],
+          "correctIndex": 1,
+          "explanation": "Inline autocomplete directly targets the core need for speed without interrupting the developer flow. It avoids unnecessary context switching.",
+          "whyWrong": [
+            "Developing an interactive voice assistant is impractical in noisy office environments.",
+            "",
+            "Creating a social media feed distracts engineers from actual coding tasks.",
+            "Focusing entirely on a chat sidebar causes context switching which developers actively try to avoid."
+          ]
+        },
+        {
+          "caseTitle": "Build, Buy or Fine-Tune for Document Understanding",
+          "source": "case",
+          "scenario": "An enterprise processes 50000 sensitive contracts monthly and needs high accuracy extracting clauses.",
+          "question": "What is the most feasible solution strategy for this document understanding system?",
+          "options": [
+            "Train a custom foundational language model from scratch using public internet legal data.",
+            "Fine tune an existing open source model on secure internal contract data to ensure high accuracy.",
+            "Hire a large team of temporary contractors to manually read and tag every single contract.",
+            "Rely solely on unprompted zero shot commercial APIs despite strict data privacy requirements."
+          ],
+          "correctIndex": 1,
+          "explanation": "Fine-tuning an open-source model balances high accuracy needs with data privacy constraints. It avoids the massive cost of building from scratch.",
+          "whyWrong": [
+            "Training a custom foundational model from scratch is too expensive and unnecessary here.",
+            "",
+            "Hiring a large team of contractors does not scale for fifty thousand monthly documents.",
+            "Relying solely on commercial APIs violates strict data privacy and security requirements."
+          ]
+        },
+        {
+          "caseTitle": "Design the Failure State for a Voice Assistant",
+          "source": "case",
+          "scenario": "A drive-thru ordering assistant experiences speech recognition errors during busy evening rush hours.",
+          "question": "How should the voice assistant handle a catastrophic recognition failure gracefully?",
+          "options": [
+            "Guess the most likely meal combination based on previous customer orders and charge the card.",
+            "Ask the frustrated driver to repeat the entire order using a complex mobile app interface.",
+            "Immediately hang up the microphone system and restart the entire terminal software application.",
+            "Politely apologize, route the confused order to a human employee, and display a visual cue."
+          ],
+          "correctIndex": 3,
+          "explanation": "Routing to a human with a polite apology prevents queue blockage and preserves customer satisfaction. It handles the failure state smoothly.",
+          "whyWrong": [
+            "Guessing the meal combination leads to incorrect orders and angry customers at the window.",
+            "Asking drivers to use a mobile app adds dangerous friction during an active drive-thru session.",
+            "Restarting the entire terminal software application takes too long and blocks the drive-thru queue.",
+            ""
+          ]
+        },
+        {
+          "caseTitle": "Ship an AI Tutor Without Undermining Learning",
+          "source": "case",
+          "scenario": "Duolingo Max users chat frequently with the AI partner but score worse on actual language assessments.",
+          "question": "Which product solution fixes this engagement versus learning retention mismatch?",
+          "options": [
+            "Reward users with extra virtual currency and digital badges for maintaining long chat streaks.",
+            "Increase the difficulty of the AI chat prompts to make the conversation much more challenging.",
+            "Remove all conversational practice features and force users to complete traditional flashcard drills.",
+            "Integrate targeted vocabulary quizzes directly into the conversational flow to test comprehension."
+          ],
+          "correctIndex": 3,
+          "explanation": "Integrating quizzes ensures active cognitive processing during chats, bridging the gap between fun conversation and actual retention.",
+          "whyWrong": [
+            "Rewarding users with virtual currency only increases shallow usage without improving learning outcomes.",
+            "Increasing chat prompt difficulty without guidance might just frustrate intermediate learners further.",
+            "Removing all conversational practice features throws away a popular and engaging learning tool.",
+            ""
+          ]
+        },
+        {
+          "caseTitle": "Enterprise AI Knowledge Base Search",
+          "source": "bonus",
+          "scenario": "Employees waste hours searching internal wikis because traditional keyword search misses contextual synonyms.",
+          "question": "What is the best initial AI search feature to surface buried operational knowledge?",
+          "options": [
+            "Implement a random recommendation widget that displays popular HR documents on employee screens.",
+            "Deploy a semantic vector search engine that highlights exact citation snippets inside documents.",
+            "Build a fully autonomous agent that automatically rewrites all company wiki pages every week.",
+            "Send a daily email blast containing a random selection of fifty company documents to staff."
+          ],
+          "correctIndex": 1,
+          "explanation": "Semantic vector search with citations helps knowledge workers find precise answers quickly with verified sources. It directly solves the lookup bottleneck.",
+          "whyWrong": [
+            "Implementing a random document recommendation widget does not help users solve specific queries.",
+            "",
+            "Building a fully autonomous agent to rewrite pages is risky and introduces hallucination issues.",
+            "Sending daily email blasts creates information overload and lowers overall employee productivity."
+          ]
+        },
+        {
+          "caseTitle": "E-Commerce Personalization Engine",
+          "source": "bonus",
+          "scenario": "An online fashion retailer wants to use generative AI to recommend outfits based on user mood.",
+          "question": "Which solution ideation approach balances creative engagement with practical conversion goals?",
+          "options": [
+            "Replace the entire checkout cart with an open ended conversational shopping assistant bot.",
+            "Force every visitor to watch a five minute generative video before viewing any clothing catalog.",
+            "Display completely random clothing combinations on the homepage to maximize user curiosity.",
+            "Design an interactive chat stylist that asks three quick style questions before generating curated looks."
+          ],
+          "correctIndex": 3,
+          "explanation": "An interactive stylist asks targeted questions to guide recommendations without overwhelming the shopping experience. It balances engagement with conversion.",
+          "whyWrong": [
+            "Replacing the checkout cart with a chat bot complicates the payment process and hurts sales.",
+            "Forcing users to watch a five minute video creates massive friction and spikes bounce rates.",
+            "Displaying completely random clothing combinations fails to personalize items to user preferences.",
+            ""
+          ]
+        }
+      ]
+    },
+    "prioritization_logic": {
+      "key": "prioritization_logic",
+      "competency": "prioritization",
+      "subtitle": "Master the explicit basis for choosing between solutions",
+      "lesson": {
+        "hook": "Stop guessing which AI feature to build next and learn how to justify your choices.",
+        "what": "Prioritization logic means using structured frameworks to evaluate solutions. You must weigh impact against effort, reach, or strategic fit.",
+        "how": [
+          "List the viable solution options clearly.",
+          "Define explicit criteria like impact and cost.",
+          "Select the winner using your criteria weights."
+        ],
+        "example": "For GitHub Copilot, we chose inline autocomplete over chat because speed directly improves developer workflow efficiency with lower effort.",
+        "mistake": "Picking a favorite solution first and inventing fake criteria to justify it."
+      },
+      "questions": [
+        {
+          "caseTitle": "Should the Code Assistant Autocomplete or Chat?",
+          "source": "case",
+          "scenario": "You are deciding whether GitHub Copilot should launch an inline autocomplete feature or a conversational sidebar first.",
+          "question": "How should you prioritize between these two AI features?",
+          "options": [
+            "Build both features simultaneously to satisfy all potential developer workflow requirements at once.",
+            "Select autocomplete because it delivers higher developer speed with lower context switching.",
+            "Delay the decision entirely until usage data from competitors clarifies market direction.",
+            "Choose chat sidebar because users always prefer having a conversational assistant available everywhere."
+          ],
+          "correctIndex": 1,
+          "explanation": "Autocomplete directly targets the primary workflow bottleneck of keystrokes with minimal friction. This choice relies on an explicit impact and effort justification.",
+          "whyWrong": [
+            "A candidate might suggest building both to avoid making a hard choice, but resources are limited.",
+            "",
+            "Waiting for competitors wastes valuable time when your own product strategy should drive decisions.",
+            "A smart person might pick this because chat is versatile, but it ignores the high context switching cost."
+          ]
+        },
+        {
+          "caseTitle": "Pick the First AI Feature for a Support Platform",
+          "source": "case",
+          "scenario": "Zendesk has one quarter to ship an AI feature and must choose between reply drafting, ticket triage, and a customer facing bot.",
+          "question": "What is the best prioritization logic for selecting the first feature?",
+          "options": [
+            "Select the customer facing bot because automation scales better across all support volume.",
+            "Pick reply drafting because it helps human agents save time while keeping human oversight.",
+            "Build a combined suite of all three features to maximize enterprise customer satisfaction.",
+            "Choose ticket triage since organizing incoming requests solves the root cause of delays."
+          ],
+          "correctIndex": 1,
+          "explanation": "Reply drafting balances high impact on agent efficiency with low risk by keeping humans in the loop. This provides a clear strategic rationale for the launch.",
+          "whyWrong": [
+            "A smart person might pick this for maximum automation, but customer facing bots carry high brand trust risks.",
+            "",
+            "Attempting a combined suite ignores quarterly engineering constraints and dilution of focus.",
+            "Triage is useful, but reply drafting delivers more immediate and visible value to daily users."
+          ]
+        },
+        {
+          "caseTitle": "Latency, Cost and Quality: Pick Two for AI Search",
+          "source": "case",
+          "scenario": "Your AI search engine suffers from high latency and token costs that cause users to abandon queries.",
+          "question": "How should you prioritize improvements to fix this performance bottleneck?",
+          "options": [
+            "Focus entirely on maximum accuracy because quality is the only metric that matters.",
+            "Prioritize latency and cost reductions by caching common queries and using smaller models.",
+            "Upgrade to a larger model to improve search quality and ignore rising operational costs.",
+            "Keep current models and simply ask users to wait longer for better search results."
+          ],
+          "correctIndex": 1,
+          "explanation": "Caching and smaller models directly target the binding constraints of cost and latency. This approach explicitly balances technical limitations with user retention needs.",
+          "whyWrong": [
+            "A candidate might argue quality is paramount, but ignoring latency drives users away completely.",
+            "",
+            "Upgrading to a larger model directly worsens the exact latency and cost issues causing churn.",
+            "Asking users to wait longer violates basic product usability principles for search tools."
+          ]
+        },
+        {
+          "caseTitle": "Build, Buy or Fine-Tune for Document Understanding",
+          "source": "case",
+          "scenario": "Your enterprise processes fifty thousand sensitive contracts monthly and needs high extraction accuracy.",
+          "question": "What is the correct prioritization logic for choosing between build, buy, or fine-tune?",
+          "options": [
+            "Always build a proprietary model from scratch to maintain complete ownership of the technology.",
+            "Buy a generic third-party API immediately because it requires zero internal engineering effort.",
+            "Evaluate options based on data privacy, extraction accuracy above ninety five percent, and cost.",
+            "Fine-tune an open source model without checking data sensitivity to save initial setup time."
+          ],
+          "correctIndex": 2,
+          "explanation": "Evaluating privacy, accuracy thresholds, and cost provides an explicit basis for selection. It directly addresses the specific constraints of the enterprise use case.",
+          "whyWrong": [
+            "A candidate might favor building from scratch for control, but it ignores high costs and timelines.",
+            "Buying a generic API is fast, but it fails to address data sensitivity requirements for contracts.",
+            "",
+            "Skipping data sensitivity checks exposes the company to severe regulatory and security risks."
+          ]
+        },
+        {
+          "caseTitle": "Design an AI Writing Assistant for Google Docs",
+          "source": "case",
+          "scenario": "Google Docs is adding inline AI writing help and needs to decide which user workflow to target first.",
+          "question": "How do you prioritize between real-time typing assistance and asynchronous longform creation?",
+          "options": [
+            "Prioritize asynchronous creators because longform drafting benefits most from generative AI.",
+            "Focus on real-time chat because users want instant answers while typing every single sentence.",
+            "Target casual note takers because they represent the largest overall user volume on Docs.",
+            "Build features for all writing styles simultaneously to avoid alienating any user segment."
+          ],
+          "correctIndex": 0,
+          "explanation": "Asynchronous longform creators have a high impact need for composition help without latency pressure. This prioritization matches feature capability to user pain points.",
+          "whyWrong": [
+            "",
+            "A smart person might want real-time chat, but constant interruptions disrupt the drafting flow.",
+            "Casual note takers have lower willingness to use complex generative tools compared to writers.",
+            "Targeting all styles at once dilutes the product focus and stretches engineering resources."
+          ]
+        },
+        {
+          "caseTitle": "Ship an AI Tutor Without Undermining Learning",
+          "source": "case",
+          "scenario": "Duolingo Max users chat more with the AI partner but score worse on language retention assessments.",
+          "question": "How should you prioritize fixes for this engagement versus learning tradeoff?",
+          "options": [
+            "Prioritize learning retention over chat time by adding structured prompts and grammar checks.",
+            "Maximize raw chat time because higher user engagement always correlates with better learning outcomes.",
+            "Remove the conversational feature entirely until all assessment score drops are fully resolved.",
+            "Ignore the assessment scores because daily active user growth is the primary company metric."
+          ],
+          "correctIndex": 0,
+          "explanation": "Prioritizing learning retention aligns with the core product mission rather than vanity metrics. It uses strategic fit as the primary basis for decision making.",
+          "whyWrong": [
+            "",
+            "A candidate might prioritize raw engagement, but the scenario explicitly states users score worse.",
+            "Removing the feature is an overreaction when targeted prompt adjustments can fix the issue.",
+            "Ignoring assessment outcomes undermines the fundamental value proposition of an educational app."
+          ]
+        },
+        {
+          "caseTitle": "Spotify Discover Weekly AI Personalization",
+          "source": "bonus",
+          "scenario": "Spotify wants to introduce a new AI DJ feature but engineering bandwidth is limited this quarter.",
+          "question": "What is the best way to prioritize the AI DJ rollout against other backlog items?",
+          "options": [
+            "Evaluate expected retention impact against engineering effort and user habit formation potential.",
+            "Build the feature because personalized audio is the biggest trend in the current music industry.",
+            "Ship to all free users first because they generate the highest overall advertising revenue.",
+            "Wait for competitors to perfect the technology before allocating any internal engineering team."
+          ],
+          "correctIndex": 0,
+          "explanation": "Evaluating retention impact, effort, and habit formation provides an explicit, objective basis for prioritization. This ensures engineering time is spent on high-value initiatives.",
+          "whyWrong": [
+            "",
+            "A smart person might lean on industry trends, but strategy must be tied to specific metrics.",
+            "Free users are important, but premium subscribers often drive higher long-term retention value.",
+            "Waiting for competitors means losing the first mover advantage in music personalization."
+          ]
+        },
+        {
+          "caseTitle": "Notion AI Page Summary and Generation",
+          "source": "bonus",
+          "scenario": "Notion is deciding whether to add AI document generation or automated database tagging as their next major release.",
+          "question": "How should Notion prioritize between these two AI capabilities?",
+          "options": [
+            "Release both features at the same time to satisfy casual writers and power database users.",
+            "Prioritize document generation because it solves a universal blank page problem for all users.",
+            "Choose database tagging because structured data organization appeals to enterprise workspace admins.",
+            "Focus on minor UI tweaks instead of AI features to maintain existing software performance."
+          ],
+          "correctIndex": 1,
+          "explanation": "Document generation has broader reach and higher emotional impact for individual users starting a page. This utilizes reach and impact as the core decision criteria.",
+          "whyWrong": [
+            "Releasing both splits focus and risks shipping two half-baked features instead of one great one.",
+            "",
+            "A candidate might pick database tagging for enterprise appeal, but document generation has broader reach.",
+            "Ignoring AI features entirely misses a major market shift in productivity software expectations."
+          ]
+        }
+      ]
+    },
+    "tradeoffs_and_metrics": {
+      "key": "tradeoffs_and_metrics",
+      "competency": "measurement",
+      "subtitle": "Master risks, second-order effects, and counter-metrics for AI features.",
+      "lesson": {
+        "hook": "Optimizing for just one metric is how you accidentally ruin your product.",
+        "what": "Tradeoffs and metrics mean balancing competing goals like speed and accuracy. You must define success while watching out for hidden negative side effects.",
+        "how": [
+          "Identify the primary growth and engagement metrics.",
+          "Establish defensive counter-metrics to prevent systemic abuse.",
+          "Evaluate second-order behavioral changes in users."
+        ],
+        "example": "For Duolingo Max, we track long-term language retention instead of just total chat time to avoid hollow engagement.",
+        "mistake": "Relying solely on vanity engagement numbers without tracking user friction or quality decline."
+      },
+      "questions": [
+        {
+          "caseTitle": "Ship an AI Tutor Without Undermining Learning",
+          "source": "case",
+          "scenario": "Heavy users of Duolingo Max practice more every single day yet score worse on actual language retention assessments.",
+          "question": "Which metric should you prioritize to fix this hidden optimization trap?",
+          "options": [
+            "Reduce model latency so students receive instant conversational replies.",
+            "Increase daily active users by sending more push notifications.",
+            "Measure total message count per session to ensure active participation.",
+            "Track long term assessment scores instead of total daily chat volume."
+          ],
+          "correctIndex": 3,
+          "explanation": "Focusing on actual learning outcomes prevents vanity engagement loops from masking a failing educational experience. Real retention matters more than empty conversation time.",
+          "whyWrong": [
+            "Lower latency helps user experience but does not solve the underlying learning drop.",
+            "More push notifications drive short term opens but worsen the core learning depth.",
+            "Total message count rewards rambling instead of accurate language acquisition.",
+            ""
+          ]
+        },
+        {
+          "caseTitle": "Your AI Recommender Is Surfacing Harmful Content",
+          "source": "case",
+          "scenario": "Engagement jumped twelve percent because your new recommender exploits dopamine loops by surfacing borderline polarizing material.",
+          "question": "What is the best way to handle this critical metric collision?",
+          "options": [
+            "Slow down inference speed to discourage rapid mindless scrolling behavior.",
+            "Remove all personalized recommendations and return to chronological feeds.",
+            "Enforce a strict safety counter metric alongside raw engagement growth.",
+            "Ignore the controversy since total daily active users are increasing."
+          ],
+          "correctIndex": 2,
+          "explanation": "A counter metric ensures growth does not come at the expense of user safety and brand trust. You must measure the harm while tracking the engagement.",
+          "whyWrong": [
+            "Slowing down inference frustrates users without directly addressing harmful content.",
+            "Throwing out personalization destroys the entire value proposition of the engine.",
+            "",
+            "Ignoring policy risks severe long term PR damage and regulatory backlash."
+          ]
+        },
+        {
+          "caseTitle": "Define Success for AI Meeting Summaries in Teams",
+          "source": "case",
+          "scenario": "Users click the automatic meeting summary button frequently because IT enabled the feature by default across the enterprise.",
+          "question": "How do you prove the summary feature is delivering genuine organizational value?",
+          "options": [
+            "Measure whether participants actually read and act on the generated notes.",
+            "Count the total number of meetings that trigger a summary document.",
+            "Track how many people download the desktop client upgrade this week.",
+            "Calculate total server compute cost saved by generating shorter texts."
+          ],
+          "correctIndex": 0,
+          "explanation": "Default enablement creates false positive clicks, so true success requires measuring downstream reading and task completion. Actionability is the real test of utility.",
+          "whyWrong": [
+            "",
+            "Counting triggered summaries simply measures default enterprise rollout rather than actual utility.",
+            "Client downloads measure software installation rather than document reading habits.",
+            "Server costs reflect infrastructure efficiency rather than human productivity gains."
+          ]
+        },
+        {
+          "caseTitle": "Price an AI Feature That Costs You Per Token",
+          "source": "case",
+          "scenario": "Your B2B SaaS tool charges forty dollars per monthly seat, but heavy users are generating massive variable token costs.",
+          "question": "What pricing strategy protects your margins without killing feature adoption?",
+          "options": [
+            "Remove the AI feature entirely until token costs drop significantly.",
+            "Implement a fair usage tier with token caps for standard seats.",
+            "Charge users directly for every single character typed into the prompt.",
+            "Raise the flat monthly subscription price by two hundred percent immediately."
+          ],
+          "correctIndex": 1,
+          "explanation": "A usage tier protects unit economics from power users while keeping the product accessible for normal accounts. It balances profitability with customer acquisition.",
+          "whyWrong": [
+            "Removing the feature destroys your competitive advantage in a crowded market.",
+            "",
+            "Charging per character feels punitive and creates high friction for everyday users.",
+            "Massive flat price hikes will cause widespread churn across your entire customer base."
+          ]
+        },
+        {
+          "caseTitle": "Design the Failure State for a Voice Assistant",
+          "source": "case",
+          "scenario": "A drive thru ordering assistant has a five percent error rate, causing frustrated drivers to block the queue during rush hour.",
+          "question": "Which counter metric best captures the true operational cost of these AI mistakes?",
+          "options": [
+            "Measure average vehicle queue delay caused by order correction loops.",
+            "Track daily active drivers who complete a purchase without human help.",
+            "Evaluate the exact vocabulary size recognized by the speech recognition model.",
+            "Count the total number of audio files successfully transcribed by the model."
+          ],
+          "correctIndex": 0,
+          "explanation": "Queue delay captures the real-world operational bottleneck and customer frustration. Operational metrics must reflect physical world impact in real-time environments.",
+          "whyWrong": [
+            "",
+            "Completed purchases overlook the operational damage caused by delayed queues.",
+            "Vocabulary size is an internal engineering metric rather than an operational outcome.",
+            "Successful audio transcriptions ignore the fact that the transcript might still be wrong."
+          ]
+        },
+        {
+          "caseTitle": "Set a Hallucination Budget for Health Answers",
+          "source": "case",
+          "scenario": "Your direct to consumer symptom checker gives preliminary guidance for acute issues, but zero errors is impossible.",
+          "question": "How should you define your acceptable hallucination budget and safety tradeoff?",
+          "options": [
+            "Hide all disclaimer warnings to ensure users trust the diagnostic output completely.",
+            "Route every single mild cough inquiry directly to emergency room doctors.",
+            "Allow a flat five percent error rate across all user medical inquiries.",
+            "Categorize errors by clinical severity and set strict zero tolerance for dangerous advice."
+          ],
+          "correctIndex": 3,
+          "explanation": "Medical AI requires differential tolerance where dangerous hallucinations are strictly blocked while minor phrasing variances are acceptable. Safety depends on clinical risk stratification.",
+          "whyWrong": [
+            "Hiding disclaimers invites severe legal liability and catastrophic user harm.",
+            "Routing every mild symptom to the ER overwhelms healthcare systems instantly.",
+            "A flat percentage ignores the difference between a wrong herbal tea tip and fatal advice.",
+            ""
+          ]
+        },
+        {
+          "caseTitle": "Autonomous Shopping Cart AI",
+          "source": "bonus",
+          "scenario": "A smart grocery cart suggests recipe ingredients and adds them to your bill as you walk through the supermarket aisles.",
+          "question": "What key counter metric protects shoppers from unwanted spending and ruined trust?",
+          "options": [
+            "Track the percentage of AI suggested items that shoppers actively remove.",
+            "Calculate the battery life remaining in the cart tablet at checkout.",
+            "Measure total gross merchandise value added to the cart per shopping trip.",
+            "Record the total weight of fresh produce placed inside the basket."
+          ],
+          "correctIndex": 0,
+          "explanation": "Item removal rate reveals aggressive upselling and unwanted additions before customer trust is permanently broken. High cart totals mean nothing if users feel tricked.",
+          "whyWrong": [
+            "",
+            "Battery life is a hardware maintenance metric unrelated to shopping psychology.",
+            "Gross merchandise value measures revenue growth while ignoring customer annoyance.",
+            "Produce weight tracks inventory logistics rather than recommendation accuracy."
+          ]
+        },
+        {
+          "caseTitle": "AI Resume Screening Filter",
+          "source": "bonus",
+          "scenario": "An enterprise recruitment tool auto-rejects unqualified job applicants to save HR teams hundreds of manual hours.",
+          "question": "Which crucial second-order effect metric must you monitor to ensure ethical hiring?",
+          "options": [
+            "Count the total number of resumes processed per second by the cloud parser.",
+            "Track the total software license fees collected from enterprise clients.",
+            "Audit demographic diversity drop-off rates across every automated screening stage.",
+            "Measure the average salary requested by candidates who pass the filter."
+          ],
+          "correctIndex": 2,
+          "explanation": "Monitoring demographic drop-offs prevents systemic bias from quietly locking out qualified minority candidates. Efficiency must never override fairness and legal compliance.",
+          "whyWrong": [
+            "Parsing speed measures technical throughput rather than fairness or screening quality.",
+            "Software license fees reflect business revenue rather than product ethics.",
+            "",
+            "Requested salary is an economic variable unrelated to algorithmic bias tracking."
+          ]
+        }
+      ]
+    }
+  }
+}

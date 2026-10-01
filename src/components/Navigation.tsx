@@ -34,6 +34,7 @@ export function Navigation() {
     return (
         <nav className="hidden md:flex gap-8 text-[13px] font-bold uppercase tracking-wider">
             <NavLink href="/practice">Case Simulator</NavLink>
+            <NavLink href="/playground">Playground</NavLink>
             <NavLink href="/mentorship">Mentorship</NavLink>
             <NavLink href="/community">Community & Blogs</NavLink>
         </nav>

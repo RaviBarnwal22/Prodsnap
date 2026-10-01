@@ -1,0 +1,1074 @@
+{
+  "slug": "strategy",
+  "framework": "Market → Moat → Options",
+  "sections": {
+    "discovery_and_framing": {
+      "key": "discovery_and_framing",
+      "competency": "problem_framing",
+      "subtitle": "Master discovery and framing to anchor interview cases correctly.",
+      "lesson": {
+        "hook": "Stop pitching solutions before you even know what game you are playing.",
+        "what": "Discovery and framing is the art of establishing goals, constraints, and time horizons. You must align on these parameters before recommending any product strategy.",
+        "how": [
+          "Explicitly state your assumed objective for the company right away.",
+          "Define the relevant time horizon for the strategic evaluation.",
+          "Call out key financial or operational constraints up front."
+        ],
+        "example": "To evaluate this, I assume Google wants a three-year horizon to capture transaction revenue. We must operate under tight margin pressures in emerging markets.",
+        "mistake": "Jumping straight into feature ideas or market sizing without clarifying the core company objective."
+      },
+      "questions": [
+        {
+          "caseTitle": "Should Google launch a ride-sharing service to compete with Uber?",
+          "source": "case",
+          "scenario": "You are starting the Google ride sharing case in front of a senior product leader.",
+          "question": "What is the best way to open your response to demonstrate strong discovery and framing?",
+          "options": [
+            "State a three year horizon and goals for transaction revenue and mapping dominance.",
+            "Ask the interviewer what features they personally use when booking a daily taxi ride.",
+            "Recommend launching an autonomous fleet immediately to capture massive urban market share.",
+            "Calculate the global total addressable market for transportation before discussing anything else."
+          ],
+          "correctIndex": 0,
+          "explanation": "Establishing the specific time horizon, goals, and strategic rationale proves you understand professional case framing. Recommending features too early ignores the core framing requirement.",
+          "whyWrong": [
+            "",
+            "Asking about personal preferences wastes valuable interview time instead of establishing strategic parameters.",
+            "Jumping straight to a launch recommendation skips the vital discovery and framing step entirely.",
+            "Calculating market size without defining goals or time horizons misses the primary objective of framing."
+          ]
+        },
+        {
+          "caseTitle": "Should Amazon launch a high-end luxury fashion vertical?",
+          "source": "case",
+          "scenario": "You receive the Amazon luxury fashion case and need to set up the parameters before analyzing options.",
+          "question": "How should you address the time horizon and core objectives in your opening statement?",
+          "options": [
+            "Focus entirely on the average order value of high end apparel items sold online today.",
+            "Demand to know the exact quarterly profit targets for the clothing division before proceeding.",
+            "Compare two distinct timelines, contrasting a short term grocery fix with a long term luxury push.",
+            "State that Amazon must instantly acquire a luxury retail brand to compete with established European houses."
+          ],
+          "correctIndex": 2,
+          "explanation": "Contrasting timelines demonstrates sophisticated framing by showing how different horizons change the strategic approach. Asking for rigid profit targets is too aggressive for a case opening.",
+          "whyWrong": [
+            "Focusing only on order value ignores the broader strategic choices and company constraints.",
+            "Demanding exact quarterly targets sounds defensive and misunderstands the purpose of strategic discovery.",
+            "",
+            "Suggesting an instant acquisition skips the foundational goal and time horizon alignment entirely."
+          ]
+        },
+        {
+          "caseTitle": "Netflix's 10-Year Strategy as CEO",
+          "source": "case",
+          "scenario": "You are stepping into the shoes of the Netflix CEO for a long term vision case study.",
+          "question": "Which opening framing best establishes the boundaries for a decade long strategic discussion?",
+          "options": [
+            "Explain that subscriber numbers do not matter as long as cultural relevance remains extremely high.",
+            "Frame the objective around maximizing member joy while acknowledging saturated Western market growth constraints.",
+            "Break down the quarterly cost of producing prestige television series across multiple global regions.",
+            "Announce that Netflix should immediately pivot into cloud gaming and hardware manufacturing for living rooms."
+          ],
+          "correctIndex": 1,
+          "explanation": "Framing the objective and acknowledging growth constraints sets a clear foundation for long term strategy. Pivoting to hardware ignores current business realities.",
+          "whyWrong": [
+            "Dismissing subscriber numbers ignores fundamental business constraints and financial realities.",
+            "",
+            "Breaking down production costs is a tactical deep dive rather than a high level discovery and framing step.",
+            "Pivoting immediately to cloud gaming and hardware is a tactical recommendation, not a proper strategic frame."
+          ]
+        },
+        {
+          "caseTitle": "Amazon's International Growth in Emerging Markets",
+          "source": "case",
+          "scenario": "You are tackling Amazon expansion in price sensitive emerging markets like India and Brazil.",
+          "question": "How do you properly ground the objective during the initial discovery phase?",
+          "options": [
+            "Assume unlimited marketing budgets to acquire every single digital consumer in the region rapidly.",
+            "Target doubling Prime subscribers within eighteen months while noting price sensitivity and local rival constraints.",
+            "Analyze the logistics infrastructure of local competitors before establishing any clear growth metrics.",
+            "Propose building massive physical hypermarkets in every major metropolitan area across the target countries."
+          ],
+          "correctIndex": 1,
+          "explanation": "Grounding the objective requires specific metrics, timelines, and acknowledged constraints like local rivals. Assuming unlimited budgets ignores real-world financial guardrails.",
+          "whyWrong": [
+            "Assuming unlimited budgets completely disregards the financial constraints essential to good framing.",
+            "",
+            "Analyzing competitor logistics first is a premature dive into competitive analysis without an anchored goal.",
+            "Proposing physical hypermarkets is a tactical solution that bypasses the required objective framing."
+          ]
+        },
+        {
+          "caseTitle": "Spotify's Expansion into Audiobooks",
+          "source": "case",
+          "scenario": "You begin the Spotify case focusing on gross margins and new content verticals.",
+          "question": "What is the ideal way to frame the strategic challenge in your introduction?",
+          "options": [
+            "Calculate the total hours spent listening to spoken word content by teenagers globally every week.",
+            "State that audiobooks are the single most profitable category in digital media publishing today.",
+            "Argue that Spotify should stop paying music labels entirely and build a proprietary podcast network.",
+            "Highlight label payout margin caps and position audiobooks as a growth engine beyond music streaming."
+          ],
+          "correctIndex": 3,
+          "explanation": "Highlighting margin caps and positioning audiobooks correctly establishes the economic reality and objective. Making sweeping claims about profitability is factually risky.",
+          "whyWrong": [
+            "Calculating listening hours for teenagers is a narrow tactical metric rather than a strategic framework.",
+            "Stating audiobooks are the most profitable category lacks grounding and ignores actual company financials.",
+            "Stopping music label payments is an unrealistic tactical extreme that destroys the core business model.",
+            ""
+          ]
+        },
+        {
+          "caseTitle": "Declining Engagement on Pinterest",
+          "source": "case",
+          "scenario": "Pinterest weekly engagement with saved ideas has dropped slightly, and you need to frame the diagnosis.",
+          "question": "How should you frame the product's core identity and objective before solving the decline?",
+          "options": [
+            "Focus exclusively on increasing advertising revenue per user to offset the declining engagement metrics.",
+            "Define Pinterest as visual search and personal curation, aiming to turn dormant boards into active value.",
+            "Recommend redesigning the entire mobile application interface to look exactly like a short video feed.",
+            "Treat Pinterest like traditional social media where users broadcast daily updates to personal friends."
+          ],
+          "correctIndex": 1,
+          "explanation": "Correctly framing Pinterest as visual search rather than social media is essential for targeted problem solving. Treating it like traditional social media fundamentally misunderstands the platform.",
+          "whyWrong": [
+            "Focusing purely on ad revenue ignores the underlying user engagement problem you were asked to solve.",
+            "",
+            "Redesigning the mobile interface is a tactical solution proposed before even framing the problem correctly.",
+            "Treating Pinterest like a traditional broadcasting social network contradicts its core product identity."
+          ]
+        },
+        {
+          "caseTitle": "Apple Vision Pro Enterprise Adoption",
+          "source": "case",
+          "scenario": "You are consulting Apple on driving enterprise adoption for their spatial computing headset.",
+          "question": "Which opening statement best demonstrates professional discovery and framing for this hardware case?",
+          "options": [
+            "Establish a three year horizon to prove high end productivity value for remote engineering and design teams.",
+            "Slash the retail price by half immediately to capture the mass consumer gaming market during launch week.",
+            "Determine how many gigabytes of local storage professional enterprise developers will require for apps.",
+            "Compare the battery life of spatial computing headsets against standard laptop computers in enterprise offices."
+          ],
+          "correctIndex": 0,
+          "explanation": "Establishing a timeline and a target enterprise use case sets the correct strategic framework. Slashing prices is a premature tactical recommendation.",
+          "whyWrong": [
+            "",
+            "Slashing prices immediately is a drastic tactical pricing move that bypasses strategic target framing.",
+            "Determining local storage requirements is an engineering detail that ignores the broader strategic objective.",
+            "Comparing battery life is a minor hardware specification discussion rather than a strategic business frame."
+          ]
+        },
+        {
+          "caseTitle": "Duolingo Max Monetization Expansion",
+          "source": "case",
+          "scenario": "Duolingo wants to expand its AI powered subscription tier without harming overall user acquisition.",
+          "question": "What is the most effective way to frame this monetization strategy case from the start?",
+          "options": [
+            "Calculate the exact server costs of running generative artificial intelligence models for millions of students.",
+            "Anchor on balancing premium feature revenue growth with keeping core language learning universally accessible.",
+            "Lock all basic lessons behind a mandatory paywall to force every single free user to upgrade today.",
+            "Discuss whether users prefer blue or green buttons on the upgrade screen for the premium tier."
+          ],
+          "correctIndex": 1,
+          "explanation": "Balancing premium revenue with core accessibility captures the delicate strategic tension of freemium monetization. Forcing a paywall ruins the foundational product growth model.",
+          "whyWrong": [
+            "Calculating server costs is an operational detail, not a strategic goal and constraint framework.",
+            "",
+            "Locking all basic lessons behind a paywall destroys the user acquisition funnel which contradicts growth.",
+            "Discussing button colors is a trivial user interface detail entirely unrelated to high level strategy."
+          ]
+        }
+      ]
+    },
+    "market_analysis": {
+      "key": "market_analysis",
+      "competency": "structured_thinking",
+      "subtitle": "Master market sizing, growth rates, structure, and value accrual.",
+      "lesson": {
+        "hook": "Stop guessing numbers. Great PMs size the market before building.",
+        "what": "Market analysis is the foundation of product strategy. It defines the size, growth trajectory, and exact profit pools of your space.",
+        "how": [
+          "Estimate total addressable market and annual growth rate.",
+          "Map industry structure and identify dominant competitors.",
+          "Determine exactly where the financial value accrues."
+        ],
+        "example": "For the global ride-sharing market, you note a hundred billion size growing at twelve percent annually with thin profit pools.",
+        "mistake": "Quoting random global statistics without explaining where the actual profit pools reside."
+      },
+      "questions": [
+        {
+          "caseTitle": "Should Google launch a ride-sharing service to compete with Uber?",
+          "source": "case",
+          "scenario": "You are evaluating whether Google should enter the competitive consumer ride-sharing transportation sector.",
+          "question": "What is the primary market analysis objective when evaluating this potential new business launch?",
+          "options": [
+            "Determine the exact marketing budget needed for year one.",
+            "List every single local competitor in every major city.",
+            "Calculate the total engineering cost required for mapping.",
+            "Size the global market and identify thin profit pools."
+          ],
+          "correctIndex": 3,
+          "explanation": "Great market analysis requires sizing the overall opportunity and understanding where profit actually accumulates. This prevents entering a large market with terrible margins.",
+          "whyWrong": [
+            "Marketing budgets are tactical execution details that come much later after the strategic market viability is proven.",
+            "You might list competitors to show depth, but local listing misses the macro market size and profit pool structure completely.",
+            "Engineering costs belong in financial modeling and feasibility rather than the initial macro market analysis phase.",
+            ""
+          ]
+        },
+        {
+          "caseTitle": "Evaluate whether Airbnb should offer long-term rentals (1 year+).",
+          "source": "case",
+          "scenario": "Airbnb is considering an expansion beyond short-term travel stays into the multi-month residential rental space.",
+          "question": "How should you approach the market analysis for this multi-month rental expansion?",
+          "options": [
+            "Measure how many users book weekend trips every single month.",
+            "Focus exclusively on the total number of global hotel chains.",
+            "Calculate the exact cost of local property management software.",
+            "Acknowledge the massive market size while noting fragmentation."
+          ],
+          "correctIndex": 3,
+          "explanation": "Recognizing that the long-term rental market is massive and dominated by fragmented players sets up the right strategic entry angle. This reveals the exact gap for digital nomads.",
+          "whyWrong": [
+            "Weekend booking frequency measures short-term travel behavior rather than the targeted long-term rental market demand.",
+            "Focusing on hotel chains is a common error because long-term rentals compete with residential landlords, not hotels.",
+            "Property management software costs are operational details rather than the macro market structure and size.",
+            ""
+          ]
+        },
+        {
+          "caseTitle": "Should Netflix enter the live sports market?",
+          "source": "case",
+          "scenario": "Netflix is experiencing plateauing subscriber growth in Western regions and is eyeing live sports programming.",
+          "question": "What key market structure factor must be evaluated before entering live sports?",
+          "options": [
+            "The risk of destroying operating margins through overbidding.",
+            "The total number of smart TVs sold globally each year.",
+            "The average internet speed required to stream high definition.",
+            "The historical cost of producing original scripted drama shows."
+          ],
+          "correctIndex": 0,
+          "explanation": "Live sports rights are notoriously expensive, making margin sustainability the core constraint of the market structure. You must avoid overbidding traps.",
+          "whyWrong": [
+            "",
+            "Smart TV sales are interesting hardware trends, but they do not explain the specific economics and bidding wars of live sports rights.",
+            "Internet speed is a technical streaming requirement rather than a market structure or profit pool evaluation.",
+            "Scripted drama costs are irrelevant because live sports have completely different bidding dynamics and monetization models."
+          ]
+        },
+        {
+          "caseTitle": "Spotify's Expansion into Audiobooks",
+          "source": "case",
+          "scenario": "Spotify needs to diversify revenue streams because music streaming gross margins are strictly capped by music labels.",
+          "question": "Why is market sizing essential for justifying Spotify's expansion into audiobooks?",
+          "options": [
+            "It guarantees that every existing music user will buy books.",
+            "It proves the audiobook market has high growth and better margins.",
+            "It calculates the exact server infrastructure costs for downloads.",
+            "It lowers the royalty payments owed to major music record labels."
+          ],
+          "correctIndex": 1,
+          "explanation": "Market sizing reveals that audiobooks are a high growth sector where Spotify can escape the low margin constraints of music. This justifies the strategic pivot.",
+          "whyWrong": [
+            "Assuming all music users will buy audiobooks is a dangerous logical leap that ignores actual product adoption behavior.",
+            "",
+            "Server download costs are technical infrastructure metrics rather than macro market size and margin structure insights.",
+            "Expanding into audiobooks changes product verticals but does not magically lower legacy royalty obligations to music labels."
+          ]
+        },
+        {
+          "caseTitle": "Should Uber Enter the Grocery Delivery Market?",
+          "source": "case",
+          "scenario": "Uber Eats is exploring whether to expand its core food delivery network into on-demand grocery delivery.",
+          "question": "What is the critical market dynamic to uncover when analyzing grocery delivery?",
+          "options": [
+            "How many drivers prefer delivering hot food over cold items.",
+            "The average weight of a typical grocery delivery paper bag.",
+            "Where value pools are shifting within the delivery ecosystem.",
+            "The total number of physical supermarkets operating in cities."
+          ],
+          "correctIndex": 2,
+          "explanation": "Understanding that value pools are shifting away from traditional grocery models helps determine if the unit economics can sustain delivery fees. This prevents entering low margin traps.",
+          "whyWrong": [
+            "Driver preferences for food versus groceries are operational constraints rather than macro market structure analyses.",
+            "Bag weight is an operational logistics detail that has no bearing on market size or strategic value accrual.",
+            "",
+            "Counting physical supermarkets is far too tactical and fails to capture digital consumer demand or profit pool dynamics."
+          ]
+        },
+        {
+          "caseTitle": "Meta's Move into E-Commerce",
+          "source": "case",
+          "scenario": "Meta wants to capture more e-commerce transaction value through Instagram Shops and native checkout features.",
+          "question": "How should you frame the market analysis for Meta's e-commerce ambitions?",
+          "options": [
+            "Acknowledge the multi-trillion market and capture discovery intent.",
+            "Calculate the server storage required for millions of product photos.",
+            "Prove that social media users spend more money than search users.",
+            "Measure the exact click-through rate of standard display banner ads."
+          ],
+          "correctIndex": 0,
+          "explanation": "Framing the massive multi-trillion e-commerce market while noting that Meta already owns discovery intent justifies building checkout tools. You align product placement with where intent forms.",
+          "whyWrong": [
+            "",
+            "Server storage for photos is an engineering infrastructure metric rather than a market analysis of commerce value pools.",
+            "Comparing total spend across channels is overly simplistic and ignores the fundamental difference between search and social intent.",
+            "Display banner ad click-through rates measure old marketing performance rather than modern social commerce market dynamics."
+          ]
+        },
+        {
+          "caseTitle": "Bonus Case: Spotify Smartwatch Hardware",
+          "source": "bonus",
+          "scenario": "You are the lead product manager evaluating whether Spotify should design and manufacture its own dedicated running smartwatch.",
+          "question": "What is the most important market analysis step when considering hardware entry?",
+          "options": [
+            "Analyze hardware margins and competitor lock-in within wearables.",
+            "Count the total number of active Spotify mobile application users.",
+            "Measure the average length of a daily user listening session.",
+            "Determine the preferred color options for fitness wristbands."
+          ],
+          "correctIndex": 0,
+          "explanation": "Hardware has radically different margin structures and competitive moats than software, requiring a specific evaluation of wearable profit pools.",
+          "whyWrong": [
+            "",
+            "Total app users represent the software funnel, but hardware requires entirely different supply chain and distribution market sizing.",
+            "Listening session lengths measure app engagement rather than the hardware market size, pricing power, and device competition.",
+            "Wristband color preferences are micro design details that have nothing to do with macro market structure or margin analysis."
+          ]
+        },
+        {
+          "caseTitle": "Bonus Case: Slack Enterprise Security",
+          "source": "bonus",
+          "scenario": "Slack is evaluating whether to invest heavily in bespoke enterprise security compliance features for Fortune 500 banks.",
+          "question": "How do you apply market analysis to justify this heavy enterprise feature investment?",
+          "options": [
+            "Size the high-value financial sector and strict compliance needs.",
+            "Count the total number of free startup teams chatting daily.",
+            "Determine the best brand color scheme for enterprise landing pages.",
+            "Calculate the exact lines of code needed for encryption keys."
+          ],
+          "correctIndex": 0,
+          "explanation": "Sizing the high-value enterprise financial sector shows where lucrative B2B software budgets reside, justifying the investment in deep security compliance.",
+          "whyWrong": [
+            "",
+            "Free startup teams do not drive the high-margin enterprise contract revenue needed to justify complex compliance investments.",
+            "Brand color schemes are marketing aesthetics that play no role in assessing enterprise market demand and security needs.",
+            "Lines of code for encryption represent engineering effort rather than market size and customer willingness to pay."
+          ]
+        }
+      ]
+    },
+    "competitive_position": {
+      "key": "competitive_position",
+      "competency": "user_insight",
+      "subtitle": "Master the art of honest competitor and advantage analysis.",
+      "lesson": {
+        "hook": "Stop pretending your product can beat everyone at everything everywhere all at once.",
+        "what": "Competitive position means assessing rivals objectively and finding your truly durable advantage. It prevents you from fighting losing battles in areas where competitors are structurally stronger.",
+        "how": [
+          "Map out actual rival strengths without sugarcoating market realities.",
+          "Identify the exact terrain where rivals cannot easily touch you.",
+          "Anchor your strategy strictly in your genuine structural advantages."
+        ],
+        "example": "eBay focuses strictly on unique pre-owned goods instead of trying to match Amazon on Prime speed. This honest read of their moat protects their margins.",
+        "mistake": "Claiming you can win by simply executing better than an entrenched giant with infinite scale."
+      },
+      "questions": [
+        {
+          "caseTitle": "eBay's Response to Amazon's Dominance",
+          "source": "case",
+          "scenario": "eBay faces intense pressure from Amazon in e-commerce and needs to grow market share over the next three years.",
+          "question": "How should eBay position itself against Amazon's formidable logistics and catalog scale?",
+          "options": [
+            "Acquire failing retail stores to build physical pickup hubs.",
+            "Build a massive logistics network to match Amazon Prime.",
+            "Double down on unique pre-owned and collectible inventory.",
+            "Launch a competing fast delivery service for new goods."
+          ],
+          "correctIndex": 2,
+          "explanation": "eBay cannot win on Prime logistics or commoditized new goods where Amazon holds structural dominance. Focusing on unique, pre-owned, and collectible commerce leverages terrain that Amazon structurally cannot touch.",
+          "whyWrong": [
+            "Physical retail hubs distract from their core marketplace strengths without solving the logistics gap.",
+            "Trying to out-logistics Amazon is a fatal capital-allocation error given their massive existing scale.",
+            "",
+            "Selling standard new goods head-to-head against Amazon guarantees a margin-destroying price war."
+          ]
+        },
+        {
+          "caseTitle": "Should Apple launch a search engine?",
+          "source": "case",
+          "scenario": "Apple is evaluating whether to build a native general search engine to replace Google on Safari.",
+          "question": "What is the most honest assessment of Apple's competitive position regarding a new search engine?",
+          "options": [
+            "Building a search engine means walking away from high margin revenue.",
+            "Safari market share gives them an unassailable advantage in crawling web pages.",
+            "Apple can easily dominate search because users love hardware products.",
+            "Advertising revenue will instantly surpass hardware profits within the first year."
+          ],
+          "correctIndex": 0,
+          "explanation": "Apple currently receives twenty billion annually from Google just to remain default, making a native engine economically irrational. An honest read of their financial reality highlights the high margin risk.",
+          "whyWrong": [
+            "Hardware loyalty does not automatically translate into search engine usage habits or algorithmic indexing expertise.",
+            "Assuming advertising can instantly replace hardware margins ignores the steep costs of building ad networks.",
+            "Browser placement helps distribution, but it does not solve the massive infrastructure required for web crawling.",
+            ""
+          ]
+        },
+        {
+          "caseTitle": "Booking.com's Strategy for US Market Entry",
+          "source": "case",
+          "scenario": "Booking.com wants to expand deeper into the US market where Airbnb and Expedia are already entrenched.",
+          "question": "How should Booking.com frame its competitive entry into the United States?",
+          "options": [
+            "Undercut Airbnb fees heavily to steal every single individual host.",
+            "Capture fragmented boutique hotels rather than fighting Airbnb on homestays.",
+            "Acquire Expedia to instantly monopolize the entire American travel sector.",
+            "Build a massive apartment rental network to replace traditional landlords."
+          ],
+          "correctIndex": 1,
+          "explanation": "Airbnb owns alternative lodging and Expedia owns traditional hotels in the US, so direct frontal attacks will fail. Targeting urban boutique hotels and premium vacation rentals finds an unserved gap.",
+          "whyWrong": [
+            "Becoming a residential landlord diverges entirely from their core travel distribution strengths.",
+            "A brutal fee war against Airbnb would destroy profitability without guaranteeing host loyalty.",
+            "",
+            "Acquiring Expedia is financially and regulatory impractical for a market entry strategy."
+          ]
+        },
+        {
+          "caseTitle": "Evaluate the threat of TikTok to YouTube's dominance.",
+          "source": "case",
+          "scenario": "YouTube faces shifting consumption patterns as younger demographics spend significant time on short-form video apps.",
+          "question": "What defines the core competitive advantage YouTube must lean on against TikTok?",
+          "options": [
+            "Cheaper ad placement rates for small local businesses seeking quick sales.",
+            "Faster algorithmic delivery of funny ten second vertical dance clips.",
+            "Massive reach across all demographics and dominance in long form television.",
+            "Exclusive contracts with teenage creators who refuse to use other platforms."
+          ],
+          "correctIndex": 2,
+          "explanation": "YouTube dominates long-form video and connected television while reaching everyone from kids to grandparents. Acknowledging this broader reach protects them from panicking into bad short-form clones.",
+          "whyWrong": [
+            "",
+            "Creators multi-home across platforms, so exclusive contracts are rare and rarely durable.",
+            "Trying to beat TikTok at short vertical clips ignores YouTube's primary structural strengths.",
+            "Small business ad rates do not solve the fundamental consumption shift happening in video."
+          ]
+        },
+        {
+          "caseTitle": "Should Google launch a ride-sharing service to compete with Uber?",
+          "source": "case",
+          "scenario": "Google is evaluating a consumer ride-sharing app to capture transaction revenue and protect mapping dominance.",
+          "question": "What is a realistic read of Google's competitive position in the ride-sharing market?",
+          "options": [
+            "Google Maps users will automatically book rides instead of using navigation tools.",
+            "Driver acquisition costs will be zero because everyone loves Google brands.",
+            "Mapping dominance helps, but profit pools are thin and competition is brutal.",
+            "Owning Android guarantees ninety percent market share in every city globally."
+          ],
+          "correctIndex": 2,
+          "explanation": "While mapping is a powerful asset, ride-sharing profit pools are thin and highly competitive. An honest assessment requires recognizing that map utility does not automatically translate into transaction volume.",
+          "whyWrong": [
+            "Android presence helps distribution, but local ride-sharing requires intense hyper-local operations.",
+            "",
+            "Navigation intent and booking intent are different user mindsets that do not auto-convert.",
+            "Driver acquisition is notoriously expensive and requires heavy subsidies regardless of brand love."
+          ]
+        },
+        {
+          "caseTitle": "Should Netflix enter the live sports market?",
+          "source": "case",
+          "scenario": "Netflix needs to sustain subscriber growth in saturated domestic markets and considers live sports.",
+          "question": "How should Netflix evaluate live sports through the lens of competitive positioning?",
+          "options": [
+            "Bid aggressively on every major league to crush traditional cable networks.",
+            "Launch a separate sports channel that relies entirely on pay-per-view fees.",
+            "Purchase an entire professional sports franchise to guarantee exclusive content.",
+            "Avoid overbidding for expensive packages that destroy operating margins."
+          ],
+          "correctIndex": 3,
+          "explanation": "Live sports represents un-streamed consumption, but the core constraint is maintaining profitability. Overbidding destroys operating margins, making disciplined bidding an essential strategic guardrail.",
+          "whyWrong": [
+            "Owning a sports franchise is capital-intensive and distracts from core streaming operations.",
+            "",
+            "Pay-per-view models contradict their subscription-based habit loop and global scale goals.",
+            "Bidding recklessly on every major sports package directly violates their strict margin constraints."
+          ]
+        },
+        {
+          "caseTitle": "Local Coffee Shop Digital Ordering App",
+          "source": "case",
+          "scenario": "An independent local coffee shop chain with five locations wants to build a custom mobile app to compete with Starbucks.",
+          "question": "What is the most accurate competitive assessment for this local coffee chain app?",
+          "options": [
+            "Focus on hyper-local community loyalty because you cannot out-tech Starbucks.",
+            "Spend millions building custom artificial intelligence to predict morning espresso orders.",
+            "Launch a global rewards program to steal customers from international coffee giants.",
+            "Build proprietary drone delivery fleets to guarantee hot coffee within five minutes."
+          ],
+          "correctIndex": 0,
+          "explanation": "A local chain cannot out-tech or out-budget a giant like Starbucks on complex digital infrastructure. An honest read dictates leaning on local community connection and personalized service instead.",
+          "whyWrong": [
+            "Building custom AI is an expensive distraction for a small business with limited engineering resources.",
+            "A global rewards program is irrelevant for customers who only care about neighborhood convenience.",
+            "Drone delivery is logistically impossible and financially ruinous for a five-store local business.",
+            ""
+          ]
+        },
+        {
+          "caseTitle": "B2B Project Management SaaS Startup",
+          "source": "case",
+          "scenario": "A new B2B project management software startup is entering a market dominated by Atlassian and Asana.",
+          "question": "How should this startup define its competitive position to survive against entrenched giants?",
+          "options": [
+            "Slash prices to zero and hope venture capital funding lasts forever.",
+            "Sue the market leaders for patent infringement to force a buyout.",
+            "Build a generic clone of every competitor feature to appeal to everyone.",
+            "Target a specific niche industry with custom workflows others ignore."
+          ],
+          "correctIndex": 3,
+          "explanation": "A startup cannot win a feature-by-feature war against well-funded incumbents with massive engineering teams. Finding an underserved vertical niche provides a defensible foothold for sustainable growth.",
+          "whyWrong": [
+            "Suing market leaders is a desperate legal strategy that drains cash without product validation.",
+            "",
+            "Slashing prices to zero without a path to profitability leads straight to bankruptcy.",
+            "Building a generic clone against established giants guarantees getting outspent on marketing."
+          ]
+        }
+      ]
+    },
+    "strategic_options": {
+      "key": "strategic_options",
+      "competency": "solutioning",
+      "subtitle": "Propose genuine strategic options like build, buy, or partner.",
+      "lesson": {
+        "hook": "Stop blurting out random features and evaluate genuine build, buy, or partner choices.",
+        "what": "Strategic options mean weighing trade-offs between internal development, acquisitions, and alliances. A great product manager narrows choices down to viable execution paths.",
+        "how": [
+          "Define clear criteria before picking options.",
+          "Consider build, buy, and partner models.",
+          "Select one path and justify the trade-offs."
+        ],
+        "example": "For grocery delivery, Uber evaluated acquiring a startup versus scaling internal courier networks. They chose internal leverage to preserve unit economics.",
+        "mistake": "Proposing a single obvious tactic without comparing it against alternative execution paths."
+      },
+      "questions": [
+        {
+          "caseTitle": "Should Uber Eats acquire a grocery delivery startup?",
+          "source": "case",
+          "scenario": "Uber Eats wants to scale grocery delivery quickly against entrenched competitors.",
+          "question": "What is the best strategic option for entering the grocery vertical?",
+          "options": [
+            "Acquire a struggling grocery startup for instant user base.",
+            "Build a brand new grocery application from absolute scratch.",
+            "Leverage existing driver networks and merchant partnerships instead.",
+            "Partner with legacy grocery chains for white label delivery."
+          ],
+          "correctIndex": 2,
+          "explanation": "Uber already possesses the operational infrastructure and merchant network required. Avoiding an expensive acquisition protects operating margins.",
+          "whyWrong": [
+            "Acquiring a startup provides an instant user base and quick market entry.",
+            "Building from scratch allows complete architectural control over the final product.",
+            "",
+            "Partnering with legacy chains minimizes capital risk while testing demand."
+          ]
+        },
+        {
+          "caseTitle": "Should Apple launch a search engine?",
+          "source": "case",
+          "scenario": "Apple weighs whether to build a native search engine to rival Google.",
+          "question": "How should Apple approach the search engine market opportunity?",
+          "options": [
+            "Collect twenty billion yearly from Google and avoid building.",
+            "Build a proprietary search engine to capture high margin ad revenue.",
+            "Partner with rival search providers to split advertising profits.",
+            "Acquire a smaller independent search engine to bypass technical hurdles."
+          ],
+          "correctIndex": 0,
+          "explanation": "Building a search engine requires massive capital investment with low returns compared to existing deals. Collecting revenue from Google remains the most profitable path.",
+          "whyWrong": [
+            "",
+            "Building a proprietary engine captures high margin search advertising revenue.",
+            "Partnering with alternative search providers diversifies advertising revenue streams.",
+            "Acquiring a smaller search provider accelerates entry into the market."
+          ]
+        },
+        {
+          "caseTitle": "Should Amazon launch a high-end luxury fashion vertical?",
+          "source": "case",
+          "scenario": "Amazon considers expanding into luxury fashion over a five year horizon.",
+          "question": "What is the most effective strategic option for luxury entry?",
+          "options": [
+            "Discount luxury items aggressively to steal market share from rivals.",
+            "Acquire an existing luxury fashion marketplace to gain instant prestige.",
+            "Build a completely separate luxury platform with bespoke user experiences.",
+            "Partner with high-end designer brands to host curated storefronts."
+          ],
+          "correctIndex": 3,
+          "explanation": "Luxury houses avoid standard e-commerce platforms due to brand dilution fears. Partnering through curated storefronts respects their brand positioning.",
+          "whyWrong": [
+            "Discounting items aggressively helps attract price sensitive shoppers quickly.",
+            "Acquiring an established luxury marketplace provides instant brand credibility.",
+            "Building a bespoke luxury platform ensures complete control over presentation.",
+            ""
+          ]
+        },
+        {
+          "caseTitle": "Should Netflix enter the live sports market?",
+          "source": "case",
+          "scenario": "Netflix needs subscriber growth and looks at live sports streaming.",
+          "question": "How should Netflix evaluate entering the live sports rights arena?",
+          "options": [
+            "Build proprietary sports leagues to own content rights completely.",
+            "Bid selectively on high engagement events while protecting operating margins.",
+            "Partner with sports leagues for secondary tournament broadcasting.",
+            "Acquire a struggling regional sports network for broadcast rights."
+          ],
+          "correctIndex": 1,
+          "explanation": "Live sports rights are extremely expensive and threaten operating margins. Bidding selectively ensures growth without destroying profitability.",
+          "whyWrong": [
+            "Building proprietary leagues gives Netflix complete ownership of content economics.",
+            "",
+            "Partnering with sports leagues reduces upfront financial risk for Netflix.",
+            "Acquiring a regional network secures immediate live broadcasting infrastructure."
+          ]
+        },
+        {
+          "caseTitle": "Spotify's Expansion into Audiobooks",
+          "source": "case",
+          "scenario": "Spotify wants to diversify revenue beyond music streaming and label payouts.",
+          "question": "What is the best strategic option for entering audiobooks?",
+          "options": [
+            "Partner with major publishers to bundle audiobooks into subscriptions.",
+            "Build an internal publishing house to create original audiobook titles.",
+            "Launch a separate standalone application for premium audiobook listeners.",
+            "Acquire a major audiobook publisher to secure exclusive content rights."
+          ],
+          "correctIndex": 3,
+          "explanation": "Acquiring a major publisher provides immediate catalog depth and protects long term margins. It establishes a strong moat against competitors.",
+          "whyWrong": [
+            "Partnering with publishers avoids capital intensive upfront content acquisition costs.",
+            "Building an internal publishing house fosters unique and exclusive original titles.",
+            "Launching a standalone application prevents cluttering the core music streaming experience.",
+            ""
+          ]
+        },
+        {
+          "caseTitle": "Booking.com's Strategy for US Market Entry",
+          "source": "case",
+          "scenario": "Booking.com wants to capture market share in the United States travel sector.",
+          "question": "How should Booking.com approach US market penetration against entrenched rivals?",
+          "options": [
+            "Partner with regional tourism boards for exclusive property listings.",
+            "Target fragmented boutique hotels and premium vacation rentals instead.",
+            "Build a massive national television campaign to drive consumer awareness.",
+            "Acquire a major US hotel chain to secure physical inventory."
+          ],
+          "correctIndex": 1,
+          "explanation": "Directly fighting Expedia on standard hotels or Airbnb on homestays is inefficient. Targeting boutique hotels finds an underserved niche.",
+          "whyWrong": [
+            "Partnering with regional tourism boards secures unique local property listings.",
+            "",
+            "Building a national campaign quickly establishes massive brand awareness nationwide.",
+            "Acquiring a hotel chain guarantees direct control over property inventory."
+          ]
+        },
+        {
+          "caseTitle": "Tesla Energy Storage Expansion",
+          "source": "bonus",
+          "scenario": "Tesla wants to scale residential and commercial battery storage production rapidly.",
+          "question": "What is the optimal strategic option for expanding energy storage manufacturing?",
+          "options": [
+            "Partner with traditional utility companies for large scale distribution.",
+            "Acquire raw material mining companies to secure supply chain stability.",
+            "Build massive new gigafactories internally to drive down unit costs.",
+            "License battery technology to third party manufacturers for royalties."
+          ],
+          "correctIndex": 2,
+          "explanation": "Scaling energy storage requires massive production volume to achieve cost efficiencies. Building internal gigafactories matches Tesla core competencies.",
+          "whyWrong": [
+            "Partnering with utility companies ensures reliable grid level integration channels.",
+            "Acquiring mining companies secures long term access to critical battery minerals.",
+            "",
+            "Licensing technology generates passive income without capital intensive manufacturing risks."
+          ]
+        },
+        {
+          "caseTitle": "Duolingo Monetization Expansion",
+          "source": "bonus",
+          "scenario": "Duolingo looks to increase revenue from its massive base of free users.",
+          "question": "How should Duolingo best approach expanding its monetization strategy?",
+          "options": [
+            "Build advanced certification testing directly into the core application.",
+            "Acquire a live tutoring platform to offer human instruction options.",
+            "Launch aggressive video advertisements for all non paying users.",
+            "Partner with global universities for accredited digital language degrees."
+          ],
+          "correctIndex": 0,
+          "explanation": "Building certification testing leverages their educational credibility and drives high margin revenue. It fits naturally into existing user workflows.",
+          "whyWrong": [
+            "",
+            "Acquiring a tutoring platform provides premium human instruction capabilities instantly.",
+            "Launching video ads monetizes the massive free user base immediately.",
+            "Partnering with universities adds academic prestige and attracts serious students."
+          ]
+        }
+      ]
+    },
+    "recommendation_and_rationale": {
+      "key": "recommendation_and_rationale",
+      "competency": "prioritization",
+      "subtitle": "Master the art of making definitive choices without waffling",
+      "lesson": {
+        "hook": "Stop hedging your bets and learn to take a bold product stance.",
+        "what": "A strong recommendation clearly picks a winning path while actively explaining why alternative paths were discarded. Fence sitting shows a lack of conviction and ruins interview scores.",
+        "how": [
+          "Pick one clear option immediately without any hesitation",
+          "Explicitly discard losing alternatives using strategic constraints",
+          "Ground your rationale firmly in unit economics or user value"
+        ],
+        "example": "Apple should skip building a search engine to preserve twenty billion in pure margin. Launching a native rival destroys easy revenue.",
+        "mistake": "Trying to please everyone by suggesting a hybrid compromise that satisfies no one."
+      },
+      "questions": [
+        {
+          "caseTitle": "Should Google launch a ride-sharing service to compete with Uber?",
+          "source": "case",
+          "scenario": "Google is evaluating whether to build a direct consumer ride-sharing app against Uber.",
+          "question": "What is the best recommendation for Google regarding ride-sharing?",
+          "options": [
+            "Google must immediately build a direct competitor to capture global passenger transportation data.",
+            "Google should avoid launching a rival app because thin profit margins fail to justify capital.",
+            "Google should partner with existing local taxi fleets to test market demand before building software.",
+            "Google ought to acquire a mid-sized regional transport startup to bypass initial driver acquisition costs."
+          ],
+          "correctIndex": 1,
+          "explanation": "A firm stance avoids capital waste in low margin sectors. It protects core map dominance instead.",
+          "whyWrong": [
+            "A smart candidate might argue transportation data is vital for mapping dominance.",
+            "",
+            "A careful candidate might suggest partnerships to lower initial product development risk.",
+            "An ambitious candidate might suggest an acquisition to accelerate market entry timelines."
+          ]
+        },
+        {
+          "caseTitle": "Evaluate whether Airbnb should offer long-term rentals (1 year+).",
+          "source": "case",
+          "scenario": "Airbnb is considering an expansion into traditional residential one-year leases in major cities.",
+          "question": "How should Airbnb approach the long-term rental market?",
+          "options": [
+            "Airbnb should ignore long-term leases completely to focus heavily on luxury short-term travel.",
+            "Airbnb ought to acquire a major property management firm to handle traditional leases directly.",
+            "Airbnb must build a dedicated residential portal for standard apartment hunters worldwide.",
+            "Airbnb must target nomads and corporate relocations rather than becoming standard landlords."
+          ],
+          "correctIndex": 3,
+          "explanation": "Targeting nomads captures massive global demand while avoiding local landlord regulations. It leverages existing platform strengths.",
+          "whyWrong": [
+            "",
+            "An aggressive candidate might suggest buying property managers for instant scale.",
+            "A growth-focused candidate might suggest building a broad residential portal for all tenants.",
+            "A conservative candidate might argue ignoring it protects short-term inventory quality."
+          ]
+        },
+        {
+          "caseTitle": "Should Netflix enter the live sports market?",
+          "source": "case",
+          "scenario": "Netflix faces slowing domestic subscriber growth and considers bidding for expensive live sports rights.",
+          "question": "What is the correct recommendation for Netflix regarding live sports?",
+          "options": [
+            "Netflix ought to build a separate sports streaming subscription tier to test user demand.",
+            "Netflix should avoid expensive live sports rights to protect its high operating margins.",
+            "Netflix should license highlights from major networks instead of streaming live events directly.",
+            "Netflix must bid aggressively for major sports leagues to capture remaining unstreamed audiences."
+          ],
+          "correctIndex": 1,
+          "explanation": "Protecting margins prevents costly overbidding wars. It keeps the core streaming business financially healthy.",
+          "whyWrong": [
+            "A cautious candidate might suggest a separate tier to test price elasticity.",
+            "A growth-driven candidate might argue live sports is the last unstreamed video pool.",
+            "A frugal candidate might suggest buying highlights to test sports engagement cheaply.",
+            ""
+          ]
+        },
+        {
+          "caseTitle": "eBay's Response to Amazon's Dominance",
+          "source": "case",
+          "scenario": "eBay needs to capture more market share against Amazon without competing on logistics.",
+          "question": "How should eBay position its strategy against Amazon?",
+          "options": [
+            "eBay should build out a massive global Prime fulfillment network to match Amazon speeds.",
+            "eBay must double down on unique pre-owned goods that Amazon structurally cannot touch.",
+            "eBay must acquire smaller e-commerce startups to increase its total standard inventory.",
+            "eBay ought to transition entirely into a new retail goods marketplace with low prices."
+          ],
+          "correctIndex": 1,
+          "explanation": "Focusing on enthusiast commerce avoids unwinnable logistics battles. It plays directly to structural strengths.",
+          "whyWrong": [
+            "An aggressive candidate might suggest matching Prime logistics to win speed seekers.",
+            "",
+            "A scale-obsessed candidate might suggest acquiring startups for more inventory volume.",
+            "A pivot-minded candidate might suggest becoming a discount retailer for new goods."
+          ]
+        },
+        {
+          "caseTitle": "Spotify's Expansion into Audiobooks",
+          "source": "case",
+          "scenario": "Spotify faces capped music gross margins and needs new growth avenues to accelerate revenue.",
+          "question": "What is the strategic recommendation for Spotify's content expansion?",
+          "options": [
+            "Spotify should expand into high margin audiobooks to improve overall gross profitability.",
+            "Spotify ought to build a dedicated standalone hardware device for listening to podcasts.",
+            "Spotify must ignore spoken word content to focus exclusively on artist discovery features.",
+            "Spotify should acquire traditional book publishing companies to control physical inventory rights."
+          ],
+          "correctIndex": 0,
+          "explanation": "Audiobooks diversify revenue away from capped music label payouts. It improves structural gross margins significantly.",
+          "whyWrong": [
+            "",
+            "A hardware-minded candidate might suggest building dedicated listening devices for users.",
+            "A focused candidate might argue sticking to music preserves core brand identity.",
+            "An integrated candidate might suggest buying publishers for direct content control."
+          ]
+        },
+        {
+          "caseTitle": "Should Apple launch a search engine?",
+          "source": "case",
+          "scenario": "Apple weighs building a native search engine against keeping its lucrative Google default deal.",
+          "question": "How should Apple approach the search engine market opportunity?",
+          "options": [
+            "Apple ought to acquire an independent search startup to bypass internal engineering costs.",
+            "Apple should create a paid subscription search tier to test enterprise user demand.",
+            "Apple should not launch a search engine to preserve massive Google revenue payments.",
+            "Apple must build a native search engine to protect user privacy across devices."
+          ],
+          "correctIndex": 2,
+          "explanation": "Walking away from twenty billion in high margin revenue makes no financial sense. Preserving the deal wins.",
+          "whyWrong": [
+            "An acquisition-minded candidate might suggest buying an existing startup to save time.",
+            "A monetization-focused candidate might suggest a paid tier for privacy conscious users.",
+            "A privacy-focused candidate might argue owning search is vital for ecosystem security.",
+            ""
+          ]
+        },
+        {
+          "caseTitle": "Slack Workplace Productivity Integration",
+          "source": "bonus",
+          "scenario": "Slack is deciding whether to build deep project management tools natively or stay focused on chat.",
+          "question": "What is the best recommendation for Slack's core product expansion?",
+          "options": [
+            "Slack ought to acquire a major task management platform to bundle subscriptions together.",
+            "Slack should launch a separate enterprise suite for human resources and payroll tracking.",
+            "Slack should avoid building native task tools and remain the premier communication hub.",
+            "Slack must build robust native project management features to compete with workplace giants."
+          ],
+          "correctIndex": 2,
+          "explanation": "Staying focused on communication avoids feature bloat. It keeps the product lightweight and fast for teams.",
+          "whyWrong": [
+            "A bundled-strategy candidate might suggest buying a task platform for market dominance.",
+            "An enterprise-focused candidate might suggest expanding into HR to capture larger budgets.",
+            "",
+            "A feature-driven candidate might suggest native task tools increase daily user retention."
+          ]
+        },
+        {
+          "caseTitle": "Duolingo Gamification Monetization Shift",
+          "source": "bonus",
+          "scenario": "Duolingo wants to increase monetization without hurting its massive free user acquisition funnel.",
+          "question": "How should Duolingo approach its monetization strategy moving forward?",
+          "options": [
+            "Duolingo ought to focus on premium tier features while keeping core learning free.",
+            "Duolingo should rely entirely on non-intrusive banner ads to preserve free user retention.",
+            "Duolingo must spin off a separate expensive platform specifically for corporate language training.",
+            "Duolingo must restrict free daily lessons further to force users into paid subscriptions."
+          ],
+          "correctIndex": 3,
+          "explanation": "Protecting the free funnel ensures top of funnel growth while monetization targets power users.",
+          "whyWrong": [
+            "",
+            "A user-growth candidate might suggest relying on banner ads to keep lessons totally free.",
+            "A corporate-focused candidate might suggest B2B enterprise pivots for larger contract values.",
+            "An aggressive monetization candidate might argue choking free lessons accelerates revenue."
+          ]
+        }
+      ]
+    },
+    "risks_and_sequencing": {
+      "key": "risks_and_sequencing",
+      "competency": "measurement",
+      "subtitle": "Master what could go wrong, sequencing, and validation",
+      "lesson": {
+        "hook": "Do not build the moon base before testing the oxygen mask.",
+        "what": "Risks and sequencing determine the order of execution and how to prove success early. It saves teams from expensive failures by testing critical assumptions before scaling.",
+        "how": [
+          "Identify the single biggest existential risk.",
+          "Sequence validation steps from cheap to expensive.",
+          "Define exact metrics to prove the bet works."
+        ],
+        "example": "For Spotify audiobooks, we sequence a publisher rights pilot before building custom hardware. Success is proven if forty percent of trial users complete one book.",
+        "mistake": "Candidates often suggest scaling a risky feature nationwide without testing unit economics first."
+      },
+      "questions": [
+        {
+          "caseTitle": "Should Google launch a ride-sharing service to compete with Uber?",
+          "source": "case",
+          "scenario": "Google is evaluating a consumer ride-sharing app over a three-year horizon to capture transaction revenue.",
+          "question": "What is the correct first step in sequencing this launch strategy?",
+          "options": [
+            "Roll out global marketing campaigns across all major urban centers.",
+            "Test driver incentives in a single secondary metro area.",
+            "Acquire a struggling regional taxi fleet to secure immediate scale.",
+            "Build custom autonomous electric vehicles for our new driverless fleet."
+          ],
+          "correctIndex": 1,
+          "explanation": "Testing in a single metro area validates unit economics cheaply. Scaling globally or buying fleets too early introduces massive unmitigated risk.",
+          "whyWrong": [
+            "A smart candidate might want rapid scale, but global rollout before unit validation burns cash.",
+            "",
+            "Acquiring fleets sounds proactive, but heavy M&A before proving demand is a severe capital risk.",
+            "Building custom vehicles is a huge distraction when basic ride matching has not been proven yet."
+          ]
+        },
+        {
+          "caseTitle": "Evaluate whether Airbnb should offer long-term rentals (1 year+).",
+          "source": "case",
+          "scenario": "Airbnb wants to target digital nomads and corporate relocations with long-term rentals.",
+          "question": "What is the primary risk that must be addressed first in the sequence?",
+          "options": [
+            "Inadequate server infrastructure for handling long booking forms.",
+            "Regulatory pushback from local residential housing laws.",
+            "High processing fees charged by traditional banking partners.",
+            "Lack of high quality photography for standard apartments."
+          ],
+          "correctIndex": 1,
+          "explanation": "Local housing regulations can completely halt long-term rentals overnight. Addressing legal viability must happen before product work.",
+          "whyWrong": [
+            "A technical candidate might worry about databases, but legal and regulatory blocks are far more fatal here.",
+            "",
+            "Payment fees impact margins, but regulatory shutdowns represent an existential threat to long-term inventory.",
+            "Better photos improve conversion, but they do not matter if local laws ban your entire operating model."
+          ]
+        },
+        {
+          "caseTitle": "Should Amazon launch a high-end luxury fashion vertical?",
+          "source": "case",
+          "scenario": "Amazon is considering a five-year horizon for brand elevation into high-end luxury goods.",
+          "question": "How should Amazon sequence this luxury fashion initiative?",
+          "options": [
+            "Discount all luxury items heavily to drive immediate transaction volume.",
+            "Integrate cheap fast fashion suppliers to build baseline category momentum.",
+            "Secure exclusive partnerships with three boutique designers before opening inventory.",
+            "Rename the main shopping homepage to reflect premium lifestyle branding."
+          ],
+          "correctIndex": 2,
+          "explanation": "Luxury brands require prestige and exclusivity. Securing top tier designer buy in first proves the value proposition.",
+          "whyWrong": [
+            "Deep discounting drives volume in standard retail, but it destroys the prestige required for luxury positioning.",
+            "Fast fashion inventory signals cheap utility, completely undermining the luxury brand elevation strategy.",
+            "",
+            "A homepage rename alienates mass market shoppers before high-end inventory is even established."
+          ]
+        },
+        {
+          "caseTitle": "Should AI art generators pay royalties to artists?",
+          "source": "case",
+          "scenario": "Generative AI platforms need long-term viability and creator retention under legal uncertainty.",
+          "question": "What is the best way to prove the royalty model is working?",
+          "options": [
+            "Creator retention increases among top tier training contributors.",
+            "Total server electricity costs decrease by ten percent monthly.",
+            "Daily active users spend more time browsing community forums.",
+            "Marketing spend drops because of organic social media sharing."
+          ],
+          "correctIndex": 0,
+          "explanation": "Creator retention directly measures whether artists feel fairly compensated and motivated to stay. This proves the core bet.",
+          "whyWrong": [
+            "Server costs reflect infrastructure efficiency, not whether creators accept the royalty compensation model.",
+            "Forum browsing indicates community engagement, but it misses the core economic relationship with artists.",
+            "Organic sharing is a nice marketing bonus, but creator retention is the exact metric for this policy.",
+            ""
+          ]
+        },
+        {
+          "caseTitle": "Should Netflix enter the live sports market?",
+          "source": "case",
+          "scenario": "Netflix needs subscriber growth in saturated domestic markets through live sports programming.",
+          "question": "What is the primary risk that dictates the sequencing of sports bidding?",
+          "options": [
+            "Losing mobile device compatibility for older smartphone operating systems.",
+            "Failing to secure celebrity interviews for pre-game studio shows.",
+            "Running out of local language subtitles for international broadcasts.",
+            "Destroying operating margins through runaway rights acquisition costs."
+          ],
+          "correctIndex": 3,
+          "explanation": "Overbidding for sports rights can devastate profitability. Financial guardrails must be established before any bids are placed.",
+          "whyWrong": [
+            "Device compatibility is a standard engineering task, whereas margin destruction is an existential financial risk.",
+            "Studio show interviews add entertainment value, but rights costs determine whether the business model survives.",
+            "Subtitles are important for global reach, but financial overextension is the main constraint mentioned.",
+            ""
+          ]
+        },
+        {
+          "caseTitle": "eBay's Response to Amazon's Dominance",
+          "source": "case",
+          "scenario": "eBay wants to capture ten percent more market share in enthusiast and pre-owned commerce.",
+          "question": "How should eBay sequence its competitive response against Amazon?",
+          "options": [
+            "Launch a broad television advertising campaign for standard new goods.",
+            "Optimize authentication services for high value collectibles first.",
+            "Acquire a generic freight shipping company for overnight delivery.",
+            "Build a massive new warehouse network for standard consumer electronics."
+          ],
+          "correctIndex": 1,
+          "explanation": "Authentication solves trust in pre-owned goods, which is eBay's core moat. Competing on logistics warehouses is a losing game.",
+          "whyWrong": [
+            "",
+            "Building warehouses mimics Amazon, playing directly into their strongest structural advantage instead of avoiding it.",
+            "Broad advertising for new goods wastes capital on categories where Amazon completely owns customer mindshare.",
+            "Freight shipping helps with standard items, but eBay cannot out-logistics Amazon on commoditized new goods."
+          ]
+        },
+        {
+          "caseTitle": "Stripe International Expansion Strategy",
+          "source": "bonus",
+          "scenario": "Stripe is launching developer payment infrastructure in emerging markets with low credit card penetration.",
+          "question": "What risk must be validated first before expanding engineering resources?",
+          "options": [
+            "Color contrast ratios on the developer documentation landing page.",
+            "Social media sentiment scores among enterprise software executives.",
+            "Local banking partner API reliability and regulatory compliance approval.",
+            "Availability of premium office space in downtown business districts."
+          ],
+          "correctIndex": 2,
+          "explanation": "Without local banking integrations and regulatory clearance, payment processing cannot happen. That is the foundational risk.",
+          "whyWrong": [
+            "Good design matters for onboarding, but banking regulations will block operations before design ever becomes a bottleneck.",
+            "Executive sentiment is helpful for enterprise sales, but local banking infrastructure is the true go no-go gate.",
+            "",
+            "Office space is operational overhead, whereas regulatory approval is a binary gatekeeper for financial tech."
+          ]
+        },
+        {
+          "caseTitle": "Duolingo Monetization Pivot",
+          "source": "bonus",
+          "scenario": "Duolingo wants to test a new premium tier for professional language learners without hurting free user growth.",
+          "question": "What metric best proves the monetization bet is working without harming the core?",
+          "options": [
+            "Paid conversion rate rises while daily active retention remains flat.",
+            "Average word count of marketing blog posts increases significantly.",
+            "Total customer acquisition spending increases across all paid social channels.",
+            "Number of customer support tickets submitted by free users grows."
+          ],
+          "correctIndex": 0,
+          "explanation": "Proving the bet requires showing that people pay without driving away the free user base that powers the ecosystem.",
+          "whyWrong": [
+            "",
+            "Blog post length is an internal content metric that has zero correlation with product monetization success.",
+            "Higher acquisition spend shows marketing effort, but it does not prove the pricing model is healthy or sustainable.",
+            "More support tickets usually indicate user confusion or friction, which signals a negative experience."
+          ]
+        }
+      ]
+    }
+  }
+}
