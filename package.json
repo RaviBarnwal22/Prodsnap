@@ -19,7 +19,7 @@
     "framer-motion": "^12.24.11",
     "isomorphic-dompurify": "^4.3.0",
     "lucide-react": "^0.562.0",
-    "marked": "^17.0.1",
+    "marked": "^18.0.14",
     "next": "^16.3.8",
     "nodemailer": "^10.0.10",
     "react": "19.2.3",
