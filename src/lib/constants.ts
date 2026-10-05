@@ -57,14 +57,22 @@ export const MENTORSHIP_SERVICES = {
 
 export type MentorshipServiceTitle = keyof typeof MENTORSHIP_SERVICES
 
+// serviceType arrives from the request body. A plain index would also match
+// names inherited from Object.prototype ("toString", "constructor"), returning
+// a function whose priceINR is undefined, which slipped past the null check in
+// the order route. Only the catalog's own keys count.
+function lookupService(serviceType: string) {
+    return Object.hasOwn(MENTORSHIP_SERVICES, serviceType)
+        ? MENTORSHIP_SERVICES[serviceType as MentorshipServiceTitle]
+        : null
+}
+
 export function getMentorshipPrice(serviceType: string): number | null {
-    const service = MENTORSHIP_SERVICES[serviceType as MentorshipServiceTitle]
-    return service ? service.priceINR : null
+    return lookupService(serviceType)?.priceINR ?? null
 }
 
 export function getMentorshipAiBonusMonths(serviceType: string): number {
-    const service = MENTORSHIP_SERVICES[serviceType as MentorshipServiceTitle]
-    return service ? service.aiBonusMonths : 0
+    return lookupService(serviceType)?.aiBonusMonths ?? 0
 }
 
 export function formatPriceINR(amount: number): string {

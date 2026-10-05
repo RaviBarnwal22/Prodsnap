@@ -1,6 +1,6 @@
 export const dynamic = 'force-dynamic'
 import { prisma } from "@/lib/prisma"
-import { getUser } from "@/lib/auth"
+import { getUser, isOwner } from "@/lib/auth"
 import { redirect } from "next/navigation"
 import Link from "next/link"
 import Image from "next/image"
@@ -21,9 +21,8 @@ import { getAdminMetrics } from "@/lib/admin-metrics"
 export default async function AdminPage() {
     const user = await getUser()
 
-    // STRICT ADMIN CHECK: Only ravibarnwal89@gmail.com is allowed
-    const isAdminEmail = user?.email === 'ravibarnwal89@gmail.com'
-    if (!user || !isAdminEmail) {
+    // Owner only: stricter than role ADMIN.
+    if (!isOwner(user)) {
         redirect('/admin/login')
     }
 

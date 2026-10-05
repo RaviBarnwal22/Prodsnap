@@ -1,13 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { getUser } from '@/lib/auth'
+import { getUser, isAdmin as isAdminUser } from '@/lib/auth'
 
 export async function POST(request: NextRequest) {
     try {
         const currentUser = await getUser()
 
         // Check if user is admin
-        const isAdmin = currentUser?.email === 'ravibarnwal89@gmail.com' || currentUser?.role === 'ADMIN'
+        const isAdmin = isAdminUser(currentUser)
         if (!isAdmin) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
         }

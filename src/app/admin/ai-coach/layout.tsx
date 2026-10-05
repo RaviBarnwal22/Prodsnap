@@ -1,4 +1,4 @@
-import { getUser } from "@/lib/auth"
+import { getUser, isOwner } from "@/lib/auth"
 import { redirect } from "next/navigation"
 
 export default async function AICoachLayout({
@@ -8,9 +8,8 @@ export default async function AICoachLayout({
 }) {
     const user = await getUser()
 
-    // STRICT ADMIN CHECK: Only ravibarnwal89@gmail.com is allowed
-    const isAdminEmail = user?.email === 'ravibarnwal89@gmail.com'
-    if (!user || !isAdminEmail) {
+    // Owner only: stricter than role ADMIN.
+    if (!isOwner(user)) {
         redirect('/admin/login')
     }
 

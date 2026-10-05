@@ -5,9 +5,16 @@ import { cache } from 'react'
 // Falls back to the historical literal because ADMIN_EMAIL is not set in every environment
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'ravibarnwal89@gmail.com'
 
-export function isAdmin(user: { email?: string | null; role?: string | null } | null | undefined) {
+export function isAdmin<T extends { email?: string | null; role?: string | null }>(user: T | null | undefined): user is T {
     if (!user) return false
     return user.email === ADMIN_EMAIL || user.role === 'ADMIN'
+}
+
+// Owner-only surfaces (the admin dashboard and AI Coach) admit the owner email
+// alone, not every account with role ADMIN. Kept separate so that stricter rule
+// survives the move off inline checks.
+export function isOwner<T extends { email?: string | null }>(user: T | null | undefined): user is T {
+    return !!user && user.email === ADMIN_EMAIL
 }
 
 export async function requireAdmin() {

@@ -13,7 +13,7 @@ import { prisma } from "@/lib/prisma"
 import Link from "next/link"
 import { Header } from "@/components/Header"
 import { Briefcase, BarChart3, TrendingUp, ArrowRight, Sparkles, ChevronLeft, Cpu, Rocket, Users, Search, Calculator, Lock, Unlock, CheckCircle, Target, Bot } from "lucide-react"
-import { getUser } from "@/lib/auth"
+import { getUser, isAdmin as isAdminUser } from "@/lib/auth"
 import { SkillRadarChart } from "@/components/SkillRadarChart"
 import { getTotalAttemptCount, hasActiveSubscription } from "@/lib/subscription"
 import { FREE_ATTEMPT_LIMIT } from "@/lib/constants"
@@ -172,7 +172,7 @@ export default async function PracticePage({
 
     const categoryOrder = ['AI_PRODUCT', 'CONSUMER_PRODUCT_DESIGN', 'STRATEGY', 'METRICS', 'GROWTH_RETENTION', 'TECH_ACUMEN', 'GTM', 'BEHAVIORAL', 'RCA', 'GUESTIMATES']
 
-    const isAdmin = user?.email === 'ravibarnwal89@gmail.com' || (user as any)?.role === 'ADMIN'
+    const isAdmin = isAdminUser(user)
     const isPremium = isSubscriptionActive || isAdmin
     const attemptsRemaining = Math.max(0, FREE_ATTEMPT_LIMIT - totalAttempts)
 

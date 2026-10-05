@@ -3,7 +3,7 @@
 import { prisma } from "@/lib/prisma"
 import { evaluateAnswer } from "@/lib/ai/engine"
 import { revalidatePath } from "next/cache"
-import { getUser } from "@/lib/auth"
+import { getUser, isAdmin } from "@/lib/auth"
 import { sendContactFormNotification, sendSupportReply, sendAdminManualReply } from "@/lib/email"
 import { MAX_ANSWER_CHARS, MAX_MESSAGE_CHARS, MAX_NAME_CHARS, MAX_EMAIL_CHARS, MAX_CLARIFYING_QUESTION_CHARS, MAX_CLARIFYING_HISTORY_TURNS, GUEST_INTERVIEWER_DAILY_LIMIT, GEMINI_MODEL_CHAIN } from "@/lib/constants"
 import { canAttemptCategory, incrementCategoryAttempt } from "@/lib/subscription"
@@ -231,8 +231,7 @@ export async function submitExpertReview(data: {
 }) {
     const user = await getUser()
 
-    const isAdminEmail = user?.email === (process.env.ADMIN_EMAIL || 'ravibarnwal89@gmail.com')
-    if (!user || (!isAdminEmail && user.role !== 'ADMIN')) {
+    if (!isAdmin(user)) {
         return { success: false, error: "Only admins can submit expert reviews" }
     }
 
@@ -270,8 +269,7 @@ export async function replyToSupport(data: {
 }) {
     const user = await getUser()
 
-    const isAdminEmail = user?.email === (process.env.ADMIN_EMAIL || 'ravibarnwal89@gmail.com')
-    if (!user || (!isAdminEmail && user.role !== 'ADMIN')) {
+    if (!isAdmin(user)) {
         return { success: false, error: "Only admins can reply to support inquiries" }
     }
 
@@ -319,8 +317,7 @@ export async function sendManualUserReply(data: {
 }) {
     const user = await getUser()
 
-    const isAdminEmail = user?.email === (process.env.ADMIN_EMAIL || 'ravibarnwal89@gmail.com')
-    if (!user || (!isAdminEmail && user.role !== 'ADMIN')) {
+    if (!isAdmin(user)) {
         return { success: false, error: "Only admins can send manual replies" }
     }
 
@@ -554,8 +551,7 @@ export async function getInterviewerHint(data: {
 
 export async function generateNewsletterDraft(prompt: string) {
     const adminUser = await getUser()
-    const isAdminEmail = adminUser?.email === (process.env.ADMIN_EMAIL || 'ravibarnwal89@gmail.com')
-    if (!adminUser || (!isAdminEmail && adminUser.role !== 'ADMIN')) {
+    if (!isAdmin(adminUser)) {
         return { success: false, error: "Unauthorized" }
     }
 
@@ -611,16 +607,31 @@ STRICT RULES:
     return { success: false, error: "No AI keys configured or service failed" };
 }
 
-export async function logEmailEvent(recipient: string, type: string, subject: string) {
-    console.log(`[logEmailEvent] Manual log: ${type} to ${recipient}`);
+// Called from the login page before the visitor is signed in, so it cannot
+// require auth. It is a public endpoint, so everything is bounded server-side:
+// only the two auth email types are accepted, the subject comes from the type
+// rather than the caller, and a repeat for the same address within ten minutes
+// is ignored, so the log cannot be flooded with junk rows.
+const LOGGABLE_AUTH_EMAILS: Record<string, string> = {
+    auth_verification: 'Verification Email',
+    auth_reset_password: 'Password Reset Email',
+}
+
+export async function logEmailEvent(recipient: string, type: string, _subject?: string) {
+    const email = String(recipient ?? '').trim().toLowerCase()
+    const kind = String(type ?? '').toLowerCase()
+    const subject = LOGGABLE_AUTH_EMAILS[kind]
+    if (!subject || email.length > MAX_EMAIL_CHARS || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        return { success: false }
+    }
     try {
+        const recent = await prisma.emailLog.findFirst({
+            where: { recipient: email, type: kind, createdAt: { gte: new Date(Date.now() - 10 * 60 * 1000) } },
+            select: { id: true },
+        })
+        if (recent) return { success: true }
         await prisma.emailLog.create({
-            data: {
-                recipient,
-                type: type.toLowerCase(),
-                subject,
-                status: 'success'
-            }
+            data: { recipient: email, type: kind, subject, status: 'success' }
         });
         return { success: true };
     } catch (error) {
@@ -661,8 +672,7 @@ export async function subscribeToNewsletter(email: string) {
 
 export async function getNewsletterEmails() {
     const adminUser = await getUser()
-    const isAdminEmail = adminUser?.email === 'ravibarnwal89@gmail.com'
-    if (!adminUser || (!isAdminEmail && adminUser.role !== 'ADMIN')) {
+    if (!isAdmin(adminUser)) {
         return { success: false, error: "Unauthorized" }
     }
 
@@ -689,8 +699,7 @@ export async function getNewsletterEmails() {
 
 export async function broadcastNewsletter(data: { subject: string, content: string }) {
     const adminUser = await getUser()
-    const isAdminEmail = adminUser?.email === 'ravibarnwal89@gmail.com'
-    if (!adminUser || (!isAdminEmail && adminUser.role !== 'ADMIN')) {
+    if (!isAdmin(adminUser)) {
         return { success: false, error: "Unauthorized" }
     }
 
@@ -742,90 +751,11 @@ export async function getLatestViralPost() {
 
 export async function generateViralLinkedInPostManual() {
     const user = await getUser();
-    if (!user || user.role !== 'ADMIN') {
+    if (!isAdmin(user)) {
         return { success: false, error: "Unauthorized" };
     }
+    const { generateViralLinkedInPost } = await import("@/lib/viral-post");
     return await generateViralLinkedInPost();
-}
-
-export async function generateViralLinkedInPost() {
-    try {
-        const { getApiKeys } = await import("@/lib/ai/engine");
-        const { gemini: geminiKeys, groq: groqKeys } = getApiKeys();
-
-        if (geminiKeys.length === 0 && groqKeys.length === 0) {
-            return { success: false, error: "AI API keys missing" };
-        }
-
-        const now = new Date();
-        const istDate = new Date(now.getTime() + (5.5 * 60 * 60 * 1000));
-        const dayIdentifier = istDate.toISOString().split('T')[0];
-        const displayDate = istDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-
-        const prompt = `Research a top AI breakthrough from the last 72 hours. Write a viral 150-word LinkedIn post with:
-1. Punchy Hook. 2. Summary. 3. Official Source Link. 4. PM Importance. 5. Engagement Question.
-Tone: Storyteller. Line breaks for readability. Output ONLY the post content.`;
-
-        let content = "";
-
-        for (const key of geminiKeys) {
-            try {
-                const { GoogleGenerativeAI } = await import("@google/generative-ai");
-                const genAI = new GoogleGenerativeAI(key);
-                const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
-                const result = await model.generateContent(prompt);
-                content = result.response.text();
-                if (content) break;
-            } catch (e) { }
-        }
-
-        if (!content) {
-            for (const key of groqKeys) {
-                try {
-                    const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${key}` },
-                        body: JSON.stringify({
-                            model: "llama-3.3-70b-versatile",
-                            messages: [{ role: "user", content: prompt }]
-                        })
-                    });
-                    if (res.ok) {
-                        const data = await res.json();
-                        content = data.choices[0].message.content;
-                        if (content) break;
-                    }
-                } catch (e) { }
-            }
-        }
-
-        if (!content) throw new Error("AI generation failed");
-
-        content = content.replace(/^```[a-z]*\n/i, '').replace(/\n```$/m, '').trim();
-        const topic = content.split('\n')[0].replace(/[#*]/g, '').trim().substring(0, 100);
-
-        const post = await prisma.viralPost.upsert({
-            where: { periodIdentifier: dayIdentifier },
-            update: { content, topic, date: displayDate },
-            create: {
-                content,
-                topic,
-                date: displayDate,
-                periodIdentifier: dayIdentifier,
-                targetDate: now
-            }
-        });
-
-        try {
-            const { revalidatePath } = await import('next/cache');
-            revalidatePath('/admin');
-        } catch (e) { }
-
-        return { success: true, post };
-    } catch (error) {
-        console.error("[generateViralLinkedInPost] Error:", error);
-        return { success: false, error: error instanceof Error ? error.message : "Failed to generate post" };
-    }
 }
 
 export async function evaluateMicroCase(questionTitle: string, answerText: string) {

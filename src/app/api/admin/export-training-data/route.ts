@@ -1,13 +1,10 @@
 import { prisma } from "@/lib/prisma"
-import { getUser } from "@/lib/auth"
+import { getUser, isAdmin } from "@/lib/auth"
 import { NextResponse } from "next/server"
 
 export async function GET() {
     const user = await getUser()
-
-    // Check if user is admin OR specifically ravibarnwal89@gmail.com
-    const isAdminEmail = user?.email === 'ravibarnwal89@gmail.com'
-    if (!user || (!isAdminEmail && user.role !== 'ADMIN')) {
+    if (!isAdmin(user)) {
         return new NextResponse("Unauthorized", { status: 401 })
     }
 

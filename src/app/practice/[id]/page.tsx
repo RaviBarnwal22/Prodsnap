@@ -23,7 +23,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
 }
 import { Header } from "@/components/Header"
 import { PracticeQuestionClient } from "@/components/PracticeQuestionClient"
-import { getUser } from "@/lib/auth"
+import { getUser, isAdmin as isAdminUser } from "@/lib/auth"
 import { PracticeHistory } from "@/components/PracticeHistory"
 import { hasActiveSubscription } from "@/lib/subscription"
 import { PracticeLockOverlay } from "@/components/PracticeLockOverlay"
@@ -58,7 +58,7 @@ export default async function QuestionPage({ params }: { params: Promise<{ id: s
     const latestSubmission = submissionHistory[0] || null
 
     const isPremium = await hasActiveSubscription()
-    const isAdmin = user?.email === 'ravibarnwal89@gmail.com' || (user as any)?.role === 'ADMIN'
+    const isAdmin = isAdminUser(user)
     const hasFullAccess = isPremium || isAdmin
 
     // Calculate if this is the "First Case" of the category to allow free viewing

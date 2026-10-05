@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/prisma"
-import { getUser } from "@/lib/auth"
+import { getUser, isAdmin as isAdminUser } from "@/lib/auth"
 import { NextRequest, NextResponse } from "next/server"
 
 // Get all users (admin only)
@@ -8,7 +8,7 @@ export async function GET(request: NextRequest) {
         const user = await getUser()
 
         // Check admin access
-        const isAdmin = user?.email === 'ravibarnwal89@gmail.com' || user?.role === 'ADMIN'
+        const isAdmin = isAdminUser(user)
         if (!user || !isAdmin) {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
         }
@@ -43,7 +43,7 @@ export async function DELETE(request: NextRequest) {
         const userId = searchParams.get('id')
 
         // Check admin access
-        const isAdmin = user?.email === 'ravibarnwal89@gmail.com' || user?.role === 'ADMIN'
+        const isAdmin = isAdminUser(user)
         if (!user || !isAdmin) {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
         }

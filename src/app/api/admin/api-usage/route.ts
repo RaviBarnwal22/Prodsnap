@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { getUser } from '@/lib/auth';
+import { getUser, isAdmin } from '@/lib/auth';
 
 // API capacity limits (per day)
 const API_LIMITS = {
@@ -19,8 +19,7 @@ export async function GET(request: Request) {
         const user = await getUser();
 
         // Check if user is admin
-        const isAdminEmail = user?.email === 'ravibarnwal89@gmail.com';
-        if (!user || (!isAdminEmail && user.role !== 'ADMIN')) {
+        if (!isAdmin(user)) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 

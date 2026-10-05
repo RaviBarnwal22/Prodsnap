@@ -4,15 +4,15 @@ import { NextResponse } from "next/server";
 export const dynamic = 'force-dynamic';
 
 export async function GET(request: Request) {
-    const authHeader = request.headers.get('authorization');
-    const isVercelCron = request.headers.get('x-vercel-cron') === '1';
+    // Only the CRON_SECRET bearer token authorizes. The x-vercel-cron header
+    // used to be accepted too, but any caller can send it. Vercel Cron sends
+    // "Authorization: Bearer <CRON_SECRET>" itself once that env var is set.
+    // With no secret configured this fails closed rather than open.
     const cronSecret = process.env.CRON_SECRET;
-
-    // Allow if it is Vercel Cron OR if the secret matches
-    const isAuthorized = isVercelCron || (cronSecret && authHeader === `Bearer ${cronSecret}`);
+    const isAuthorized = !!cronSecret && request.headers.get('authorization') === `Bearer ${cronSecret}`;
 
     if (!isAuthorized) {
-        console.error("[Cron] Unauthorized attempt - Secret/Vercel header mismatch");
+        console.error("[Cron] Unauthorized attempt - missing or wrong CRON_SECRET");
         return new Response('Unauthorized', { status: 401 });
     }
 
