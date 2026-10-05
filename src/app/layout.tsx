@@ -4,6 +4,7 @@ import Script from "next/script";
 import "./globals.css";
 import ClientProviders from "@/components/ClientProviders";
 import { SiteStructuredData } from "@/components/SiteStructuredData";
+import { GoogleAnalytics } from "@/components/GoogleAnalytics";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -89,6 +90,7 @@ export default function RootLayout({
           {children}
         </ClientProviders>
         <Script src="https://sdk.cashfree.com/js/v3/cashfree.js" strategy="lazyOnload" />
+        <GoogleAnalytics />
       </body>
     </html>
   );

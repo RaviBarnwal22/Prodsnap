@@ -17,7 +17,7 @@ export default function PrivacyPolicy() {
             <div className="container mx-auto max-w-4xl">
                 <h1 className="text-4xl font-black mb-8">Privacy Policy</h1>
                 <p className="text-gray-600 dark:text-gray-400 mb-8">
-                    Last updated: January 25, 2026
+                    Last updated: October 5, 2026
                 </p>
 
                 <div className="prose prose-lg dark:prose-invert max-w-none space-y-8">
@@ -79,6 +79,8 @@ export default function PrivacyPolicy() {
                             <li><strong>AI-Powered Providers:</strong> For generating feedback on your practice responses</li>
                             <li><strong>Groq AI:</strong> For high-speed AI processing and extraction</li>
                             <li><strong>Brevo:</strong> For sending transactional emails</li>
+                            <li><strong>Cashfree:</strong> For processing payments</li>
+                            <li><strong>Google Analytics:</strong> For measuring site traffic and how pages are used</li>
                         </ul>
                         <p className="text-gray-700 dark:text-gray-300 leading-relaxed mt-4">
                             These services have their own privacy policies and we encourage you to review them.
@@ -103,8 +105,11 @@ export default function PrivacyPolicy() {
                     <section>
                         <h2 className="text-2xl font-bold mb-4">7. Cookies and Tracking</h2>
                         <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
-                            We use essential cookies to maintain your session and provide core functionality. We do not use
-                            third-party advertising or tracking cookies. You can control cookie settings through your browser.
+                            We use essential cookies to maintain your session and provide core functionality. We also use
+                            Google Analytics, which sets cookies to count visits and understand how pages are used. This data
+                            is aggregated and is not used for advertising. We do not use advertising cookies. You can block or
+                            delete cookies through your browser, or opt out of Google Analytics with Google&apos;s browser
+                            add-on at tools.google.com/dlpage/gaoptout.
                         </p>
                     </section>
 
