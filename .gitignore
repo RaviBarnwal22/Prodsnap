@@ -75,3 +75,6 @@ next-env.d.ts
 ehthumbs.db
 Thumbs.db
 .data/
+
+# Database backups hold customer data. Never commit them.
+backups/

@@ -22,7 +22,7 @@ Both are gitignored, so **nothing env-related is ever pushed** — production va
 
 Local Cashfree is **sandbox**; production keys live only in Vercel. Never test checkout against production keys.
 
-Referenced in code but absent everywhere: `ADMIN_EMAIL`, `CRON_SECRET`. Both fail silently.
+Referenced in code but absent everywhere: `ADMIN_EMAIL` (falls back to the owner literal), `CRON_SECRET` (cron routes reject every call until it is set).
 
 ## Payments (the most intricate area — read before touching)
 
@@ -42,7 +42,7 @@ Flow: modal → `cashfree-order` (creates pending row + Cashfree order) → SDK 
 
 **Confirmation emails do not arrive.** Brevo accepts every message (`250 OK`, nothing rejected) but delivery fails. Cause: `SMTP_SENDER` is a `@gmail.com` address relayed through Brevo, which cannot be DKIM-signed. Fix is to authenticate `prodsnap.in` in Brevo, add its DKIM + `include:spf.sendinblue.com` to Cloudflare DNS, then switch the sender to `info@prodsnap.in`. Do not switch the sender before the DNS work — `prodsnap.in` is `p=quarantine`.
 
-**`/api/cron/*` is bypassable** — it authorizes on the forgeable `x-vercel-cron` header. Tightening it requires `CRON_SECRET` to exist in Vercel first, or live cron breaks.
+**`/api/cron/*` requires `CRON_SECRET`** as a bearer token and fails closed without it. No crons are scheduled in `vercel.json`, so nothing calls these today; add `CRON_SECRET` in Vercel before scheduling any.
 
 ## Security invariants (non-negotiable)
 
@@ -65,7 +65,9 @@ Not yet fixed — treat as known risk: **there is no rate limiting anywhere**, w
 
 **Prisma** — always the singleton from `@/lib/prisma`. Never `new PrismaClient()`.
 
-**Admin check** — `isAdmin()` / `requireAdmin()` exist in `@/lib/auth`; use them for new code. **The 15 existing call sites have not been migrated** and still inline `user?.email === 'ravibarnwal89@gmail.com' || user?.role === 'ADMIN'`. Migrating them is outstanding work.
+**Admin check** — always `isAdmin()` / `requireAdmin()` from `@/lib/auth` (owner email or role ADMIN). The admin dashboard and AI Coach are stricter and use `isOwner()` (owner email only). Never inline the email. The only remaining literals are the admin login page's client-side hint and the metrics exclusion list.
+
+**Every export of a `'use server'` file is a public endpoint** once any client component imports that file, and `src/app/actions.ts` is imported by many. Each exported action authorizes itself. Unguarded internals (e.g. `generateViralLinkedInPost` in `@/lib/viral-post`) live in plain `lib/` modules, never in an actions file.
 
 **`src/middleware.ts` excludes `/api`** — it only guards `/admin`, `/feedback`, `/account`, `/dashboard`. Every API route must do its own auth. (`/dashboard` has no route; the guard is kept in case one is added.)
 
@@ -106,7 +108,7 @@ Never read these whole — grep for the specific key or function:
 Applies to every change. These are checkable rules, not aspirations — if a rule can't be met, say so rather than quietly skipping it.
 
 **Correctness — verify, don't assume.**
-- `npx tsc --noEmit` and `npm run build` must both pass before any change is called done. Never report success on unrun code.
+- `npx tsc --noEmit`, `npm test` and `npm run build` must all pass before any change is called done. Never report success on unrun code.
 - Trace the full path before editing: who calls this, what breaks downstream. Deleting something requires proving it has zero references first.
 - Test the failure path, not just the happy path. A route that "works" is not verified until bad input has been sent to it.
 - Client-rendered UI can't be verified with `curl` — say so rather than implying it was checked.
@@ -271,7 +273,9 @@ npx prisma studio        # DB GUI — remember it's production
 npm run lint
 ```
 
-No test framework is configured.
+`npm test` runs Vitest (`tests/`). Tests cover prices, the AI bonus, quotas, admin checks and the order route. Every test mocks Prisma, and the config points `DATABASE_URL` at an unreachable address, so a test can never touch production. Add a failing test before changing money or access code. CI (`.github/workflows/ci.yml`) runs the type check and tests on every push.
+
+`npx tsx scripts/backup-db.ts` writes a read-only JSON backup of every table to the gitignored `backups/`. `scripts/enable-rls.sql` turns on Row Level Security for the public schema; run it in the Supabase SQL editor.
 
 <!-- BEGIN:nextjs-agent-rules -->
 
