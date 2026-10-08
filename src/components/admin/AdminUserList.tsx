@@ -97,22 +97,38 @@ export function AdminUserList({ users }: { users: UserWithStats[] }) {
     const [emailSubject, setEmailSubject] = useState('')
     const [emailMessage, setEmailMessage] = useState('')
     const [isSendingEmail, setIsSendingEmail] = useState(false)
-    const [emailSent, setEmailSent] = useState(false)
+    // Which user the last email went to. A single true/false flag used to be
+    // shared by every user, so after one send the panel claimed "sent" for
+    // whoever was opened next.
+    const [emailSentTo, setEmailSentTo] = useState<string | null>(null)
+    const emailSent = selectedUser !== null && emailSentTo === selectedUser.id
+
+    // Opening a different user starts a fresh email. Otherwise a draft written
+    // for one person stays in the form and can be sent to the next one.
+    const [emailDraftFor, setEmailDraftFor] = useState<string | null>(null)
+    const openUserId = selectedUser?.id ?? null
+    if (openUserId !== emailDraftFor) {
+        setEmailDraftFor(openUserId)
+        setEmailSubject('')
+        setEmailMessage('')
+        setEmailSentTo(null)
+    }
 
     const handleSendEmail = async () => {
         if (!selectedUser || !emailSubject.trim() || !emailMessage.trim()) return
+        const recipient = selectedUser
         setIsSendingEmail(true)
 
         try {
             const res = await sendManualUserReply({
-                email: selectedUser.email,
-                name: selectedUser.firstName || selectedUser.name || 'User',
+                email: recipient.email,
+                name: recipient.firstName || recipient.name || 'User',
                 subject: emailSubject,
                 message: emailMessage
             })
 
             if (res.success) {
-                setEmailSent(true)
+                setEmailSentTo(recipient.id)
                 setEmailMessage('')
                 setEmailSubject('')
             } else {
@@ -642,7 +658,7 @@ export function AdminUserList({ users }: { users: UserWithStats[] }) {
                                         <Send size={18} />
                                         Email sent successfully to {selectedUser.email}
                                         <button
-                                            onClick={() => setEmailSent(false)}
+                                            onClick={() => setEmailSentTo(null)}
                                             className="ml-auto text-xs bg-green-500/20 px-2 py-1 rounded-lg hover:bg-green-500/30"
                                         >
                                             Send Another
