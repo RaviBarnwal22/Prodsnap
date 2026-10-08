@@ -100,8 +100,12 @@ export default async function QuestionPage({ params }: { params: Promise<{ id: s
                 </Link>
                 <div className="grid md:grid-cols-3 gap-8">
                     {/* Left Column: Question Details */}
-                    <div className="md:col-span-1 space-y-6">
-                        <div className="bg-white dark:bg-gray-900 p-8 rounded-[2rem] border shadow-sm sticky top-24 relative overflow-hidden">
+                    {/* The whole column is pinned, not just the problem card. Pinning only
+                        the card let the attempts panel below it scroll up underneath the
+                        card and vanish. A column taller than the screen scrolls on its own. */}
+                    <div className="md:col-span-1">
+                      <div className="space-y-6 md:sticky md:top-24 md:max-h-[calc(100vh-7rem)] md:overflow-y-auto md:overscroll-contain custom-scrollbar md:pr-1 md:pb-2">
+                        <div className="bg-white dark:bg-gray-900 p-8 rounded-[2rem] border shadow-sm relative overflow-hidden">
                             {/* Premium Lock Overlay for question details */}
                             {isLocked && (
                                 <div className="absolute inset-0 z-10 pointer-events-none">
@@ -150,6 +154,7 @@ export default async function QuestionPage({ params }: { params: Promise<{ id: s
                                 createdAt: s.createdAt.toISOString()
                             }))} />
                         )}
+                      </div>
                     </div>
 
                     {/* Right Column: Interaction Hub */}
