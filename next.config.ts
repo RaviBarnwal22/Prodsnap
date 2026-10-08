@@ -1,5 +1,9 @@
 import type { NextConfig } from "next";
 
+const supabaseHost = (() => {
+  try { return new URL(process.env.NEXT_PUBLIC_SUPABASE_URL ?? '').hostname } catch { return '' }
+})();
+
 const nextConfig: NextConfig = {
   compress: true,
   poweredByHeader: false,
@@ -12,6 +16,10 @@ const nextConfig: NextConfig = {
         protocol: 'https',
         hostname: 'images.unsplash.com',
       },
+      // Blog images uploaded from the admin editor (Supabase Storage).
+      ...(supabaseHost
+        ? [{ protocol: 'https' as const, hostname: supabaseHost, pathname: '/storage/v1/object/public/**' }]
+        : []),
     ],
   },
 

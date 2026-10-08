@@ -1,6 +1,11 @@
 import { MetadataRoute } from "next";
 import { SEOContentData } from "@/lib/seo-content";
 import { PLAYGROUND_CATEGORIES } from "@/lib/playground/categories";
+import { getPublishedPosts } from "@/lib/blog/queries";
+
+// Rebuilt hourly and whenever an article is published, so new posts reach
+// Google without a deploy.
+export const revalidate = 3600;
 
 const baseUrl = "https://prodsnap.in";
 
@@ -10,7 +15,7 @@ const baseUrl = "https://prodsnap.in";
 // — bump CONTENT_LAST_MODIFIED when the SEO content or page copy changes.
 const CONTENT_LAST_MODIFIED = new Date("2026-09-23");
 
-export default function sitemap(): MetadataRoute.Sitemap {
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // Routes whose content genuinely changes often.
   const frequentRoutes: MetadataRoute.Sitemap = [
     { url: `${baseUrl}`, changeFrequency: "daily" as const, priority: 1.0 },
@@ -61,5 +66,28 @@ export default function sitemap(): MetadataRoute.Sitemap {
     });
   });
 
-  return [...frequentRoutes, ...staticRoutes, ...pillarRoutes, ...dynamicRoutes];
+  // Blog articles from the admin editor. A database hiccup must never take the
+  // whole sitemap down, so a failure just omits them until the next rebuild.
+  let blogRoutes: MetadataRoute.Sitemap = [];
+  try {
+    const posts = await getPublishedPosts(500);
+    blogRoutes = [
+      {
+        url: `${baseUrl}/blog`,
+        lastModified: posts[0]?.publishedAt ?? CONTENT_LAST_MODIFIED,
+        changeFrequency: "weekly" as const,
+        priority: 0.8,
+      },
+      ...posts.map((p) => ({
+        url: `${baseUrl}/blog/${p.slug}`,
+        lastModified: p.publishedAt ?? CONTENT_LAST_MODIFIED,
+        changeFrequency: "monthly" as const,
+        priority: 0.7,
+      })),
+    ];
+  } catch (e) {
+    console.error("[sitemap] blog posts unavailable", e);
+  }
+
+  return [...frequentRoutes, ...staticRoutes, ...pillarRoutes, ...dynamicRoutes, ...blogRoutes];
 }

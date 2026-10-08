@@ -16,8 +16,31 @@ import { Header } from "@/components/Header"
 import { Footer } from "@/components/Footer"
 import { CommunityContent, FeaturedGuide } from "@/components/CommunityContent"
 import { BookOpen, Users, MessageCircle } from "lucide-react"
+import { getPublishedPosts } from "@/lib/blog/queries"
+import { formatBlogDate } from "@/components/blog/ArticleView"
 
-export default function CommunityPage() {
+// Refreshed hourly, and immediately when a blog article is published.
+export const revalidate = 3600
+
+export default async function CommunityPage() {
+    // Articles from the site's own blog come first, then the LinkedIn archive.
+    // The community page must never fail because of the blog, so a database
+    // error just leaves the LinkedIn archive on its own.
+    const latest = await getPublishedPosts(6).catch((e) => {
+        console.error("[community] blog posts unavailable", e)
+        return []
+    })
+    const siteArticles = latest.map((p) => ({
+        title: p.title,
+        excerpt: p.excerpt,
+        author: "Ravi Barnwal",
+        date: formatBlogDate(p.publishedAt),
+        readTime: `${p.readingMinutes} min read`,
+        category: p.seriesName ?? "Prodsnap Blog",
+        image: p.coverImage ?? "https://images.unsplash.com/photo-1677442136019-21780ecad995?w=800&h=500&fit=crop",
+        url: `/blog/${p.slug}`,
+    }))
+
     const benefits = [
         {
             icon: <BookOpen size={24} />,
@@ -178,7 +201,7 @@ export default function CommunityPage() {
         <div className="min-h-screen bg-white dark:bg-gray-950 flex flex-col font-sans">
             <Header />
             <main className="flex-grow pt-16">
-                <CommunityContent benefits={benefits} blogPosts={blogPosts} featuredGuides={featuredGuides} />
+                <CommunityContent benefits={benefits} blogPosts={[...siteArticles, ...blogPosts]} featuredGuides={featuredGuides} />
             </main>
             <Footer />
         </div>

@@ -364,3 +364,27 @@ model Job {
   @@index([category])
   @@index([source])
 }
+
+// Long-form blog articles written in the admin editor and served at /blog.
+// contentHtml is sanitized on save AND on render (lib/blog/sanitize.ts), so a
+// bad row can never inject script. Call-to-action blocks are stored as
+// <div data-cta="practice"></div> markers and rendered as components.
+model BlogPost {
+  id             String    @id @default(cuid())
+  slug           String    @unique
+  title          String
+  excerpt        String    @default("")
+  coverImage     String?
+  contentHtml    String    @default("") @db.Text
+  seriesName     String?
+  seriesPart     Int?
+  tags           String[]
+  status         String    @default("DRAFT") // DRAFT | PUBLISHED
+  readingMinutes Int       @default(1)
+  publishedAt    DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  @@index([status, publishedAt])
+  @@index([seriesName])
+}

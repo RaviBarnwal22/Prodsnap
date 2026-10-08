@@ -4,7 +4,7 @@ import { getUser, isOwner } from "@/lib/auth"
 import { redirect } from "next/navigation"
 import Link from "next/link"
 import Image from "next/image"
-import { ShieldCheck, LogOut, Home, Brain } from "lucide-react"
+import { ShieldCheck, LogOut, Home, Brain, PenSquare } from "lucide-react"
 import { AdminUserList } from "@/components/admin/AdminUserList"
 import { UserFeedbackList } from "@/components/admin/UserFeedbackList"
 import { AdminPaymentRequests } from "@/components/admin/AdminPaymentRequests"
@@ -88,6 +88,10 @@ export default async function AdminPage() {
                         </div>
                     </div>
                     <div className="flex items-center gap-4">
+                        <Link href="/admin/blog" className="flex items-center gap-2 text-violet-400 hover:text-violet-300 text-sm font-bold transition bg-violet-500/10 px-3 py-1.5 rounded-lg border border-violet-500/20">
+                            <PenSquare size={16} />
+                            Blog
+                        </Link>
                         <Link href="/admin/ai-coach" className="flex items-center gap-2 text-indigo-400 hover:text-indigo-300 text-sm font-bold transition bg-indigo-500/10 px-3 py-1.5 rounded-lg border border-indigo-500/20 mr-2">
                             <Brain size={16} />
                             AI Coach

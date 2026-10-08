@@ -83,6 +83,16 @@ Not yet fixed — treat as known risk: **there is no rate limiting anywhere**, w
 
 **Server action IDs change on every rebuild.** A tab open from before a deploy fails with "Failed to find Server Action"; the UI tells the user to refresh. Not a bug — don't chase it.
 
+## Blog
+
+Long-form articles are written in the admin at `/admin/blog` (owner only) and served at `/blog` and `/blog/[slug]`.
+
+- **Storage.** `BlogPost` rows. `contentHtml` is sanitized by `sanitizeBlogHtml` in `@/lib/blog/content` on save **and** on render. Never render it any other way.
+- **Calls to action** are `<div data-cta="practice|playground|subscription|mentorship"></div>` markers the author inserts. Their copy and links live in `@/lib/blog/cta`; editing a CTA there updates every article. Clicks log `blog_cta_click` with the CTA type.
+- **Images** upload through `/api/admin/blog/upload` to the public Supabase Storage bucket `blog-images`, created on first upload. Needs `SUPABASE_SERVICE_ROLE_KEY` (server-only, never `NEXT_PUBLIC_`). Files are checked by their first bytes; SVG is refused.
+- **Rendering.** Pages use ISR (`revalidate = 3600`); the admin actions call `revalidatePath` on save, publish and delete, so changes show at once. Articles are in the sitemap.
+- **Attribution.** `PageTracker` records `linkedin` in the view's metadata for visits tagged `utm_source=linkedin` or referred by LinkedIn. The editor's "Copy LinkedIn link" adds that tag.
+
 ## Helpers
 
 | Need | Use |
@@ -260,7 +270,7 @@ Keyword stuffing, doorway pages spun from a template with swapped nouns, schema 
 
 - **The `BAILOUT_TO_CLIENT_SIDE_RENDERING` check below over-reports.** `grep -c` matches the contained `<template data-dgst="BAILOUT_TO_CLIENT_SIDE_RENDERING">` markers that the Suspense-wrapped analytics components legitimately emit, so it prints 1 on a healthy page. What actually matters is that the page still returns its real `<h1>` and body copy. Verified against production on 2026-09-23: one `h1`, full copy served.
 - **Jobs feature is recoverable, not rebuildable.** The `Job` model is still in the schema and the table exists but holds **0 rows**. The six deleted files (~1,260 lines) are in commit `8cd6977`. Restoring the UI without wiring a data source ships an empty page.
-- **`/blog` is a bare redirect to `/community`.** Fine as a redirect; it is deliberately excluded from the sitemap.
+
 - Confirmation-email deliverability (see **Known broken**) indirectly hurts conversion from organic traffic.
 
 ## Commands

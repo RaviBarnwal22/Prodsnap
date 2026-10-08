@@ -237,13 +237,14 @@ export function CommunityContent({ benefits, blogPosts, featuredGuides = [] }: C
                                 Founder Insights & Articles
                             </h3>
                             <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">
-                                Written by Ravi Barnwal on LinkedIn about career transitions and modern product management.
+                                Written by Ravi Barnwal on the Prodsnap blog and LinkedIn about AI product management, careers and PM interviews.{" "}
+                                <a href="/blog" className="text-blue-600 font-bold hover:underline">See all blog articles</a>
                             </p>
                         </div>
 
                         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-10">
                             {blogPosts.map((post, i) => (
-                                <a key={i} href={post.url} target="_blank" rel="noopener noreferrer" className="group cursor-pointer">
+                                <a key={i} href={post.url} {...(post.url.startsWith("/") ? {} : { target: "_blank", rel: "noopener noreferrer" })} className="group cursor-pointer">
                                     <div className="aspect-[16/10] bg-gradient-to-br from-blue-500 via-indigo-500 to-purple-600 rounded-3xl mb-6 overflow-hidden relative shadow-lg">
                                         <div className="absolute inset-0 flex items-center justify-center p-6 text-white/90 text-center z-0">
                                             <span className="text-lg font-bold line-clamp-3 leading-tight uppercase font-black">{post.title}</span>
