@@ -15,6 +15,16 @@ const nextConfig: NextConfig = {
     ],
   },
 
+  async redirects() {
+    return [
+      // AI News was retired on 2026-10-10 (stale since March, nothing linked
+      // to it). Permanent redirect so any indexed URL or bookmark still lands
+      // somewhere useful instead of a 404.
+      { source: '/ai-news', destination: '/blog', permanent: true },
+      { source: '/ai-news/:path*', destination: '/blog', permanent: true },
+    ];
+  },
+
   async headers() {
     return [
       {

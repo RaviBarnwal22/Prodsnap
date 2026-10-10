@@ -292,6 +292,10 @@ model EmailLog {
   @@index([type])
 }
 
+// Retired: held the AI News feed, whose code was deleted on 2026-10-10.
+// Kept in the schema on purpose. Removing the model would make the next
+// `prisma db push` DROP the table and its rows. Drop it deliberately, after a
+// backup, if the data is no longer wanted.
 model Article {
   id               String      @id @default(cuid())
   articleType      String      @default("DAILY") // DAILY, WEEKLY_TOP, MONTHLY_TOP
