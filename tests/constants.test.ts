@@ -5,7 +5,14 @@ describe("getMentorshipPrice", () => {
     it("returns the catalog price for every package", () => {
         expect(getMentorshipPrice("PM Career Accelerator")).toBe(1299)
         expect(getMentorshipPrice("Profile & Resume Booster")).toBe(899)
+        expect(getMentorshipPrice("PM Career Clarity Call")).toBe(499)
+    })
+
+    // Renamed from "Resume Review" on 2026-10-11. Bookings saved under the old
+    // name, and checkouts started before the deploy, must still resolve.
+    it("still prices the old Resume Review name, at the same price", () => {
         expect(getMentorshipPrice("Resume Review")).toBe(499)
+        expect(getMentorshipAiBonusMonths("Resume Review")).toBe(1)
     })
 
     it("returns null for an unknown package", () => {

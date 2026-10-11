@@ -227,14 +227,15 @@ export default function MentorshipClient() {
                 ]
             },
             {
-                title: "Resume Review",
-                duration: MENTORSHIP_SERVICES["Resume Review"].duration,
-                price: formatPriceINR(MENTORSHIP_SERVICES["Resume Review"].priceINR),
-                description: "Deep dive into your resume to make it ATS-friendly and impactful for top-tier PM roles.",
+                title: "PM Career Clarity Call",
+                duration: MENTORSHIP_SERVICES["PM Career Clarity Call"].duration,
+                price: formatPriceINR(MENTORSHIP_SERVICES["PM Career Clarity Call"].priceINR),
+                description: "One focused 45-minute call. Bring your resume, your PM career questions or your plans, and leave with clear next steps.",
                 features: [
-                    "Line-by-line review",
-                    "ATS optimization",
-                    "Action verb enhancement",
+                    "Resume review — what to fix for PM shortlists",
+                    "PM career guidance — your questions, answered",
+                    "Career roadmap — next steps mapped to your profile",
+                    "Pick your focus for the session",
                     "1 month Prodsnap AI case practice — free"
                 ]
             },

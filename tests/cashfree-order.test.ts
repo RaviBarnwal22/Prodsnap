@@ -29,7 +29,7 @@ beforeEach(() => {
 describe("POST /api/payment/cashfree-order", () => {
     it("requires sign-in", async () => {
         getUser.mockResolvedValue(null)
-        expect((await post({ serviceType: "Resume Review" })).status).toBe(401)
+        expect((await post({ serviceType: "PM Career Clarity Call" })).status).toBe(401)
         expect(createCashfreeOrder).not.toHaveBeenCalled()
     })
 
@@ -38,6 +38,13 @@ describe("POST /api/payment/cashfree-order", () => {
         expect(res.status).toBe(200)
         expect(createCashfreeOrder.mock.calls[0][0].orderAmount).toBe(1299)
         expect(prisma.mentorshipBooking.create.mock.calls[0][0].data.amount).toBe(1299)
+    })
+
+    it("accepts the old Resume Review name from a page loaded before the rename", async () => {
+        const res = await post({ type: "mentorship", serviceType: "Resume Review" })
+        expect(res.status).toBe(200)
+        expect(createCashfreeOrder.mock.calls[0][0].orderAmount).toBe(499)
+        expect(prisma.mentorshipBooking.create.mock.calls[0][0].data.serviceType).toBe("PM Career Clarity Call")
     })
 
     it.each(["Free Session", "toString", "__proto__", "constructor"])(

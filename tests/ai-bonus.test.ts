@@ -21,7 +21,7 @@ beforeEach(() => {
 
 describe("grantAiAccessBonus", () => {
     it("starts a one-month plan for a user with none", async () => {
-        await grantAiAccessBonus("u1", "a@b.com", "Resume Review")
+        await grantAiAccessBonus("u1", "a@b.com", "PM Career Clarity Call")
         const daysGranted = (grantedEndDate().getTime() - Date.now()) / DAY
         expect(daysGranted).toBeGreaterThan(27)
         expect(daysGranted).toBeLessThan(32)
@@ -30,18 +30,18 @@ describe("grantAiAccessBonus", () => {
     it("extends an active plan from its end date instead of shortening it", async () => {
         const existingEnd = new Date(Date.now() + 60 * DAY)
         prisma.subscription.findUnique.mockResolvedValue({ status: "active", endDate: existingEnd })
-        await grantAiAccessBonus("u1", "a@b.com", "Resume Review")
+        await grantAiAccessBonus("u1", "a@b.com", "PM Career Clarity Call")
         expect(grantedEndDate().getTime()).toBeGreaterThan(existingEnd.getTime() + 27 * DAY)
     })
 
     it("restarts from today when the old plan already expired", async () => {
         prisma.subscription.findUnique.mockResolvedValue({ status: "inactive", endDate: new Date(Date.now() - 90 * DAY) })
-        await grantAiAccessBonus("u1", "a@b.com", "Resume Review")
+        await grantAiAccessBonus("u1", "a@b.com", "PM Career Clarity Call")
         expect((grantedEndDate().getTime() - Date.now()) / DAY).toBeGreaterThan(27)
     })
 
     it("resolves the account by booking user id before the editable contact email", async () => {
-        await grantAiAccessBonus("u1", "typed-by-user@x.com", "Resume Review")
+        await grantAiAccessBonus("u1", "typed-by-user@x.com", "PM Career Clarity Call")
         expect(prisma.user.findUnique).toHaveBeenCalledWith({ where: { id: "u1" } })
     })
 
@@ -52,7 +52,7 @@ describe("grantAiAccessBonus", () => {
 
     it("grants nothing when no account matches", async () => {
         prisma.user.findUnique.mockResolvedValue(null)
-        await grantAiAccessBonus(null, "nobody@x.com", "Resume Review")
+        await grantAiAccessBonus(null, "nobody@x.com", "PM Career Clarity Call")
         expect(prisma.subscription.upsert).not.toHaveBeenCalled()
     })
 })

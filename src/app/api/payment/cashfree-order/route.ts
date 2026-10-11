@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { getUser } from "@/lib/auth"
 import { createCashfreeOrder } from "@/lib/cashfree"
-import { getMentorshipPrice, SUBSCRIPTION_PRICE } from "@/lib/constants"
+import { getMentorshipPrice, resolveMentorshipTitle, SUBSCRIPTION_PRICE } from "@/lib/constants"
 import { logEvent } from "@/lib/analytics"
 
 export async function POST(request: NextRequest) {
@@ -57,7 +57,10 @@ export async function POST(request: NextRequest) {
 
         if (type === 'mentorship') {
             const numericAmount = serviceType ? getMentorshipPrice(serviceType) : null
-            if (numericAmount === null) {
+            // Store the current package name even if an old name was sent, so
+            // admin, emails and analytics all show one name per package.
+            const serviceTitle = serviceType ? resolveMentorshipTitle(serviceType) : null
+            if (numericAmount === null || serviceTitle === null) {
                 return NextResponse.json(
                     { error: "Unknown mentorship service" },
                     { status: 400 }
@@ -73,7 +76,7 @@ export async function POST(request: NextRequest) {
                     name: contactName,
                     email: contactEmail,
                     phone: contactPhone,
-                    serviceType,
+                    serviceType: serviceTitle,
                     paymentProof: orderId,
                     amount: numericAmount,
                     linkedinProfile: linkedinProfile || null,
@@ -95,13 +98,13 @@ export async function POST(request: NextRequest) {
                 orderMeta: {
                     returnUrl: `${origin}/payment/status?order_id={order_id}&type=mentorship`
                 },
-                orderNote: `Mentorship: ${serviceType}`
+                orderNote: `Mentorship: ${serviceTitle}`
             })
 
             // Intent to pay: the order exists at Cashfree and checkout is about to
             // open. Paired with purchase_completed this gives the checkout
             // abandonment rate, which nothing measured before.
-            await logEvent('checkout_started', '/mentorship', user.id, serviceType)
+            await logEvent('checkout_started', '/mentorship', user.id, serviceTitle)
 
             return NextResponse.json({
                 success: true,

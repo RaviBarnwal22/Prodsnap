@@ -52,19 +52,34 @@ export const MAX_URL_CHARS = 500
 export const MENTORSHIP_SERVICES = {
     "PM Career Accelerator": { priceINR: 1299, duration: "3 × 45 min", sessions: 3, aiBonusMonths: 1 },
     "Profile & Resume Booster": { priceINR: 899, duration: "2 × 45 min", sessions: 2, aiBonusMonths: 1 },
-    "Resume Review": { priceINR: 499, duration: "45 min", sessions: 1, aiBonusMonths: 1 },
+    "PM Career Clarity Call": { priceINR: 499, duration: "45 min", sessions: 1, aiBonusMonths: 1 },
 } as const
 
 export type MentorshipServiceTitle = keyof typeof MENTORSHIP_SERVICES
+
+// Old package names that must keep working. The name is the package's ID: it
+// is stored on every booking and sent at checkout, so a renamed package keeps
+// its old name here. Otherwise a booking saved under the old name, or a
+// checkout started on a page loaded before the deploy, would lose its price
+// and its free AI month.
+const LEGACY_SERVICE_TITLES: Record<string, MentorshipServiceTitle> = {
+    "Resume Review": "PM Career Clarity Call", // renamed 2026-10-11
+}
 
 // serviceType arrives from the request body. A plain index would also match
 // names inherited from Object.prototype ("toString", "constructor"), returning
 // a function whose priceINR is undefined, which slipped past the null check in
 // the order route. Only the catalog's own keys count.
+/** The current package name for a current or legacy name, or null if unknown. */
+export function resolveMentorshipTitle(serviceType: string): MentorshipServiceTitle | null {
+    if (Object.hasOwn(MENTORSHIP_SERVICES, serviceType)) return serviceType as MentorshipServiceTitle
+    if (Object.hasOwn(LEGACY_SERVICE_TITLES, serviceType)) return LEGACY_SERVICE_TITLES[serviceType]
+    return null
+}
+
 function lookupService(serviceType: string) {
-    return Object.hasOwn(MENTORSHIP_SERVICES, serviceType)
-        ? MENTORSHIP_SERVICES[serviceType as MentorshipServiceTitle]
-        : null
+    const title = resolveMentorshipTitle(serviceType)
+    return title ? MENTORSHIP_SERVICES[title] : null
 }
 
 export function getMentorshipPrice(serviceType: string): number | null {
