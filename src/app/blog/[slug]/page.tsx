@@ -10,6 +10,11 @@ import { Linkedin } from "lucide-react"
 
 export const revalidate = 3600
 
+// Deliberately no loading.tsx here or in /blog. A skeleton streams the response
+// before the page knows the article is missing, so notFound() would answer
+// 200 (a soft 404) instead of 404. Articles are ISR-cached, so there is
+// little to wait for anyway.
+
 // Empty on purpose: articles render on first visit and are then cached, so a
 // build never depends on the database. Publishing revalidates the page.
 export function generateStaticParams() {

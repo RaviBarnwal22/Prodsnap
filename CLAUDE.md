@@ -272,6 +272,7 @@ Keyword stuffing, doorway pages spun from a template with swapped nouns, schema 
 - **Jobs feature is recoverable, not rebuildable.** The `Job` model is still in the schema and the table exists but holds **0 rows**. The six deleted files (~1,260 lines) are in commit `8cd6977`. Restoring the UI without wiring a data source ships an empty page.
 
 - Confirmation-email deliverability (see **Known broken**) indirectly hurts conversion from organic traffic.
+- **Missing practice cases return 200, not 404** (a soft 404: the not-found page renders with `noindex`, but the status is 200). `src/app/practice/[id]/loading.tsx` streams the response before `notFound()` runs. The blog avoids this by having no `loading.tsx` under `/blog`. Fixing practice means dropping that skeleton or moving the lookup above it.
 
 ## Commands
 
