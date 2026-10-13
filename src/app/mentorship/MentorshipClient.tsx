@@ -1,11 +1,12 @@
 'use client'
 
+import Image from "next/image"
 import { useState, useRef, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { createClient } from '@/lib/supabase/client'
 import { useAuth } from "@/components/AuthContext"
-import { MENTORSHIP_SERVICES, formatPriceINR } from "@/lib/constants"
+import { MENTORSHIP_SERVICES, formatPriceINR, SESSION_FOCUS_OPTIONS, SESSION_FOCUS_PACKAGE, type SessionFocus } from "@/lib/constants"
 import {
     Star,
     GraduationCap,
@@ -45,6 +46,8 @@ export default function MentorshipClient() {
     const { openAuthModal } = useAuth()
 
     const [selectedService, setSelectedService] = useState<any>(null)
+    // What the single session should cover. Chosen on the card, sent with the booking.
+    const [sessionFocus, setSessionFocus] = useState<SessionFocus>("Resume Review")
     const [isPaymentProcessing, setIsPaymentProcessing] = useState(false)
     const [paymentStatus, setPaymentStatus] = useState<'idle' | 'checkout' | 'success'>('idle')
     const [errorMessage, setErrorMessage] = useState('')
@@ -113,10 +116,10 @@ export default function MentorshipClient() {
             "Growth Hacking"
         ],
         accolades: [
-            { icon: <GraduationCap size={20} />, title: "IIM Gold Medalist", description: "Graduated with distinction from a premier B-school" },
+            { icon: <GraduationCap size={20} />, title: "IIM Gold Medalist", description: "MBA from IIM, graduated with a gold medal" },
             { icon: <Award size={20} />, title: "Building ProdSnap", description: "Built India's leading PM interview prep platform" },
             { icon: <Trophy size={20} />, title: "Top Mentor on Unstop", description: "Recognized as a top-rated mentor helping aspiring PMs" },
-            { icon: <Mic size={20} />, title: "Guest Speaker & Panelist", description: "Speaker at ISB (Indian School of Business) Hyderabad & Mohali, IIMs & top tech forums" },
+            { icon: <Mic size={20} />, title: "Guest Speaker & Hackathon Judge", description: "Mentored ISB (Indian School of Business) Hyderabad & Mohali students; speaker at IIMs; judge at Hackering 2.0, RVITM Bengaluru" },
         ],
         testimonials: [
             {
@@ -227,23 +230,23 @@ export default function MentorshipClient() {
                 ]
             },
             {
-                title: "PM Career Clarity Call",
-                duration: MENTORSHIP_SERVICES["PM Career Clarity Call"].duration,
-                price: formatPriceINR(MENTORSHIP_SERVICES["PM Career Clarity Call"].priceINR),
-                description: "One focused 45-minute call. Bring your resume, your PM career questions or your plans, and leave with clear next steps.",
+                title: SESSION_FOCUS_PACKAGE,
+                duration: MENTORSHIP_SERVICES[SESSION_FOCUS_PACKAGE].duration,
+                price: formatPriceINR(MENTORSHIP_SERVICES[SESSION_FOCUS_PACKAGE].priceINR),
+                description: "One focused 45-minute call with Ravi. Choose what you need most and leave with clear next steps.",
                 features: [
-                    "Resume review — what to fix for PM shortlists",
-                    "PM career guidance — your questions, answered",
-                    "Career roadmap — next steps mapped to your profile",
-                    "Pick your focus for the session",
                     "1 month Prodsnap AI case practice — free"
-                ]
+                ],
+                hasFocusOptions: true
             },
         ]
     }
 
     const handleBookNow = (service: any) => {
-        setSelectedService(service)
+        // The single session carries the chosen focus into the booking form,
+        // so the buyer sees exactly what they are paying for.
+        const focus = service.hasFocusOptions ? sessionFocus : null
+        setSelectedService(focus ? { ...service, focus, displayTitle: `${service.title} · ${focus}` } : service)
         setPaymentStatus('idle')
         // Reset form
         setFullName('')
@@ -311,6 +314,7 @@ export default function MentorshipClient() {
                     email,
                     phone,
                     serviceType: selectedService.title,
+                    sessionFocus: selectedService.focus ?? undefined,
                     linkedinProfile: linkedin,
                     messageToMentor: message
                 })
@@ -399,7 +403,7 @@ export default function MentorshipClient() {
                                     </div>
                                     <h4 className="text-2xl font-black mb-1 text-gray-900 dark:text-white">Booking Confirmed!</h4>
                                     <p className="text-gray-600 dark:text-gray-400 text-sm mb-6">
-                                        Thank you <strong className="text-gray-900 dark:text-white">{fullName}</strong>! Your 1:1 session for <strong className="text-violet-600 dark:text-violet-400">{selectedService.title}</strong> has been booked.
+                                        Thank you <strong className="text-gray-900 dark:text-white">{fullName}</strong>! Your 1:1 session for <strong className="text-violet-600 dark:text-violet-400">{selectedService.displayTitle ?? selectedService.title}</strong> has been booked.
                                     </p>
 
                                     <div className="bg-gray-50 dark:bg-gray-900/50 border border-gray-100 dark:border-gray-800 rounded-2xl p-4 mb-5 text-left space-y-2 text-xs">
@@ -453,7 +457,7 @@ export default function MentorshipClient() {
                                         <div className="flex justify-between items-start mb-2">
                                             <div>
                                                 <span className="text-[11px] font-bold uppercase tracking-wider text-violet-600 dark:text-violet-400">Selected Service</span>
-                                                <h4 className="font-bold text-lg text-gray-900 dark:text-white">{selectedService.title}</h4>
+                                                <h4 className="font-bold text-lg text-gray-900 dark:text-white">{selectedService.displayTitle ?? selectedService.title}</h4>
                                             </div>
                                             <div className="text-right">
                                                 <span className="text-[11px] font-medium text-gray-500 block">Total Payable</span>
@@ -545,7 +549,7 @@ export default function MentorshipClient() {
                                     <div className="bg-violet-50 dark:bg-violet-900/20 px-4 py-3 rounded-xl mb-4">
                                         <div className="flex justify-between items-center gap-3">
                                             <div className="min-w-0">
-                                                <h4 className="font-bold text-base text-violet-900 dark:text-violet-100 truncate">{selectedService.title}</h4>
+                                                <h4 className="font-bold text-base text-violet-900 dark:text-violet-100 truncate">{selectedService.displayTitle ?? selectedService.title}</h4>
                                                 <span className="flex items-center gap-1.5 text-xs text-gray-600 dark:text-gray-400">
                                                     <Clock size={12} />
                                                     {selectedService.duration} Session
@@ -801,6 +805,36 @@ export default function MentorshipClient() {
 
                                     <p className="text-gray-600 dark:text-gray-300 text-sm mb-6 leading-relaxed">{service.description}</p>
 
+                                    {'hasFocusOptions' in service && service.hasFocusOptions && (
+                                        <fieldset className="mb-5">
+                                            <legend className="text-xs font-black uppercase tracking-widest text-gray-500 dark:text-gray-400 mb-3">Choose your session</legend>
+                                            <div className="space-y-2">
+                                                {(Object.entries(SESSION_FOCUS_OPTIONS) as [SessionFocus, string][]).map(([focus, blurb]) => (
+                                                    <label
+                                                        key={focus}
+                                                        className={`flex items-start gap-3 p-3 rounded-xl border-2 cursor-pointer transition-all ${sessionFocus === focus
+                                                            ? 'border-violet-500 bg-violet-50 dark:bg-violet-900/20'
+                                                            : 'border-gray-200 dark:border-gray-700 hover:border-violet-300'
+                                                            }`}
+                                                    >
+                                                        <input
+                                                            type="radio"
+                                                            name="session-focus"
+                                                            value={focus}
+                                                            checked={sessionFocus === focus}
+                                                            onChange={() => setSessionFocus(focus)}
+                                                            className="mt-1 accent-violet-600"
+                                                        />
+                                                        <span>
+                                                            <span className="block text-sm font-bold text-gray-900 dark:text-white">{focus}</span>
+                                                            <span className="block text-xs text-gray-500 dark:text-gray-400">{blurb}</span>
+                                                        </span>
+                                                    </label>
+                                                ))}
+                                            </div>
+                                        </fieldset>
+                                    )}
+
                                     <ul className="space-y-3 mb-8">
                                         {service.features.map((feature, j) => (
                                             <li key={j} className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
@@ -818,7 +852,9 @@ export default function MentorshipClient() {
                                             }`}
                                     >
                                         <Calendar size={18} />
-                                        {userId ? 'Book Now' : 'Sign In to Book'}
+                                        {userId
+                                            ? ('hasFocusOptions' in service && service.hasFocusOptions ? `Book ${sessionFocus}` : 'Book Now')
+                                            : 'Sign In to Book'}
                                     </button>
                                 </div>
                         ))}
@@ -838,7 +874,7 @@ export default function MentorshipClient() {
                             Mentorship in Action
                         </h2>
                         <p className="text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
-                            Guiding students at premier B-schools like ISB (Indian School of Business) & IIMs into high-growth Product Management careers.
+                            Guiding students from premier B-schools like ISB (Indian School of Business) & IIMs into high-growth Product Management careers.
                         </p>
                     </div>
 
@@ -847,7 +883,7 @@ export default function MentorshipClient() {
                         <div className="lg:col-span-2 group relative overflow-hidden rounded-3xl h-[380px] shadow-lg border border-gray-100 dark:border-gray-800">
                             <img
                                 src="/isb-panel-discussion.jpg"
-                                alt="Panel Discussion for ISB (Indian School of Business) Hyderabad & Mohali Students"
+                                alt="Panel discussion on product management with ISB (Indian School of Business) Hyderabad and Mohali students"
                                 className="w-full h-full object-cover object-center transition-transform duration-700 group-hover:scale-105"
                             />
                             <div className="absolute top-4 left-4 z-10">
@@ -861,7 +897,7 @@ export default function MentorshipClient() {
                                     Panel Discussion on Product Management
                                 </h3>
                                 <p className="text-gray-200 text-sm leading-relaxed max-w-xl">
-                                    Sharing product strategy frameworks, career roadmaps, and real-world PM execution insights for ISB (Indian School of Business) Hyderabad & Mohali students.
+                                    Sharing product strategy frameworks, career roadmaps, and real-world PM execution insights with ISB (Indian School of Business) Hyderabad & Mohali students.
                                 </p>
                             </div>
                         </div>
@@ -870,7 +906,7 @@ export default function MentorshipClient() {
                         <div className="group relative overflow-hidden rounded-3xl h-[380px] shadow-lg border border-gray-100 dark:border-gray-800">
                             <img
                                 src="/isb-students-session.jpg"
-                                alt="Interactive Session with ISB (Indian School of Business) Students"
+                                alt="Ravi answering questions from ISB (Indian School of Business) students on product management careers"
                                 className="w-full h-full object-cover object-center transition-transform duration-700 group-hover:scale-105"
                             />
                             <div className="absolute top-4 left-4 z-10">
@@ -880,10 +916,10 @@ export default function MentorshipClient() {
                             </div>
                             <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent transition-opacity duration-300 flex flex-col justify-end p-6">
                                 <h3 className="text-white font-bold text-lg mb-1 group-hover:text-violet-200 transition-colors">
-                                    Interactive Session with ISB (Indian School of Business) PM Students
+                                    Q&A with ISB (Indian School of Business) PM Students
                                 </h3>
                                 <p className="text-gray-300 text-xs md:text-sm leading-relaxed">
-                                    Engaging Q&A masterclass with aspiring product leaders.
+                                    Open questions on breaking into product management, answered.
                                 </p>
                             </div>
                         </div>
@@ -901,7 +937,7 @@ export default function MentorshipClient() {
                                 </span>
                             </div>
                             <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent transition-opacity duration-300 flex flex-col justify-end p-6">
-                                <p className="text-white font-bold text-base">Interactive Product Management session for IBM interns</p>
+                                <p className="text-white font-bold text-base">Teaching product management to IBM interns</p>
                             </div>
                         </div>
 
@@ -918,7 +954,138 @@ export default function MentorshipClient() {
                                 </span>
                             </div>
                             <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent transition-opacity duration-300 flex flex-col justify-end p-6 md:p-8">
-                                <p className="text-white font-bold text-lg">Interactive career session & masterclass at IIM Bodh Gaya</p>
+                                <p className="text-white font-bold text-lg">Career strategy masterclass at IIM Bodh Gaya</p>
+                            </div>
+                        </div>
+
+                        {/* Highlight 5: IIM Bodh Gaya MBA course, Agile / DevOps / AI product development */}
+                        <div className="lg:col-span-2 group relative overflow-hidden rounded-3xl h-[340px] shadow-lg border border-gray-100 dark:border-gray-800">
+                            <Image
+                                src="/iim-bodh-gaya-agile-devops-session.jpg"
+                                alt="IIM Bodh Gaya MBA students following a live session on Agile, DevOps and software project management, shown on the lecture hall screens"
+                                fill
+                                sizes="(max-width: 1024px) 100vw, 66vw"
+                                className="object-cover object-center transition-transform duration-700 group-hover:scale-105"
+                            />
+                            <div className="absolute top-4 left-4 z-10">
+                                <span className="bg-violet-600/90 backdrop-blur-md text-white text-xs px-3.5 py-1.5 rounded-full font-bold shadow-md flex items-center gap-1.5">
+                                    <Sparkles size={12} />
+                                    IIM Bodh Gaya · MBA Course
+                                </span>
+                            </div>
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent flex flex-col justify-end p-6 md:p-8">
+                                <h3 className="text-white font-black text-xl md:text-2xl mb-1.5 group-hover:text-violet-200 transition-colors">
+                                    Live Course: Agile, DevOps & Software Project Management
+                                </h3>
+                                <p className="text-gray-200 text-sm leading-relaxed max-w-xl">
+                                    Teaching MBA students how modern software teams plan, build and ship, through to AI product development.
+                                </p>
+                            </div>
+                        </div>
+
+                        {/* Highlight 6: IIM Bodh Gaya MBA cohort */}
+                        <div className="group relative overflow-hidden rounded-3xl h-[340px] shadow-lg border border-gray-100 dark:border-gray-800">
+                            <Image
+                                src="/iim-bodh-gaya-mba-cohort.jpg"
+                                alt="A full lecture hall of IIM Bodh Gaya MBA students with laptops during the AI product development course"
+                                fill
+                                sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                                className="object-cover object-center transition-transform duration-700 group-hover:scale-105"
+                            />
+                            <div className="absolute top-4 left-4 z-10">
+                                <span className="bg-black/60 backdrop-blur-md text-white text-xs px-3 py-1 rounded-full font-bold">
+                                    IIM Bodh Gaya
+                                </span>
+                            </div>
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex flex-col justify-end p-6">
+                                <p className="text-white font-bold text-lg">A full MBA cohort learning AI product development</p>
+                            </div>
+                        </div>
+
+                        {/* Highlight 7: Hackering 2.0 judging (RVITM Bengaluru) */}
+                        <div className="lg:col-span-2 group relative overflow-hidden rounded-3xl h-[340px] shadow-lg border border-gray-100 dark:border-gray-800">
+                            <Image
+                                src="/rvitm-hackathon-judging.jpg"
+                                alt="Ravi Barnwal discussing a team’s AI product with students while judging the Hackering 2.0 hackathon at RVITM Bengaluru"
+                                fill
+                                sizes="(max-width: 1024px) 100vw, 66vw"
+                                className="object-cover object-center transition-transform duration-700 group-hover:scale-105"
+                            />
+                            <div className="absolute top-4 left-4 z-10">
+                                <span className="bg-violet-600/90 backdrop-blur-md text-white text-xs px-3.5 py-1.5 rounded-full font-bold shadow-md flex items-center gap-1.5">
+                                    <Sparkles size={12} />
+                                    Hackathon Judge · RVITM Bengaluru
+                                </span>
+                            </div>
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent flex flex-col justify-end p-6 md:p-8">
+                                <h3 className="text-white font-black text-xl md:text-2xl mb-1.5 group-hover:text-violet-200 transition-colors">
+                                    Judging Hackering 2.0
+                                </h3>
+                                <p className="text-gray-200 text-sm leading-relaxed max-w-xl">
+                                    70+ teams from across India, 36 hours of building. Ravi judged their AI-powered solutions on problem-solving, user value and product thinking.
+                                </p>
+                            </div>
+                        </div>
+
+                        {/* Highlight 8: Certificate of appreciation */}
+                        <div className="group relative overflow-hidden rounded-3xl h-[340px] shadow-lg border border-gray-100 dark:border-gray-800">
+                            <Image
+                                src="/rvitm-hackathon-certificate.jpg"
+                                alt="Ravi Barnwal receiving a certificate of appreciation on stage at Hackering 2.0, RV Institute of Technology and Management"
+                                fill
+                                sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                                className="object-cover object-[center_30%] transition-transform duration-700 group-hover:scale-105"
+                            />
+                            <div className="absolute top-4 left-4 z-10">
+                                <span className="bg-black/60 backdrop-blur-md text-white text-xs px-3 py-1 rounded-full font-bold">
+                                    Hackering 2.0
+                                </span>
+                            </div>
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent flex flex-col justify-end p-6">
+                                <p className="text-white font-bold text-lg">Honoured by RVITM for judging Hackering 2.0</p>
+                            </div>
+                        </div>
+
+                        {/* Highlight 9: Hackathon audience */}
+                        <div className="group relative overflow-hidden rounded-3xl h-[340px] shadow-lg border border-gray-100 dark:border-gray-800">
+                            <Image
+                                src="/rvitm-hackathon-audience.jpg"
+                                alt="A packed auditorium of student builders at the Hackering 2.0 hackathon, RV Institute of Technology and Management, Bengaluru"
+                                fill
+                                sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                                className="object-cover object-center transition-transform duration-700 group-hover:scale-105"
+                            />
+                            <div className="absolute top-4 left-4 z-10">
+                                <span className="bg-black/60 backdrop-blur-md text-white text-xs px-3 py-1 rounded-full font-bold">
+                                    RVITM Bengaluru
+                                </span>
+                            </div>
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent flex flex-col justify-end p-6">
+                                <p className="text-white font-bold text-lg">A packed auditorium of student builders</p>
+                            </div>
+                        </div>
+
+                        {/* Highlight 10: Hackathon winners */}
+                        <div className="lg:col-span-2 group relative overflow-hidden rounded-3xl h-[340px] shadow-lg border border-gray-100 dark:border-gray-800">
+                            <Image
+                                src="/rvitm-hackathon-winners.jpg"
+                                alt="Hackering 2.0 AI track winners on stage with the judges and RVITM faculty"
+                                fill
+                                sizes="(max-width: 1024px) 100vw, 66vw"
+                                className="object-cover object-center transition-transform duration-700 group-hover:scale-105"
+                            />
+                            <div className="absolute top-4 left-4 z-10">
+                                <span className="bg-black/60 backdrop-blur-md text-white text-xs px-3 py-1 rounded-full font-bold">
+                                    Hackering 2.0 · AI Track
+                                </span>
+                            </div>
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent flex flex-col justify-end p-6 md:p-8">
+                                <h3 className="text-white font-black text-xl md:text-2xl mb-1.5 group-hover:text-violet-200 transition-colors">
+                                    Celebrating the AI track winners
+                                </h3>
+                                <p className="text-gray-200 text-sm leading-relaxed max-w-xl">
+                                    Teams that turned out-of-the-box ideas into working AI products, on stage with the judging panel and RVITM faculty.
+                                </p>
                             </div>
                         </div>
                     </div>
@@ -940,7 +1107,7 @@ export default function MentorshipClient() {
                                 Think Like a Product Manager, Build Products That Win
                             </h2>
                             <p className="text-gray-600 dark:text-gray-400 leading-relaxed text-sm md:text-base">
-                                A highlight from Ravi's interactive Product Management Workshop at **IIM Bodh Gaya** (DigiBiz). Ravi teaches practical frameworks, core product sense methodologies, and real-world case simulations to help aspiring leaders crack top-tier product roles.
+                                A highlight from Ravi's hands-on Product Management Workshop at <strong className="text-gray-900 dark:text-white">IIM Bodh Gaya</strong> (DigiBiz). Ravi teaches practical frameworks, core product sense methodologies, and real-world case simulations to help aspiring leaders crack top-tier product roles.
                             </p>
                             <div className="flex flex-wrap gap-3">
                                 <div className="px-4 py-2 bg-slate-50 dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 text-xs font-bold text-gray-500 dark:text-gray-400">

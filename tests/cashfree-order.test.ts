@@ -29,7 +29,7 @@ beforeEach(() => {
 describe("POST /api/payment/cashfree-order", () => {
     it("requires sign-in", async () => {
         getUser.mockResolvedValue(null)
-        expect((await post({ serviceType: "PM Career Clarity Call" })).status).toBe(401)
+        expect((await post({ serviceType: "1:1 PM Career Session" })).status).toBe(401)
         expect(createCashfreeOrder).not.toHaveBeenCalled()
     })
 
@@ -44,7 +44,31 @@ describe("POST /api/payment/cashfree-order", () => {
         const res = await post({ type: "mentorship", serviceType: "Resume Review" })
         expect(res.status).toBe(200)
         expect(createCashfreeOrder.mock.calls[0][0].orderAmount).toBe(499)
-        expect(prisma.mentorshipBooking.create.mock.calls[0][0].data.serviceType).toBe("PM Career Clarity Call")
+        expect(prisma.mentorshipBooking.create.mock.calls[0][0].data.serviceType).toBe("1:1 PM Career Session")
+    })
+
+    it("saves the chosen focus with a single-session booking", async () => {
+        const res = await post({ type: "mentorship", serviceType: "1:1 PM Career Session", sessionFocus: "Career Roadmap" })
+        expect(res.status).toBe(200)
+        expect(createCashfreeOrder.mock.calls[0][0].orderAmount).toBe(499)
+        expect(prisma.mentorshipBooking.create.mock.calls[0][0].data.serviceType).toBe("1:1 PM Career Session · Career Roadmap")
+    })
+
+    it("rejects a focus that is not one of the options", async () => {
+        const res = await post({ type: "mentorship", serviceType: "1:1 PM Career Session", sessionFocus: "<script>" })
+        expect(res.status).toBe(400)
+        expect(prisma.mentorshipBooking.create).not.toHaveBeenCalled()
+        expect(createCashfreeOrder).not.toHaveBeenCalled()
+    })
+
+    it("ignores a focus sent for a package without options", async () => {
+        await post({ type: "mentorship", serviceType: "PM Career Accelerator", sessionFocus: "Resume Review" })
+        expect(prisma.mentorshipBooking.create.mock.calls[0][0].data.serviceType).toBe("PM Career Accelerator")
+    })
+
+    it("never stores a client-built label as-is", async () => {
+        await post({ type: "mentorship", serviceType: "1:1 PM Career Session · Resume Review" })
+        expect(prisma.mentorshipBooking.create.mock.calls[0][0].data.serviceType).toBe("1:1 PM Career Session")
     })
 
     it.each(["Free Session", "toString", "__proto__", "constructor"])(

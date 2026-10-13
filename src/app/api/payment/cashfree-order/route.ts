@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { getUser } from "@/lib/auth"
 import { createCashfreeOrder } from "@/lib/cashfree"
-import { getMentorshipPrice, resolveMentorshipTitle, SUBSCRIPTION_PRICE } from "@/lib/constants"
+import { getMentorshipPrice, resolveMentorshipTitle, bookingServiceLabel, isSessionFocus, SESSION_FOCUS_PACKAGE, MAX_MESSAGE_CHARS, MAX_URL_CHARS, SUBSCRIPTION_PRICE } from "@/lib/constants"
 import { logEvent } from "@/lib/analytics"
 
 export async function POST(request: NextRequest) {
@@ -25,6 +25,7 @@ export async function POST(request: NextRequest) {
             email,
             phone,
             serviceType,
+            sessionFocus,
             linkedinProfile,
             messageToMentor,
             planType = 'monthly'
@@ -66,6 +67,16 @@ export async function POST(request: NextRequest) {
                     { status: 400 }
                 )
             }
+            // Only the single session takes a focus, and only a listed one. A page
+            // loaded before this option existed sends none, which is allowed.
+            let focus = null
+            if (serviceTitle === SESSION_FOCUS_PACKAGE && sessionFocus != null && sessionFocus !== "") {
+                if (!isSessionFocus(sessionFocus)) {
+                    return NextResponse.json({ error: "Please choose what your session should cover." }, { status: 400 })
+                }
+                focus = sessionFocus
+            }
+            const bookedAs = bookingServiceLabel(serviceTitle, focus)
             // Cashfree order ID must be alphanumeric and underscore, max 45 chars
             const orderId = `mentor_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`
 
@@ -76,11 +87,11 @@ export async function POST(request: NextRequest) {
                     name: contactName,
                     email: contactEmail,
                     phone: contactPhone,
-                    serviceType: serviceTitle,
+                    serviceType: bookedAs,
                     paymentProof: orderId,
                     amount: numericAmount,
-                    linkedinProfile: linkedinProfile || null,
-                    messageToMentor: messageToMentor || null,
+                    linkedinProfile: linkedinProfile ? String(linkedinProfile).slice(0, MAX_URL_CHARS) : null,
+                    messageToMentor: messageToMentor ? String(messageToMentor).slice(0, MAX_MESSAGE_CHARS) : null,
                     status: "pending"
                 }
             })
@@ -98,13 +109,13 @@ export async function POST(request: NextRequest) {
                 orderMeta: {
                     returnUrl: `${origin}/payment/status?order_id={order_id}&type=mentorship`
                 },
-                orderNote: `Mentorship: ${serviceTitle}`
+                orderNote: `Mentorship: ${bookedAs}`
             })
 
             // Intent to pay: the order exists at Cashfree and checkout is about to
             // open. Paired with purchase_completed this gives the checkout
             // abandonment rate, which nothing measured before.
-            await logEvent('checkout_started', '/mentorship', user.id, serviceTitle)
+            await logEvent('checkout_started', '/mentorship', user.id, bookedAs)
 
             return NextResponse.json({
                 success: true,

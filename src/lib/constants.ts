@@ -52,7 +52,7 @@ export const MAX_URL_CHARS = 500
 export const MENTORSHIP_SERVICES = {
     "PM Career Accelerator": { priceINR: 1299, duration: "3 × 45 min", sessions: 3, aiBonusMonths: 1 },
     "Profile & Resume Booster": { priceINR: 899, duration: "2 × 45 min", sessions: 2, aiBonusMonths: 1 },
-    "PM Career Clarity Call": { priceINR: 499, duration: "45 min", sessions: 1, aiBonusMonths: 1 },
+    "1:1 PM Career Session": { priceINR: 499, duration: "45 min", sessions: 1, aiBonusMonths: 1 },
 } as const
 
 export type MentorshipServiceTitle = keyof typeof MENTORSHIP_SERVICES
@@ -63,7 +63,31 @@ export type MentorshipServiceTitle = keyof typeof MENTORSHIP_SERVICES
 // checkout started on a page loaded before the deploy, would lose its price
 // and its free AI month.
 const LEGACY_SERVICE_TITLES: Record<string, MentorshipServiceTitle> = {
-    "Resume Review": "PM Career Clarity Call", // renamed 2026-10-11
+    "Resume Review": "1:1 PM Career Session", // renamed 2026-10-11
+}
+
+// The single session lets the buyer choose what it covers. Same price either
+// way. The choice is saved on the booking as "<package> · <focus>", built by
+// the server from these keys, so it shows in admin, emails and Cashfree.
+export const SESSION_FOCUS_PACKAGE: MentorshipServiceTitle = "1:1 PM Career Session"
+
+export const SESSION_FOCUS_OPTIONS = {
+    "Resume Review": "Line-by-line fixes for PM shortlists",
+    "PM Career Guidance": "Get answers to your PM career questions",
+    "Career Roadmap": "Next steps mapped to your profile",
+} as const
+
+export type SessionFocus = keyof typeof SESSION_FOCUS_OPTIONS
+
+export function isSessionFocus(value: unknown): value is SessionFocus {
+    return typeof value === "string" && Object.hasOwn(SESSION_FOCUS_OPTIONS, value)
+}
+
+const FOCUS_SEPARATOR = " · "
+
+/** What a booking stores as its serviceType: the package, plus the focus if one was chosen. */
+export function bookingServiceLabel(title: MentorshipServiceTitle, focus: SessionFocus | null): string {
+    return focus ? `${title}${FOCUS_SEPARATOR}${focus}` : title
 }
 
 // serviceType arrives from the request body. A plain index would also match
@@ -74,6 +98,14 @@ const LEGACY_SERVICE_TITLES: Record<string, MentorshipServiceTitle> = {
 export function resolveMentorshipTitle(serviceType: string): MentorshipServiceTitle | null {
     if (Object.hasOwn(MENTORSHIP_SERVICES, serviceType)) return serviceType as MentorshipServiceTitle
     if (Object.hasOwn(LEGACY_SERVICE_TITLES, serviceType)) return LEGACY_SERVICE_TITLES[serviceType]
+    // A stored booking label: "<package> · <focus>". Only the focus package
+    // takes a focus, and only one of the listed options.
+    const at = serviceType.lastIndexOf(FOCUS_SEPARATOR)
+    if (at > 0) {
+        const base = serviceType.slice(0, at)
+        const focus = serviceType.slice(at + FOCUS_SEPARATOR.length)
+        if (base === SESSION_FOCUS_PACKAGE && isSessionFocus(focus)) return SESSION_FOCUS_PACKAGE
+    }
     return null
 }
 

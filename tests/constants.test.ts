@@ -1,11 +1,11 @@
 import { describe, it, expect } from "vitest"
-import { getMentorshipPrice, getMentorshipAiBonusMonths, MENTORSHIP_SERVICES } from "@/lib/constants"
+import { getMentorshipPrice, getMentorshipAiBonusMonths, MENTORSHIP_SERVICES, SESSION_FOCUS_OPTIONS, bookingServiceLabel, resolveMentorshipTitle } from "@/lib/constants"
 
 describe("getMentorshipPrice", () => {
     it("returns the catalog price for every package", () => {
         expect(getMentorshipPrice("PM Career Accelerator")).toBe(1299)
         expect(getMentorshipPrice("Profile & Resume Booster")).toBe(899)
-        expect(getMentorshipPrice("PM Career Clarity Call")).toBe(499)
+        expect(getMentorshipPrice("1:1 PM Career Session")).toBe(499)
     })
 
     // Renamed from "Resume Review" on 2026-10-11. Bookings saved under the old
@@ -36,6 +36,32 @@ describe("getMentorshipPrice", () => {
             expect(Number.isInteger(price)).toBe(true)
             expect(price!).toBeGreaterThan(0)
         }
+    })
+})
+
+// The single-session package lets the buyer pick a focus. The booking stores
+// "<package> · <focus>", which must still resolve for the free AI month.
+describe("session focus options", () => {
+    it("offers exactly the three options", () => {
+        expect(Object.keys(SESSION_FOCUS_OPTIONS)).toEqual(["Resume Review", "PM Career Guidance", "Career Roadmap"])
+    })
+
+    it("labels a booking with its focus", () => {
+        expect(bookingServiceLabel("1:1 PM Career Session", "Career Roadmap")).toBe("1:1 PM Career Session · Career Roadmap")
+        expect(bookingServiceLabel("1:1 PM Career Session", null)).toBe("1:1 PM Career Session")
+    })
+
+    it.each(Object.keys(SESSION_FOCUS_OPTIONS))("resolves a stored booking label with focus %s", (focus) => {
+        const label = `1:1 PM Career Session · ${focus}`
+        expect(resolveMentorshipTitle(label)).toBe("1:1 PM Career Session")
+        expect(getMentorshipPrice(label)).toBe(499)
+        expect(getMentorshipAiBonusMonths(label)).toBe(1)
+    })
+
+    it("rejects an unknown focus or a focus on a package that has none", () => {
+        expect(resolveMentorshipTitle("1:1 PM Career Session · Hacking")).toBeNull()
+        expect(resolveMentorshipTitle("PM Career Accelerator · Resume Review")).toBeNull()
+        expect(resolveMentorshipTitle("1:1 PM Career Session · toString")).toBeNull()
     })
 })
 
