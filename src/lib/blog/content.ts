@@ -1,62 +1,72 @@
-import DOMPurify from "isomorphic-dompurify"
+import { FilterXSS, friendlyAttrValue, escapeAttrValue } from "xss"
 import { isBlogCtaType, type BlogCtaType } from "./cta"
+
+// Article HTML is cleaned with js-xss, a pure-JavaScript allow-list filter.
+// It used to be isomorphic-dompurify, which needs jsdom on the server, and
+// jsdom failed to load on Vercel (ERR_REQUIRE_ESM inside its dependencies),
+// crashing every article page and the admin save. js-xss has no DOM and no
+// Node version requirement. Keep the server free of jsdom.
 
 // Everything the editor can produce, and nothing else. Anything outside this
 // list (script, iframe, style, event handlers, inline styles) is stripped.
-const ALLOWED_TAGS = [
-    "p", "br", "hr", "h2", "h3", "strong", "b", "em", "i", "u", "s",
-    "a", "ul", "ol", "li", "blockquote", "code", "pre", "img", "div",
-]
-const ALLOWED_ATTR = ["href", "src", "alt", "title", "data-cta"]
+const WHITE_LIST: Record<string, string[]> = {
+    p: [], br: [], hr: [], h2: [], h3: [], strong: [], b: [], em: [], i: [], u: [], s: [],
+    ul: [], ol: [], li: [], blockquote: [], code: [], pre: [],
+    a: ["href", "title", "target", "rel"],
+    img: ["src", "alt", "title"],
+    div: ["data-cta"],
+}
 
-let hooksInstalled = false
+// Tags whose CONTENT is dropped too, not just the tag, so script text, CSS
+// and embedded markup never leak into the article as visible text.
+const DROP_WITH_CONTENT = ["script", "style", "iframe", "object", "embed", "noscript", "template", "svg", "math", "textarea", "select", "head", "title"]
 
-function installHooks() {
-    if (hooksInstalled) return
-    hooksInstalled = true
+const isInternal = (href: string) => /^https?:\/\/(www\.)?prodsnap\.in(\/|$)/i.test(href)
 
-    DOMPurify.addHook("afterSanitizeAttributes", (node) => {
-        const el = node as Element
-        const tag = el.tagName?.toLowerCase()
+const filter = new FilterXSS({
+    whiteList: WHITE_LIST,
+    stripIgnoreTag: true,
+    stripIgnoreTagBody: DROP_WITH_CONTENT,
+    allowCommentTag: false,
+    css: false,
+    onTagAttr(tag, name, value) {
+        // friendlyAttrValue decodes entities and strips control characters, so
+        // tricks like "java&#115;cript:" are seen for what they are.
+        const v = friendlyAttrValue(value).trim()
 
         if (tag === "a") {
-            const href = el.getAttribute("href") ?? ""
-            if (!/^(https?:|mailto:|\/(?!\/)|#)/i.test(href)) {
-                el.removeAttribute("href")
-            } else if (/^https?:/i.test(href) && !/^https?:\/\/(www\.)?prodsnap\.in(\/|$)/i.test(href)) {
+            if (name === "target" || name === "rel") return "" // derived from href below
+            if (name === "href") {
+                if (!/^(https?:|mailto:|\/(?!\/)|#)/i.test(v)) return ""
+                const safe = `href="${escapeAttrValue(v)}"`
                 // External links open in a new tab and pass no ranking credit.
-                el.setAttribute("target", "_blank")
-                el.setAttribute("rel", "noopener noreferrer nofollow")
+                return /^https?:/i.test(v) && !isInternal(v)
+                    ? `${safe} target="_blank" rel="noopener noreferrer nofollow"`
+                    : safe
             }
         }
 
-        if (tag === "img") {
-            const src = el.getAttribute("src") ?? ""
-            if (!/^https:\/\//i.test(src)) el.removeAttribute("src")
-            el.setAttribute("loading", "lazy")
-            el.setAttribute("decoding", "async")
+        if (tag === "img" && name === "src") {
+            return /^https:\/\//i.test(v)
+                ? `src="${escapeAttrValue(v)}" loading="lazy" decoding="async"`
+                : ""
         }
 
-        if (tag === "div") {
-            // A div only survives as a known CTA marker, and it carries nothing else.
-            const cta = el.getAttribute("data-cta")
-            if (!isBlogCtaType(cta)) {
-                el.removeAttribute("data-cta")
-            } else {
-                el.textContent = ""
-            }
+        if (tag === "div" && name === "data-cta") {
+            // A div only survives as a known CTA marker.
+            return isBlogCtaType(v) ? `data-cta="${v}"` : ""
         }
-    })
-}
+
+        return undefined // default handling for the remaining allowed attributes
+    },
+})
 
 /** Clean editor HTML so it is safe to store and to render. */
 export function sanitizeBlogHtml(html: string): string {
-    installHooks()
-    return DOMPurify.sanitize(String(html ?? ""), {
-        ALLOWED_TAGS,
-        ALLOWED_ATTR: [...ALLOWED_ATTR, "target", "rel", "loading", "decoding"],
-        ALLOW_DATA_ATTR: false,
-    })
+    const cleaned = filter.process(String(html ?? ""))
+    // A CTA marker must be empty. One with content is treated as a plain div,
+    // so text inside it is shown rather than silently replaced by a card.
+    return cleaned.replace(/<div data-cta="([a-z]+)">(?!<\/div>)/g, "<div>")
 }
 
 export type BlogSegment = { kind: "html"; html: string } | { kind: "cta"; cta: BlogCtaType }

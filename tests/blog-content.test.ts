@@ -33,10 +33,32 @@ describe("sanitizeBlogHtml", () => {
         expect(sanitizeBlogHtml('<img src="https://a.com/x.png" alt="a">')).toContain('loading="lazy"')
     })
 
-    it("keeps known CTA markers empty and drops unknown ones", () => {
-        expect(sanitizeBlogHtml('<div data-cta="mentorship">junk<b>x</b></div>')).toBe('<div data-cta="mentorship"></div>')
+    it("keeps empty CTA markers, demotes a marker with content, and drops unknown ones", () => {
+        expect(sanitizeBlogHtml('<div data-cta="mentorship"></div>')).toBe('<div data-cta="mentorship"></div>')
+        expect(sanitizeBlogHtml('<div data-cta="mentorship">junk<b>x</b></div>')).toBe('<div>junk<b>x</b></div>')
         expect(sanitizeBlogHtml('<div data-cta="toString"></div>')).toBe("<div></div>")
         expect(sanitizeBlogHtml('<div data-cta="evil" data-x="1"></div>')).toBe("<div></div>")
+    })
+})
+
+describe("sanitizeBlogHtml: bypass attempts", () => {
+    it.each([
+        ['<a href="java&#115;cript:alert(1)">x</a>', "entity-encoded javascript: link"],
+        ['<a href="JaVaScRiPt:alert(1)">x</a>', "mixed-case javascript: link"],
+        ['<a href=" javascript:alert(1)">x</a>', "javascript: link with leading space"],
+        ['<a href="//evil.com">x</a>', "protocol-relative link"],
+        ['<img src="x" onerror="alert(1)">', "image with error handler"],
+        ['<svg onload="alert(1)"><circle/></svg>', "svg with onload"],
+        ['<p style="background:url(javascript:alert(1))">a</p>', "inline style"],
+        ['<div data-x="1" class="evil" id="evil">a</div>', "unknown attributes"],
+        ['<!-- <script>alert(1)</script> -->', "comment hiding a script"],
+    ])("neutralises %s (%s)", (input) => {
+        const out = sanitizeBlogHtml(input)
+        expect(out).not.toMatch(/javascript|onerror|onload|<svg|style=|data-x|class=|id=|<script|evil\.com/i)
+    })
+
+    it("drops the content of script and style tags, not just the tags", () => {
+        expect(sanitizeBlogHtml("<p>a</p><style>p{color:red}</style><script>steal()</script>")).toBe("<p>a</p>")
     })
 })
 

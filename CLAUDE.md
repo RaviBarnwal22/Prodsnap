@@ -88,6 +88,7 @@ Not yet fixed — treat as known risk: **there is no rate limiting anywhere**, w
 Long-form articles are written in the admin at `/admin/blog` (owner only) and served at `/blog` and `/blog/[slug]`.
 
 - **Storage.** `BlogPost` rows. `contentHtml` is sanitized by `sanitizeBlogHtml` in `@/lib/blog/content` on save **and** on render. Never render it any other way.
+- **No jsdom on the server.** `sanitizeBlogHtml` uses js-xss (`xss`), a pure-JavaScript allow-list filter. It was `isomorphic-dompurify`, whose jsdom dependency fails to load on Vercel (`ERR_REQUIRE_ESM` in `html-encoding-sniffer`), which crashed every article page and the admin save in production on 2026-10-13 while working locally. Do not import `isomorphic-dompurify` or `jsdom` from server code; client-side DOMPurify (the admin AI Coach chat) is fine.
 - **Calls to action** are `<div data-cta="practice|playground|subscription|mentorship"></div>` markers the author inserts. Their copy and links live in `@/lib/blog/cta`; editing a CTA there updates every article. Clicks log `blog_cta_click` with the CTA type.
 - **Images** upload through `/api/admin/blog/upload` to the public Supabase Storage bucket `blog-images`, created on first upload. Needs `SUPABASE_SERVICE_ROLE_KEY` (server-only, never `NEXT_PUBLIC_`). Files are checked by their first bytes; SVG is refused.
 - **Rendering.** Pages use ISR (`revalidate = 3600`); the admin actions call `revalidatePath` on save, publish and delete, so changes show at once. Articles are in the sitemap.
