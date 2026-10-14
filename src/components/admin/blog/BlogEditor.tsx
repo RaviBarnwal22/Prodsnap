@@ -308,8 +308,11 @@ export default function BlogEditor({ initial, seriesOptions }: { initial: Editor
             )}
 
             <div className="max-w-6xl mx-auto px-4 py-6 grid lg:grid-cols-[1fr_320px] gap-6">
-                {/* Writing area */}
-                <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden">
+                {/* Writing area. overflow-clip, not overflow-hidden: hidden turns
+                    this box into a scroll container, which stops the toolbar
+                    inside it from staying pinned while you scroll. clip still
+                    rounds the cover image's corners without that side effect. */}
+                <div className="bg-white rounded-2xl border border-gray-200 overflow-clip">
                     {/* Cover */}
                     {post.coverImage ? (
                         <div className="relative group">
